@@ -1,0 +1,97 @@
+# Builds the KHGIS browser app (WebAssembly) and publishes it to this repository's gh-pages
+# branch, which GitHub Pages serves at https://khgeo.github.io/KHGIS/
+#
+# The app lands at the site root; the landing page in site/ is published at /about/.
+# No secrets are needed: the built-in GITHUB_TOKEN can push to this repository.
+#
+# Adapted from upstream's web-deploy.yml, which publishes web.rustgis.app to a separate
+# repository with a deploy key and so cannot run on a fork.
+name: Deploy KHGIS web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: khgis-web
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and publish
+    # Only this repository publishes; forks of the fork build nothing.
+    if: github.repository == 'khgeo/KHGIS'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Record the commit that was built
+        id: built
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: khgis-web
+
+      - name: Build the web app
+        run: |
+          set -euo pipefail
+          # Pinned Trunk release, checksum-verified (same pin as upstream).
+          curl -sSfL -o "$RUNNER_TEMP/trunk.tar.gz" https://github.com/trunk-rs/trunk/releases/download/v0.21.14/trunk-x86_64-unknown-linux-gnu.tar.gz
+          echo "f2b4680cd239693a646a2795e4633c625328d7b2a044fbe749fa3a2fe9e7036b  $RUNNER_TEMP/trunk.tar.gz" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/bin" && tar xzf "$RUNNER_TEMP/trunk.tar.gz" -C "$RUNNER_TEMP/bin" trunk
+          export PATH="$RUNNER_TEMP/bin:$PATH"
+          cd apps/rustgis-web
+          # Served from the /KHGIS/ subpath. On a root domain this becomes --public-url /
+          trunk build --release --public-url /KHGIS/
+
+      - name: Add the service worker
+        run: cargo xtask web-pwa dist/web
+
+      - name: Add the landing page at /about/
+        run: |
+          set -euo pipefail
+          mkdir -p dist/web/about
+          cp site/index.html site/NotoSansKhmer-Regular.ttf site/NotoSansKhmer-OFL.txt dist/web/about/
+
+      - name: Prepare the site for GitHub Pages
+        working-directory: dist/web
+        run: |
+          set -euo pipefail
+          test -f index.html
+          ls *_bg.wasm >/dev/null
+          touch .nojekyll
+          oversized=$(find . -type f -size +104857600c -print)
+          if [ -n "$oversized" ]; then
+            echo "::error::A file exceeds GitHub Pages' 100 MB per-file limit: $oversized"
+            exit 1
+          fi
+          echo "Built site: $(du -sh . | cut -f1)"
+
+      - name: Publish to gh-pages
+        working-directory: dist/web
+        env:
+          BUILT_SHA: ${{ steps.built.outputs.sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Deploy ${BUILT_SHA}"
+          # Parentless snapshots keep the branch near the size of one build.
+          git push -q --force \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+          echo "Published ${BUILT_SHA} to https://khgeo.github.io/KHGIS/"
