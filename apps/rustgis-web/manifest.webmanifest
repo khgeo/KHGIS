@@ -9,9 +9,23 @@
   "display": "standalone",
   "background_color": "#e4e8ee",
   "theme_color": "#0E3F44",
-  "categories": ["education", "productivity", "utilities"],
+  "categories": [
+    "education",
+    "productivity",
+    "utilities"
+  ],
   "icons": [
-    { "src": "khgis-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "khgis-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    {
+      "src": "khgis-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "khgis-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
   ]
 }
