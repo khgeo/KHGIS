@@ -28,6 +28,17 @@ impl P<'_> {
         self.p.add(Shape::closed_line(v, Stroke::new(self.w(w), c)));
     }
     /// Convex fill.
+    /// Fills a concave outline as one path. `fill` cuts into triangles, whose edges show as
+    /// hairlines where two of them meet.
+    fn solid_path(&self, pts: &[(f32, f32)], fill: Color32, w: f32, stroke: Color32) {
+        let v: Vec<Pos2> = pts.iter().map(|(a, b)| self.pt(*a, *b)).collect();
+        self.p.add(Shape::Path(egui::epaint::PathShape {
+            points: v,
+            closed: true,
+            fill,
+            stroke: Stroke::new(self.w(w), stroke).into(),
+        }));
+    }
     fn fill(&self, pts: &[(f32, f32)], c: Color32) {
         let v: Vec<Pos2> = pts.iter().map(|(x, y)| self.pt(*x, *y)).collect();
         self.p.add(Shape::convex_polygon(v, c, Stroke::NONE));
@@ -226,19 +237,13 @@ fn maneuver(p: &P, kind: &str) {
 
 /// Paints icon `name` into `r`. `ink` draws outlines, `accent` the colour parts.
 /// Cambodia's national outline (ADM0), traced from the bundled boundary and reduced to the
-/// 24-unit icon grid. `CAMBODIA_TRIS` indexes it: the shape is concave, so it fills as triangles.
+/// 24-unit icon grid.
 const CAMBODIA: [(f32, f32); 32] = [
     (7.7, 19.7), (7.2, 20.5), (6.6, 20.3), (6.1, 19.8), (7.0, 18.8), (6.3, 17.6), (5.8, 18.7), (4.6, 18.8),
     (4.7, 17.0), (4.3, 16.5), (4.1, 17.2), (1.5, 7.9), (2.6, 7.7), (4.4, 4.9), (6.4, 4.3), (11.3, 4.3),
     (16.5, 6.4), (16.1, 4.6), (18.2, 3.7), (19.9, 4.8), (22.2, 3.3), (21.4, 5.6), (22.5, 8.0), (22.2, 12.8),
     (17.7, 14.3), (17.9, 15.6), (15.4, 15.7), (16.8, 19.1), (15.2, 18.2), (12.4, 18.5), (12.5, 19.4),
     (10.1, 20.7)
-];
-const CAMBODIA_TRIS: [[u8; 3]; 30] = [
-    [0, 1, 2], [0, 2, 3], [0, 3, 4], [31, 0, 4], [31, 4, 5], [5, 6, 7], [5, 7, 8], [5, 8, 9], [9, 10, 11],
-    [5, 9, 11], [31, 5, 11], [31, 11, 12], [31, 12, 13], [31, 13, 14], [31, 14, 15], [31, 15, 16],
-    [16, 17, 18], [31, 16, 18], [31, 18, 19], [31, 19, 20], [31, 20, 21], [31, 21, 22], [22, 23, 24],
-    [24, 25, 26], [22, 24, 26], [26, 27, 28], [26, 28, 29], [22, 26, 29], [31, 22, 29], [29, 30, 31]
 ];
 
 pub fn paint(painter: &Painter, r: Rect, name: &str, ink: Color32, accent: Color32) {
@@ -884,13 +889,9 @@ pub fn paint(painter: &Painter, r: Rect, name: &str, ink: Color32, accent: Color
             }
         }
         // Cambodia's outline, drawn from the bundled national boundary: the Cambodia Data pane.
+        // Cambodia's outline, drawn from the bundled national boundary: the Cambodia Data pane.
         "cambodia" => {
-            let fill = p.tint(210);
-            for t in CAMBODIA_TRIS {
-                let v = |n: u8| CAMBODIA[n as usize];
-                p.fill(&[v(t[0]), v(t[1]), v(t[2])], fill);
-            }
-            p.closed(&CAMBODIA, 1.2, ink);
+            p.solid_path(&CAMBODIA, p.tint(210), 1.2, ink);
         }
         "point_layer" => p.circle(12.0, 12.0, 5.0, Some(accent), Some((1.2, ink))),
         "line_layer" => p.line(&[(3.0, 17.0), (9.0, 8.0), (15.0, 15.0), (21.0, 6.0)], 2.2, accent),

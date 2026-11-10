@@ -18,9 +18,8 @@ pub struct XrayState {
 
 impl Default for XrayState {
     fn default() -> Self {
-        // KHGIS keeps the lens on by default; View › Toggle X-ray Lens (`ui.xray`) turns it off,
-        // after which holding X still shows it.
-        XrayState { sticky: true, radius: 110.0 }
+        // Off unless asked for: hold X over the map, or View › Toggle X-ray Lens (`ui.xray`).
+        XrayState { sticky: false, radius: 110.0 }
     }
 }
 

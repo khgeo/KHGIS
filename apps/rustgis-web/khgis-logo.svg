@@ -33,13 +33,14 @@
 
   <!-- Wordmark -->
   <text x="128" y="128" text-anchor="middle" dominant-baseline="central"
-        font-family="Inter, Helvetica, Arial, sans-serif" font-size="40" font-weight="700"
-        fill="#FFFFFF" letter-spacing="1.5">KHGIS</text>
+        font-family="Inter, Helvetica, Arial, sans-serif" font-size="62" font-weight="700"
+        fill="#FFFFFF" stroke="#0E3F44" stroke-width="9" paint-order="stroke"
+        letter-spacing="2">KH</text>
 
   <!-- Ring text -->
   <g font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="600"
      fill="#0E3F44" letter-spacing="1.9">
     <text><textPath href="#arcTop" startOffset="50%" text-anchor="middle">GEOGRAPHIC INFORMATION SYSTEM</textPath></text>
-    <text><textPath href="#arcBottom" startOffset="50%" text-anchor="middle">CAMBODIA · KHGIS</textPath></text>
+    <text><textPath href="#arcBottom" startOffset="50%" text-anchor="middle">KINGDOM OF CAMBODIA</textPath></text>
   </g>
 </svg>

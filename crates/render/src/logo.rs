@@ -1,11 +1,15 @@
-//! The KHGIS logo, drawn in code (no image files): a graticule globe on a deep teal rounded
-//! square, matching the app icon and the mark on the web page.
+//! The KHGIS logo, drawn in code (no image files): a graticule globe lettered KH, inside a
+//! ring ticked at the cardinal points, on a deep teal rounded square.
 
 use tiny_skia::{FillRule, Paint, PathBuilder, Pixmap, Stroke, Transform};
 
 const C: f32 = 256.0;
 /// The globe's radius on the 512-unit grid.
-const R: f32 = 184.0;
+const R: f32 = 168.0;
+/// The ring the cardinal ticks cross.
+const RING: f32 = 228.0;
+/// A circle's quarter as a cubic: control points at 0.5523 of the radius.
+const K: f32 = 0.552_284_8;
 
 fn solid(r: u8, g: u8, b: u8, a: u8) -> Paint<'static> {
     let mut p = Paint { anti_alias: true, ..Paint::default() };
@@ -13,10 +17,7 @@ fn solid(r: u8, g: u8, b: u8, a: u8) -> Paint<'static> {
     p
 }
 
-/// A circle's quarter as a cubic: control points at 0.5523 of the radius.
-const K: f32 = 0.552_284_8;
-
-/// An ellipse centred on the globe, as four cubic segments. `rx` of `R` is the globe's edge;
+/// An ellipse centred on the globe, as four cubic segments: `rx` of `R` is the globe's edge,
 /// narrower values are the meridians drawn across it.
 fn ellipse(rx: f32, ry: f32) -> Option<tiny_skia::Path> {
     let (kx, ky) = (rx * K, ry * K);
@@ -30,13 +31,33 @@ fn ellipse(rx: f32, ry: f32) -> Option<tiny_skia::Path> {
     pb.finish()
 }
 
-/// The KHGIS logo as a premultiplied RGBA pixmap of `size`×`size` pixels (16..=1024): a globe
-/// with its graticule on a deep teal rounded square. No lettering: the mark is drawn as small as
-/// a title bar, where letters over the graticule stop being readable.
+fn polyline(pts: &[(f32, f32)]) -> Option<tiny_skia::Path> {
+    let mut pb = PathBuilder::new();
+    let (x, y) = *pts.first()?;
+    pb.move_to(x, y);
+    for (x, y) in &pts[1..] {
+        pb.line_to(*x, *y);
+    }
+    pb.finish()
+}
+
+/// "KH" as strokes rather than text: the mark must draw the same everywhere, including in the
+/// window and installer icons, where no font is loaded.
+fn letters() -> [Option<tiny_skia::Path>; 4] {
+    [
+        polyline(&[(171.0, 196.0), (171.0, 316.0)]),                 // K stem
+        polyline(&[(242.0, 196.0), (184.0, 256.0), (242.0, 316.0)]), // K arms
+        polyline(&[(283.0, 196.0), (283.0, 316.0)]),                 // H left
+        polyline(&[(341.0, 196.0), (341.0, 316.0)]),                 // H right
+    ]
+}
+
+/// The KHGIS logo as a premultiplied RGBA pixmap of `size`×`size` pixels (16..=1024).
 pub fn pixmap(size: u32) -> Option<Pixmap> {
     let size = size.clamp(16, 1024);
     let mut pm = Pixmap::new(size, size)?;
     let t = Transform::from_scale(size as f32 / 512.0, size as f32 / 512.0);
+    let deep = solid(0x0E, 0x3F, 0x44, 255);
     // The tile.
     let tile = {
         let (x0, y0, x1, y1, r) = (16.0f32, 16.0f32, 496.0f32, 496.0f32, 104.0f32);
@@ -54,30 +75,46 @@ pub fn pixmap(size: u32) -> Option<Pixmap> {
         pb.close();
         pb.finish()?
     };
-    pm.fill_path(&tile, &solid(0x0E, 0x3F, 0x44, 255), FillRule::Winding, t, None);
-    // The globe, then its graticule.
-    pm.fill_path(&ellipse(R, R)?, &solid(0x10, 0x56, 0x5C, 255), FillRule::Winding, t, None);
-    let grid = solid(0x9F, 0xD8, 0xDF, 235);
-    let stroke = Stroke { width: 9.0, ..Stroke::default() };
-    // Parallels: chords of the globe, so each stops at its edge.
-    for dy in [-98.0f32, 0.0, 98.0] {
-        let half = (R * R - dy * dy).max(0.0).sqrt();
-        let mut pb = PathBuilder::new();
-        pb.move_to(C - half, C + dy);
-        pb.line_to(C + half, C + dy);
-        if let Some(path) = pb.finish() {
-            pm.stroke_path(&path, &grid, &stroke, t, None);
+    pm.fill_path(&tile, &deep, FillRule::Winding, t, None);
+
+    // The ring, and the ticks that cross it at the cardinal points.
+    let rim = solid(0x9F, 0xD8, 0xDF, 170);
+    pm.stroke_path(&ellipse(RING, RING)?, &rim, &Stroke { width: 5.0, ..Stroke::default() }, t, None);
+    let tick = Stroke { width: 7.0, ..Stroke::default() };
+    for (dx, dy) in [(0.0f32, -1.0f32), (0.0, 1.0), (-1.0, 0.0), (1.0, 0.0)] {
+        if let Some(path) = polyline(&[(C + dx * 206.0, C + dy * 206.0), (C + dx * 248.0, C + dy * 248.0)]) {
+            pm.stroke_path(&path, &rim, &tick, t, None);
         }
     }
-    // Meridians, and the globe's edge.
-    for rx in [68.0f32, R] {
-        pm.stroke_path(&ellipse(rx, R)?, &grid, &stroke, t, None);
+
+    // The globe and its graticule.
+    pm.fill_path(&ellipse(R, R)?, &solid(0x10, 0x56, 0x5C, 255), FillRule::Winding, t, None);
+    let grid = solid(0x9F, 0xD8, 0xDF, 225);
+    let thin = Stroke { width: 7.0, ..Stroke::default() };
+    for dy in [-90.0f32, 0.0, 90.0] {
+        let half = (R * R - dy * dy).max(0.0).sqrt();
+        if let Some(path) = polyline(&[(C - half, C + dy), (C + half, C + dy)]) {
+            pm.stroke_path(&path, &grid, &thin, t, None);
+        }
     }
-    let mut pb = PathBuilder::new();
-    pb.move_to(C, C - R);
-    pb.line_to(C, C + R);
-    if let Some(path) = pb.finish() {
-        pm.stroke_path(&path, &grid, &stroke, t, None);
+    for rx in [62.0f32, R] {
+        pm.stroke_path(&ellipse(rx, R)?, &grid, &thin, t, None);
+    }
+    if let Some(path) = polyline(&[(C, C - R), (C, C + R)]) {
+        pm.stroke_path(&path, &grid, &thin, t, None);
+    }
+
+    // "KH": a deep coat first, so the letters stay readable over the graticule.
+    let halo = Stroke { width: 42.0, ..Stroke::default() };
+    let face = Stroke { width: 26.0, ..Stroke::default() };
+    let crossbar = polyline(&[(283.0, 256.0), (341.0, 256.0)]);
+    for (paint, stroke) in [(&deep, &halo), (&solid(0xFF, 0xFF, 0xFF, 255), &face)] {
+        for path in letters().iter().flatten() {
+            pm.stroke_path(path, paint, stroke, t, None);
+        }
+        if let Some(path) = crossbar.as_ref() {
+            pm.stroke_path(path, paint, stroke, t, None);
+        }
     }
     Some(pm)
 }
