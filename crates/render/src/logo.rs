@@ -1,9 +1,11 @@
-//! The KHGIS logo, drawn in code (no image files): three stacked map layers on a navy rounded
-//! square. KHGIS is built on KHGIS.
+//! The KHGIS logo, drawn in code (no image files): a graticule globe on a deep teal rounded
+//! square, matching the app icon and the mark on the web page.
 
-use tiny_skia::{FillRule, Paint, PathBuilder, Pixmap, Transform};
+use tiny_skia::{FillRule, Paint, PathBuilder, Pixmap, Stroke, Transform};
 
 const C: f32 = 256.0;
+/// The globe's radius on the 512-unit grid.
+const R: f32 = 184.0;
 
 fn solid(r: u8, g: u8, b: u8, a: u8) -> Paint<'static> {
     let mut p = Paint { anti_alias: true, ..Paint::default() };
@@ -11,9 +13,26 @@ fn solid(r: u8, g: u8, b: u8, a: u8) -> Paint<'static> {
     p
 }
 
-/// The KHGIS logo as a premultiplied RGBA pixmap of `size`×`size` pixels (16..=1024): three
-/// stacked map layers, flat, on a navy rounded square. Each sheet has a navy rim, so the one
-/// above cuts cleanly across the one below at any size.
+/// A circle's quarter as a cubic: control points at 0.5523 of the radius.
+const K: f32 = 0.552_284_8;
+
+/// An ellipse centred on the globe, as four cubic segments. `rx` of `R` is the globe's edge;
+/// narrower values are the meridians drawn across it.
+fn ellipse(rx: f32, ry: f32) -> Option<tiny_skia::Path> {
+    let (kx, ky) = (rx * K, ry * K);
+    let mut pb = PathBuilder::new();
+    pb.move_to(C, C - ry);
+    pb.cubic_to(C + kx, C - ry, C + rx, C - ky, C + rx, C);
+    pb.cubic_to(C + rx, C + ky, C + kx, C + ry, C, C + ry);
+    pb.cubic_to(C - kx, C + ry, C - rx, C + ky, C - rx, C);
+    pb.cubic_to(C - rx, C - ky, C - kx, C - ry, C, C - ry);
+    pb.close();
+    pb.finish()
+}
+
+/// The KHGIS logo as a premultiplied RGBA pixmap of `size`×`size` pixels (16..=1024): a globe
+/// with its graticule on a deep teal rounded square. No lettering: the mark is drawn as small as
+/// a title bar, where letters over the graticule stop being readable.
 pub fn pixmap(size: u32) -> Option<Pixmap> {
     let size = size.clamp(16, 1024);
     let mut pm = Pixmap::new(size, size)?;
@@ -21,8 +40,7 @@ pub fn pixmap(size: u32) -> Option<Pixmap> {
     // The tile.
     let tile = {
         let (x0, y0, x1, y1, r) = (16.0f32, 16.0f32, 496.0f32, 496.0f32, 104.0f32);
-        // A circle's quarter as a cubic: control points at 0.5523 of the radius.
-        let k = r * 0.552_284_8;
+        let k = r * K;
         let mut pb = PathBuilder::new();
         pb.move_to(x0 + r, y0);
         pb.line_to(x1 - r, y0);
@@ -36,23 +54,30 @@ pub fn pixmap(size: u32) -> Option<Pixmap> {
         pb.close();
         pb.finish()?
     };
-    let navy = solid(0x0B, 0x1A, 0x33, 255);
-    pm.fill_path(&tile, &navy, FillRule::Winding, t, None);
-    // The sheets, bottom first: deep teal, teal, cyan.
-    let sheet = |cy: f32, grow: f32| -> Option<tiny_skia::Path> {
-        let (w, h) = (158.0 + grow * 1.88, 84.0 + grow);
+    pm.fill_path(&tile, &solid(0x0E, 0x3F, 0x44, 255), FillRule::Winding, t, None);
+    // The globe, then its graticule.
+    pm.fill_path(&ellipse(R, R)?, &solid(0x10, 0x56, 0x5C, 255), FillRule::Winding, t, None);
+    let grid = solid(0x9F, 0xD8, 0xDF, 235);
+    let stroke = Stroke { width: 9.0, ..Stroke::default() };
+    // Parallels: chords of the globe, so each stops at its edge.
+    for dy in [-98.0f32, 0.0, 98.0] {
+        let half = (R * R - dy * dy).max(0.0).sqrt();
         let mut pb = PathBuilder::new();
-        pb.move_to(C, cy - h);
-        pb.line_to(C + w, cy);
-        pb.line_to(C, cy + h);
-        pb.line_to(C - w, cy);
-        pb.close();
-        pb.finish()
-    };
-    for (i, (r, g, b)) in [(0x0E, 0x60, 0x80), (0x08, 0x91, 0xB2), (0x22, 0xD3, 0xEE)].into_iter().enumerate() {
-        let cy = 330.0 - i as f32 * 62.0;
-        pm.fill_path(&sheet(cy, 7.0)?, &navy, FillRule::Winding, t, None);
-        pm.fill_path(&sheet(cy, 0.0)?, &solid(r, g, b, 255), FillRule::Winding, t, None);
+        pb.move_to(C - half, C + dy);
+        pb.line_to(C + half, C + dy);
+        if let Some(path) = pb.finish() {
+            pm.stroke_path(&path, &grid, &stroke, t, None);
+        }
+    }
+    // Meridians, and the globe's edge.
+    for rx in [68.0f32, R] {
+        pm.stroke_path(&ellipse(rx, R)?, &grid, &stroke, t, None);
+    }
+    let mut pb = PathBuilder::new();
+    pb.move_to(C, C - R);
+    pb.line_to(C, C + R);
+    if let Some(path) = pb.finish() {
+        pm.stroke_path(&path, &grid, &stroke, t, None);
     }
     Some(pm)
 }
