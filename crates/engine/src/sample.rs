@@ -140,11 +140,17 @@ pub fn world_project() -> Project {
     p
 }
 
-/// Cambodia's provinces (25, English and Khmer names) and districts (197, with their province),
-/// from geoBoundaries (© OpenStreetMap contributors, ODbL 1.0), simplified. Bundled so KHGIS
-/// opens on Cambodia, and picks a province, without a network.
+/// Cambodia's official administrative boundaries at full resolution, unsimplified: the country
+/// (ADM0), its 25 provinces (ADM1, English and Khmer names) and 197 districts (ADM2, with their
+/// province). Bundled so KHGIS opens on Cambodia, and picks a province, without a network.
+///
+/// The source punches Tonle Sap out of the national outline; those interior rings are filled, so
+/// the country boundary covers the lake. The lake itself is a layer of its own.
+pub const CAMBODIA_COUNTRY: &str = include_str!("../data/cambodia_adm0.geojson");
 pub const CAMBODIA_PROVINCES: &str = include_str!("../data/cambodia_adm1.geojson");
 pub const CAMBODIA_DISTRICTS: &str = include_str!("../data/cambodia_adm2.geojson");
+/// Tonle Sap, which the administrative boundaries leave as a gap between provinces.
+pub const CAMBODIA_TONLESAP: &str = include_str!("../data/cambodia_tonlesap.geojson");
 
 /// "Cambodia": KHGIS's home map. Satellite imagery under glowing province outlines labelled in
 /// Khmer and English, districts drawn faintly, with a bookmark per region.
@@ -164,9 +170,19 @@ pub fn cambodia_project(khmer: bool) -> Project {
     map.tiles.push(imagery);
 
     let mut add = |name: &str, text: &str| read_geojson(text, name).ok().map(|(ds, _)| map.add_dataset(ds));
+    // Bottom to top: the lake sits in the gap the provinces leave, then districts, provinces, and
+    // the national outline drawn over them.
+    let lake = add(if khmer { "បឹងទន្លេសាប" } else { "Tonle Sap Lake" }, CAMBODIA_TONLESAP);
     let districts = add(if khmer { "ស្រុក/ខណ្ឌ" } else { "Districts" }, CAMBODIA_DISTRICTS);
     let provinces = add(if khmer { "ខេត្ត/រាជធានី" } else { "Provinces" }, CAMBODIA_PROVINCES);
+    let country = add(if khmer { "ព្រំដែនជាតិ" } else { "National Boundary" }, CAMBODIA_COUNTRY);
     let cyan = Rgba::rgb(0x22, 0xD3, 0xEE);
+    if let Some(l) = lake.and_then(|id| map.layer_mut(id)) {
+        l.renderer = Renderer::Single(Symbol { fill: Rgba::new(0x38, 0xBD, 0xF8, 110), stroke: Rgba::new(0x7D, 0xD3, 0xFC, 180), stroke_width: 0.8, size: 0.0, marker: Marker::Circle });
+    }
+    if let Some(l) = country.and_then(|id| map.layer_mut(id)) {
+        l.renderer = Renderer::Single(Symbol { fill: Rgba::new(0, 0, 0, 0), stroke: Rgba::new(0xE6, 0xFB, 0xFF, 220), stroke_width: 2.2, size: 0.0, marker: Marker::Circle });
+    }
     if let Some(l) = districts.and_then(|id| map.layer_mut(id)) {
         l.renderer = Renderer::Single(Symbol { fill: Rgba::new(0, 0, 0, 0), stroke: Rgba::new(0xCF, 0xFA, 0xFE, 90), stroke_width: 0.5, size: 0.0, marker: Marker::Circle });
     }
