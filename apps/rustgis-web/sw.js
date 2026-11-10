@@ -47,6 +47,13 @@ self.addEventListener("install", (event) => {
   );
 });
 
+// KHGIS deploys from its own repository on every push, so a new build should be the one that
+// runs after a reload rather than waiting for the viewer to accept the update notice. Upstream
+// waits because swapping assets mid-session can leave a page naming files the new cache lacks;
+// taking over at install is safe here because `activate` below clears the older caches and the
+// page is fetched fresh with its matching assets.
+self.addEventListener("install", () => self.skipWaiting());
+
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
