@@ -21,14 +21,17 @@ pub(crate) fn ensure_map_imports_complete(map: &Map) -> Result<(), String> {
     Ok(())
 }
 
-pub const EXTENSION: &str = "rgis";
-/// The project extension earlier versions wrote; such files still open.
-pub const LEGACY_EXTENSION: &str = "rgisx";
+pub const EXTENSION: &str = "kgis";
+/// The project extensions earlier versions wrote; such files still open. `.rgis` is what KHGIS
+/// saved before it took an extension of its own, and what upstream RustGIS writes, so projects
+/// already on disk keep working and files from either side open here.
+pub const LEGACY_EXTENSIONS: [&str; 2] = ["rgis", "rgisx"];
 
-/// Whether a file name or path names a project file (`.rgis`, or the legacy `.rgisx`), ignoring case.
+/// Whether a file name or path names a project file (`.kgis`, or the legacy `.rgis` and
+/// `.rgisx`), ignoring case.
 pub fn is_project_file(name: &str) -> bool {
     let n = name.to_ascii_lowercase();
-    [EXTENSION, LEGACY_EXTENSION].iter().any(|x| n.strip_suffix(x).is_some_and(|s| s.ends_with('.')))
+    [EXTENSION].iter().chain(LEGACY_EXTENSIONS.iter()).any(|x| n.strip_suffix(x).is_some_and(|s| s.ends_with('.')))
 }
 
 /// The extension of a project package (`project.package`): a project with its data, which opens

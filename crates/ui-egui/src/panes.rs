@@ -2618,6 +2618,7 @@ fn folder_browser(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
                         "gpkg",
                         "duckdb",
                         "ddb",
+                        "kgis",
                         "rgis",
                         "rgisx",
                         "rgispkg",

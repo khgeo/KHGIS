@@ -3705,7 +3705,7 @@ fn start_project_menu(app: &mut RustGisApp, ui: &mut Ui) {
         let item = if chosen.is_empty() { item } else { item.on_hover_text(chosen) };
         if item.clicked() {
             ui.close();
-            if let Some(path) = crate::dialogs::pick_open(&["rgis", "rgisx"], tl!("KHGIS project"))
+            if let Some(path) = crate::dialogs::pick_open(&["kgis", "rgis", "rgisx"], tl!("KHGIS project"))
                 && let Err(e) = app.run("ui.startup", json!({"project": {"path": path}}))
             {
                 app.session.notify(e, true);

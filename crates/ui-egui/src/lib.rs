@@ -3389,7 +3389,7 @@ impl RustGisApp {
                     open("project");
                     self.ui.backstage = false;
                 } else if let Some(path) = dialogs::pick_open(
-                    &["rgis", "rgisx", "rgispkg", "qgs", "qgz", "geolibre", "json"],
+                    &["kgis", "rgis", "rgisx", "rgispkg", "qgs", "qgz", "geolibre", "json"],
                     tl!("Projects and JSON data (KHGIS, QGIS, GeoLibre)"),
                 ) {
                     // A QGIS project opens as a new map of this one.
@@ -3430,8 +3430,8 @@ impl RustGisApp {
                 return self.run("ui.saveAs", Value::Null);
             }
             "ui.saveAs" => {
-                let name = format!("{}.rgis", self.session.project.name);
-                if let Some(path) = dialogs::pick_save(&name, &["rgis"], tl!("KHGIS project")) {
+                let name = format!("{}.{}", self.session.project.name, rustgis_engine::project::EXTENSION);
+                if let Some(path) = dialogs::pick_save(&name, &["kgis", "rgis"], tl!("KHGIS project")) {
                     return self.run("project.saveAs", json!({"path": path}));
                 }
             }
@@ -3552,11 +3552,11 @@ impl RustGisApp {
             "ui.openItem" => {
                 let kind = p.get("kind").and_then(Value::as_str).ok_or("kind is required")?;
                 let (cmd, exts, label): (&str, &[&str], &str) = match kind {
-                    "map" => ("map.import", &["rgismap", "rgismpk", "rgis", "rgisx", "rgispkg"], "KHGIS maps and projects"),
+                    "map" => ("map.import", &["rgismap", "rgismpk", "kgis", "rgis", "rgisx", "rgispkg"], "KHGIS maps and projects"),
                     "layer" => ("layer.addLayerFile", &["rgislyr"], "KHGIS layer file"),
                     "styles" => ("style.add", &["rgisstyle"], "KHGIS styles"),
                     "ramps" => ("ramp.add", &["rgisramp", "xml", "qml", "txt", "clr", "cpt"], "Colour ramps (KHGIS, QGIS, GDAL, GMT)"),
-                    "importStyles" => ("style.import", &["rgislyr", "rgismap", "rgis", "rgisx"], "KHGIS layers, maps and projects"),
+                    "importStyles" => ("style.import", &["rgislyr", "rgismap", "kgis", "rgis", "rgisx"], "KHGIS layers, maps and projects"),
                     "geolibreProject" => ("project.importGeolibre", &["geolibre", "json"], "GeoLibre project"),
                     "qgisProject" => ("project.importQgis", &["qgs", "qgz"], "QGIS project"),
                     "qgisStyle" => ("style.importQgis", &["qml"], "QGIS layer style"),
