@@ -1,7 +1,6 @@
-//! KHGIS's heads-up display over the map: glowing corner brackets, a centre reticle, a live
-//! readout of the pointer's position and the map's scale and heading, and an animated fly-to
-//! whenever the camera jumps (Zoom To Layer, a bookmark, a search result, Full Extent): the view
-//! glides there, pulling back for long hops, instead of cutting.
+//! KHGIS's heads-up display over the map: glowing corner brackets, a centre reticle, and an
+//! animated fly-to whenever the camera jumps (Zoom To Layer, a bookmark, a search result,
+//! Full Extent): the view glides there, pulling back for long hops, instead of cutting.
 //!
 //! User motion (dragging, the wheel, the keyboard over the map) is never animated: only jumps
 //! the map didn't make itself.
@@ -204,49 +203,12 @@ pub fn paint(app: &RustGisApp, p: &Painter, rect: Rect, t: &Tokens) {
     }
     p.circle_filled(m, 1.6, c);
 
-    // The readout: pointer position, scale and heading.
-    let map = app.session.map();
-    let scale = map.scale();
-    let mut parts = Vec::new();
-    if let Some(ll) = app.map.pointer_lonlat {
-        let ns = if ll.y >= 0.0 { "N" } else { "S" };
-        let ew = if ll.x >= 0.0 { "E" } else { "W" };
-        parts.push(format!("{:.5}° {ns}  {:.5}° {ew}", ll.y.abs(), ll.x.abs()));
-    }
-    if scale.is_finite() && scale > 0.0 {
-        parts.push(format!("1:{}", group_thousands(scale.round() as u64)));
-    }
-    parts.push(format!("HDG {:03.0}°", ((map.camera.bearing % 360.0) + 360.0) % 360.0));
-    if app.ws.hud.flying() {
-        parts.push(crate::i18n::t("FLYING").to_string());
-    }
-    let text = parts.join("   ·   ");
-    let g = p.layout_no_wrap(text, egui::FontId::monospace(11.5), t.accent_text);
-    let box_ = Rect::from_center_size(pos2(m.x, rect.min.y + 22.0), g.size() + vec2(28.0, 10.0));
-    p.rect_filled(box_, egui::CornerRadius::same(4), Color32::from_rgba_unmultiplied(4, 10, 22, 190));
-    p.rect_stroke(box_, egui::CornerRadius::same(4), Stroke::new(1.0, c.gamma_multiply(0.6)), egui::StrokeKind::Inside);
-    // Small notches on the box's ends, like an instrument's.
-    for x in [box_.min.x, box_.max.x] {
-        p.line_segment([pos2(x, box_.center().y - 4.0), pos2(x, box_.center().y + 4.0)], Stroke::new(2.0, c));
-    }
-    p.galley(box_.center() - g.size() / 2.0, g, t.accent_text);
     // The product mark, faint, bottom centre.
     let mark = p.layout_no_wrap(crate::APP_NAME.to_string(), semibold(10.0), c.gamma_multiply(0.55));
     p.galley(pos2(m.x - mark.size().x / 2.0, rect.max.y - inset - mark.size().y - 2.0), mark, c);
     let _ = regular;
 }
 
-fn group_thousands(n: u64) -> String {
-    let s = n.to_string();
-    let mut out = String::new();
-    for (i, ch) in s.chars().enumerate() {
-        if i > 0 && (s.len() - i) % 3 == 0 {
-            out.push(',');
-        }
-        out.push(ch);
-    }
-    out
-}
 
 #[cfg(test)]
 mod tests {
@@ -278,6 +240,5 @@ mod tests {
     #[test]
     fn headings_turn_the_short_way() {
         assert!((lerp_angle(350.0, 10.0, 0.5) - 360.0).abs() < 1e-9);
-        assert_eq!(group_thousands(1234567), "1,234,567");
     }
 }
