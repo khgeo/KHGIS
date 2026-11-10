@@ -10,7 +10,6 @@
 pub mod i18n;
 #[cfg(not(target_arch = "wasm32"))]
 mod agentthreads;
-mod hud;
 mod radial;
 mod xray;
 mod khdata;
@@ -3139,13 +3138,6 @@ impl RustGisApp {
                 x.sticky = p.get("on").and_then(Value::as_bool).unwrap_or(!x.sticky);
                 if let Some(r) = p.get("radius").and_then(Value::as_f64) {
                     x.radius = (r as f32).clamp(30.0, 600.0);
-                }
-            }
-            "ui.hud" => {
-                let hud = &mut self.ws.hud;
-                hud.enabled = p.get("on").and_then(Value::as_bool).unwrap_or(!hud.enabled);
-                if let Some(f) = p.get("fly").and_then(Value::as_bool) {
-                    hud.fly_enabled = f;
                 }
             }
             "ui.backstage" => self.ui.backstage = p.get("open").and_then(Value::as_bool).unwrap_or(!self.ui.backstage),

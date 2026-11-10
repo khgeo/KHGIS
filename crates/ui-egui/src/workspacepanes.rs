@@ -11,7 +11,6 @@ use crate::theme::{Tokens, regular, semibold};
 #[derive(Default)]
 pub struct WorkspaceState {
     /// KHGIS's heads-up display and fly-to.
-    pub hud: crate::hud::HudState,
     /// The radial right-click menu.
     pub radial: crate::radial::RadialState,
     /// The X-ray lens.

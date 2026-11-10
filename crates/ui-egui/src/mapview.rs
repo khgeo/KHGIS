@@ -607,7 +607,6 @@ pub fn show(app: &mut RustGisApp, ui: &mut Ui) {
     crate::graphicformat::follow(app, ui.ctx());
     animate(app, ui);
     crate::radial::escape(app, ui);
-    crate::hud::fly(app, ui);
     // Side by side: the other map on the right, following this one when views are linked.
     if let Some(other) = split_map(app).filter(|i| *i != app.session.project.active_map) {
         let full = ui.available_rect_before_wrap();
@@ -752,7 +751,6 @@ fn split_view(app: &mut RustGisApp, ui: &mut Ui, other: usize, rect: Rect, t: &T
 fn main_view(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
     let t = *t;
     let rect = ui.available_rect_before_wrap();
-    crate::hud::note_rect(app, rect);
     crate::xray::update(app, ui, rect);
     let resp = ui.allocate_rect(rect, Sense::click_and_drag());
     let (w, h) = (rect.width() as f64, rect.height() as f64);
@@ -3306,7 +3304,6 @@ fn overlays(app: &mut RustGisApp, ui: &mut Ui, p: &egui::Painter, rect: Rect, t:
     }
     north_arrow(p, rect, t, bearing, pitch);
     crate::xray::paint(app, p, rect, t);
-    crate::hud::paint(app, p, rect, t);
     // Attribution.
     let att = attribution(app.session.map(), &app.map.attribution);
     if !att.is_empty() {

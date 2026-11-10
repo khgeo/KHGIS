@@ -1,10 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="KHGIS">
   <title>KHGIS</title>
   <defs>
-    <!-- Ring text baselines. The band runs from r=84 to r=112, so its centre is r=98; the
-         baseline sits half a cap-height inside that, putting the lettering in the middle. -->
+    <!-- Ring text baselines. The band runs from r=84 to r=112, so its centre is r=98. The top
+         line's letters grow outward from its baseline and the bottom line's grow inward, so each
+         baseline sits half a cap height on its own side of the centre. -->
     <path id="arcTop" d="M 128,128 m -93.3,0 a 93.3,93.3 0 0 1 186.6,0" fill="none"/>
-    <path id="arcBottom" d="M 128,128 m -93.3,0 a 93.3,93.3 0 0 0 186.6,0" fill="none"/>
+    <path id="arcBottom" d="M 128,128 m -102.7,0 a 102.7,102.7 0 0 0 205.4,0" fill="none"/>
     <clipPath id="globeClip"><circle cx="128" cy="128" r="70"/></clipPath>
   </defs>
 
