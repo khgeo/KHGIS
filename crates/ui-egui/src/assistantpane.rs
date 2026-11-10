@@ -488,7 +488,7 @@ fn signed_in(app: &mut RustGisApp, c: &chatgpt::Credentials, ctx: &egui::Context
     app.assistant.account = Some(c.account());
     app.assistant.login_error = None;
     let saved = chatgpt::accounts().unwrap_or_default();
-    // "Use another account" with an account already saved registers RustGIS for it again.
+    // "Use another account" with an account already saved registers KHGIS for it again.
     app.assistant.duplicate = saved.iter().any(|a| a.subject == c.subject && a.client_id != c.client_id);
     app.assistant.accounts = Some(saved);
     // The first sign-in says that the plan is now used (once).
@@ -688,7 +688,7 @@ pub fn poll(app: &mut RustGisApp, ctx: &egui::Context) {
         app.assistant.signout = None;
         if r.is_err() {
             app.assistant.login_error = Some(
-                tl!("Signed out on this computer, but OpenAI didn't confirm it. You can disconnect RustGIS in ChatGPT's settings.").into(),
+                tl!("Signed out on this computer, but OpenAI didn't confirm it. You can disconnect KHGIS in ChatGPT's settings.").into(),
             );
         }
     }
@@ -1041,7 +1041,7 @@ fn sign_in_storage_note(account: Option<&chatgpt::Account>) -> String {
             "The sign-in is still kept in the app's settings folder, readable by your user account: the system keychain is unavailable, so it hasn't been moved there yet."
         ),
         Some(chatgpt::Kept::Session) => tl!(
-            "The system keychain is unavailable, so this sign-in won't be remembered: it lasts until RustGIS closes."
+            "The system keychain is unavailable, so this sign-in won't be remembered: it lasts until KHGIS closes."
         ),
         _ => tl!("The sign-in is kept in the system keychain, never in the app's settings or a project file."),
     }
@@ -1077,7 +1077,7 @@ fn key_storage_note(app: &RustGisApp, provider: &str) -> String {
                 if *reading {
                     notes.push(tl!("A saved key could not be read. A key entered now will be kept for this session only."));
                 } else if *deleting {
-                    notes.push(tl!("RustGIS could not confirm that any previously saved key was deleted from the system keychain."));
+                    notes.push(tl!("KHGIS could not confirm that any previously saved key was deleted from the system keychain."));
                 } else if !legacy || !plaintext {
                     notes.push(tl!("The key is kept for this session only; it has not been remembered."));
                 }
@@ -1178,7 +1178,7 @@ fn account_row(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens, cfg: &mut Config) 
                     forget_sign_in(app, cfg);
                     if out.unrevoked.is_some() {
                         app.assistant.login_error = Some(
-                            tl!("Signed out on this computer, but the system keychain couldn't be read, so OpenAI wasn't asked to end the session. You can disconnect RustGIS in ChatGPT's settings.")
+                            tl!("Signed out on this computer, but the system keychain couldn't be read, so OpenAI wasn't asked to end the session. You can disconnect KHGIS in ChatGPT's settings.")
                                 .into(),
                         );
                     }
@@ -1294,7 +1294,7 @@ fn local_agents_setting(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
     } else {
         let names: Vec<&str> = found.iter().map(|(spec, _)| spec.label).collect();
         crate::i18n::fmt(
-            "Found: {names}. An agent works on this map through RustGIS's tools and with its own (web, scripts, files) in a folder of its own, kept in Documents › RustGIS › Agent work. It asks you before each action.",
+            "Found: {names}. An agent works on this map through KHGIS's tools and with its own (web, scripts, files) in a folder of its own, kept in Documents › KHGIS › Agent work. It asks you before each action.",
             &[("names", &names.join(", "))],
         )
     };
@@ -1449,7 +1449,7 @@ fn plan_notice(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
         egui::Frame::group(ui.style()).show(ui, |ui| {
             ui.label(RichText::new(tl!("You're using your ChatGPT plan")).font(semibold(12.5)));
             ui.label(
-                RichText::new(tl!("Eligible requests in RustGIS use your ChatGPT plan. You can manage usage in ChatGPT settings."))
+                RichText::new(tl!("Eligible requests in KHGIS use your ChatGPT plan. You can manage usage in ChatGPT settings."))
                     .small()
                     .color(t.text_dim),
             );
@@ -1607,7 +1607,7 @@ fn composer(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens, busy: bool, ctx: &egu
 fn transcript(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens, ctx: &egui::Context) {
     let Some(agent) = app.assistant.agent.as_ref() else { return };
     if agent.transcript.is_empty() {
-        ui.label(RichText::new(tl!("Ask a question about your data, or describe what to do with the map. The assistant runs RustGIS commands for you; every change can be undone.")).color(t.text_dim));
+        ui.label(RichText::new(tl!("Ask a question about your data, or describe what to do with the map. The assistant runs KHGIS commands for you; every change can be undone.")).color(t.text_dim));
         ui.add_space(8.0);
         let mut chosen = None;
         for s in SUGGESTIONS {

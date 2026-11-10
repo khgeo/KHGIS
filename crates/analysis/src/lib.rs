@@ -95,7 +95,7 @@ pub enum ParamKind {
     VectorLayers,
     /// On or off.
     Bool,
-    /// A file path typed by the user (for data RustGIS doesn't open as a layer, such as LiDAR).
+    /// A file path typed by the user (for data KHGIS doesn't open as a layer, such as LiDAR).
     Path,
     /// A file written by the tool, not an input to read. Native callers supply a destination;
     /// browser callers supply a download name (or use the tool's suggested name).

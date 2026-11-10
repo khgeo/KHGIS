@@ -319,7 +319,7 @@ pub struct Dataset {
     /// recover it; import the original file with a CRS override instead. Kept across project saves.
     #[serde(default)]
     pub crs_incomplete: bool,
-    /// The source had Z or M values (heights or measures), which RustGIS doesn't keep: they were
+    /// The source had Z or M values (heights or measures), which KHGIS doesn't keep: they were
     /// dropped on import, so an export writes x and y only. Kept across project saves.
     #[serde(default)]
     pub zm_dropped: bool,
@@ -374,7 +374,7 @@ pub fn zm_note(features: Option<u64>) -> String {
         Some(n) => format!("{n} features had Z or M values (heights or measures), which were"),
         None => "its Z or M values (heights or measures) were".to_string(),
     };
-    format!("{what} dropped: RustGIS keeps x and y only, so exports won't have them")
+    format!("{what} dropped: KHGIS keeps x and y only, so exports won't have them")
 }
 
 /// What an export of `layers` says when any lost Z or M values on import, or `None`: one notice,

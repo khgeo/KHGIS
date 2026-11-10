@@ -195,7 +195,7 @@ pub fn write(pages: &[Page], title: &str) -> Vec<u8> {
     doc.put(catalog, format!("<< /Type /Catalog /Pages {tree} 0 R >>").as_bytes());
     let kids: Vec<String> = ids.iter().map(|i| format!("{i} 0 R")).collect();
     doc.put(tree, format!("<< /Type /Pages /Kids [{}] /Count {} >>", kids.join(" "), pages.len()).as_bytes());
-    doc.put(info, format!("<< /Title {} /Producer (RustGIS) >>", text_string(title)).as_bytes());
+    doc.put(info, format!("<< /Title {} /Producer (KHGIS) >>", text_string(title)).as_bytes());
     doc.finish(catalog, info)
 }
 

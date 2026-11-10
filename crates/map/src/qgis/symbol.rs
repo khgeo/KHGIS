@@ -1,5 +1,5 @@
-//! QGIS symbols (`<symbol type="fill|line|marker">`) as a RustGIS [`Symbol`], and a line's
-//! symbol layers as stacked [`LineStroke`]s. A symbol layer RustGIS has no match for is drawn
+//! QGIS symbols (`<symbol type="fill|line|marker">`) as a KHGIS [`Symbol`], and a line's
+//! symbol layers as stacked [`LineStroke`]s. A symbol layer KHGIS has no match for is drawn
 //! as near as it can (a pattern fill as a tint of its colour, an SVG marker as a circle in its
 //! colour) or left out, and noted.
 
@@ -21,7 +21,7 @@ type Props = Vec<(String, String)>;
 /// layer gives no unit of its own. No symbol layer setting is named so.
 const SYMBOL_UNIT: &str = "(symbol unit)";
 
-/// A QGIS symbol in RustGIS's terms: the symbol, and a line's strokes bottom first (each simple
+/// A QGIS symbol in KHGIS's terms: the symbol, and a line's strokes bottom first (each simple
 /// line of it; empty for fills and markers, and for a line with none).
 #[derive(Clone, Debug, PartialEq)]
 pub(super) struct Converted {
@@ -230,7 +230,7 @@ fn dashed(style: Option<&str>) -> bool {
 
 /// A simple line's dash pattern in points: its own (`use_custom_dash`, in its unit), or Qt's for
 /// a named pen style (in line widths, as Qt sizes them). `None` for a solid line, and for a
-/// pattern RustGIS can't draw (noted).
+/// pattern KHGIS can't draw (noted).
 fn dash(p: &[(String, String)], width: f32, reference: Option<f64>, layer: &str, report: &mut Report) -> Option<Dash> {
     let style = prop(p, "line_style").unwrap_or("solid");
     let steps: Vec<f32> = if prop(p, "use_custom_dash") == Some("1") {
@@ -262,7 +262,7 @@ fn dash(p: &[(String, String)], width: f32, reference: Option<f64>, layer: &str,
     };
     let d = Dash::new(&steps);
     if d.is_none() {
-        report.approximated(layer, "dashed lines whose pattern RustGIS can't draw, drawn solid");
+        report.approximated(layer, "dashed lines whose pattern KHGIS can't draw, drawn solid");
     }
     if d.is_some() && prop(p, "dash_pattern_offset").and_then(|o| o.trim().parse::<f64>().ok()).is_some_and(|o| o != 0.0) {
         report.approximated(layer, "dash patterns' offsets along the line, left out");
@@ -663,7 +663,7 @@ fn along(l: Node, p: &[(String, String)], hash: bool, reference: Option<f64>, la
 }
 
 /// Where a marker or hashed line puts its marks: `placements` (QGIS 3.24 on, several at once) or
-/// `placement` (before); none for a placement RustGIS has no match for (noted).
+/// `placement` (before); none for a placement KHGIS has no match for (noted).
 fn placements(p: &[(String, String)], layer: &str, report: &mut Report) -> Placements {
     let text = prop(p, "placements").or(prop(p, "placement")).unwrap_or("Interval");
     let mut at = Placements::NONE;
@@ -690,7 +690,7 @@ fn placements(p: &[(String, String)], layer: &str, report: &mut Report) -> Place
 }
 
 /// A marker line's marker layer `class` (its settings `p`) as a stroke of markers at `base`'s
-/// places, or `None` for one RustGIS has no match for (noted).
+/// places, or `None` for one KHGIS has no match for (noted).
 fn marker_mark(
     class: &str,
     p: &[(String, String)],
@@ -736,7 +736,7 @@ fn marker_mark(
 }
 
 /// A hashed line's line layer `class` (its settings `p`; the hashed line's `hp`) as a stroke of
-/// hash marks at `base`'s places, or `None` for one RustGIS has no match for (noted).
+/// hash marks at `base`'s places, or `None` for one KHGIS has no match for (noted).
 fn hash_mark(
     class: &str,
     p: &[(String, String)],
@@ -920,7 +920,7 @@ pub(super) fn property_text(property: Node) -> Option<String> {
 }
 
 /// Takes the data-defined property `name` of a symbol layer (its settings `p`) of a `kind`
-/// symbol into `by` when RustGIS draws it by expression: a marker's size and angle, the fill and
+/// symbol into `by` when KHGIS draws it by expression: a marker's size and angle, the fill and
 /// outline colours and the outline's (a line's) width, sizes turned from the layer's unit into
 /// points. False for one it doesn't. A second symbol layer's for the same keeps the first's (noted).
 #[allow(clippy::too_many_arguments)]
@@ -1033,7 +1033,7 @@ fn anchored(p: &[(String, String)]) -> bool {
     ["horizontal_anchor_point", "vertical_anchor_point"].iter().any(|k| prop(p, k).is_some_and(|v| v.trim() != "1"))
 }
 
-/// QGIS's simple marker shapes RustGIS has.
+/// QGIS's simple marker shapes KHGIS has.
 fn shape_of(name: &str) -> Option<Marker> {
     Some(match name {
         "circle" => Marker::Circle,

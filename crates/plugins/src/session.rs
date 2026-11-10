@@ -1,24 +1,24 @@
 //! Session process plugins (`"session": true`, desktop and command line): one program kept
-//! running between the plugin's commands, so it can ask RustGIS for things at any time and hear
+//! running between the plugin's commands, so it can ask KHGIS for things at any time and hear
 //! when the map changes. A linked view in a window of its own (a 3D globe) is one.
 //!
-//! RustGIS starts the program the first time one of the plugin's commands runs, in the plugin's
+//! KHGIS starts the program the first time one of the plugin's commands runs, in the plugin's
 //! folder, and writes a first line `{"session": {"abi", "plugin", "rustgis", "lang"}}`. From
 //! then on the lines go both ways, one JSON object each:
 //!
-//! - RustGIS to the program: `{"command": request, "id": n}`, a command to run (the request a
+//! - KHGIS to the program: `{"command": request, "id": n}`, a command to run (the request a
 //!   per-call plugin gets), answered with `{"ok": value, "id": n}` or `{"error": "text", "id": n}`;
 //!   the reply to one of its host requests, `{"ok": value}` or `{"error": "text"}` with the
 //!   request's `id` when it gave one; and `{"event": "view" | "layers" | "selection" | "project",
 //!   ...}` when the map changes or another project opens.
-//! - The program to RustGIS: `{"call": {"op", "params"}, "id": n}` (the `id` optional), `log`
+//! - The program to KHGIS: `{"call": {"op", "params"}, "id": n}` (the `id` optional), `log`
 //!   and `progress` lines, and its answers to commands.
 //!
 //! The channel is the program's own input and output: no port, no token, nothing another program
 //! can join. Its requests go through the same [`Host`] checks as a command's, within the plugin's
 //! permissions. The program is stopped, with what it started, when the plugin is turned off,
-//! removed or updated and when RustGIS closes ([`stop`], [`stop_all`]); its input closing means
-//! it is being stopped (RustGIS closing or gone, however it ended; the plugin turned off, removed
+//! removed or updated and when KHGIS closes ([`stop`], [`stop_all`]); its input closing means
+//! it is being stopped (KHGIS closing or gone, however it ended; the plugin turned off, removed
 //! or updated; the program failed) and is its sign to exit. A program that exits on its own (its window
 //! closed) is started again by the plugin's next command; on Unix what it left running is stopped.
 //!
@@ -262,7 +262,7 @@ pub fn stop(plugin: &str) {
     }
 }
 
-/// Stops every program (RustGIS is closing): their inputs close together, and they share the
+/// Stops every program (KHGIS is closing): their inputs close together, and they share the
 /// time to exit.
 pub fn stop_all() {
     let all: Vec<Running> = RUNNING.lock().map(|mut v| std::mem::take(&mut *v)).unwrap_or_default();
@@ -462,7 +462,7 @@ pub struct Ended {
     /// Whether what it sent after exiting wasn't all read: something it left running kept
     /// writing past [`DRAIN_BATCHES`], and its requests from then on weren't answered.
     pub unread: bool,
-    /// Why RustGIS stopped it, when it did for what it sent.
+    /// Why KHGIS stopped it, when it did for what it sent.
     pub reason: Option<String>,
 }
 
@@ -547,7 +547,7 @@ pub fn poll(plugin: &str, host: &mut dyn Host) -> Polled {
             return out;
         }
     }
-    // It stopped reading while it still runs: nothing RustGIS says reaches it. Stopped, and said.
+    // It stopped reading while it still runs: nothing KHGIS says reaches it. Stopped, and said.
     if ended.is_none() && r.input_closed && !process::exited(&mut r.child) {
         reason = Some("it stopped reading its input while running".to_string());
         ended = Some(true);

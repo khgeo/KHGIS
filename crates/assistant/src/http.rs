@@ -34,7 +34,7 @@ fn send_with(req: &HttpRequest, timeout: std::time::Duration, mut on_chunk: Opti
         .tls_config(rustgis_engine::data::http::tls_config())
         .build()
         .into();
-    let ua = concat!("RustGIS/", env!("CARGO_PKG_VERSION"));
+    let ua = concat!("KHGIS/", env!("CARGO_PKG_VERSION"));
     let result = match (req.method, &req.body) {
         ("POST", body) => {
             let mut b = agent.post(url).header("User-Agent", ua);

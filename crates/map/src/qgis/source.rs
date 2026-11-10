@@ -1,11 +1,11 @@
-//! QGIS data sources: a layer's provider and `<datasource>` text, read into where RustGIS finds
+//! QGIS data sources: a layer's provider and `<datasource>` text, read into where KHGIS finds
 //! the data. Paths are made absolute from the project's folder; web addresses are decoded.
 
 /// Where a QGIS layer's data is.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Source {
     /// A file (`ogr`, `gdal`, `spatialite`): its path, the layer or table in it, and the filter
-    /// QGIS's subset string sets (as QGIS has it), and the source's options RustGIS doesn't read
+    /// QGIS's subset string sets (as QGIS has it), and the source's options KHGIS doesn't read
     /// (`layerid=2`, `geometrytype=Point`), for the import to note.
     File { path: String, layer: Option<String>, subset: Option<String>, ignored: Vec<String> },
     /// A delimited text file (`delimitedtext`): its path, and the fields its points (or WKT
@@ -19,7 +19,7 @@ pub enum Source {
     Wfs { url: String, layer: String },
     /// A PostGIS table: QGIS's connection text (its password left out) and the table.
     Postgres { connection: String, table: String },
-    /// One RustGIS doesn't read.
+    /// One KHGIS doesn't read.
     Other { provider: String },
 }
 
@@ -33,7 +33,7 @@ pub fn read(provider: &str, datasource: &str, dir: &str) -> Source {
             let (head, sql) = datasource.rsplit_once(" sql=").unwrap_or((datasource, ""));
             let subset = Some(sql.trim().to_string()).filter(|q| !q.is_empty());
             let kv = conninfo(head);
-            // What QGIS always writes and RustGIS reads or needn't.
+            // What QGIS always writes and KHGIS reads or needn't.
             const READ_OR_HARMLESS: [&str; 7] = ["dbname", "table", "key", "srid", "type", "estimatedmetadata", "checkPrimaryKeyUnicity"];
             let ignored = kv
                 .iter()
@@ -243,7 +243,7 @@ mod tests {
             read("gdal", "C:/maps/dem.tif", dir),
             Source::File { path: "C:/maps/dem.tif".into(), layer: None, subset: None, ignored: Vec::new() }
         );
-        // Options RustGIS doesn't read are kept for a note; the first layer's number isn't one.
+        // Options KHGIS doesn't read are kept for a note; the first layer's number isn't one.
         let Source::File { ignored, .. } = read("ogr", "./multi.gpkg|layerid=2|geometrytype=Point", dir) else { panic!() };
         assert_eq!(ignored, ["layerid=2", "geometrytype=Point"]);
         let Source::File { ignored, .. } = read("ogr", "./one.gpkg|layerid=0", dir) else { panic!() };

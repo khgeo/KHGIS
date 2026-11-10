@@ -2,7 +2,7 @@
 //! its secured services (which otherwise answer error 499, "Token Required") can be read.
 //!
 //! The sign-in is OAuth 2.0 authorization code with PKCE (S256) in the system browser: the user
-//! signs in on the portal's own page (its SSO and MFA included), so RustGIS never sees a password.
+//! signs in on the portal's own page (its SSO and MFA included), so KHGIS never sees a password.
 //! The portal sends the browser back to a short-lived server on this computer at
 //! [`redirect_uri`] (`http://127.0.0.1:7290/arcgis/callback` by default). ArcGIS accepts only
 //! the redirect addresses an app registration lists, exactly, so the portal's administrator
@@ -35,7 +35,7 @@ pub const CALLBACK: &str = "/arcgis/callback";
 const REFRESH_MARGIN: i64 = 60;
 /// After the portal couldn't be reached for a renewal, how long until it is tried again (seconds).
 const RETRY_RENEWAL: i64 = 30;
-/// RustGIS's own OAuth app on ArcGIS Online, used when no client id is given for an ArcGIS Online
+/// KHGIS's own OAuth app on ArcGIS Online, used when no client id is given for an ArcGIS Online
 /// portal (an Enterprise portal registers its own). Its redirect URLs are the desktop's
 /// [`redirect_uri`] for [`PORT`] and the web app's callback page (`oauth-callback.html`) at
 /// https://web.rustgis.app and `trunk serve`'s http://127.0.0.1:8772. A client id isn't a secret.
@@ -660,7 +660,7 @@ pub fn renewal_done(r: &Renewal, answer: Result<&[u8], String>) {
     }
 }
 
-/// The client id a sign-in to `portal` uses: the one given, else RustGIS's own for ArcGIS Online.
+/// The client id a sign-in to `portal` uses: the one given, else KHGIS's own for ArcGIS Online.
 pub fn client_id_for(portal: &str, given: &str) -> Option<String> {
     let given = given.trim();
     if !given.is_empty() {
@@ -877,7 +877,7 @@ mod native {
                 .tls_config(rustgis_data::http::tls_config())
                 .http_status_as_error(!forms)
                 .timeout_global(Some(REQUEST_TIMEOUT))
-                .user_agent(concat!("RustGIS/", env!("CARGO_PKG_VERSION"), " (+https://rustgis.app)"))
+                .user_agent(concat!("KHGIS/", env!("CARGO_PKG_VERSION"), " (+https://rustgis.app)"))
                 .max_redirects(0)
                 .max_idle_connections(0)
                 .build()
@@ -1054,7 +1054,7 @@ mod native {
                     respond(
                         &mut stream,
                         200,
-                        &page("Signed in", &format!("RustGIS is signed in to {}{who}. You can close this tab.", info.portal)),
+                        &page("Signed in", &format!("KHGIS is signed in to {}{who}. You can close this tab.", info.portal)),
                     );
                 }
                 Err(e) => respond(&mut stream, 200, &page("Sign-in failed", e)),
@@ -1178,7 +1178,7 @@ mod native {
 
     fn page(title: &str, text: &str) -> String {
         format!(
-            "<!doctype html><html><head><meta charset=\"utf-8\"><title>RustGIS: {t}</title></head><body style=\"font-family:sans-serif;max-width:32em;margin:4em auto\"><h1>{t}</h1><p>{m}</p></body></html>",
+            "<!doctype html><html><head><meta charset=\"utf-8\"><title>KHGIS: {t}</title></head><body style=\"font-family:sans-serif;max-width:32em;margin:4em auto\"><h1>{t}</h1><p>{m}</p></body></html>",
             t = escape(title),
             m = escape(text)
         )

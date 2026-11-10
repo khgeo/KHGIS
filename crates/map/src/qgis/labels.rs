@@ -1,4 +1,4 @@
-//! QGIS labels (`<labeling type="simple|rule-based">`) as RustGIS label classes: each rule a
+//! QGIS labels (`<labeling type="simple|rule-based">`) as KHGIS label classes: each rule a
 //! class whose SQL clause is its filter (and its parents'), an else rule the features no other
 //! rule takes; the text's field, size, colour, weight, slant and letter spacing, its buffer as a
 //! halo of its colour and size, its background as a rectangle behind it, its wrapping and how its
@@ -33,7 +33,7 @@ pub(super) fn read(l: Node, geometry: Option<&str>, layer: &str, report: &mut Re
             if left > 0 {
                 report.skipped(
                     layer,
-                    format!("{left} of its label rules, past the {} RustGIS reads or nested more than 32 deep", MAX_LABEL_CLASSES * 4),
+                    format!("{left} of its label rules, past the {} KHGIS reads or nested more than 32 deep", MAX_LABEL_CLASSES * 4),
                 );
             }
             for (i, r) in rules.iter().enumerate() {
@@ -110,7 +110,7 @@ fn is_else(f: &str) -> bool {
 
 /// A rule-based labeling's rule with settings: its filter and its parents' (an else rule's own
 /// left out), for an else rule and each else rule above it the siblings' filters it takes the rest
-/// of (what none of them does), and the scale range along the way (RustGIS's min and max scale).
+/// of (what none of them does), and the scale range along the way (KHGIS's min and max scale).
 struct Rule<'a, 'i> {
     node: Node<'a, 'i>,
     filters: Vec<String>,
@@ -190,7 +190,7 @@ fn class(
     let mut by = LabelBy::default();
     let field = if text.attribute("isExpression") == Some("1") {
         // An expression that is only a field labels from it; any other is the text's expression
-        // (one RustGIS can't read is noted when the layer's fields are known).
+        // (one KHGIS can't read is noted when the layer's fields are known).
         let bare = field.strip_prefix('"').and_then(|f| f.strip_suffix('"')).unwrap_or(field);
         // (Empty first: a quoted space is no field name.)
         if bare.trim().is_empty() {
@@ -203,7 +203,7 @@ fn class(
             return None;
         } else {
             let text = super::expr::rustgis_scales(field);
-            // (Its map scale read as RustGIS's lengthens it.)
+            // (Its map scale read as KHGIS's lengthens it.)
             if text.chars().count() > rustgis_data::query::MAX_LEN {
                 report.skipped(layer, "labels whose text is an expression too long to read");
                 return None;
@@ -218,7 +218,7 @@ fn class(
         return None;
     }
     let num = |n: Node, k: &str| n.attribute(k).and_then(|v| v.trim().parse::<f64>().ok()).filter(|v| v.is_finite());
-    // The size in typographic points, as RustGIS's label sizes are; its letter spacing in the
+    // The size in typographic points, as KHGIS's label sizes are; its letter spacing in the
     // size's unit.
     let size_unit = text.attribute("fontSizeUnit").unwrap_or("Point");
     let size = points(num(text, "fontSize").unwrap_or(10.0), size_unit, "label sizes", layer, report);
@@ -237,7 +237,7 @@ fn class(
         || weight >= 63.0
         || text.attribute("fontBold") == Some("1");
     let italic = style.contains("italic") || style.contains("oblique") || text.attribute("fontItalic") == Some("1");
-    // QGIS's font family: drawn in it where it is installed, else in RustGIS's label font.
+    // QGIS's font family: drawn in it where it is installed, else in KHGIS's label font.
     let font = text.attribute("fontFamily").and_then(crate::symbology::font_name);
     let spacing =
         num(text, "fontLetterSpacing").filter(|s| *s != 0.0).map_or(0.0, |s| points(s, size_unit, "label letter spacing", layer, report));
@@ -334,7 +334,7 @@ fn data_defined(settings: Node, size_unit: &str, by: &mut LabelBy, layer: &str, 
         let slot = match name {
             "Size" => &mut by.size,
             "Color" => &mut by.color,
-            // (Clockwise in degrees, as RustGIS's; QGIS 2's `Rotation` turned counterclockwise.)
+            // (Clockwise in degrees, as KHGIS's; QGIS 2's `Rotation` turned counterclockwise.)
             "LabelRotation" | "Rotation" => &mut by.angle,
             _ => {
                 left.push(name);
@@ -406,7 +406,7 @@ fn follow_placement(placement: LabelPlacement) -> TextAlign {
 
 /// A label's repeat along its line, in points: QGIS's repeat distance in its units, for a label
 /// placed along a line. Round a polygon's outline (QGIS's placement along a polygon layer's lines,
-/// or round its perimeter) RustGIS labels it once, and says so.
+/// or round its perimeter) KHGIS labels it once, and says so.
 fn repeat(p: Node, placement: LabelPlacement, geometry: Option<&str>, layer: &str, report: &mut Report) -> Option<f32> {
     let d = p.attribute("repeatDistance").and_then(|v| v.trim().parse::<f64>().ok()).filter(|v| v.is_finite() && *v > 0.0)?;
     // (QGIS repeats only along lines: a polygon's outline with Line or Curved, or round its
@@ -430,7 +430,7 @@ fn repeat(p: Node, placement: LabelPlacement, geometry: Option<&str>, layer: &st
     crate::symbology::label_repeat(points(d, unit, "label repeat distances", layer, report))
 }
 
-/// A label's background as RustGIS's rectangle: QGIS's rectangle (its square, ellipse and circle
+/// A label's background as KHGIS's rectangle: QGIS's rectangle (its square, ellipse and circle
 /// drawn as one), padded by its size, filled and outlined as its fill symbol says (else its own
 /// colours), its corners rounded.
 fn background(text: Node, layer: &str, report: &mut Report) -> Option<LabelBackground> {
@@ -508,7 +508,7 @@ fn background(text: Node, layer: &str, report: &mut Report) -> Option<LabelBackg
 
 /// How far a label is moved from where its placement puts it (points, right and down): QGIS's
 /// offset from a point (or a polygon's centroid), and on a point layer its distance around the
-/// point, the label above it that far out (RustGIS's Auto puts it above).
+/// point, the label above it that far out (KHGIS's Auto puts it above).
 fn offset(p: Node, geometry: Option<&str>, layer: &str, report: &mut Report) -> [f32; 2] {
     let num = |k: &str| p.attribute(k).and_then(|v| v.trim().parse::<f64>().ok()).filter(|v| v.is_finite());
     let within = |v: f64| v.clamp(*LABEL_OFFSET.start(), *LABEL_OFFSET.end()) as f32;
@@ -546,7 +546,7 @@ fn points(v: f64, unit: &str, what: &str, layer: &str, report: &mut Report) -> f
     }
 }
 
-/// Notes the label settings RustGIS has no place for, where they are set off QGIS's defaults.
+/// Notes the label settings KHGIS has no place for, where they are set off QGIS's defaults.
 fn unread(settings: Node, geometry: Option<&str>, layer: &str, report: &mut Report) {
     let num =
         |n: Option<Node>, k: &str| n.and_then(|n| n.attribute(k)).and_then(|v| v.trim().parse::<f64>().ok()).filter(|v| v.is_finite());
@@ -570,7 +570,7 @@ fn unread(settings: Node, geometry: Option<&str>, layer: &str, report: &mut Repo
     }
 }
 
-/// QGIS's label placement, as RustGIS's.
+/// QGIS's label placement, as KHGIS's.
 fn placement(p: Node, layer: &str, report: &mut Report) -> LabelPlacement {
     let quad = |q: Option<&str>| match q {
         Some("0") => LabelPlacement::AboveLeft,
@@ -584,7 +584,7 @@ fn placement(p: Node, layer: &str, report: &mut Report) -> LabelPlacement {
         _ => LabelPlacement::Center,
     };
     match p.attribute("placement").unwrap_or("0") {
-        // Around the point: QGIS picks the best spot, RustGIS's automatic is above it.
+        // Around the point: QGIS picks the best spot, KHGIS's automatic is above it.
         "0" | "6" => LabelPlacement::Auto,
         "1" => quad(p.attribute("quadOffset")),
         "2" => LabelPlacement::Parallel,

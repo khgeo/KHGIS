@@ -265,7 +265,7 @@ pub fn start() {
             match result {
                 Ok(()) => el.remove(),
                 Err(e) => {
-                    el.set_inner_html(&format!("<p>RustGIS failed to start: {e:?}</p><p>A browser with WebGPU or WebGL2 is required.</p>"))
+                    el.set_inner_html(&format!("<p>KHGIS failed to start: {e:?}</p><p>A browser with WebGPU or WebGL2 is required.</p>"))
                 }
             }
         }
@@ -1187,14 +1187,14 @@ fn services(inbox: Inbox, font_inbox: Inbox, notes: Notes, ctx: egui::Context, e
                 rfd::AsyncFileDialog::new().add_filter("Shapefile", &["shp", "dbf", "shx", "prj", "cpg", "zip"])
             } else if purpose == "project" {
                 rfd::AsyncFileDialog::new().add_filter(
-                    rustgis_ui_egui::tl!("Projects and JSON data (RustGIS, GeoLibre)"),
+                    rustgis_ui_egui::tl!("Projects and JSON data (KHGIS, GeoLibre)"),
                     &["rgis", "rgisx", "rgispkg", "geolibre", "json"],
                 )
             } else if purpose == "qgisProject" {
                 rfd::AsyncFileDialog::new().add_filter(rustgis_ui_egui::tl!("QGIS project"), &["qgs", "qgz"])
             } else if purpose == "item" {
                 rfd::AsyncFileDialog::new().add_filter(
-                    "RustGIS items",
+                    "KHGIS items",
                     &[
                         "rgismap",
                         "rgismpk",
@@ -1212,9 +1212,9 @@ fn services(inbox: Inbox, font_inbox: Inbox, notes: Notes, ctx: egui::Context, e
             } else if purpose == "ramp" {
                 rfd::AsyncFileDialog::new().add_filter("Colour ramps", &["rgisramp", "xml", "qml", "txt", "clr", "cpt"])
             } else if purpose == "layout" {
-                rfd::AsyncFileDialog::new().add_filter("RustGIS layout", &["rgislayout"])
+                rfd::AsyncFileDialog::new().add_filter("KHGIS layout", &["rgislayout"])
             } else if purpose == "plugin" {
-                rfd::AsyncFileDialog::new().add_filter("RustGIS plugin", &["rgplugin"])
+                rfd::AsyncFileDialog::new().add_filter("KHGIS plugin", &["rgplugin"])
             } else if purpose == "text" {
                 rfd::AsyncFileDialog::new()
                     .add_filter("Delimited text and spreadsheets", &["csv", "tsv", "txt", "xlsx", "xlsm", "xlsb", "xls", "ods"])

@@ -1,4 +1,4 @@
-//! RustGIS on the command line. Every command the ribbon runs is available here by id.
+//! KHGIS on the command line. Every command the ribbon runs is available here by id.
 //!
 //! ```text
 //! rustgis-cli commands                                  # list command ids and parameters
@@ -47,7 +47,7 @@ use serde_json::{Map, Value, json};
 
 fn usage() -> ExitCode {
     eprintln!(
-        "usage:\n  rustgis-cli commands | tools\n  rustgis-cli plugins [install <file|folder> | uninstall <id> | enable <id> | disable <id> | browse | get <id> | prepare <id>] [--registry URL]\n  rustgis-cli skills [add <SKILL.md|folder|.zip> | remove <name> | enable <name> | disable <name>]\n  rustgis-cli info <data>\n  rustgis-cli logo <out.png|out.ico|out.bmp> [--size N] [--canvas WxH --at X,Y (.bmp only)]\n  rustgis-cli render <data|project> <out.png> [--basemap NAME] [--tiles URL] [--width N] [--height N] [--dpi N] [--worldview auto|default|china]\n  rustgis-cli run [--sample] [--project P] [--data F]… --cmd 'id={{json}}'… [--save P] [--worldview auto|default|china]\n  rustgis-cli ask [--sample] [--project P] [--data F]… \"request\" [--provider P] [--model M] [--base-url URL] [--yes] [--save P]\n  rustgis-cli ask --models [--provider P]\n  rustgis-cli ask --login [--another-account] [--account CLIENT_ID] | --logout\n  rustgis-cli ask --accounts | --account CLIENT_ID | --remove-account CLIENT_ID\n  common options: --use-saved-secrets (use the connections, passwords, keys, ChatGPT sign-in and Earthdata Login token the RustGIS app saved; reads the system keychain), --threads N (the most threads one piece of work uses, 1-1024; default: the cores, up to 16)\n  rustgis-cli mcp [--sample] [--project P] [--data F]… [--yes] [--attach [PORT] [--token-file FILE] [--timeout SECONDS (5-600)]]\n  rustgis-cli mcp-register [--client claude] [--name NAME] [--port PORT]"
+        "usage:\n  rustgis-cli commands | tools\n  rustgis-cli plugins [install <file|folder> | uninstall <id> | enable <id> | disable <id> | browse | get <id> | prepare <id>] [--registry URL]\n  rustgis-cli skills [add <SKILL.md|folder|.zip> | remove <name> | enable <name> | disable <name>]\n  rustgis-cli info <data>\n  rustgis-cli logo <out.png|out.ico|out.bmp> [--size N] [--canvas WxH --at X,Y (.bmp only)]\n  rustgis-cli render <data|project> <out.png> [--basemap NAME] [--tiles URL] [--width N] [--height N] [--dpi N] [--worldview auto|default|china]\n  rustgis-cli run [--sample] [--project P] [--data F]… --cmd 'id={{json}}'… [--save P] [--worldview auto|default|china]\n  rustgis-cli ask [--sample] [--project P] [--data F]… \"request\" [--provider P] [--model M] [--base-url URL] [--yes] [--save P]\n  rustgis-cli ask --models [--provider P]\n  rustgis-cli ask --login [--another-account] [--account CLIENT_ID] | --logout\n  rustgis-cli ask --accounts | --account CLIENT_ID | --remove-account CLIENT_ID\n  common options: --use-saved-secrets (use the connections, passwords, keys, ChatGPT sign-in and Earthdata Login token the KHGIS app saved; reads the system keychain), --threads N (the most threads one piece of work uses, 1-1024; default: the cores, up to 16)\n  rustgis-cli mcp [--sample] [--project P] [--data F]… [--yes] [--attach [PORT] [--token-file FILE] [--timeout SECONDS (5-600)]]\n  rustgis-cli mcp-register [--client claude] [--name NAME] [--port PORT]"
     );
     ExitCode::from(2)
 }
@@ -308,7 +308,7 @@ fn ask(s: &mut Session, args: &[String], saved: Option<&Saved>, env: &Environmen
             && let Err(e) = chatgpt::revoke(&r)
         {
             eprintln!(
-                "removed on this computer, but OpenAI didn't confirm the sign-out ({e}); disconnect RustGIS in ChatGPT's settings if needed"
+                "removed on this computer, but OpenAI didn't confirm the sign-out ({e}); disconnect KHGIS in ChatGPT's settings if needed"
             );
             return Ok(());
         }
@@ -321,7 +321,7 @@ fn ask(s: &mut Session, args: &[String], saved: Option<&Saved>, env: &Environmen
         let out = chatgpt::sign_out()?;
         if let Some(e) = &out.unrevoked {
             eprintln!(
-                "signed out on this computer, but OpenAI wasn't asked to end the session ({e}); disconnect RustGIS in ChatGPT's settings if needed"
+                "signed out on this computer, but OpenAI wasn't asked to end the session ({e}); disconnect KHGIS in ChatGPT's settings if needed"
             );
             return Ok(());
         }
@@ -332,7 +332,7 @@ fn ask(s: &mut Session, args: &[String], saved: Option<&Saved>, env: &Environmen
         };
         if let Err(e) = chatgpt::revoke(&r) {
             eprintln!(
-                "signed out on this computer, but OpenAI didn't confirm it ({e}); disconnect RustGIS in ChatGPT's settings if needed"
+                "signed out on this computer, but OpenAI didn't confirm it ({e}); disconnect KHGIS in ChatGPT's settings if needed"
             );
             return Ok(());
         }
@@ -353,7 +353,7 @@ fn ask(s: &mut Session, args: &[String], saved: Option<&Saved>, env: &Environmen
             return Err(rustgis_assistant::Error::new(rustgis_assistant::Recovery::Consent, "").to_string());
         }
         let who = if c.email.is_empty() { "your ChatGPT account" } else { c.email.as_str() };
-        eprintln!("signed in as {who}; RustGIS now uses your ChatGPT plan (manage usage at {})", chatgpt::USAGE_URL);
+        eprintln!("signed in as {who}; KHGIS now uses your ChatGPT plan (manage usage at {})", chatgpt::USAGE_URL);
         if c.kept == chatgpt::Kept::Session {
             if saved.is_none() {
                 eprintln!(
@@ -417,7 +417,7 @@ fn ask(s: &mut Session, args: &[String], saved: Option<&Saved>, env: &Environmen
             Some(p) => format!(
                 "set {}{}",
                 p.key_env.join(" or "),
-                if saved.is_none() { ", or pass --use-saved-secrets to use the key saved in the RustGIS app" } else { "" }
+                if saved.is_none() { ", or pass --use-saved-secrets to use the key saved in the KHGIS app" } else { "" }
             ),
             None => String::new(),
         };
@@ -500,7 +500,7 @@ fn attach(port: u16, allow_access: bool, token_file: Option<&str>, timeout: Opti
         None => rustgis_assistant::relay::read_token(port)?,
     };
     let mut stream = std::net::TcpStream::connect(("127.0.0.1", port))
-        .map_err(|e| format!("nothing is listening on 127.0.0.1:{port} ({e}); start RustGIS's MCP Relay command first"))?;
+        .map_err(|e| format!("nothing is listening on 127.0.0.1:{port} ({e}); start KHGIS's MCP Relay command first"))?;
     let mut hello = json!({"jsonrpc": "2.0", "method": "rustgis/attach", "params": {"access": allow_access, "token": token}});
     // How long each call may wait for the app (5 to 600 seconds; 60 unless asked).
     if let (Some(secs), Some(params)) = (timeout, hello.get_mut("params").and_then(Value::as_object_mut)) {
@@ -508,7 +508,7 @@ fn attach(port: u16, allow_access: bool, token_file: Option<&str>, timeout: Opti
     }
     writeln!(stream, "{hello}").map_err(|e| format!("telling the app what --yes allows: {e}"))?;
     eprintln!(
-        "rustgis-cli: MCP server ready (the open RustGIS app at 127.0.0.1:{port}; file and network access {})",
+        "rustgis-cli: MCP server ready (the open KHGIS app at 127.0.0.1:{port}; file and network access {})",
         if allow_access { "allowed" } else { "off, --yes allows it" }
     );
     let mut input = std::io::BufReader::new(stream.try_clone().map_err(|e| format!("opening the app's replies: {e}"))?);
@@ -533,7 +533,7 @@ fn attach(port: u16, allow_access: bool, token_file: Option<&str>, timeout: Opti
         }
         let reply = match rustgis_assistant::framing::read_message(&mut input, rustgis_assistant::framing::Oversize::Stop) {
             Ok(Some(reply)) => reply,
-            Ok(None) => return Err("the RustGIS app closed the relay".into()),
+            Ok(None) => return Err("the KHGIS app closed the relay".into()),
             Err(why) => return Err(format!("the app's reply: {why}")),
         };
         writeln!(stdout, "{reply}").and_then(|()| stdout.flush()).map_err(|e| format!("writing to standard output: {e}"))?;
@@ -587,7 +587,7 @@ fn mcp_register(args: &[String]) -> Result<(), String> {
             if !status.success() {
                 return Err(format!("claude mcp add failed ({status})"));
             }
-            eprintln!("rustgis-cli: registered {name} ({url}) with Claude Code; RustGIS serves it while agents are turned on in the app");
+            eprintln!("rustgis-cli: registered {name} ({url}) with Claude Code; KHGIS serves it while agents are turned on in the app");
             Ok(())
         }
         Some(other) => {

@@ -66,7 +66,7 @@ A line, or markers or hash marks along it	Una línea, o marcadores o marcas tran
 A magnifying lens that follows the pointer.	Una lupa que sigue al puntero.
 A map, feature or coverage service's address: WMS, WMTS, WFS, WCS, OGC API Features or Tiles, or an ArcGIS FeatureServer, MapServer, ImageServer or VectorTileServer (or a services directory, to browse).	La dirección de un servicio de mapas, entidades o coberturas: WMS, WMTS, WFS, WCS, OGC API Features o Tiles, o un ArcGIS FeatureServer, MapServer, ImageServer o VectorTileServer (o un directorio de servicios, para explorar).
 a name, or owner/name such as giswqs/geospatial	un nombre, o propietario/nombre como giswqs/geospatial
-A named endpoint you can reuse. Keys are kept until RustGIS closes unless you choose to remember them on this computer; the connection itself never keeps them.	Un punto de conexión con nombre que puede reutilizar. Las claves se conservan hasta que se cierra RustGIS, salvo que elija recordarlas en este equipo; la conexión en sí nunca las guarda.
+A named endpoint you can reuse. Keys are kept until KHGIS closes unless you choose to remember them on this computer; the connection itself never keeps them.	Un punto de conexión con nombre que puede reutilizar. Las claves se conservan hasta que se cierra KHGIS, salvo que elija recordarlas en este equipo; la conexión en sí nunca las guarda.
 A named endpoint you can reuse. Passwords last for this session unless you choose to remember them in this computer's password store.	Un punto de conexión con nombre que puede reutilizar. Las contraseñas duran esta sesión, salvo que elija recordarlas en el almacén de contraseñas de este equipo.
 A new GeoPackage	Un GeoPackage nuevo
 A new table in a GeoPackage	Una tabla nueva en un GeoPackage
@@ -110,8 +110,8 @@ A5 Grid	Cuadrícula A5
 A5's equal-area pentagonal cells at a resolution, over the map's extent, a layer or the world, as polygons with their ids.	Las celdas pentagonales de áreas iguales de A5 a una resolución, sobre la extensión del mapa, una capa o el mundo, como polígonos con sus identificadores.
 About	Acerca de
 About plugins	Acerca de los complementos
-About RustGIS	Acerca de RustGIS
-About RustGIS.	Acerca de RustGIS.
+About KHGIS	Acerca de KHGIS
+About KHGIS.	Acerca de KHGIS.
 Above	Arriba
 Above Left	Arriba a la izquierda
 Above Right	Arriba a la derecha
@@ -288,7 +288,7 @@ Agent input queue is full or disconnected; stop the agent and try again.	La cola
 Agent threads	Hilos de agentes
 Agent work	Agent work
 Agents have full access: they may run scripts, tasks, models and plugins. Click to stop the MCP relay	Los agentes tienen acceso total: pueden ejecutar scripts, tareas, modelos y complementos. Haga clic para detener el relé MCP
-Agents on this computer that connect (Claude Code, Codex, Cursor and others) work on the map open here, with RustGIS's tools: they can open and save files and use the web. Scripts and plugin management stay off.	Los agentes de este equipo que se conecten (Claude Code, Codex, Cursor y otros) trabajan en el mapa abierto aquí con las herramientas de RustGIS: pueden abrir y guardar archivos y usar la web. Los scripts y la gestión de complementos siguen desactivados.
+Agents on this computer that connect (Claude Code, Codex, Cursor and others) work on the map open here, with KHGIS's tools: they can open and save files and use the web. Scripts and plugin management stay off.	Los agentes de este equipo que se conecten (Claude Code, Codex, Cursor y otros) trabajan en el mapa abierto aquí con las herramientas de KHGIS: pueden abrir y guardar archivos y usar la web. Los scripts y la gestión de complementos siguen desactivados.
 Agents then run commands, change files and use the web on this computer without asking you.	Los agentes ejecutarán comandos, cambiarán archivos y usarán la web en este equipo sin preguntarte.
 Aggregate Points to A5	Agregar puntos en A5
 Aggregation	Agregación
@@ -313,7 +313,7 @@ Allow Feature Selection	Permitir la selección de entidades
 Allow only certain combinations of values across fields.	Permitir solo ciertas combinaciones de valores entre campos.
 Allow such actions for this conversation	Permitir este tipo de acciones en esta conversación
 Allow this action?	¿Permitir esta acción?
-Allow this agent's RustGIS action?	¿Permitir esta acción de RustGIS del agente?
+Allow this agent's KHGIS action?	¿Permitir esta acción de KHGIS del agente?
 Along lines	A lo largo de líneas
 Along Selected Line	A lo largo de la línea seleccionada
 Alt+	Alt+
@@ -325,7 +325,7 @@ Alternating bar	Barra alterna
 Altitude	Altitud
 Always allow	Permitir siempre
 Amazon S3	Amazon S3
-Amazon S3, or an S3-compatible service (MinIO, Cloudflare R2, Wasabi…) by its endpoint. Keys are kept until RustGIS closes; a saved connection keeps its name, endpoint and region, never its secret.	Amazon S3, o un servicio compatible con S3 (MinIO, Cloudflare R2, Wasabi…) por su punto de conexión. Las claves se conservan hasta que se cierra RustGIS; una conexión guardada conserva su nombre, punto de conexión y región, nunca su secreto.
+Amazon S3, or an S3-compatible service (MinIO, Cloudflare R2, Wasabi…) by its endpoint. Keys are kept until KHGIS closes; a saved connection keeps its name, endpoint and region, never its secret.	Amazon S3, o un servicio compatible con S3 (MinIO, Cloudflare R2, Wasabi…) por su punto de conexión. Las claves se conservan hasta que se cierra KHGIS; una conexión guardada conserva su nombre, punto de conexión y región, nunca su secreto.
 amenity=cafe, shop	amenity=cafe, shop
 An agent on this computer asks to:	Un agente de este equipo pide:
 An API key sent in a header must use plain ASCII characters.	Una clave de API enviada en un encabezado debe usar caracteres ASCII simples.
@@ -379,7 +379,7 @@ Arrange	Organizar
 Arrange Element	Organizar elemento
 Arrow	Flecha
 Arrowheads	Puntas de flecha
-Ask a question about your data, or describe what to do with the map. The assistant runs RustGIS commands for you; every change can be undone.	Haga una pregunta sobre sus datos, o describa qué hacer con el mapa. El asistente ejecuta comandos de RustGIS por usted; cada cambio se puede deshacer.
+Ask a question about your data, or describe what to do with the map. The assistant runs KHGIS commands for you; every change can be undone.	Haga una pregunta sobre sus datos, o describa qué hacer con el mapa. El asistente ejecuta comandos de KHGIS por usted; cada cambio se puede deshacer.
 Ask about the map, or tell it what to do…	Pregunte sobre el mapa, o dígale qué hacer…
 Ask about your data, or tell the assistant what to do with the map.	Pregunte sobre sus datos, o diga al asistente qué hacer con el mapa.
 Ask Which Layers to Add	Preguntar qué capas añadir
@@ -745,7 +745,7 @@ Color Vision Simulator	Simulador de visión del color
 Colorbar	Barra de colores
 Colormap	Mapa de colores
 Colors from the raster's own color table.	Colores de la propia tabla de colores del ráster.
-Colour ramps (RustGIS, QGIS, GDAL, GMT)	Rampas de color (RustGIS, QGIS, GDAL, GMT)
+Colour ramps (KHGIS, QGIS, GDAL, GMT)	Rampas de color (KHGIS, QGIS, GDAL, GMT)
 Columns	Columnas
 Columns named like longitude/latitude, easting/northing or geometry are picked for you.	Las columnas con nombres como longitude/latitude, easting/northing o geometry se seleccionan automáticamente.
 Combinations from the box above, one per line	Combinaciones del cuadro de arriba, una por línea
@@ -977,7 +977,7 @@ Delete selected rows	Eliminar las filas seleccionadas
 Delete Style	Eliminar estilo
 Delete Task	Eliminar tarea
 Delete Task Step	Eliminar paso de tarea
-Delete the GeoLibre runner that RustGIS installed. Install it again at any time.	Eliminar el ejecutor de GeoLibre que instaló RustGIS. Puede volver a instalarlo en cualquier momento.
+Delete the GeoLibre runner that KHGIS installed. Install it again at any time.	Eliminar el ejecutor de GeoLibre que instaló KHGIS. Puede volver a instalarlo en cualquier momento.
 Delete the layout {name}?	¿Eliminar el diseño {name}?
 Delete the map {name}?	¿Eliminar el mapa {name}?
 Delete the selected features.	Eliminar las entidades seleccionadas.
@@ -1209,7 +1209,7 @@ Element Properties	Propiedades del elemento
 Elevation	Elevación
 Elevation model	Modelo de elevación
 Elevation profiles along lines, cross sections and more.	Perfiles de elevación a lo largo de líneas, secciones transversales y más.
-Eligible requests in RustGIS use your ChatGPT plan. You can manage usage in ChatGPT settings.	Las solicitudes admitidas en RustGIS usan tu plan de ChatGPT. Puedes gestionar el uso en la configuración de ChatGPT.
+Eligible requests in KHGIS use your ChatGPT plan. You can manage usage in ChatGPT settings.	Las solicitudes admitidas en KHGIS usan tu plan de ChatGPT. Puedes gestionar el uso en la configuración de ChatGPT.
 Ellipse	Elipse
 Embeddings	Incrustaciones
 Ember	Brasa
@@ -1418,7 +1418,7 @@ Find and run geoprocessing tools.	Buscar y ejecutar herramientas de geoprocesami
 Find any command by name (Ctrl+K).	Buscar cualquier comando por su nombre (Ctrl+K).
 Find Items	Buscar ítems
 Find Place	Buscar lugar
-Find plugins in the RustGIS plugin registry.	Buscar complementos en el registro de complementos de RustGIS.
+Find plugins in the KHGIS plugin registry.	Buscar complementos en el registro de complementos de KHGIS.
 Find Similar	Buscar similares
 Find Tools	Buscar herramientas
 Finding routes…	Buscando rutas…
@@ -1454,7 +1454,7 @@ Follow the System	Seguir al sistema
 Follow the time slider	Seguir el control deslizante de tiempo
 Font	Fuente
 for a store that doesn't say	para un almacén que no lo indica
-For ArcGIS Online, the client ID is RustGIS's own app. For an ArcGIS Enterprise portal, register an OAuth app on it (Content › New item › Developer credentials) whose redirect URL is {redirect}, and give its client ID.	Para ArcGIS Online, el ID de cliente es la propia aplicación de RustGIS. Para un portal de ArcGIS Enterprise, registre en él una aplicación OAuth (Contenido › Nuevo elemento › Credenciales de desarrollador) cuya URL de redirección sea {redirect} e indique su ID de cliente.
+For ArcGIS Online, the client ID is KHGIS's own app. For an ArcGIS Enterprise portal, register an OAuth app on it (Content › New item › Developer credentials) whose redirect URL is {redirect}, and give its client ID.	Para ArcGIS Online, el ID de cliente es la propia aplicación de KHGIS. Para un portal de ArcGIS Enterprise, registre en él una aplicación OAuth (Contenido › Nuevo elemento › Credenciales de desarrollador) cuya URL de redirección sea {redirect} e indique su ID de cliente.
 for the layers that change with time, as they list their times (2024-06-01, 1995)	para las capas que cambian con el tiempo, tal como enumeran sus tiempos (2024-06-01, 1995)
 Forest	Bosque
 Forget Earthdata Login Token	Olvidar token de Earthdata Login
@@ -1462,7 +1462,7 @@ Forget Saved Keys	Olvidar claves guardadas
 Forget Saved Password	Olvidar contraseña guardada
 Forget this plugin: the app stops trying to load it at start.	Olvidar este complemento: la aplicación deja de intentar cargarlo al iniciar.
 Format	Formato
-Found: {names}. An agent works on this map through RustGIS's tools and with its own (web, scripts, files) in a folder of its own, kept in Documents › RustGIS › Agent work. It asks you before each action.	Encontrados: {names}. Un agente trabaja en este mapa con las herramientas de RustGIS y con las suyas (web, scripts, archivos), en una carpeta propia que se conserva en Documentos › RustGIS › Agent work. Te pregunta antes de cada acción.
+Found: {names}. An agent works on this map through KHGIS's tools and with its own (web, scripts, files) in a folder of its own, kept in Documents › KHGIS › Agent work. It asks you before each action.	Encontrados: {names}. Un agente trabaja en este mapa con las herramientas de KHGIS y con las suyas (web, scripts, archivos), en una carpeta propia que se conserva en Documentos › KHGIS › Agent work. Te pregunta antes de cada acción.
 Frame rate	Velocidad de fotogramas
 Frame rate, draw time, data size and memory.	Velocidad de fotogramas, tiempo de dibujo, tamaño de los datos y memoria.
 France	Francia
@@ -1631,7 +1631,7 @@ host=… dbname=… user=…	host=… dbname=… user=…
 Hosted Imagery	Imágenes alojadas
 Hour	Hora
 How much of each zone each class of polygons covers, with the classes' totals shared out to the zones by area.	Cuánto de cada zona cubre cada clase de polígonos, con los totales de las clases repartidos entre las zonas según el área.
-How often RustGIS keeps a copy of unsaved work, to offer it back after a crash.	Con qué frecuencia RustGIS guarda una copia del trabajo sin guardar, para ofrecerla de nuevo tras un fallo.
+How often KHGIS keeps a copy of unsaved work, to offer it back after a crash.	Con qué frecuencia KHGIS guarda una copia del trabajo sin guardar, para ofrecerla de nuevo tras un fallo.
 How the layer's colours combine with the tile layers and basemap beneath.	Cómo se combinan los colores de la capa con las capas de teselas y el mapa base de debajo.
 How the layer's colours combine with what's beneath.	Cómo se combinan los colores de la capa con lo que hay debajo.
 HTTP failure	Error HTTP
@@ -1704,7 +1704,7 @@ In place, holding a {w} × {h} overview	In situ, con una vista general de {w} ×
 In Progress	En curso
 in progress	en curso
 In project	En el proyecto
-In RustGIS, it can:	En RustGIS, puede:
+In KHGIS, it can:	En KHGIS, puede:
 In the browser, pick the .shp and .dbf together, with any sidecars, or pick a ZIP. The override applies to every Shapefile in the ZIP.	En el navegador, seleccione los .shp y .dbf a la vez, con los archivos auxiliares que haya, o seleccione un ZIP. La sustitución se aplica a todos los Shapefile del ZIP.
 In the coordinate system's units: metres for UTM.	En las unidades del sistema de coordenadas: metros para UTM.
 In the middle	En el centro
@@ -1804,7 +1804,7 @@ Item {id}	Ítem {id}
 its copy kept in the browser is damaged: {error}	su copia guardada en el navegador está dañada: {error}
 its default	su valor predeterminado
 Its default: {default}. Its times: {times}	Su valor predeterminado: {default}. Sus tiempos: {times}
-Its firewall ({firewall}) blocked RustGIS. The service may only allow some applications: contact its administrator and send them the details below.	Su cortafuegos ({firewall}) bloqueó RustGIS. Es posible que el servicio solo permita algunas aplicaciones: contacte con su administrador y envíele los detalles de abajo.
+Its firewall ({firewall}) blocked KHGIS. The service may only allow some applications: contact its administrator and send them the details below.	Su cortafuegos ({firewall}) bloqueó KHGIS. Es posible que el servicio solo permita algunas aplicaciones: contacte con su administrador y envíele los detalles de abajo.
 its layer was removed	se eliminó su capa
 Its tool isn't available now (a plugin's, not loaded, or a suite's, not installed)	Su herramienta no está disponible ahora (de un complemento no cargado o de un conjunto no instalado)
 Jobs	Trabajos
@@ -1836,7 +1836,7 @@ Keep Tool	Mantener herramienta
 Keep value	Conservar valor
 Keeps the access key ID and secret access key in this computer's credential store, never in the connection or the project.	Guarda el ID de clave de acceso y la clave de acceso secreta en el almacén de credenciales de este equipo, nunca en la conexión ni en el proyecto.
 Keeps the parts of two polygon layers that only one of them covers, with that layer's attributes.	Conserva las partes de dos capas de polígonos que solo cubre una de ellas, con los atributos de esa capa.
-Keeps the token in the system's credential store, so it is there when RustGIS starts again. Unticked, a token remembered before is deleted when you save another.	Conserva el token en el almacén de credenciales del sistema, para que esté disponible cuando RustGIS se inicie de nuevo. Sin marcar, un token recordado antes se elimina al guardar otro.
+Keeps the token in the system's credential store, so it is there when KHGIS starts again. Unticked, a token remembered before is deleted when you save another.	Conserva el token en el almacén de credenciales del sistema, para que esté disponible cuando KHGIS se inicie de nuevo. Sin marcar, un token recordado antes se elimina al guardar otro.
 Kernel Density	Densidad kernel
 Kernel Type	Tipo de kernel
 Key	Key
@@ -1919,7 +1919,7 @@ Legend label. Clear it to show the value again.	Etiqueta de la leyenda. Bórrela
 Length	Longitud
 Length {length} · gain {gain} · loss {loss}	Longitud {length} · ascenso {gain} · descenso {loss}
 Let the assistant hand tasks to agents on this computer	Permitir que el asistente encargue tareas a agentes de este equipo
-Let your Agents Control RustGIS	Deja que tus agentes controlen RustGIS
+Let your Agents Control KHGIS	Deja que tus agentes controlen KHGIS
 Letter spacing	Espaciado entre letras
 Level	Nivel
 Library	Biblioteca
@@ -1978,7 +1978,7 @@ List The National Map Services	Listar servicios de The National Map
 List the provider's models	Listar los modelos del proveedor
 List this layer in the legend	Mostrar esta capa en la leyenda
 List what it holds	Listar su contenido
-Listed for discovery: RustGIS doesn't read this dataset yet. Its data and paper are linked above.	Listado para descubrimiento: RustGIS aún no lee este conjunto de datos. Sus datos y su artículo están enlazados arriba.
+Listed for discovery: KHGIS doesn't read this dataset yet. Its data and paper are linked above.	Listado para descubrimiento: KHGIS aún no lee este conjunto de datos. Sus datos y su artículo están enlazados arriba.
 Listing datasets…	Listando conjuntos de datos…
 Listing…	Listando…
 Lit	Iluminado
@@ -2034,7 +2034,7 @@ Look for {name}, outlined on the ribbon.	Busque {name}, resaltado en la cinta.
 Looking up the place…	Buscando el lugar…
 Loop	Bucle
 Lower Priority	Bajar prioridad
-Made in RustGIS: samples, drawings and tool outputs	Creadas en RustGIS: ejemplos, dibujos y resultados de herramientas
+Made in KHGIS: samples, drawings and tool outputs	Creadas en KHGIS: ejemplos, dibujos y resultados de herramientas
 Magnifier	Lupa
 Major Lakes	Lagos principales
 Major Rivers	Ríos principales
@@ -2302,7 +2302,7 @@ No command matches	Ningún comando coincide
 No data at the points picked.	No hay datos en los puntos elegidos.
 No data cube matches	Ningún cubo de datos coincide
 No datasets match.	Ningún conjunto de datos coincide.
-No datasets with data RustGIS can add	No hay conjuntos de datos con datos que RustGIS pueda añadir
+No datasets with data KHGIS can add	No hay conjuntos de datos con datos que KHGIS pueda añadir
 no date in the name	sin fecha en el nombre
 No diagnostic entries match this filter.	Ninguna entrada de diagnóstico coincide con este filtro.
 no download service	sin servicio de descarga
@@ -2372,8 +2372,8 @@ North Polar Stereographic	Estereográfica polar norte
 NOT	NOT
 Not a GeoLibre project	No es un proyecto de GeoLibre
 not a picture	no es una imagen
-not a RustGIS layout	no es un diseño de RustGIS
-not a RustGIS project	no es un proyecto de RustGIS
+not a KHGIS layout	no es un diseño de KHGIS
+not a KHGIS project	no es un proyecto de KHGIS
 not a UTM or MGRS grid reference	no es una referencia de cuadrícula UTM ni MGRS
 Not added: a drawn line holds at most 10,000 points	No añadida: una línea dibujada admite como máximo 10.000 puntos
 Not applied yet.	Aún no se ha aplicado.
@@ -2451,7 +2451,7 @@ Open a Data Cube	Abrir un cubo de datos
 open a layout first	abra primero un diseño
 Open a model file (*.model.json)	Abrir un archivo de modelo (*.model.json)
 Open a model of this project	Abrir un modelo de este proyecto
-Open a RustGIS or Jupyter notebook.	Abrir un cuaderno de RustGIS o de Jupyter.
+Open a KHGIS or Jupyter notebook.	Abrir un cuaderno de KHGIS o de Jupyter.
 Open an offline area to edit.	Abrir un área sin conexión para editarla.
 Open browser again	Abrir el navegador de nuevo
 Open Custom Template	Abrir plantilla personalizada
@@ -2480,7 +2480,7 @@ Open the layer's attribute table.	Abrir la tabla de atributos de la capa.
 Open the layer's table.	Abrir la tabla de la capa.
 Open the plugin's panel.	Abrir el panel del complemento.
 Open the Release Page	Abrir la página de la versión
-Open the RustGIS user guide.	Abrir la guía del usuario de RustGIS.
+Open the KHGIS user guide.	Abrir la guía del usuario de KHGIS.
 Open the selected layer's table.	Abrir la tabla de la capa seleccionada.
 Open the Symbology pane.	Abrir el panel Simbología.
 Open the task's steps	Abrir los pasos de la tarea
@@ -2660,7 +2660,7 @@ Plugin registry	Registro de complementos
 Plugins	Complementos
 Plugins are .rgplugin files. Install only plugins from people you trust.	Los complementos son archivos .rgplugin. Instale solo complementos de personas de confianza.
 Plugins marked Not sandboxed run as programs on your computer instead, and can do anything you can.	Los complementos marcados como «Sin aislamiento» se ejecutan, en cambio, como programas en su equipo y pueden hacer todo lo que usted puede.
-Plugins run in a sandbox: they can't reach your files or the network, and they change the project only through RustGIS's own commands, within the permissions you accept.	Los complementos se ejecutan en un entorno aislado: no pueden acceder a sus archivos ni a la red, y solo modifican el proyecto mediante los propios comandos de RustGIS, dentro de los permisos que usted acepte.
+Plugins run in a sandbox: they can't reach your files or the network, and they change the project only through KHGIS's own commands, within the permissions you accept.	Los complementos se ejecutan en un entorno aislado: no pueden acceder a sus archivos ni a la red, y solo modifican el proyecto mediante los propios comandos de KHGIS, dentro de los permisos que usted acepte.
 PMTiles archive	Archivo PMTiles
 PNG frames (zip)	Fotogramas PNG (zip)
 PNG image or GeoTIFF	Imagen PNG o GeoTIFF
@@ -2741,7 +2741,7 @@ Project Template	Plantilla de proyecto
 project's path is required	se requiere la ruta del proyecto
 Projection	Proyección
 Projections	Proyecciones
-Projects and JSON data (RustGIS, QGIS, GeoLibre)	Proyectos y datos JSON (RustGIS, QGIS, GeoLibre)
+Projects and JSON data (KHGIS, QGIS, GeoLibre)	Proyectos y datos JSON (KHGIS, QGIS, GeoLibre)
 Properties	Propiedades
 Property	Propiedad
 Proportional Symbols	Símbolos proporcionales
@@ -2804,7 +2804,7 @@ Read error	Error de lectura
 Read the bands picked for the view (at most about 6 km a side)	Leer las bandas elegidas para la vista (como máximo unos 6 km de lado)
 Read the map's layers and features	Leer las capas y entidades del mapa
 Read the points in the view, coloured by their principal components	Leer los puntos de la vista, coloreados por sus componentes principales
-Reading a granule's files needs an Earthdata Login token, which works for every NASA DAAC. It is kept until RustGIS closes unless you tick Remember, never in the project, and sent only to NASA's Earthdata data servers.	Leer los archivos de un gránulo requiere un token de Earthdata Login, que sirve para todos los DAAC de la NASA. Se conserva hasta que RustGIS se cierra salvo que marque Recordar, nunca en el proyecto, y solo se envía a los servidores de datos Earthdata de la NASA.
+Reading a granule's files needs an Earthdata Login token, which works for every NASA DAAC. It is kept until KHGIS closes unless you tick Remember, never in the project, and sent only to NASA's Earthdata data servers.	Leer los archivos de un gránulo requiere un token de Earthdata Login, que sirve para todos los DAAC de la NASA. Se conserva hasta que KHGIS se cierra salvo que marque Recordar, nunca en el proyecto, y solo se envía a los servidores de datos Earthdata de la NASA.
 Reading in place…	Leyendo in situ…
 Reading the catalog: {n} documents read, {m} items found…	Leyendo el catálogo: {n} documentos leídos, {m} ítems encontrados…
 Reading the catalog…	Leyendo el catálogo…
@@ -3002,35 +3002,35 @@ Run Tool	Ejecutar herramienta
 Run {name}	Ejecutar {name}
 Running the query for the map…	Ejecutando la consulta para el mapa…
 Running…	Ejecutando…
-RustGIS	RustGIS
-RustGIS bookmarks	Marcadores de RustGIS
-RustGIS could not confirm that any previously saved key was deleted from the system keychain.	RustGIS no pudo confirmar que se eliminara del llavero del sistema alguna clave guardada anteriormente.
-RustGIS couldn't reach the server.	RustGIS no pudo conectar con el servidor.
-RustGIS deep learning package	Paquete de aprendizaje profundo de RustGIS
-RustGIS didn't close properly last time, so it started with the World Atlas instead of your start-up project. Open the project from the Project menu when you're ready.	RustGIS no se cerró correctamente la última vez, así que se abrió con World Atlas en lugar de su proyecto de inicio. Abra el proyecto desde el menú Proyecto cuando lo desee.
-RustGIS didn't close properly last time.	RustGIS no se cerró correctamente la última vez.
-RustGIS doesn't have this tool. Install the tools it comes from, or delete the node.	RustGIS no tiene esta herramienta. Instale las herramientas de las que procede o elimine el nodo.
-RustGIS is a free and open-source GIS written in pure Rust. It runs on the desktop and in the browser, and every action is a command you can also run from the command line.	RustGIS es un SIG libre y de código abierto escrito en Rust puro. Funciona en el escritorio y en el navegador, y cada acción es un comando que también puede ejecutar desde la línea de comandos.
-RustGIS layer file	Archivo de capa de RustGIS
-RustGIS layers, maps and projects	Capas, mapas y proyectos de RustGIS
-RustGIS layout	Diseño de RustGIS
-RustGIS maps and projects	Mapas y proyectos de RustGIS
-RustGIS model	Modelo de RustGIS
-RustGIS or Jupyter notebook	Cuaderno de RustGIS o de Jupyter
-RustGIS plugin	Complemento de RustGIS
-RustGIS presentation	Presentación de RustGIS
-RustGIS project	Proyecto de RustGIS
-RustGIS project template	Plantilla de proyecto de RustGIS
-RustGIS ran into an internal error last time. The details are in {path}; please attach them to a bug report.	RustGIS encontró un error interno la última vez. Los detalles están en {path}; adjúntelos a un informe de error.
-RustGIS report or report template	Informe o plantilla de informe de RustGIS
-RustGIS styles	Estilos de RustGIS
-RustGIS task	Tarea de RustGIS
-RustGIS was quit last time without saving your changes.	La última vez se salió de RustGIS sin guardar sus cambios.
-RustGIS was updated to {version}.	RustGIS se actualizó a {version}.
-RustGIS {latest} is available.	RustGIS {latest} está disponible.
-RustGIS {version} installs when RustGIS closes.	RustGIS {version} se instala cuando se cierre RustGIS.
-RustGIS {version} is the latest version.	RustGIS {version} es la versión más reciente.
-RustGIS {version} wasn't installed: try again from Help › Check for Updates, or install it from the release page.	RustGIS {version} no se instaló: inténtelo de nuevo desde Ayuda › Buscar actualizaciones o instálelo desde la página de la versión.
+KHGIS	KHGIS
+KHGIS bookmarks	Marcadores de KHGIS
+KHGIS could not confirm that any previously saved key was deleted from the system keychain.	KHGIS no pudo confirmar que se eliminara del llavero del sistema alguna clave guardada anteriormente.
+KHGIS couldn't reach the server.	KHGIS no pudo conectar con el servidor.
+KHGIS deep learning package	Paquete de aprendizaje profundo de KHGIS
+KHGIS didn't close properly last time, so it started with the World Atlas instead of your start-up project. Open the project from the Project menu when you're ready.	KHGIS no se cerró correctamente la última vez, así que se abrió con World Atlas en lugar de su proyecto de inicio. Abra el proyecto desde el menú Proyecto cuando lo desee.
+KHGIS didn't close properly last time.	KHGIS no se cerró correctamente la última vez.
+KHGIS doesn't have this tool. Install the tools it comes from, or delete the node.	KHGIS no tiene esta herramienta. Instale las herramientas de las que procede o elimine el nodo.
+KHGIS is a free and open-source GIS written in pure Rust. It runs on the desktop and in the browser, and every action is a command you can also run from the command line.	KHGIS es un SIG libre y de código abierto escrito en Rust puro. Funciona en el escritorio y en el navegador, y cada acción es un comando que también puede ejecutar desde la línea de comandos.
+KHGIS layer file	Archivo de capa de KHGIS
+KHGIS layers, maps and projects	Capas, mapas y proyectos de KHGIS
+KHGIS layout	Diseño de KHGIS
+KHGIS maps and projects	Mapas y proyectos de KHGIS
+KHGIS model	Modelo de KHGIS
+KHGIS or Jupyter notebook	Cuaderno de KHGIS o de Jupyter
+KHGIS plugin	Complemento de KHGIS
+KHGIS presentation	Presentación de KHGIS
+KHGIS project	Proyecto de KHGIS
+KHGIS project template	Plantilla de proyecto de KHGIS
+KHGIS ran into an internal error last time. The details are in {path}; please attach them to a bug report.	KHGIS encontró un error interno la última vez. Los detalles están en {path}; adjúntelos a un informe de error.
+KHGIS report or report template	Informe o plantilla de informe de KHGIS
+KHGIS styles	Estilos de KHGIS
+KHGIS task	Tarea de KHGIS
+KHGIS was quit last time without saving your changes.	La última vez se salió de KHGIS sin guardar sus cambios.
+KHGIS was updated to {version}.	KHGIS se actualizó a {version}.
+KHGIS {latest} is available.	KHGIS {latest} está disponible.
+KHGIS {version} installs when KHGIS closes.	KHGIS {version} se instala cuando se cierre KHGIS.
+KHGIS {version} is the latest version.	KHGIS {version} es la versión más reciente.
+KHGIS {version} wasn't installed: try again from Help › Check for Updates, or install it from the release page.	KHGIS {version} no se instaló: inténtelo de nuevo desde Ayuda › Buscar actualizaciones o instálelo desde la página de la versión.
 RUSTGIS_ASSISTANT_MODEL	RUSTGIS_ASSISTANT_MODEL
 RUSTGIS_ASSISTANT_PROVIDER	RUSTGIS_ASSISTANT_PROVIDER
 RUSTGIS_GPU	RUSTGIS_GPU
@@ -3041,7 +3041,7 @@ S3 Buckets	Buckets de S3
 S3 Connections	Conexiones S3
 S3…	S3…
 Sample data (Natural Earth)	Datos de ejemplo (Natural Earth)
-Sample data © Natural Earth (public domain). RustGIS is licensed under Apache-2.0.	Datos de ejemplo © Natural Earth (dominio público). RustGIS se distribuye bajo la licencia Apache-2.0.
+Sample data © Natural Earth (public domain). KHGIS is licensed under Apache-2.0.	Datos de ejemplo © Natural Earth (dominio público). KHGIS se distribuye bajo la licencia Apache-2.0.
 Sample data: Natural Earth (public domain). Licensed under Apache-2.0.	Datos de ejemplo: Natural Earth (dominio público). Con licencia Apache-2.0.
 Sans-serif	Sans-serif
 Satellite Embedding Datasets	Conjuntos de datos de incrustaciones satelitales
@@ -3191,7 +3191,7 @@ Sections	Secciones
 See and set the camera's position and scale.	Ver y establecer la posición y la escala de la cámara.
 See the map as people with colour vision deficiencies do.	Ver el mapa como lo ven las personas con deficiencias en la visión del color.
 See the tools you've run.	Ver las herramientas que ha ejecutado.
-See whether a newer RustGIS has been released.	Comprobar si se ha publicado una versión más reciente de RustGIS.
+See whether a newer KHGIS has been released.	Comprobar si se ha publicado una versión más reciente de KHGIS.
 SELECT	SELECT
 Select	Seleccionar
 Select (click)	Seleccionar (clic)
@@ -3397,8 +3397,8 @@ Sign-in timed out. Start again and allow the browser to reach this computer's lo
 signed in	sesión iniciada
 Signed in to {portal}	Sesión iniciada en {portal}
 Signed in to {portal} as {user}	Sesión iniciada en {portal} como {user}
-Signed out on this computer, but OpenAI didn't confirm it. You can disconnect RustGIS in ChatGPT's settings.	Sesión cerrada en este equipo, pero OpenAI no lo confirmó. Puedes desconectar RustGIS en la configuración de ChatGPT.
-Signed out on this computer, but the system keychain couldn't be read, so OpenAI wasn't asked to end the session. You can disconnect RustGIS in ChatGPT's settings.	Sesión cerrada en este equipo, pero no se pudo leer el llavero del sistema, así que no se pidió a OpenAI que terminara la sesión. Puede desconectar RustGIS en la configuración de ChatGPT.
+Signed out on this computer, but OpenAI didn't confirm it. You can disconnect KHGIS in ChatGPT's settings.	Sesión cerrada en este equipo, pero OpenAI no lo confirmó. Puedes desconectar KHGIS en la configuración de ChatGPT.
+Signed out on this computer, but the system keychain couldn't be read, so OpenAI wasn't asked to end the session. You can disconnect KHGIS in ChatGPT's settings.	Sesión cerrada en este equipo, pero no se pudo leer el llavero del sistema, así que no se pidió a OpenAI que terminara la sesión. Puede desconectar KHGIS en la configuración de ChatGPT.
 Significance level	Nivel de significancia
 Signing in with ChatGPT works in the desktop app.	El inicio de sesión con ChatGPT funciona en la aplicación de escritorio.
 Signing the asset (Planetary Computer)…	Firmando el recurso (Planetary Computer)…
@@ -3658,7 +3658,7 @@ The assistant follows a skill's instructions when it uses it. Whatever they say,
 The assistant is busy; stop it or wait for it to finish.	El asistente está ocupado; deténgalo o espere a que termine.
 The assistant wants to run this, and {why}:	El asistente quiere ejecutar lo siguiente, y {why}:
 The Basemaps plugin's tab of public basemaps.	La pestaña de mapas base públicos del complemento Mapas base.
-The browser didn't give RustGIS the clipboard ({why}): paste with {keys}.	El navegador no dio a RustGIS el portapapeles ({why}): pegue con {keys}.
+The browser didn't give KHGIS the clipboard ({why}): paste with {keys}.	El navegador no dio a KHGIS el portapapeles ({why}): pegue con {keys}.
 the browser kept neither a copy of it nor where to download it	el navegador no guardó ni una copia ni la dirección de descarga
 the capture failed unexpectedly	la captura falló inesperadamente
 The class these label groups and the Labeling pane edit.	La clase que editan estos grupos de etiquetas y el panel Etiquetado.
@@ -3668,7 +3668,7 @@ the connection has no id	la conexión no tiene id
 The coordinate format must be decimal, dms, utm or mgrs	El formato de coordenadas debe ser decimal, dms, utm o mgrs
 The country list couldn't be read ({e}): type a country's code	No se pudo leer la lista de países ({e}): escriba el código de un país
 The current elevation stays in effect while you edit inputs. Click Apply elevation to apply the value and units.	La elevación actual sigue vigente mientras edita los valores. Haga clic en Aplicar elevación para aplicar el valor y las unidades.
-The dataset has nothing RustGIS can add	El conjunto de datos no tiene nada que RustGIS pueda añadir
+The dataset has nothing KHGIS can add	El conjunto de datos no tiene nada que KHGIS pueda añadir
 The desktop app adds data cubes	La aplicación de escritorio añade cubos de datos
 The distance between two marks along the line	La distancia entre dos marcas a lo largo de la línea
 The environment (AWS_ACCESS_KEY_ID…)	El entorno (AWS_ACCESS_KEY_ID…)
@@ -3681,7 +3681,7 @@ The first {n} rows	Las primeras {n} filas
 The flowtrace didn't answer: the whole flowline nearest the point is shown.	El flowtrace no respondió: se muestra toda la línea de flujo más cercana al punto.
 the grid digits must be an even count of 0 to 10, half for the easting and half for the northing	los dígitos de la cuadrícula deben ser una cantidad par de 0 a 10, la mitad para la coordenada este y la mitad para la coordenada norte
 The installed GeoLibre runner lists no tools.	El ejecutor de GeoLibre instalado no lista ninguna herramienta.
-The installer is downloaded and checked. RustGIS closes, installs the update and opens again.	El instalador se descarga y se comprueba. RustGIS se cierra, instala la actualización y se vuelve a abrir.
+The installer is downloaded and checked. KHGIS closes, installs the update and opens again.	El instalador se descarga y se comprueba. KHGIS se cierra, instala la actualización y se vuelve a abrir.
 The interface colours, spacing and text sizes: a built-in theme or a file from the themes folder.	Los colores, espaciados y tamaños de texto de la interfaz: un tema integrado o un archivo de la carpeta de temas.
 The job covers the map view	El trabajo cubre la vista del mapa
 The key is kept for this session only.	La clave se conserva solo durante esta sesión.
@@ -3700,7 +3700,7 @@ The layer's fills	Los rellenos de la capa
 The layer's strokes	Los trazos de la capa
 the layout export failed unexpectedly	la exportación del diseño falló inesperadamente
 The link doesn't say its STAC API: Find Items searches {api}	El enlace no indica su STAC API: Buscar ítems busca en {api}
-The list of plugins to browse. Leave it empty for the RustGIS plugin registry.	La lista de complementos que explorar. Déjela vacía para usar el registro de complementos de RustGIS.
+The list of plugins to browse. Leave it empty for the KHGIS plugin registry.	La lista de complementos que explorar. Déjela vacía para usar el registro de complementos de KHGIS.
 The log cut it short or took its secrets out: it would run only in part	El registro lo acortó o le quitó los secretos: solo se ejecutaría en parte
 The longest a callout's line may be.	La longitud máxima de la línea de una llamada.
 The map at the left; the title, locator, legend, sources and reference in a panel at the right.	El mapa a la izquierda; el título, el localizador, la leyenda, las fuentes y la referencia en un panel a la derecha.
@@ -3709,7 +3709,7 @@ the map has no layers	el mapa no tiene capas
 the map has no PostGIS layer loaded for editing (Home › Add Data › Database…, Load for editing)	el mapa no tiene ninguna capa PostGIS cargada para editar (Inicio › Añadir datos › Base de datos…, Cargar para editar)
 The map has no tile archive read from a file.	El mapa no tiene ningún archivo de teselas leído de un archivo.
 The map is drawn in this coordinate system; layers are projected on the fly.	El mapa se dibuja en este sistema de coordenadas; las capas se proyectan al vuelo.
-the map isn't on screen in RustGIS (a layout or the catalog is shown), so it was drawn offscreen	el mapa no está en pantalla en RustGIS (se muestra un diseño o el catálogo), así que se dibujó fuera de pantalla
+the map isn't on screen in KHGIS (a layout or the catalog is shown), so it was drawn offscreen	el mapa no está en pantalla en KHGIS (se muestra un diseño o el catálogo), así que se dibujó fuera de pantalla
 the map it was asked for isn't open	el mapa solicitado no está abierto
 The map view as it is now	La vista del mapa tal como está ahora
 The map's extent isn't known yet	La extensión del mapa aún no se conoce
@@ -3794,7 +3794,7 @@ The sign-in is still kept in the app's settings folder, readable by your user ac
 The significance level is a number, such as 0.05	El nivel de significancia es un número, por ejemplo 0.05
 The size of the menu, the panes and the text drawn in them.	El tamaño del menú, los paneles y el texto que se dibuja en ellos.
 The start-up project {path} didn't open: {error}	El proyecto de inicio {path} no se abrió: {error}
-The start-up project {path} isn't a RustGIS project file.	El proyecto de inicio {path} no es un archivo de proyecto de RustGIS.
+The start-up project {path} isn't a KHGIS project file.	El proyecto de inicio {path} no es un archivo de proyecto de KHGIS.
 The step's layer {name} isn't in the map.	La capa {name} del paso no está en el mapa.
 The store has no variables with two or more dimensions.	El almacén no tiene variables con dos o más dimensiones.
 the store is gone	el almacén ya no existe
@@ -3803,7 +3803,7 @@ The summary failed unexpectedly	El resumen falló de forma inesperada
 The summary finished after another project was opened, so it wasn't added	El resumen terminó después de abrir otro proyecto, así que no se añadió
 The system keychain could not complete the request.	El llavero del sistema no pudo completar la solicitud.
 The system keychain is locked or access was refused.	El llavero del sistema está bloqueado o se denegó el acceso.
-The system keychain is unavailable, so this sign-in won't be remembered: it lasts until RustGIS closes.	El llavero del sistema no está disponible, así que este inicio de sesión no se recordará: dura hasta que RustGIS se cierre.
+The system keychain is unavailable, so this sign-in won't be remembered: it lasts until KHGIS closes.	El llavero del sistema no está disponible, así que este inicio de sesión no se recordará: dura hasta que KHGIS se cierre.
 The system keychain is unavailable.	El llavero del sistema no está disponible.
 The task's steps changed, so the step being edited was closed: edit it again.	Los pasos de la tarea cambiaron, así que se cerró el paso que se estaba editando: edítelo de nuevo.
 the time slider is off	el control deslizante de tiempo está desactivado
@@ -3857,7 +3857,7 @@ This map's thumbnail, from an image.	La miniatura de este mapa, a partir de una 
 This map's thumbnail, from the view.	La miniatura de este mapa, a partir de la vista.
 This platform does not report the system theme	Esta plataforma no informa del tema del sistema
 This plugin can:	Este complemento puede:
-This plugin runs as a program on your computer, outside RustGIS's sandbox. It can do anything you can: read and change your files, use the network and run other programs. Install it only if you trust its author.	Este complemento se ejecuta como un programa en su equipo, fuera del entorno aislado de RustGIS. Puede hacer todo lo que usted puede: leer y modificar sus archivos, usar la red y ejecutar otros programas. Instálelo solo si confía en su autor.
+This plugin runs as a program on your computer, outside KHGIS's sandbox. It can do anything you can: read and change your files, use the network and run other programs. Install it only if you trust its author.	Este complemento se ejecuta como un programa en su equipo, fuera del entorno aislado de KHGIS. Puede hacer todo lo que usted puede: leer y modificar sus archivos, usar la red y ejecutar otros programas. Instálelo solo si confía en su autor.
 This project	Este proyecto
 This project uses a connection for {origin} that is not saved on this computer.	Este proyecto usa una conexión para {origin} que no está guardada en este equipo.
 This read was already started	Esta lectura ya se había iniciado
@@ -4003,7 +4003,7 @@ unknown (an older project)	desconocido (un proyecto anterior)
 Unknown shortcut binding field.	Campo de asignación de atajo desconocido.
 Unknown shortcut command.	Comando de atajo desconocido.
 UNKNOWN TOOL	HERRAMIENTA DESCONOCIDA
-Unload the GeoLibre tools and stop loading them when RustGIS starts.	Descargar las herramientas de GeoLibre y dejar de cargarlas al iniciar RustGIS.
+Unload the GeoLibre tools and stop loading them when KHGIS starts.	Descargar las herramientas de GeoLibre y dejar de cargarlas al iniciar KHGIS.
 Unsaved changes	Cambios sin guardar
 Unsplit Line	Deshacer división de línea
 Unsupervised classes (k-means)	Clases no supervisadas (k-means)
@@ -4144,14 +4144,14 @@ Web-service logins last for this session only.	Los inicios de sesión de servici
 Website	Sitio web
 Weekly usage	Uso semanal
 Weights	Pesos
-Welcome to RustGIS	Bienvenido a RustGIS
+Welcome to KHGIS	Bienvenido a KHGIS
 West	Oeste
 WFS	WFS
 WGS 84 / Globe	WGS 84 / Globo
 WGS 84 / Web Mercator	WGS 84 / Web Mercator
 What each slice or bar says beside it: its value, its share in percent, or both	Lo que indica cada sector o barra a su lado: su valor, su porcentaje o ambos
-What RustGIS opens with: the World Atlas sample or a blank map.	Con qué se abre RustGIS: el ejemplo World Atlas o un mapa en blanco.
-What RustGIS opens with: the World Atlas sample, a blank map, a project you choose, or the last project opened or saved.	Con qué se abre RustGIS: el ejemplo World Atlas, un mapa en blanco, un proyecto que usted elija o el último proyecto abierto o guardado.
+What KHGIS opens with: the World Atlas sample or a blank map.	Con qué se abre KHGIS: el ejemplo World Atlas o un mapa en blanco.
+What KHGIS opens with: the World Atlas sample, a blank map, a project you choose, or the last project opened or saved.	Con qué se abre KHGIS: el ejemplo World Atlas, un mapa en blanco, un proyecto que usted elija o el último proyecto abierto o guardado.
 What to do, where to find it and why	Qué hacer, dónde encontrarlo y por qué
 What's near a point	Qué hay cerca de un punto
 What's new	Novedades

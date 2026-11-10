@@ -172,7 +172,7 @@ impl Pki {
             "rsa:2048",
             "-nodes",
             "-subj",
-            "/CN=RustGIS ephemeral private CA",
+            "/CN=KHGIS ephemeral private CA",
             "-keyout",
             "ca.key",
             "-out",

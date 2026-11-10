@@ -214,7 +214,7 @@ fn tab_strip(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
             app.ui.backstage = true;
         }
         ui.add_space(6.0);
-        // RustGIS's tabs, then plugins' own tabs; the user can hide any of them.
+        // KHGIS's tabs, then plugins' own tabs; the user can hide any of them.
         let mut tabs: Vec<(String, String)> = TABS.iter().map(|t| (t.to_string(), tl!(*t).to_string())).collect();
         tabs.extend(plugin_tabs(app));
         tabs.retain(|(id, _)| !app.ui.hidden_tabs.iter().any(|h| h == id));
@@ -1332,7 +1332,7 @@ fn notebook_group(app: &mut RustGisApp, ui: &mut Ui) {
                 app,
                 "open",
                 "Add and Open",
-                "Open a RustGIS or Jupyter notebook.",
+                "Open a KHGIS or Jupyter notebook.",
                 "ui.openItem",
                 json!({"kind": "notebook"}),
                 false,
@@ -3252,7 +3252,7 @@ fn plugins_tab(app: &mut RustGisApp, ui: &mut Ui) {
                 app,
                 "search",
                 "Browse Plugins",
-                "Find plugins in the RustGIS plugin registry.",
+                "Find plugins in the KHGIS plugin registry.",
                 "ui.plugins",
                 json!({"open": true, "tab": "browse"}),
                 false,
@@ -3471,7 +3471,7 @@ fn settings_tab(app: &mut RustGisApp, ui: &mut Ui) {
     });
     group(ui, "Customize", |ui| {
         let hidden = app.ui.hidden_tabs.clone();
-        // RustGIS's tabs and plugins' tabs.
+        // KHGIS's tabs and plugins' tabs.
         let mut all: Vec<(String, String)> =
             TABS.iter().filter(|t| !FIXED_TABS.contains(*t)).map(|t| (t.to_string(), tl!(*t).to_string())).collect();
         all.extend(plugin_tabs(app));
@@ -3557,7 +3557,7 @@ fn autosave_interval(minutes: u32) -> String {
 fn autosave_menu(app: &mut RustGisApp, ui: &mut Ui) {
     let minutes = app.autosave.minutes;
     let label = format!("{}\n{}", tl!("Autosave"), autosave_interval(minutes));
-    let tip = "How often RustGIS keeps a copy of unsaved work, to offer it back after a crash.";
+    let tip = "How often KHGIS keeps a copy of unsaved work, to offer it back after a crash.";
     big_menu(ui, app, "save", &label, tip, move |ui, app| {
         for m in crate::autosave::CHOICES {
             if ui.add(egui::Button::selectable(minutes == m, autosave_interval(m))).clicked() {
@@ -3673,9 +3673,9 @@ fn start_project_menu(app: &mut RustGisApp, ui: &mut Ui) {
     let label = format!("{}\n{current}", tl!("Start With"));
     let files = app.opens_files();
     let tip = if files {
-        "What RustGIS opens with: the World Atlas sample, a blank map, a project you choose, or the last project opened or saved."
+        "What KHGIS opens with: the World Atlas sample, a blank map, a project you choose, or the last project opened or saved."
     } else {
-        "What RustGIS opens with: the World Atlas sample or a blank map."
+        "What KHGIS opens with: the World Atlas sample or a blank map."
     };
     big_menu(ui, app, "map", &label, tip, move |ui, app| {
         for (w, name) in [(StartWith::Sample, tl!("Cambodia")), (StartWith::Blank, tl!("Blank Map"))] {
@@ -3705,7 +3705,7 @@ fn start_project_menu(app: &mut RustGisApp, ui: &mut Ui) {
         let item = if chosen.is_empty() { item } else { item.on_hover_text(chosen) };
         if item.clicked() {
             ui.close();
-            if let Some(path) = crate::dialogs::pick_open(&["rgis", "rgisx"], tl!("RustGIS project"))
+            if let Some(path) = crate::dialogs::pick_open(&["rgis", "rgisx"], tl!("KHGIS project"))
                 && let Err(e) = app.run("ui.startup", json!({"project": {"path": path}}))
             {
                 app.session.notify(e, true);
@@ -3798,17 +3798,17 @@ fn help_tab(app: &mut RustGisApp, ui: &mut Ui) {
         );
     });
     group(ui, "Learn", |ui| {
-        big(ui, app, "help", "Learning\nResources", "Open the RustGIS user guide.", "ui.learn", Value::Null, false, false);
+        big(ui, app, "help", "Learning\nResources", "Open the KHGIS user guide.", "ui.learn", Value::Null, false, false);
     });
     group(ui, "Help", |ui| {
-        big(ui, app, "help", "About", "About RustGIS.", "ui.about", Value::Null, false, false);
+        big(ui, app, "help", "About", "About KHGIS.", "ui.about", Value::Null, false, false);
         if !cfg!(target_arch = "wasm32") {
             big(
                 ui,
                 app,
                 "update",
                 "Check for\nUpdates",
-                "See whether a newer RustGIS has been released.",
+                "See whether a newer KHGIS has been released.",
                 "ui.checkUpdate",
                 Value::Null,
                 false,

@@ -1,4 +1,4 @@
-//! Vector tiles' source layer names (`roads`, `water`) as RustGIS keeps them: an archive's
+//! Vector tiles' source layer names (`roads`, `water`) as KHGIS keeps them: an archive's
 //! `vector_layers`, and the ones a tile layer hides. One rule for both, so a name the Layers pane
 //! lists is one the archive's style can draw and the layer can hide.
 

@@ -1,4 +1,4 @@
-//! RustGIS desktop app.
+//! KHGIS desktop app.
 //!
 //! `rustgis [project.rgis | data.geojson|csv|shp …] [--sample] [--backend dx12|vulkan|gl|metal]`
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
@@ -97,7 +97,7 @@ mod crash {
         let used = std::fs::metadata(&path).map_or(0, |m| m.len());
         let thread = std::thread::current();
         let entry = format!(
-            "--- RustGIS {} on {} {}, {} UTC, thread {}\n{info}\n{}\n\n",
+            "--- KHGIS {} on {} {}, {} UTC, thread {}\n{info}\n{}\n\n",
             env!("CARGO_PKG_VERSION"),
             std::env::consts::OS,
             std::env::consts::ARCH,
@@ -185,7 +185,7 @@ mod running {
     /// it, or the folder can't be written), and whether the previous run didn't close cleanly.
     pub fn start(dir: Option<&Path>) -> (Result<Marker, NoMarker>, bool) {
         let none = |why: String| Err(NoMarker { why, other_copy: false });
-        let Some(dir) = dir else { return (none("this computer has no settings folder for RustGIS".into()), false) };
+        let Some(dir) = dir else { return (none("this computer has no settings folder for KHGIS".into()), false) };
         let file = std::fs::create_dir_all(dir)
             .and_then(|_| OpenOptions::new().read(true).write(true).create(true).truncate(false).open(dir.join("running")));
         let mut file = match file {
@@ -198,8 +198,8 @@ mod running {
         let locked = match file.try_lock() {
             Ok(()) => true,
             Err(std::fs::TryLockError::WouldBlock) => {
-                log::info!("the run marker is held: another copy of RustGIS is running");
-                let why = "another copy of RustGIS is running, and only the first keeps a recovery copy".into();
+                log::info!("the run marker is held: another copy of KHGIS is running");
+                let why = "another copy of KHGIS is running, and only the first keeps a recovery copy".into();
                 return (Err(NoMarker { why, other_copy: true }), false);
             }
             // The folder can't lock files (some network or FUSE folders): keep the marker unlocked,
@@ -344,7 +344,7 @@ impl eframe::App for App {
         self.0.end_autosave();
         // Session plugins' programs end with the app, with what they started.
         rustgis_engine::plugins::session::stop_all();
-        // The installer starts before the marker goes, so a RustGIS started meanwhile finds this
+        // The installer starts before the marker goes, so a KHGIS started meanwhile finds this
         // one still running.
         #[cfg(windows)]
         run_installer(&self.0);
@@ -404,7 +404,7 @@ impl App {
 /// This run's recovery folder, `recovery` in the app-data folder `data` (see
 /// `docs/installation.md`), or why there is none: the app then starts without autosave and says so.
 fn recovery_store(data: Option<std::path::PathBuf>) -> Result<Box<dyn rustgis_ui_egui::RecoveryStore>, String> {
-    let dir = data.ok_or("this computer has no folder for RustGIS's app data")?.join("recovery");
+    let dir = data.ok_or("this computer has no folder for KHGIS's app data")?.join("recovery");
     let store = rustgis_ui_egui::FolderStore::open(&dir)?;
     Ok(Box::new(store))
 }
@@ -449,10 +449,10 @@ fn backends(flag: Option<&str>, env: Option<&str>, windows: bool) -> wgpu::Backe
 }
 
 /// Help › Check for Updates › Install and Restart: the downloaded, checked installer runs as
-/// RustGIS closes, silently, and opens RustGIS again when done (#1290). It waits for this
+/// KHGIS closes, silently, and opens KHGIS again when done (#1290). It waits for this
 /// process to end before replacing its files (`packaging/windows/rustgis.nsi`).
 ///
-/// Nothing can be shown here, as RustGIS closes: the next start says whether the update arrived
+/// Nothing can be shown here, as KHGIS closes: the next start says whether the update arrived
 /// (`UpdateState::last_install_notice`), a failure to run the installer included.
 #[cfg(windows)]
 fn run_installer(app: &RustGisApp) {
@@ -460,8 +460,8 @@ fn run_installer(app: &RustGisApp) {
     let Some(i) = app.update.installer_at_exit() else { return };
     // NSIS reads `/D=` last and unquoted, spaces and all: raw, not quoted as an argument.
     match std::process::Command::new(&i.installer).args(&i.args).raw_arg(&i.folder).spawn() {
-        Ok(_) => log::info!("running {} to update RustGIS", i.installer.display()),
-        Err(e) => log::warn!("could not run the installer {} ({e}): RustGIS stays as it is", i.installer.display()),
+        Ok(_) => log::info!("running {} to update KHGIS", i.installer.display()),
+        Err(e) => log::warn!("could not run the installer {} ({e}): KHGIS stays as it is", i.installer.display()),
     }
 }
 
@@ -508,7 +508,7 @@ fn main() -> eframe::Result {
             }
             Err(e) => Some(e),
         },
-        Ok(_) => Some("the settings folder can't lock files, so a second copy of RustGIS couldn't be told apart".into()),
+        Ok(_) => Some("the settings folder can't lock files, so a second copy of KHGIS couldn't be told apart".into()),
         Err(no) => Some(no.why.clone()),
     };
     // The keys the macOS menu bar keeps, before the stored shortcuts load: the keymap leaves them
@@ -531,7 +531,7 @@ fn main() -> eframe::Result {
         // Notices are shown as written: translate this one now that the language is known.
         rustgis_ui_egui::i18n::set_current(app.chosen_lang());
         let text = rustgis_ui_egui::i18n::fmt(
-            "RustGIS ran into an internal error last time. The details are in {path}; please attach them to a bug report.",
+            "KHGIS ran into an internal error last time. The details are in {path}; please attach them to a bug report.",
             &[("path", &log.display().to_string())],
         );
         app.session.notify(text, true);
@@ -565,7 +565,7 @@ fn main() -> eframe::Result {
     app.session.mark_saved();
     let mut viewport = egui::ViewportBuilder::default()
         .with_title("KHGIS")
-        .with_app_id("org.rustgis.RustGIS")
+        .with_app_id("org.rustgis.KHGIS")
         .with_inner_size([1480.0, 920.0])
         .with_min_inner_size([900.0, 560.0])
         .with_drag_and_drop(true);
@@ -604,7 +604,7 @@ fn main() -> eframe::Result {
     let held = marker.clone();
     let menus = Menus::default();
     let result = eframe::run_native(
-        "RustGIS",
+        "KHGIS",
         options,
         Box::new(move |_cc| {
             // The menu's choices wake the app: egui draws only on events.

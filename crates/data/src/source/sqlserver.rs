@@ -202,7 +202,7 @@ async fn open_client(config: &Config, password: Option<&str>) -> std::result::Re
     if let Some(d) = &config.database {
         cfg.database(d);
     }
-    cfg.application_name("RustGIS");
+    cfg.application_name("KHGIS");
     cfg.readonly(true);
     cfg.encryption(match config.encrypt {
         Encrypt::Required => tiberius::EncryptionLevel::Required,
@@ -809,10 +809,10 @@ fn note_zm(info: &mut SourceInfo, probe: Result<Option<Option<u64>>>) {
         Ok(Some(Some(0))) => {}
         Ok(Some(n)) => info.drop_zm(n),
         Ok(None) => info.notes.push(format!(
-            "the table couldn't be checked for Z or M values (heights or measures) within {PROBE_TIMEOUT} s: any it has are dropped, as RustGIS keeps x and y only"
+            "the table couldn't be checked for Z or M values (heights or measures) within {PROBE_TIMEOUT} s: any it has are dropped, as KHGIS keeps x and y only"
         )),
         Err(e) => info.notes.push(format!(
-            "the table couldn't be checked for Z or M values (heights or measures): {e}; any it has are dropped, as RustGIS keeps x and y only"
+            "the table couldn't be checked for Z or M values (heights or measures): {e}; any it has are dropped, as KHGIS keeps x and y only"
         )),
     }
 }

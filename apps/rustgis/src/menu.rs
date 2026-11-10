@@ -2,7 +2,7 @@
 //! a command the app already has, so the menus add no behaviour of their own: File, View and Help
 //! items run their commands as the ribbon does (asking to save first when one would replace the
 //! project), the Edit items work as their keys do (on a focused text field, ModelBuilder's canvas,
-//! or the project), and Quit RustGIS asks to save unsaved changes. The shortcuts shown are the
+//! or the project), and Quit KHGIS asks to save unsaved changes. The shortcuts shown are the
 //! keymap's, and items grey out as their commands do; Undo and Redo don't, since a text field
 //! undoes its own text when the project has nothing to undo.
 //!
@@ -75,9 +75,9 @@ use Entry::{Item, Separator};
 /// into the catalogs by hand (docs/i18n.md).
 const MENUS: &[(&str, &[Entry])] = &[
     (
-        "RustGIS",
+        "KHGIS",
         &[
-            Item("About RustGIS", Command("ui.about", ""), None),
+            Item("About KHGIS", Command("ui.about", ""), None),
             Item("Check for Updates…", Command("ui.checkUpdate", ""), None),
             Separator,
             Item("Settings…", Command("ui.tab", r#"{"tab":"Settings"}"#), Some((Key::Comma, false))),
@@ -88,7 +88,7 @@ const MENUS: &[(&str, &[Entry])] = &[
             Entry::Std(Std::HideOthers),
             Entry::Std(Std::ShowAll),
             Separator,
-            Item("Quit RustGIS", Command("ui.quit", ""), Some((Key::Q, false))),
+            Item("Quit KHGIS", Command("ui.quit", ""), Some((Key::Q, false))),
         ],
     ),
     (
@@ -141,10 +141,10 @@ const MENUS: &[(&str, &[Entry])] = &[
     (
         "Help",
         &[
-            Item("RustGIS Help", Command("ui.learn", ""), None),
+            Item("KHGIS Help", Command("ui.learn", ""), None),
             Item("Keyboard Shortcuts", Command("ui.shortcuts", ""), None),
             Separator,
-            Item("Report an Issue", Command("ui.learn", r#"{"url":"https://github.com/opengeos/RustGIS/issues/new/choose"}"#), None),
+            Item("Report an Issue", Command("ui.learn", r#"{"url":"https://github.com/khgeo/KHGIS/issues/new/choose"}"#), None),
         ],
     ),
 ];
@@ -329,7 +329,7 @@ fn std_item(s: Std, lang: Lang) -> PredefinedMenuItem {
     let t = |s: &str| Some(label(lang, s).to_string());
     match s {
         Std::Services => PredefinedMenuItem::services(t("Services").as_deref()),
-        Std::Hide => PredefinedMenuItem::hide(t("Hide RustGIS").as_deref()),
+        Std::Hide => PredefinedMenuItem::hide(t("Hide KHGIS").as_deref()),
         Std::HideOthers => PredefinedMenuItem::hide_others(t("Hide Others").as_deref()),
         Std::ShowAll => PredefinedMenuItem::show_all(t("Show All").as_deref()),
         Std::Minimize => PredefinedMenuItem::minimize(t("Minimize").as_deref()),

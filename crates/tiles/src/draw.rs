@@ -123,7 +123,7 @@ fn relief_note(layers: &[StyleLayer], zoom: f32) -> Option<String> {
         .collect();
     (!ids.is_empty()).then(|| {
         format!(
-            "{} color-relief layer(s) skipped where their color-relief-color isn't a ramp on [\"elevation\"] RustGIS can draw: {}",
+            "{} color-relief layer(s) skipped where their color-relief-color isn't a ramp on [\"elevation\"] KHGIS can draw: {}",
             ids.len(),
             ids.join(", ")
         )

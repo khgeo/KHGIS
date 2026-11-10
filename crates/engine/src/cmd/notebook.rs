@@ -1,6 +1,6 @@
 //! Analyze › Notebook (New Notebook, Add and Open Notebook): notebooks of text and command cells.
 //! A command cell is a script (one command per line, `id {json}`) whose results show beneath it.
-//! Notebooks save as RustGIS notebooks or Jupyter notebooks, and open from either. A Jupyter
+//! Notebooks save as KHGIS notebooks or Jupyter notebooks, and open from either. A Jupyter
 //! notebook in another language (Python) keeps its kernel, metadata and outputs through open and
 //! save; its code cells are shown but not run.
 
@@ -79,8 +79,8 @@ impl Cell {
 }
 
 impl Notebook {
-    /// The language of a Jupyter notebook whose code cells aren't RustGIS commands (`python`),
-    /// from its kernel, or `code` when it names none (RustGIS writes `rustgis`); `None` for
+    /// The language of a Jupyter notebook whose code cells aren't KHGIS commands (`python`),
+    /// from its kernel, or `code` when it names none (KHGIS writes `rustgis`); `None` for
     /// command notebooks.
     pub fn language(&self) -> Option<&str> {
         let Some(meta) = self.jupyter.as_deref()?.get("metadata") else { return Some("code") };
@@ -324,7 +324,7 @@ fn run_cells(s: &mut Session, p: &Value) -> CmdResult {
         // Another language's cells (a Python notebook) are kept, not run as commands.
         if let Some(lang) = s.project.notebooks.get(i).and_then(Notebook::language_label) {
             if one {
-                return Err(format!("this is a {lang} cell: RustGIS runs command cells only, so run it in Jupyter"));
+                return Err(format!("this is a {lang} cell: KHGIS runs command cells only, so run it in Jupyter"));
             }
             skipped += 1;
             continue;
@@ -466,17 +466,17 @@ fn jupyter_outputs(outputs: &[Value]) -> (String, bool) {
     (text, error)
 }
 
-/// A RustGIS or Jupyter notebook.
+/// A KHGIS or Jupyter notebook.
 fn parse(text: &str, fallback_name: &str) -> Result<Notebook, String> {
     let v: Value = serde_json::from_str(text).map_err(|e| format!("not a notebook: {e}"))?;
     // nbformat 3 keeps its cells in worksheets: opened as 4, they'd be lost on save.
     if let Some(major) = v.get("nbformat").and_then(Value::as_u64).filter(|n| *n < 4) {
-        return Err(format!("this is an nbformat {major} notebook; RustGIS opens nbformat 4 notebooks (Jupyter converts older ones)"));
+        return Err(format!("this is an nbformat {major} notebook; KHGIS opens nbformat 4 notebooks (Jupyter converts older ones)"));
     }
     if v.get("nbformat").is_some() {
         let meta = v.get("metadata").filter(|m| m.is_object());
         let name = meta.and_then(|m| m.get("title")).and_then(Value::as_str).unwrap_or(fallback_name).to_string();
-        // Kept even when empty: a Jupyter notebook that doesn't say it's RustGIS isn't commands.
+        // Kept even when empty: a Jupyter notebook that doesn't say it's KHGIS isn't commands.
         let mut j = serde_json::Map::new();
         j.insert("metadata".into(), meta.cloned().unwrap_or_else(|| json!({})));
         if let Some(minor) = v.get("nbformat_minor").filter(|n| n.is_u64()) {
@@ -487,12 +487,12 @@ fn parse(text: &str, fallback_name: &str) -> Result<Notebook, String> {
         let cells = v.get("cells").and_then(Value::as_array).map_or(&[][..], Vec::as_slice);
         // Dropping the extra cells would lose them on the next save.
         if cells.len() > MAX_CELLS {
-            return Err(format!("this notebook has {} cells; RustGIS opens notebooks of up to {MAX_CELLS}", cells.len()));
+            return Err(format!("this notebook has {} cells; KHGIS opens notebooks of up to {MAX_CELLS}", cells.len()));
         }
         // Cutting a cell short would lose its end on the next save.
         if let Some(n) = cells.iter().position(|c| jupyter_text(c.get("source").unwrap_or(&Value::Null)).chars().nth(MAX_SOURCE).is_some())
         {
-            return Err(format!("cell {} of this notebook is longer than {MAX_SOURCE} characters, the most RustGIS opens", n + 1));
+            return Err(format!("cell {} of this notebook is longer than {MAX_SOURCE} characters, the most KHGIS opens", n + 1));
         }
         for c in cells {
             // Skipping a cell that isn't an object would lose it on the next save.
@@ -514,11 +514,11 @@ fn parse(text: &str, fallback_name: &str) -> Result<Notebook, String> {
     }
     let cells = v.get("cells").and_then(Value::as_array).map_or(0, Vec::len);
     if cells > MAX_CELLS {
-        return Err(format!("this notebook has {cells} cells; RustGIS opens notebooks of up to {MAX_CELLS}"));
+        return Err(format!("this notebook has {cells} cells; KHGIS opens notebooks of up to {MAX_CELLS}"));
     }
-    let mut nb: Notebook = serde_json::from_value(v).map_err(|e| format!("not a RustGIS notebook: {e}"))?;
+    let mut nb: Notebook = serde_json::from_value(v).map_err(|e| format!("not a KHGIS notebook: {e}"))?;
     if let Some(n) = nb.cells.iter().position(|c| c.source.chars().nth(MAX_SOURCE).is_some()) {
-        return Err(format!("cell {} of this notebook is longer than {MAX_SOURCE} characters, the most RustGIS opens", n + 1));
+        return Err(format!("cell {} of this notebook is longer than {MAX_SOURCE} characters, the most KHGIS opens", n + 1));
     }
     if nb.name.trim().is_empty() {
         nb.name = fallback_name.to_string();
@@ -606,7 +606,7 @@ fn jupyter_file(nb: &Notebook) -> Value {
     json!({"nbformat": 4, "nbformat_minor": minor, "metadata": metadata, "cells": cells})
 }
 
-/// The notebook as a RustGIS notebook or (nbformat 4) Jupyter notebook.
+/// The notebook as a KHGIS notebook or (nbformat 4) Jupyter notebook.
 pub fn notebook_file(s: &mut Session, i: usize, jupyter: bool) -> Result<Vec<u8>, String> {
     let nb = s.project.notebooks.get_mut(i).ok_or("no notebook")?;
     let (bytes, report) = crate::durable::output(nb, None, |nb| {

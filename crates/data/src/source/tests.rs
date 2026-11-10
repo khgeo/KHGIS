@@ -2541,7 +2541,7 @@ fn declared_z_and_m_are_said_and_counted() {
     assert!(info.zm_dropped && info.notes.contains(&crate::zm_note(None)), "{:?}", info.notes);
 }
 
-/// A GeoParquet whose columns RustGIS has no field type for (a decimal too wide for a 64-bit
+/// A GeoParquet whose columns KHGIS has no field type for (a decimal too wide for a 64-bit
 /// integer, binary, a list, a struct, a leaf beside the bbox covering's box) are said and left
 /// out, and whose dates and times, read as whole numbers, are said with their unit; the box's
 /// zmin and zmax aren't, and a file of ordinary columns says nothing.
@@ -2604,7 +2604,7 @@ fn geoparquet_columns_not_kept_or_read_as_numbers_are_said() {
     w.write(&RecordBatch::try_new(schema, cols).unwrap()).unwrap();
     w.close().unwrap();
 
-    let left_out = "5 columns of types RustGIS has no field for were left out: \
+    let left_out = "5 columns of types KHGIS has no field for were left out: \
                     price (decimal), photo (binary), tags (list), extra (struct), geometry_bbox (struct)";
     let as_numbers = "3 columns of dates or times were read as whole numbers: seen (milliseconds since 1970-01-01), \
                       logged (microseconds since 1970-01-01), day (days since 1970-01-01)";
@@ -2630,7 +2630,7 @@ fn geoparquet_columns_not_kept_or_read_as_numbers_are_said() {
     assert!(materialize(src.as_ref()).unwrap().1.messages.is_empty());
 }
 
-/// A FlatGeobuf's binary column, which RustGIS has no field type for, is said and left out, the
+/// A FlatGeobuf's binary column, which KHGIS has no field type for, is said and left out, the
 /// columns after it keeping their values; a file without one says nothing.
 #[test]
 fn flatgeobuf_binary_columns_are_said_and_left_out() {
@@ -2651,7 +2651,7 @@ fn flatgeobuf_binary_columns_are_said_and_left_out() {
     .unwrap();
     w.write(std::fs::File::create(&path).unwrap()).unwrap();
 
-    let note = "1 column of a type RustGIS has no field for was left out: blob (binary)";
+    let note = "1 column of a type KHGIS has no field for was left out: blob (binary)";
     let src = open_path(&path, None).unwrap();
     assert_eq!(src.info().notes, vec![note.to_string()]);
     let names: Vec<&str> = src.info().fields.iter().map(|f| f.name.as_str()).collect();

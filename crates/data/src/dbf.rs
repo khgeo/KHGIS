@@ -145,7 +145,7 @@ pub(crate) fn encoding(cpg: Option<&[u8]>, ldid: u8, notes: &mut Vec<String>) ->
     DbfEncoding::Utf8
 }
 
-/// The name of a code page a language driver may name and RustGIS can't decode, for the note.
+/// The name of a code page a language driver may name and KHGIS can't decode, for the note.
 fn page_name(page: u16) -> Option<&'static str> {
     Some(match page {
         620 => "DOS Polish (Mazovia)",
@@ -225,7 +225,7 @@ mod tests {
         assert_eq!(short, [3, 0, 0]);
     }
 
-    /// Every language driver dbase's own table names and RustGIS read before keeps its code page:
+    /// Every language driver dbase's own table names and KHGIS read before keeps its code page:
     /// the table replaced dbase's, and must not lose or change one of its entries.
     #[test]
     fn every_language_driver_dbase_names_keeps_its_code_page() {
@@ -250,7 +250,7 @@ mod tests {
                 CodePageMark::CP1255 => 1255,
                 CodePageMark::CP1256 => 1256,
                 CodePageMark::Utf8 => 65001,
-                // Pages dbase names that RustGIS can't decode: the table names them too.
+                // Pages dbase names that KHGIS can't decode: the table names them too.
                 CodePageMark::CP620 => 620,
                 CodePageMark::CP737 => 737,
                 CodePageMark::CP857 => 857,

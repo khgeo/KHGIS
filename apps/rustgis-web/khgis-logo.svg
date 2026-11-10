@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="KHGIS">
+  <title>KHGIS</title>
+  <defs>
+    <path id="arcTop" d="M 128,128 m -104,0 a 104,104 0 0 1 208,0" fill="none"/>
+    <path id="arcBottom" d="M 26,128 a 102,102 0 0 0 204,0" fill="none"/>
+    <clipPath id="globeClip"><circle cx="128" cy="128" r="74"/></clipPath>
+  </defs>
+
+  <g fill="none" stroke="#0E3F44" stroke-width="2">
+    <circle cx="128" cy="128" r="122"/>
+    <circle cx="128" cy="128" r="92"/>
+  </g>
+
+  <!-- Cardinal ticks -->
+  <g stroke="#0E3F44" stroke-width="2.5" stroke-linecap="round">
+    <path d="M128 6v18M128 232v18M6 128h18M232 128h18"/>
+  </g>
+  <g stroke="#0E3F44" stroke-width="1.5" opacity=".55">
+    <path d="M42 42l11 11M214 42l-11 11M42 214l11-11M214 214l-11-11"/>
+  </g>
+
+  <!-- Globe -->
+  <circle cx="128" cy="128" r="74" fill="#0E3F44"/>
+  <g clip-path="url(#globeClip)" fill="none" stroke="#9FD8DF" stroke-width="1.6" opacity=".75">
+    <!-- parallels -->
+    <path d="M54 102h148M54 128h148M54 154h148M62 78h132M62 178h132"/>
+    <!-- meridians -->
+    <ellipse cx="128" cy="128" rx="25" ry="74"/>
+    <ellipse cx="128" cy="128" rx="51" ry="74"/>
+    <path d="M128 54v148"/>
+  </g>
+  <circle cx="128" cy="128" r="74" fill="none" stroke="#0E3F44" stroke-width="3"/>
+
+  <!-- Wordmark -->
+  <text x="128" y="128" text-anchor="middle" dominant-baseline="central"
+        font-family="Inter, Helvetica, Arial, sans-serif" font-size="40" font-weight="700"
+        fill="#FFFFFF" letter-spacing="1.5">KHGIS</text>
+
+  <!-- Ring text -->
+  <g font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="600"
+     fill="#0E3F44" letter-spacing="1.9">
+    <text><textPath href="#arcTop" startOffset="50%" text-anchor="middle">GEOGRAPHIC INFORMATION SYSTEM</textPath></text>
+    <text><textPath href="#arcBottom" startOffset="50%" text-anchor="middle">CAMBODIA · KHGIS</textPath></text>
+  </g>
+</svg>

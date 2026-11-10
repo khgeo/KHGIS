@@ -7,8 +7,8 @@
 //! (`cargo test --test reference -- --nocapture` shows them). Once it agrees within the case's own
 //! tolerance, the test fails until the mark is removed from `generate.py`.
 //!
-//! When a case fails, fix the tool with RustGIS's own code. Don't translate GEOS's source to make
-//! it pass: GEOS is LGPL-2.1, and RustGIS is Apache-2.0 with no third-party code.
+//! When a case fails, fix the tool with KHGIS's own code. Don't translate GEOS's source to make
+//! it pass: GEOS is LGPL-2.1, and KHGIS is Apache-2.0 with no third-party code.
 
 use std::collections::{BTreeMap, HashMap};
 use std::path::{Path, PathBuf};

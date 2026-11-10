@@ -1,5 +1,5 @@
 //! Satellite embeddings: a catalog of pre-computed embedding datasets (vectors a geospatial
-//! foundation model made for every pixel or image patch), and finding and reading those RustGIS
+//! foundation model made for every pixel or image patch), and finding and reading those KHGIS
 //! shows where the map is.
 //!
 //! - AlphaEarth Foundations (Google's Satellite Embedding): 64 signed-byte bands a 10 m pixel, in
@@ -26,7 +26,7 @@ use crate::cog::Look;
 
 pub mod tessera;
 
-/// What a dataset in the catalog is and what RustGIS does with it.
+/// What a dataset in the catalog is and what KHGIS does with it.
 #[derive(Clone, Copy, Debug)]
 pub struct EmbeddingDataset {
     pub id: &'static str,
@@ -47,7 +47,7 @@ pub struct EmbeddingDataset {
     pub data_url: &'static str,
     /// The paper or model documentation.
     pub paper_url: &'static str,
-    /// Whether RustGIS searches it and shows it on the map (otherwise it is listed with links).
+    /// Whether KHGIS searches it and shows it on the map (otherwise it is listed with links).
     pub search: bool,
 }
 

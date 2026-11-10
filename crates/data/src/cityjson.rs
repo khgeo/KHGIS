@@ -174,12 +174,12 @@ pub fn read(file_name: &str, bytes: &[u8], given: Option<Crs>) -> Result<Vec<(Da
 }
 
 /// As [`read`], for a member of an archive, where the system given is meant for what can't say its
-/// own: a model that names one RustGIS knows keeps it.
+/// own: a model that names one KHGIS knows keeps it.
 pub(crate) fn read_member(file_name: &str, bytes: &[u8], given: Option<Crs>) -> Result<Vec<(Dataset, ReadReport)>> {
     read_with(file_name, bytes, given, true)
 }
 
-/// Reads a CityJSON document; with `keep_named`, the system it names, when RustGIS knows it, goes
+/// Reads a CityJSON document; with `keep_named`, the system it names, when KHGIS knows it, goes
 /// before `given`.
 fn read_with(file_name: &str, bytes: &[u8], given: Option<Crs>, keep_named: bool) -> Result<Vec<(Dataset, ReadReport)>> {
     if bytes.len() as u64 > crate::io::MAX_BYTES {
@@ -197,7 +197,7 @@ fn read_with(file_name: &str, bytes: &[u8], given: Option<Crs>, keep_named: bool
     let mut numbers = version.split('.');
     if !matches!((numbers.next(), numbers.next()), (Some("1"), Some("1")) | (Some("2"), Some("0"))) {
         let said = if version.is_empty() { "of no version".to_string() } else { format!("version {version}") };
-        return Err(DataError::Unsupported(format!("{file_name}: CityJSON {said}: RustGIS reads 1.1 and 2.0 (cjio upgrades older files)")));
+        return Err(DataError::Unsupported(format!("{file_name}: CityJSON {said}: KHGIS reads 1.1 and 2.0 (cjio upgrades older files)")));
     }
     let Some(transform) = doc.transform else {
         return Err(DataError::Format(format!("{file_name}: CityJSON without its \"transform\", which the specification requires")));

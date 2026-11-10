@@ -556,7 +556,7 @@ impl Item {
                 .or_else(|| self.assets.iter().filter(ok).find(|a| a.is_point_cloud()))
                 .or_else(|| self.assets.iter().filter(ok).find(|a| a.roles.iter().any(|r| r == "data")))
         };
-        choose(true).or_else(|| choose(false)).ok_or_else(|| format!("{}: no asset RustGIS can add", self.id))
+        choose(true).or_else(|| choose(false)).ok_or_else(|| format!("{}: no asset KHGIS can add", self.id))
     }
 
     /// Its preview picture: the `thumbnail` asset (or one with that role, or a `preview`), a PNG
@@ -586,7 +586,7 @@ impl Item {
         if !(lower.starts_with("https://") || lower.starts_with("http://") || crate::s3::is_s3(&lower)) {
             let scheme = lower.split("://").next().unwrap_or("");
             return Err(format!(
-                "{}: asset '{}' is at {} (a {scheme}:// address); RustGIS adds assets by their web or s3:// address",
+                "{}: asset '{}' is at {} (a {scheme}:// address); KHGIS adds assets by their web or s3:// address",
                 self.id, a.key, a.href
             ));
         }

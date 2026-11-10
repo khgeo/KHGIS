@@ -1,6 +1,6 @@
 //! Help › Check for Updates: asks GitHub for the latest release and compares it with this build,
 //! showing a newer one's version and release notes. On Windows, a copy installed with
-//! `setup.exe` can download that release's installer, check it and install it when RustGIS
+//! `setup.exe` can download that release's installer, check it and install it when KHGIS
 //! closes (#1290, see [`install`]). Nothing is sent until the user asks.
 
 use egui::Align2;
@@ -14,7 +14,7 @@ mod install;
 /// The latest release, as JSON naming its tag and page.
 const LATEST: &str = "https://api.github.com/repos/opengeos/RustGIS/releases/latest";
 /// Every release, for when the check can't reach GitHub.
-const RELEASES: &str = "https://github.com/opengeos/RustGIS/releases";
+const RELEASES: &str = "https://github.com/khgeo/KHGIS/releases";
 /// The release JSON is a few kilobytes (some tens with long notes); anything far larger isn't it.
 const MAX_BYTES: usize = 1024 * 1024;
 /// The release notes shown, at most: the rest is on the release page.
@@ -37,7 +37,7 @@ pub struct UpdateState {
     recheck: Option<std::time::Instant>,
 }
 
-/// Download and Install's progress, from the click to the installer waiting for RustGIS to close.
+/// Download and Install's progress, from the click to the installer waiting for KHGIS to close.
 #[cfg(not(target_arch = "wasm32"))]
 #[derive(Default)]
 enum Install {
@@ -45,7 +45,7 @@ enum Install {
     Idle,
     /// Downloading and checking `version`'s installer.
     Downloading { version: String, progress: install::Progress, slot: Slot<Result<install::Saved, String>> },
-    /// Checked and saved: it runs when RustGIS closes, once the user has said so (`at_exit`).
+    /// Checked and saved: it runs when KHGIS closes, once the user has said so (`at_exit`).
     Ready { version: String, saved: install::Saved, at_exit: bool },
     /// `version`'s download failed, or Install and Restart's (`installing`): shown with that
     /// release only. Either way Try Again downloads it again.
@@ -69,9 +69,9 @@ impl UpdateState {
         self.result = None;
     }
 
-    /// The installer to run as RustGIS closes: set once the user chose Install and Restart. The
+    /// The installer to run as KHGIS closes: set once the user chose Install and Restart. The
     /// desktop app runs it from its exit (`apps/rustgis`). Checked again here: the save question
-    /// can keep RustGIS open long after the click. A file changed since doesn't run, and the next
+    /// can keep KHGIS open long after the click. A file changed since doesn't run, and the next
     /// start says the update wasn't installed (its version is noted already).
     #[cfg(not(target_arch = "wasm32"))]
     pub fn installer_at_exit(&self) -> Option<PendingInstall> {
@@ -80,9 +80,9 @@ impl UpdateState {
             log::warn!("The update isn't installed: {e}");
             return None;
         }
-        // Checked again: RustGIS's own uninstaller may have run since the window first asked.
+        // Checked again: KHGIS's own uninstaller may have run since the window first asked.
         let dir = install::setup_install().filter(|d| install::setup_install_in(d))?;
-        // Noted again as the installer starts: the note's age tells a RustGIS started meanwhile
+        // Noted again as the installer starts: the note's age tells a KHGIS started meanwhile
         // that the installer may still be at work, however long the save question took.
         if let Err(e) = install::note_pending(version) {
             log::warn!("could not note the update being installed: {e}");
@@ -92,8 +92,8 @@ impl UpdateState {
     }
 
     /// At start, what the last Install and Restart did, as a notice and whether it is an error:
-    /// RustGIS was updated, or the update didn't arrive (asked once; nothing could say so as
-    /// RustGIS closed). `None` when nothing was installed, and while the installer may still be at
+    /// KHGIS was updated, or the update didn't arrive (asked once; nothing could say so as
+    /// KHGIS closed). `None` when nothing was installed, and while the installer may still be at
     /// work: then the window's frame asks again once it can't be (see [`show`]).
     #[cfg(not(target_arch = "wasm32"))]
     pub fn last_install_notice(&mut self) -> Option<(String, bool)> {
@@ -109,10 +109,10 @@ impl UpdateState {
 #[cfg(not(target_arch = "wasm32"))]
 fn last_install_notice(current: &str) -> Option<(String, bool)> {
     Some(match install::last_install(current)? {
-        Ok(v) => (crate::i18n::fmt("RustGIS was updated to {version}.", &[("version", &v)]), false),
+        Ok(v) => (crate::i18n::fmt("KHGIS was updated to {version}.", &[("version", &v)]), false),
         Err(v) => (
             crate::i18n::fmt(
-                "RustGIS {version} wasn't installed: try again from Help › Check for Updates, or install it from the release page.",
+                "KHGIS {version} wasn't installed: try again from Help › Check for Updates, or install it from the release page.",
                 &[("version", &v)],
             ),
             true,
@@ -143,7 +143,7 @@ pub struct Release {
     pub notes: String,
     /// Whether the notes were cut: the window says the rest is on the release page.
     pub notes_cut: bool,
-    /// Its files with an address RustGIS downloads from: HTTPS, or HTTP to this computer.
+    /// Its files with an address KHGIS downloads from: HTTPS, or HTTP to this computer.
     pub assets: Vec<Asset>,
 }
 
@@ -332,7 +332,7 @@ enum Action {
         sums: Asset,
     },
     Cancel,
-    /// Install and Restart: close RustGIS, which runs the installer.
+    /// Install and Restart: close KHGIS, which runs the installer.
     InstallNow,
 }
 
@@ -402,7 +402,7 @@ pub fn show(app: &mut RustGisApp, ctx: &egui::Context) {
                     });
                 }
                 Some(Ok(r)) if is_newer(&r.version, current) => {
-                    ui.label(egui::RichText::new(crate::i18n::fmt("RustGIS {latest} is available.", &[("latest", &r.version)])).strong());
+                    ui.label(egui::RichText::new(crate::i18n::fmt("KHGIS {latest} is available.", &[("latest", &r.version)])).strong());
                     ui.label(crate::i18n::fmt("You have version {version}.", &[("version", current)]));
                     // What the release brings, before anything is installed.
                     if !r.notes.is_empty() {
@@ -424,7 +424,7 @@ pub fn show(app: &mut RustGisApp, ctx: &egui::Context) {
                         let assets = if setup { install::assets_for(r, std::env::consts::ARCH) } else { None };
                         let stage = match &app.update.install {
                             // A download of another release (an older check), or its failure,
-                            // doesn't count, but an install already set for when RustGIS closes
+                            // doesn't count, but an install already set for when KHGIS closes
                             // stays until it runs: a new download would drop it without a word.
                             Install::Downloading { version, .. }
                             | Install::Ready { version, at_exit: false, .. }
@@ -457,10 +457,10 @@ pub fn show(app: &mut RustGisApp, ctx: &egui::Context) {
                             }
                             (Install::Ready { version, at_exit, .. }, _) => {
                                 ui.label(tl!(
-                                    "The installer is downloaded and checked. RustGIS closes, installs the update and opens again."
+                                    "The installer is downloaded and checked. KHGIS closes, installs the update and opens again."
                                 ));
                                 if *at_exit {
-                                    let text = crate::i18n::fmt("RustGIS {version} installs when RustGIS closes.", &[("version", version)]);
+                                    let text = crate::i18n::fmt("KHGIS {version} installs when KHGIS closes.", &[("version", version)]);
                                     ui.label(egui::RichText::new(text).small().weak());
                                 }
                                 ui.add_space(6.0);
@@ -531,7 +531,7 @@ pub fn show(app: &mut RustGisApp, ctx: &egui::Context) {
                     }
                 }
                 Some(Ok(_)) => {
-                    ui.label(crate::i18n::fmt("RustGIS {version} is the latest version.", &[("version", current)]));
+                    ui.label(crate::i18n::fmt("KHGIS {version} is the latest version.", &[("version", current)]));
                     ui.add_space(6.0);
                     if ui.button(tl!("Check Again")).clicked() {
                         again = true;
@@ -568,11 +568,11 @@ pub fn show(app: &mut RustGisApp, ctx: &egui::Context) {
             }
             app.update.install = Install::Idle;
         }
-        // The usual way out: a project with unsaved changes asks first (Cancel keeps RustGIS
+        // The usual way out: a project with unsaved changes asks first (Cancel keeps KHGIS
         // open, and the update waits for it to close).
-        // Checked again first, and the version noted for the next start: once RustGIS has closed
+        // Checked again first, and the version noted for the next start: once KHGIS has closed
         // nothing can say that the update didn't happen. The hash runs here, on the window's
-        // thread, so a failure shows before RustGIS closes; for an installer of a few tens of
+        // thread, so a failure shows before KHGIS closes; for an installer of a few tens of
         // MB it is a short pause, once, at the click.
         Some(Action::InstallNow) => {
             if let Install::Ready { version, saved, at_exit } = &mut app.update.install {
@@ -627,7 +627,7 @@ mod tests {
 
     #[test]
     fn release_json_is_read_and_checked() {
-        let r = parse_release(br#"{"tag_name":"v0.2.0","html_url":"https://github.com/opengeos/RustGIS/releases/tag/v0.2.0"}"#).unwrap();
+        let r = parse_release(br#"{"tag_name":"v0.2.0","html_url":"https://github.com/khgeo/KHGIS/releases/tag/v0.2.0"}"#).unwrap();
         assert_eq!(r.version, "0.2.0");
         assert!(r.url.ends_with("/v0.2.0"));
         // A page that isn't HTTPS falls back to the releases list.
@@ -644,7 +644,7 @@ mod tests {
     fn release_notes_and_files_are_read() {
         let r = parse_release(
             br#"{"tag_name":"v0.6.0","body":"  ## Highlights\n- Faster maps  ","assets":[
-                {"name":"SHA256SUMS","browser_download_url":"https://github.com/opengeos/RustGIS/releases/download/v0.6.0/SHA256SUMS"},
+                {"name":"SHA256SUMS","browser_download_url":"https://github.com/khgeo/KHGIS/releases/download/v0.6.0/SHA256SUMS"},
                 {"name":"plain.exe","browser_download_url":"http://example.com/plain.exe"},
                 {"name":"local.exe","browser_download_url":"http://127.0.0.1:8000/local.exe"},
                 {"name":"nameless"},
@@ -655,7 +655,7 @@ mod tests {
         // Plain text, made once.
         assert_eq!(r.notes, "Highlights\n• Faster maps");
         assert!(!r.notes_cut);
-        // Only files with a name and an address RustGIS downloads from: HTTPS, or HTTP to this
+        // Only files with a name and an address KHGIS downloads from: HTTPS, or HTTP to this
         // computer (a release served there to try an update), not plain HTTP elsewhere.
         assert_eq!(r.assets.iter().map(|a| a.name.as_str()).collect::<Vec<_>>(), ["SHA256SUMS", "local.exe"]);
         // No notes or files: empty, not an error.

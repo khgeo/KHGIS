@@ -2976,7 +2976,7 @@ mod tests {
         let mut l =
             Layer::new(1, Dataset::new("p", GeometryType::Point, vec![rustgis_data::Field::new("a", rustgis_data::FieldType::Double)]));
         l.dataset.push(Some(Geometry::Point(Coord::new(0.0, 0.0))), vec![rustgis_data::Value::Float(450.0)]);
-        // None isn't written: an older RustGIS reads the layer as before.
+        // None isn't written: an older KHGIS reads the layer as before.
         assert!(serde_json::to_value(&l).unwrap().get("marker_rotation").is_none());
         l.marker_rotation = Some(symbology::MarkerRotation { field: "a".into(), counterclockwise: true });
         let v = serde_json::to_value(&l).unwrap();
@@ -3019,7 +3019,7 @@ mod tests {
             ]]])),
             vec![Value::Int(52_000), Value::Int(48_000)],
         );
-        // None isn't written: an older RustGIS reads the layer as before.
+        // None isn't written: an older KHGIS reads the layer as before.
         assert!(serde_json::to_value(&l).unwrap().get("diagram").is_none());
         l.diagram = Some(diagram::DiagramSettings {
             kind: diagram::DiagramKind::Pie,

@@ -46,7 +46,7 @@ pub(crate) fn empty_notices(e: &rustgis_data::source::shp::Emptied) -> Vec<(Stri
     if e.in_use > 0 {
         let what = if e.in_use == 1 { "1 index".to_string() } else { format!("{} indexes", e.in_use) };
         notices.push((
-            format!("Shapefile index cache: {what} in use by open layers or another RustGIS window kept ({})", size(e.in_use_bytes)),
+            format!("Shapefile index cache: {what} in use by open layers or another KHGIS window kept ({})", size(e.in_use_bytes)),
             false,
         ));
     }

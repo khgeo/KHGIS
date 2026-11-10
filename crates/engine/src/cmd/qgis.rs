@@ -122,7 +122,7 @@ fn import_project(s: &mut Session, p: &Value) -> CmdResult {
 }
 
 /// Adds one QGIS layer to the active map with its style: `Ok(Some(name))` when added, `Ok(None)`
-/// when its source is one RustGIS doesn't read (noted). Without the project's folder (`has_dir`:
+/// when its source is one KHGIS doesn't read (noted). Without the project's folder (`has_dir`:
 /// a project given as text or data with no `dir`), a relative path has nothing to start from and
 /// is noted rather than looked for in the working directory.
 fn add_layer(s: &mut Session, layer: &qgis::ProjectLayer, has_dir: bool, report: &mut Report) -> Result<Option<String>, String> {
@@ -141,7 +141,7 @@ fn add_layer(s: &mut Session, layer: &qgis::ProjectLayer, has_dir: bool, report:
     match &layer.source {
         Source::File { path, layer: table, ignored, .. } => {
             if !ignored.is_empty() {
-                // `layerid=2`: RustGIS opens a layer by name, so without one every layer of a file
+                // `layerid=2`: KHGIS opens a layer by name, so without one every layer of a file
                 // that has several comes in; with one, the options are only not read.
                 let why = if table.is_some() { "not read" } else { "not read: a file with several layers adds them all" };
                 report.approximated(name, format!("its source options {} ({why})", ignored.join(", ")));
@@ -192,7 +192,7 @@ fn add_layer(s: &mut Session, layer: &qgis::ProjectLayer, has_dir: bool, report:
         Source::Other { provider } => {
             // A layer of no provider (an annotation layer, a group layer) is told by its kind.
             let what = if provider.is_empty() { format!("{} layers", layer.kind) } else { format!("{provider} sources") };
-            report.skipped(name, format!("the layer: RustGIS doesn't read QGIS's {what}"));
+            report.skipped(name, format!("the layer: KHGIS doesn't read QGIS's {what}"));
             return Ok(None);
         }
     }
@@ -225,7 +225,7 @@ fn add_layer(s: &mut Session, layer: &qgis::ProjectLayer, has_dir: bool, report:
 /// in the project's units, which aren't read yet, so an expression using them doesn't read.
 fn parse_imported(text: &str, ds: &rustgis_data::Dataset) -> Result<rustgis_data::query::Expr, String> {
     if qgis::reads_measure(text) {
-        return Err("it measures in the QGIS project's units, which RustGIS doesn't read yet".into());
+        return Err("it measures in the QGIS project's units, which KHGIS doesn't read yet".into());
     }
     rustgis_data::query::parse(text, ds)
 }
@@ -361,7 +361,7 @@ fn check_fields(
         report.approximated(name, format!("classes by the field {f}, which the layer hasn't: every feature draws as the rest"));
     }
     // The symbol's data-defined settings: an expression that doesn't read here (a QGIS function
-    // or variable RustGIS lacks, a field the layer hasn't) is left out.
+    // or variable KHGIS lacks, a field the layer hasn't) is left out.
     let by = &mut l.symbol_by;
     for (what, slot) in [
         ("size", &mut by.size),
@@ -430,7 +430,7 @@ fn fit_rules(l: &mut rustgis_map::Layer, name: &str, rules: &[qgis::RuleFilter],
 const MAX_RULE_CHECKS: usize = 20_000_000;
 
 /// Notes the features of `l` that more than one of a rule-based renderer's `rules` picks at some
-/// scale: QGIS draws such a feature with each rule's symbol, RustGIS with the first's.
+/// scale: QGIS draws such a feature with each rule's symbol, KHGIS with the first's.
 fn note_overlapping_rules(l: &rustgis_map::Layer, name: &str, rules: &[qgis::RuleFilter], report: &mut Report) {
     let ds = &l.dataset;
     let mut compiled: Vec<_> = rules.iter().filter_map(|r| Some((r, parse_imported(&r.condition, ds).ok()?))).collect();

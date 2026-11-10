@@ -78,7 +78,7 @@ impl FgbSource {
         let code = h.crs().map(|c| c.code()).and_then(|c| u32::try_from(c).ok()).filter(|c| *c > 0 && epsg_org);
         // Another body's system (an IAU organization, or WKT that says so) is said, or refused when
         // its coordinates aren't longitude/latitude. It is checked whenever there's no EPSG code
-        // RustGIS converts, because an unknown code is read as longitude/latitude too.
+        // KHGIS converts, because an unknown code is read as longitude/latitude too.
         let other_body = match h.crs() {
             Some(c) if code.and_then(Crs::from_epsg).is_none() => {
                 Reproject::planetary("its coordinate system", c.org(), Some(i64::from(c.code())), c.wkt(), &mut notes)
@@ -145,7 +145,7 @@ impl FgbSource {
         };
         info.note_columns(
             &left_out,
-            ["of a type RustGIS has no field for was left out", "of types RustGIS has no field for were left out"],
+            ["of a type KHGIS has no field for was left out", "of types KHGIS has no field for were left out"],
         );
         if h.has_z() || h.has_m() {
             info.drop_zm((count > 0).then_some(count));
@@ -599,7 +599,7 @@ fn err(e: flatgeobuf::Error) -> DataError {
     DataError::Format(format!("FlatGeobuf: {e}"))
 }
 
-/// The field type a column is read as; `None` for binary, which RustGIS has no field type for.
+/// The field type a column is read as; `None` for binary, which KHGIS has no field type for.
 fn field_type(t: ColumnType) -> Option<FieldType> {
     Some(match t {
         ColumnType::Byte

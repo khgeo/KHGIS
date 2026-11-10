@@ -2048,7 +2048,7 @@ impl Session {
         if bundled && !self.bundled_roots_said {
             self.bundled_roots_said = true;
             self.warn(
-                "This system has no CA certificates, so HTTPS servers are checked against the Mozilla roots bundled with RustGIS: install the system's CA certificates (or set SSL_CERT_FILE or SSL_CERT_DIR) to use its trust instead",
+                "This system has no CA certificates, so HTTPS servers are checked against the Mozilla roots bundled with KHGIS: install the system's CA certificates (or set SSL_CERT_FILE or SSL_CERT_DIR) to use its trust instead",
             );
         }
     }

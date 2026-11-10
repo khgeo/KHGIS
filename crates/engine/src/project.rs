@@ -53,7 +53,7 @@ pub fn open_command(path: &str) -> &'static str {
         "layer.addData"
     }
 }
-/// Saved-document compatibility version, independent of the RustGIS release version.
+/// Saved-document compatibility version, independent of the KHGIS release version.
 /// Advance it when an older reader would lose meaningful saved information on resaving.
 pub const FORMAT: u32 = 1;
 /// Largest project file read or saved in the browser, or on a computer whose memory isn't known
@@ -665,9 +665,9 @@ pub(crate) fn check_format(text: &str, kind: &str) -> Result<(), String> {
     if text.trim_start().starts_with('[') {
         return Ok(());
     }
-    let header: FileFormat = serde_json::from_str(text).map_err(|e| format!("not a RustGIS {kind}: {e}"))?;
+    let header: FileFormat = serde_json::from_str(text).map_err(|e| format!("not a KHGIS {kind}: {e}"))?;
     if header.format > u64::from(FORMAT) {
-        return Err(format!("this {kind} was saved by a newer RustGIS (format {}). Update RustGIS to open it.", header.format));
+        return Err(format!("this {kind} was saved by a newer KHGIS (format {}). Update KHGIS to open it.", header.format));
     }
     Ok(())
 }
@@ -991,7 +991,7 @@ impl Project {
                 // A raster layer whose path is a plain web address, from no saved connection, is
                 // read in place, the one way such a path is read (a login or S3 wrapper is
                 // downloaded whole, as is a connection's address, plain here until its login is
-                // made again): one saved by an older RustGIS, which didn't know `in_place` (it
+                // made again): one saved by an older KHGIS, which didn't know `in_place` (it
                 // showed the layer as missing and saved it again without the key), reads in
                 // place again here, losing a pending look at most.
                 for l in &mut m.layers {
@@ -1190,14 +1190,14 @@ impl Project {
         let mut p: Project = serde_json::from_str(text).map_err(|e| {
             let msg = e.to_string();
             if msg.contains("unknown variant") {
-                format!("this project may have been saved by a newer RustGIS: {msg}. Update RustGIS to open it.")
+                format!("this project may have been saved by a newer KHGIS: {msg}. Update KHGIS to open it.")
             } else {
-                format!("not a RustGIS project: {msg}")
+                format!("not a KHGIS project: {msg}")
             }
         })?;
         p.ensure_imports_complete().map_err(|_| "a project file cannot contain runtime GeoLibre download reservations".to_string())?;
         if p.format > FORMAT {
-            return Err(format!("this project was saved by a newer RustGIS (format {}). Update RustGIS to open it.", p.format));
+            return Err(format!("this project was saved by a newer KHGIS (format {}). Update KHGIS to open it.", p.format));
         }
         if restore {
             crate::durable::restore(&mut p, text);
@@ -1232,7 +1232,7 @@ impl Project {
                 format!(": no computer opens a project past {} MiB", BYTES_CEILING >> 20)
             } else if meta.len() > ceiling() {
                 // Only a 32-bit build stops below the ceiling.
-                format!(": a 64-bit RustGIS on a computer with at least {needed} GiB of memory opens it")
+                format!(": a 64-bit KHGIS on a computer with at least {needed} GiB of memory opens it")
             } else if rustgis_data::memory::physical().is_some() {
                 format!(": a computer with at least {needed} GiB of memory opens it")
             } else {
@@ -1247,7 +1247,7 @@ impl Project {
             ));
         }
         let bytes = read_file(path, max)?;
-        let text = String::from_utf8(bytes).map_err(|_| format!("{} isn't a RustGIS project", path.display()))?;
+        let text = String::from_utf8(bytes).map_err(|_| format!("{} isn't a KHGIS project", path.display()))?;
         let dir = std::path::absolute(path).ok().and_then(|p| p.parent().map(Path::to_path_buf));
         Self::read_json(&text, true, dir.as_deref(), true)
     }

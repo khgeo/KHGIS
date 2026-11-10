@@ -135,12 +135,12 @@ fn main() -> eframe::Result {
     app.run("map.addTiles", tiles).map_err(fail)?;
     app.run("map.goToLink", json!({"url": at})).map_err(fail)?;
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_title("RustGIS navigation benchmark").with_inner_size([1480.0, 900.0]),
+        viewport: egui::ViewportBuilder::default().with_title("KHGIS navigation benchmark").with_inner_size([1480.0, 900.0]),
         ..Default::default()
     };
     println!("navigate_bench case={case} gpu={gpu}");
     eframe::run_native(
-        "RustGIS navigation benchmark",
+        "KHGIS navigation benchmark",
         options,
         Box::new(move |_| {
             let now = Instant::now();

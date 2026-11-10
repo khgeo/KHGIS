@@ -1,7 +1,7 @@
 //! Non-spatial attribute join (Join Field): joins attributes from a source table or layer
 //! to a target table or layer based on matching key values, without any geometry or spatial operations.
 //!
-//! Conforms to RustGIS zero-panic architecture: bounded allocations, typed error handling,
+//! Conforms to KHGIS zero-panic architecture: bounded allocations, typed error handling,
 //! preservation of target ordering, schema preservation, and deterministic collision handling.
 
 use rustgis_data::{Dataset, Field, FieldType, Value};

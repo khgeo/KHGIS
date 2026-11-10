@@ -93,11 +93,11 @@ fn plugin_strings_use_the_plugins_translations() {
     let pkg = plugins::Package::from_zip(&plugins::testing::package("i18n-fallback", &[])).unwrap();
     plugins::load(pkg, "test").unwrap();
     let de = Lang::from_code("de").unwrap();
-    // Not in RustGIS's catalog: the plugin's `i18n` has it.
+    // Not in KHGIS's catalog: the plugin's `i18n` has it.
     assert_eq!(tr(de, "Hello"), "Hallo");
     assert_eq!(tr(Lang::EN, "Hello"), "Hello");
     assert_eq!(tr(Lang::from_code("fr").unwrap(), "Hello"), "Hello");
-    // RustGIS's own catalog comes first.
+    // KHGIS's own catalog comes first.
     assert_eq!(tr(de, "Open"), de.0.lookup("", "Open", false).unwrap_or("Open"));
     plugins::unload("i18n-fallback");
 }
@@ -108,9 +108,9 @@ fn start_up_project_strings_have_real_translations() {
         "Last Project",
         "Choose Project…",
         "No project opened or saved yet",
-        "What RustGIS opens with: the World Atlas sample, a blank map, a project you choose, or the last project opened or saved.",
-        "RustGIS didn't close properly last time, so it started with the World Atlas instead of your start-up project. Open the project from the Project menu when you're ready.",
-        "The start-up project {path} isn't a RustGIS project file.",
+        "What KHGIS opens with: the World Atlas sample, a blank map, a project you choose, or the last project opened or saved.",
+        "KHGIS didn't close properly last time, so it started with the World Atlas instead of your start-up project. Open the project from the Project menu when you're ready.",
+        "The start-up project {path} isn't a KHGIS project file.",
         "The start-up project {path} didn't open: {error}",
     ];
     for l in &LANGUAGES[1..] {
@@ -208,8 +208,8 @@ fn skills_controls_are_in_every_catalog() {
 #[test]
 fn letting_agents_control_rustgis_is_in_every_catalog() {
     let keys = [
-        "Let your Agents Control RustGIS",
-        "Agents on this computer that connect (Claude Code, Codex, Cursor and others) work on the map open here, with RustGIS's tools: they can open and save files and use the web. Scripts and plugin management stay off.",
+        "Let your Agents Control KHGIS",
+        "Agents on this computer that connect (Claude Code, Codex, Cursor and others) work on the map open here, with KHGIS's tools: they can open and save files and use the web. Scripts and plugin management stay off.",
         "Add this MCP server to your agent:",
         "Or run, for Claude Code or Codex:",
     ];
@@ -228,7 +228,7 @@ fn agents_on_this_computer_are_in_every_catalog() {
         "An agent on this computer asks to:",
         "Always allow",
         "Let the assistant hand tasks to agents on this computer",
-        "Found: {names}. An agent works on this map through RustGIS's tools and with its own (web, scripts, files) in a folder of its own, kept in Documents › RustGIS › Agent work. It asks you before each action.",
+        "Found: {names}. An agent works on this map through KHGIS's tools and with its own (web, scripts, files) in a folder of its own, kept in Documents › KHGIS › Agent work. It asks you before each action.",
         "Approve agents' actions without asking",
         "Agent threads",
         "Waiting for your answer",
@@ -316,7 +316,7 @@ fn context_lookup_fallback_macros_and_formatted_values() {
         name: "Test",
         english: "Test",
         script: Script::Alphabetic,
-        source: "Open\tDefault\nverb\tOpen\tÖffnen\nstate\tOpen\tOffen\ncount\t{n} open\t{n} offen\nrtl\tOpen\tباز RustGIS\n",
+        source: "Open\tDefault\nverb\tOpen\tÖffnen\nstate\tOpen\tOffen\ncount\t{n} open\t{n} offen\nrtl\tOpen\tباز KHGIS\n",
         catalog: OnceLock::new(),
         visual: OnceLock::new(),
     };
@@ -331,8 +331,8 @@ fn context_lookup_fallback_macros_and_formatted_values() {
     // Restore the thread-local language even if an assertion panics.
     let result = std::panic::catch_unwind(|| {
         assert_eq!(tl!("Open", context = "verb"), "Öffnen");
-        assert_eq!(tl_raw!("Open", context = "rtl"), "باز RustGIS");
-        assert_eq!(tl!("Open", context = "rtl"), rtl::visual("باز RustGIS"));
+        assert_eq!(tl_raw!("Open", context = "rtl"), "باز KHGIS");
+        assert_eq!(tl!("Open", context = "rtl"), rtl::visual("باز KHGIS"));
         assert_eq!(fmt_context("count", "{n} open", &[("n", "{literal}")]), "{literal} offen");
     });
     set_current(previous);

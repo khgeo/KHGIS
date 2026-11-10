@@ -134,7 +134,7 @@ impl ShpSource {
             && !extent.is_empty()
             && (extent.min_x < -180.5 || extent.max_x > 180.5 || extent.min_y < -90.5 || extent.max_y > 90.5)
         {
-            notes.push("coordinates are not longitude/latitude; RustGIS reads them as WGS 84 and they may draw out of place".into());
+            notes.push("coordinates are not longitude/latitude; KHGIS reads them as WGS 84 and they may draw out of place".into());
         }
         let fields = table
             .columns

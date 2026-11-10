@@ -3,7 +3,7 @@
 //! (as GeoJSON addresses) and OGC API Tiles tilesets (map and vector tiles in WebMercatorQuad) —
 //! and ArcGIS REST services (FeatureServer, MapServer, ImageServer,
 //! VectorTileServer). The documents are hostile input: no DTD is read, nodes are capped, and
-//! only layers RustGIS can draw are listed (the rest are counted in a note).
+//! only layers KHGIS can draw are listed (the rest are counted in a note).
 
 use roxmltree::{Node, ParsingOptions};
 use serde::{Deserialize, Serialize};
@@ -346,7 +346,7 @@ fn layer_time(default: Option<&str>, all: Vec<String>, check: fn(&str) -> Result
 /// The note for layers whose own times run past [`MAX_TIME_VALUES`] (`layers` of them).
 fn long_times_note(layers: usize) -> String {
     format!(
-        "{layers} layers list more than {MAX_TIME_VALUES} times: RustGIS keeps the latest {MAX_TIME_VALUES} of each, and the earliest are left out"
+        "{layers} layers list more than {MAX_TIME_VALUES} times: KHGIS keeps the latest {MAX_TIME_VALUES} of each, and the earliest are left out"
     )
 }
 
@@ -425,7 +425,7 @@ pub fn legends_at(legends: &[Legend], scale: f64) -> impl Iterator<Item = &Legen
 /// The most legend pictures a layer keeps.
 pub const MAX_LEGENDS: usize = 16;
 
-/// Whether a legend picture's format is one RustGIS shows (PNG or JPEG); a legend that names
+/// Whether a legend picture's format is one KHGIS shows (PNG or JPEG); a legend that names
 /// none is taken to be one.
 fn legend_format(format: Option<&str>) -> bool {
     format.is_none_or(|f| {
@@ -440,7 +440,7 @@ fn scale_attr(n: &Node, key: &str) -> Option<f64> {
 }
 
 /// A service's capabilities: its kind (`WMS`, `WMTS`, `WFS`, `OGC API Features`), title, the
-/// layers RustGIS can add, and notes on what it left out.
+/// layers KHGIS can add, and notes on what it left out.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Service {
     pub kind: String,
@@ -453,7 +453,7 @@ pub struct Service {
     /// added by name.
     pub listed: Option<usize>,
     /// Some advertised collections were left out (past the listing limit, or with an items
-    /// address RustGIS doesn't fetch): the listing isn't the whole service.
+    /// address KHGIS doesn't fetch): the listing isn't the whole service.
     pub incomplete: bool,
     /// Destinations that did not inherit one or more query pairs; reported by the caller.
     pub withheld_addresses: u32,
@@ -488,7 +488,7 @@ fn read_limit(per_layer: usize) -> usize {
 fn note_copied_addresses(service: &mut Service, per_layer: usize, limit: usize) {
     if limit < MAX_READ_LAYERS {
         service.notes.push(format!(
-            "each of its layers copies {per_layer} bytes of the document's request addresses, so RustGIS reads {limit} of them, not {MAX_READ_LAYERS}"
+            "each of its layers copies {per_layer} bytes of the document's request addresses, so KHGIS reads {limit} of them, not {MAX_READ_LAYERS}"
         ));
     }
 }
@@ -503,7 +503,7 @@ fn address_bytes(layer: &ServiceLayer) -> usize {
 }
 
 /// How a note says that a document went past what is read of it.
-const PAST_READ_LIMIT: &str = "RustGIS reads at most";
+const PAST_READ_LIMIT: &str = "KHGIS reads at most";
 /// Features asked of a WFS in one request.
 pub const FEATURE_LIMIT: usize = 50_000;
 /// Features asked of an OGC API in one request: servers cap their pages (often at 10,000) and
@@ -759,7 +759,7 @@ fn push_resolved_path(out: &mut String, href: &str, root: usize) {
 
 /// The words in the notes on OGC API collections left out as 3D content, by which
 /// `service.add` finds why a layer isn't listed.
-pub const LEFT_OUT_3D: &str = "which RustGIS doesn't draw";
+pub const LEFT_OUT_3D: &str = "which KHGIS doesn't draw";
 
 /// What an OGC API collection's items link, in the document at `from`, offers when it is 3D
 /// content, not features: 3D Tiles (its type, or an address ending in `/3dtiles`) or quantized
@@ -978,7 +978,7 @@ fn wms(url: &str, root: &Node) -> Service {
     // Layers inherit their parents' coordinate systems, nearest valid geographic bounds, queryable
     // attribute and time dimension.
     // The SLD profile's GetLegendGraphic (WMS 1.3.0 with SLD 1.1, 1.1.1 with SLD 1.0), when the
-    // service offers it in a format RustGIS shows: a layer's legend, drawn from its default style.
+    // service offers it in a format KHGIS shows: a layer's legend, drawn from its default style.
     let legend_graphic = wms_legend_graphic(root, url, &get_map, version);
     let per_layer =
         get_map.len() + info_request.as_ref().map_or(0, |r| r.url.len()) + legend_graphic.as_ref().map_or(0, |g| g("").url.len());
@@ -1127,7 +1127,7 @@ fn wms(url: &str, root: &Node) -> Service {
     }
     if cut_times > 0 {
         service.notes.push(format!(
-            "{cut_times} layers keep fewer or none of their times: RustGIS keeps {MAX_DOCUMENT_TIME_VALUES} for one document, and they come after them"
+            "{cut_times} layers keep fewer or none of their times: KHGIS keeps {MAX_DOCUMENT_TIME_VALUES} for one document, and they come after them"
         ));
     }
     if long_times > 0 {
@@ -1135,7 +1135,7 @@ fn wms(url: &str, root: &Node) -> Service {
     }
     cut_listing(&mut service);
     if skipped > 0 {
-        service.notes.push(format!("{skipped} layers aren't offered in a coordinate system RustGIS can draw and are left out"));
+        service.notes.push(format!("{skipped} layers aren't offered in a coordinate system KHGIS can draw and are left out"));
     }
     if too_long > 0 {
         service.notes.push(format!(
@@ -1146,14 +1146,14 @@ fn wms(url: &str, root: &Node) -> Service {
 }
 
 /// The coordinate systems a WMS layer is offered in, its own and those it inherits: whether Web
-/// Mercator is among them, and the first [`warp::MAX_SYSTEMS`] RustGIS can draw the layer in, in
+/// Mercator is among them, and the first [`warp::MAX_SYSTEMS`] KHGIS can draw the layer in, in
 /// order of preference (see [`wms_candidates`]), the only ones [`wms_native`] takes. A layer
 /// naming systems of its own adds them to its parent's first ones, so the many a service's root
 /// may list (a GeoServer's thousands) are worked out once, not again for each layer (#1519).
 #[derive(Default)]
 struct Systems {
     /// Where a sublayer's own names are numbered from: all the names its parents list, those
-    /// RustGIS leaves out included (only the order matters).
+    /// KHGIS leaves out included (only the order matters).
     names: usize,
     mercator: bool,
     first: Vec<Candidate>,
@@ -1201,11 +1201,11 @@ fn candidate_rank((name, _, c, _): &Candidate) -> u8 {
     }
 }
 
-/// A system of a WMS layer's list that RustGIS knows: its name there, its EPSG code, it, and its
+/// A system of a WMS layer's list that KHGIS knows: its name there, its EPSG code, it, and its
 /// place in the list.
 type Candidate = (String, u32, crate::raster::Crs, usize);
 
-/// The systems of a WMS layer's list that RustGIS knows, one name each, in order of preference:
+/// The systems of a WMS layer's list that KHGIS knows, one name each, in order of preference:
 /// projected ones first (the service's own, as a rule), then CRS:84, then other
 /// longitude/latitude ones, each kind as listed. (A GeoServer lists some 5,000 systems by
 /// default, each layer inheriting them: only a system's definition is looked up here, once a
@@ -1231,12 +1231,12 @@ fn wms_candidates(crs: &[String]) -> Vec<Candidate> {
     listed
 }
 
-/// The systems a WMS layer is offered in that RustGIS can draw (#769), of its `listed`
+/// The systems a WMS layer is offered in that KHGIS can draw (#769), of its `listed`
 /// candidates (see [`wms_candidates`]), and the one a Web Mercator map takes its pictures in: Web
 /// Mercator itself (`mercator`), else the first. `None` for a layer offered in Web Mercator
 /// alone (its address stays as it was) or in nothing usable. In WMS 1.3.0 a bounding box follows
 /// the system's axes as EPSG defines them ([`crate::raster::epsg_axes`]); for a system whose
-/// order RustGIS doesn't know, as the layer's own `BoundingBox` in it is written (else latitude
+/// order KHGIS doesn't know, as the layer's own `BoundingBox` in it is written (else latitude
 /// first in a geographic system other than CRS:84).
 fn wms_native<'a, 'i>(
     layer: &Node<'a, 'i>,
@@ -1268,7 +1268,7 @@ fn wms_native<'a, 'i>(
     let lat_first = |name: &str, system: crate::raster::Crs| {
         v13 && !warp::is_crs84(name) && {
             // In the order of the system's axes as EPSG defines them (WMS 1.3.0 §6.7.3.3); for a
-            // system newer than RustGIS's table, the layer's box in it, against its area there.
+            // system newer than KHGIS's table, the layer's box in it, against its area there.
             if let Some(north) = epsg_north_first(system) {
                 return north;
             }
@@ -1305,7 +1305,7 @@ fn wms_native<'a, 'i>(
 type LayerBoxes<'a, 'i> = std::collections::HashMap<roxmltree::NodeId, std::collections::HashMap<u32, Node<'a, 'i>>>;
 
 /// Whether `system` is written north (or latitude) first as EPSG defines its axes, when
-/// RustGIS's table knows it ([`crate::raster::epsg_axes`]).
+/// KHGIS's table knows it ([`crate::raster::epsg_axes`]).
 fn epsg_north_first(system: crate::raster::Crs) -> Option<bool> {
     match system {
         crate::raster::Crs::Custom(_) => None,
@@ -1320,7 +1320,7 @@ const MAX_ADDRESS: usize = 4096;
 const MAX_STYLES: usize = 64;
 
 /// A WMS layer's legend: its default style's (the one a GetMap with `STYLES=` draws: the one
-/// named `default`, else the first), the first of its `LegendURL`s in a format RustGIS shows.
+/// named `default`, else the first), the first of its `LegendURL`s in a format KHGIS shows.
 fn wms_legend(url: &str, styles: &[Node]) -> Option<Legend> {
     let style =
         styles.iter().find(|s| child_text(s, "Name").is_some_and(|n| n.eq_ignore_ascii_case("default"))).or_else(|| styles.first())?;
@@ -1440,8 +1440,8 @@ struct RawMatrix {
 /// The most `TileMatrix` entries read of a tile matrix set in another system.
 const MAX_RAW_MATRICES: usize = 256;
 
-/// A tile matrix set in another system than Web Mercator that RustGIS can draw (#769): its EPSG
-/// code and its matrices RustGIS can draw, coarsest first.
+/// A tile matrix set in another system than Web Mercator that KHGIS can draw (#769): its EPSG
+/// code and its matrices KHGIS can draw, coarsest first.
 fn native_matrices(tms: &Node) -> Option<(u16, crate::raster::Crs, Vec<RawMatrix>)> {
     let name = child_text(tms, "SupportedCRS")?;
     let code = warp::epsg_of(&name)?;
@@ -1450,7 +1450,7 @@ fn native_matrices(tms: &Node) -> Option<(u16, crate::raster::Crs, Vec<RawMatrix
     let mut out = Vec::new();
     // (In any order, up to `MAX_RAW_MATRICES` read: a real set has a few dozen.)
     for m in children(tms, "TileMatrix").take(MAX_RAW_MATRICES) {
-        // One that can't be read or drawn is left out, not the set; only one RustGIS can draw
+        // One that can't be read or drawn is left out, not the set; only one KHGIS can draw
         // counts towards `MAX_MATRICES`.
         if let Some(raw) = raw_matrix(&m)
             && warp::Matrix::from_scale(raw.id.clone(), raw.scale, unit, raw.corner, raw.tile, raw.size).is_some()
@@ -1495,7 +1495,7 @@ fn wmts(url: &str, root: &Node) -> Service {
     // Tile matrix sets that are Web Mercator pyramids, with a zoom per matrix identifier.
     let sets: Vec<(String, Vec<(String, u8)>)> =
         children(&contents, "TileMatrixSet").filter_map(|t| Some((child_text(&t, "Identifier")?, mercator_matrices(&t)?))).collect();
-    // Others in a system RustGIS can transform, drawn warped into the map's tiles (#769).
+    // Others in a system KHGIS can transform, drawn warped into the map's tiles (#769).
     let natives: Vec<(String, u16, crate::raster::Crs, bool, Vec<RawMatrix>)> = children(&contents, "TileMatrixSet")
         .filter_map(|t| {
             let id = child_text(&t, "Identifier")?;
@@ -1565,7 +1565,7 @@ fn wmts(url: &str, root: &Node) -> Service {
                 // geographic corner is often written longitude first anyway: one whose first number
                 // can't be a latitude is so; one whose numbers could be either is read longitude
                 // first only when its matrix, read in EPSG's order, misses the layer and read the
-                // other way doesn't. For a system newer than RustGIS's table, the order whose
+                // other way doesn't. For a system newer than KHGIS's table, the order whose
                 // matrix covers more of the layer, else latitude first in a geographic system.
                 let swap = !*crs84
                     && match epsg_north_first(*system) {
@@ -1679,7 +1679,7 @@ fn wmts(url: &str, root: &Node) -> Service {
     }
     cut_listing(&mut service);
     if skipped > 0 {
-        service.notes.push(format!("{skipped} layers have no tile matrix set RustGIS can draw and are left out"));
+        service.notes.push(format!("{skipped} layers have no tile matrix set KHGIS can draw and are left out"));
     }
     if too_long > 0 {
         service.notes.push(format!(
@@ -2137,7 +2137,7 @@ pub fn coverage_area(info: &CoverageInfo, area: [f64; 4]) -> Option<[f64; 4]> {
 /// Records asked of a catalogue in one request.
 pub const RECORDS_PAGE: u32 = 20;
 
-/// A catalogue record's link: a service (`wms`, `wmts`, `wfs`, `wcs`, `ogcapi`, `arcgis`) RustGIS
+/// A catalogue record's link: a service (`wms`, `wmts`, `wfs`, `wcs`, `ogcapi`, `arcgis`) KHGIS
 /// can open, a file to download, or another web page.
 #[derive(Clone, Debug, PartialEq)]
 pub struct RecordLink {
@@ -2339,7 +2339,7 @@ fn arcgis(url: &str, v: &serde_json::Value) -> Result<Service, String> {
         .to_string();
     let full = v.get("fullExtent").or_else(|| v.get("extent")).and_then(arcgis_extent);
     let mut service = Service { kind: "ArcGIS".into(), title: title.clone(), ..Service::default() };
-    // A directory of services: its folders and the services RustGIS can add, each to open. Known
+    // A directory of services: its folders and the services KHGIS can add, each to open. Known
     // by its answer (services or folders, and no layers or capabilities of a service's own), not
     // its address: a folder may be named like a service.
     let service_answer = ["layers", "capabilities", "serviceDescription", "tileInfo"].iter().any(|k| v.get(k).is_some());
@@ -2505,7 +2505,7 @@ fn template_is_cache(service: &Service) -> bool {
     service.layers.first().is_some_and(|l| matches!(&l.offer, Offer::Tiles { template } if template.contains("/tile/{z}/")))
 }
 
-/// The ArcGIS service types a directory lists that RustGIS can add.
+/// The ArcGIS service types a directory lists that KHGIS can add.
 const ARCGIS_TYPES: [&str; 4] = ["MapServer", "FeatureServer", "ImageServer", "VectorTileServer"];
 
 /// A name an ArcGIS directory gives a folder or service, checked: it goes into addresses, so only
@@ -2519,7 +2519,7 @@ fn arcgis_name(n: &str) -> Option<&str> {
 }
 
 /// An ArcGIS services directory (`…/rest/services`, or a folder of it): its folders and the
-/// services RustGIS can add, each offered to open. Services are named with their folder
+/// services KHGIS can add, each offered to open. Services are named with their folder
 /// (`Folder/Name`), so their addresses start at the directory's root, not at the folder.
 fn arcgis_directory(b: &str, v: &serde_json::Value) -> Service {
     let lower = b.to_ascii_lowercase();
@@ -2532,7 +2532,7 @@ fn arcgis_directory(b: &str, v: &serde_json::Value) -> Service {
     let title = if here.is_empty() { "ArcGIS services".to_string() } else { here.to_string() };
     let mut service = Service { kind: "ArcGIS Services Directory".into(), title, ..Service::default() };
     let mut skipped = 0;
-    // Names RustGIS won't put into an address (spaces, `?`, `..`): counted in a note.
+    // Names KHGIS won't put into an address (spaces, `?`, `..`): counted in a note.
     let mut unnamed = 0;
     // ArcGIS's own system folder holds geometry and printing tools, never maps.
     for f in v.get("folders").and_then(|f| f.as_array()).into_iter().flatten().take(MAX_LISTED_LAYERS) {
@@ -2589,7 +2589,7 @@ fn arcgis_directory(b: &str, v: &serde_json::Value) -> Service {
         service.notes.push(format!("{skipped} services of other or unknown types (geoprocessing, geometry, …) are left out"));
     }
     if unnamed > 0 {
-        service.notes.push(format!("{unnamed} folders or services with names RustGIS can't put in an address are left out"));
+        service.notes.push(format!("{unnamed} folders or services with names KHGIS can't put in an address are left out"));
     }
     for (key, what) in [("folders", "folders"), ("services", "services")] {
         let left = v.get(key).and_then(|l| l.as_array()).map_or(0, Vec::len).saturating_sub(MAX_LISTED_LAYERS);
@@ -2770,7 +2770,7 @@ fn ogc_api(url: &str, v: &serde_json::Value) -> Result<Service, String> {
         });
     }
     if unreadable > 0 {
-        service.notes.push(format!("{unreadable} collections link to their items with an address RustGIS doesn't fetch and are left out"));
+        service.notes.push(format!("{unreadable} collections link to their items with an address KHGIS doesn't fetch and are left out"));
     }
     for ((what, tiles), ids) in &three_d {
         let mut named = ids.iter().take(20).map(|i| format!("'{i}'")).collect::<Vec<_>>().join(", ");
@@ -2851,7 +2851,7 @@ fn tileset(from: &str, links: &[serde_json::Value], which: TileRel) -> Option<(S
 }
 
 /// Notice template shared by native discovery and the translated asynchronous UI resolver.
-pub const QUERY_WITHHELD_NOTICE: &str = "{n} address(es) the service listed didn't get its keys or other settings: RustGIS sends those only to addresses it builds itself from the one given; add such an address with its own key if it needs one";
+pub const QUERY_WITHHELD_NOTICE: &str = "{n} address(es) the service listed didn't get its keys or other settings: KHGIS sends those only to addresses it builds itself from the one given; add such an address with its own key if it needs one";
 
 /// What an OGC API tiles document says on the way to a tile template: the template, or the
 /// address of the document to read next (a tileset list's WebMercatorQuad tileset).
@@ -3079,7 +3079,7 @@ struct ArcgisPaging {
 
 /// How a layer's description (`…/FeatureServer/0?f=json`) lets it be read in pages: `None` unless it
 /// says it supports them (`advancedQueryCapabilities.supportsPagination`, from ArcGIS Server 10.3).
-/// Its `maxRecordCount` is the page size when it is a count RustGIS would ask for; its object id
+/// Its `maxRecordCount` is the page size when it is a count KHGIS would ask for; its object id
 /// field, the order, when it is a plain field name (it goes into the address).
 fn arcgis_paging(layer: &serde_json::Value) -> Option<ArcgisPaging> {
     if layer.pointer("/advancedQueryCapabilities/supportsPagination").and_then(|p| p.as_bool()) != Some(true) {
@@ -3306,7 +3306,7 @@ enum Phase {
     /// lists them.
     Describe { pbf: bool },
     /// The address asked for, as it is: the first page. `paging`: how the ArcGIS layer it queries
-    /// is read in pages when this one is cut off (its description named no page size RustGIS
+    /// is read in pages when this one is cut off (its description named no page size KHGIS
     /// asks for, so the pages are as long as this one).
     First { paging: Option<ArcgisPaging> },
     /// A WFS hits response, used when its GeoJSON gives no next link.
@@ -4578,21 +4578,21 @@ mod tests {
         assert_eq!(offered[1].0, "plain");
         assert!(
             s.notes.contains(
-                &"collections 'gebouwen', 'terreinen', 'relative', 'bin' offer 3D Tiles, which RustGIS doesn't draw, so they are left out"
+                &"collections 'gebouwen', 'terreinen', 'relative', 'bin' offer 3D Tiles, which KHGIS doesn't draw, so they are left out"
                     .to_string()
             ),
             "{:?}",
             s.notes
         );
         assert!(
-            s.notes.contains(&"collection 'dtm' offers quantized mesh terrain, which RustGIS doesn't draw, so it is left out".to_string()),
+            s.notes.contains(&"collection 'dtm' offers quantized mesh terrain, which KHGIS doesn't draw, so it is left out".to_string()),
             "{:?}",
             s.notes
         );
         // A collection with tiles too is listed by them, and the note says its 3D items aren't.
         assert!(s.layers.iter().any(|l| l.name == "tiled (map tiles)"));
         assert!(
-            s.notes.contains(&"collection 'tiled' also offers 3D Tiles, which RustGIS doesn't draw; its tiles are listed".to_string()),
+            s.notes.contains(&"collection 'tiled' also offers 3D Tiles, which KHGIS doesn't draw; its tiles are listed".to_string()),
             "{:?}",
             s.notes
         );
@@ -4694,7 +4694,7 @@ mod tests {
         let brazil = Some([-71.99, -30.51, -34.12, 1.10]);
         assert!(fix_axes(ibge, brazil).is_none());
 
-        // Latitude first with no crs, as deegree answers when asked in the URN form (RustGIS asks
+        // Latitude first with no crs, as deegree answers when asked in the URN form (KHGIS asks
         // EPSG:4326). Turned round, a GeometryCollection too; a null geometry and a property
         // holding numbers are no positions.
         let hamburg = Some([8.41, 53.40, 10.33, 53.96]);
@@ -5951,14 +5951,14 @@ mod tests {
         assert_eq!((w.epsg, &w.grid), (32633, &warp::Grid::Map { lat_first: false }));
         // Its identify asks in UTM too.
         assert_eq!(utm.feature_info.as_ref().map(|f| f.crs.as_str()), Some("EPSG:32633"));
-        // One in a system RustGIS can't draw is left out, and said so.
+        // One in a system KHGIS can't draw is left out, and said so.
         assert!(s.notes.iter().any(|n| n.contains("1 layers")));
     }
 
     /// A WMS layer's legend: the one the service draws (GetLegendGraphic, when its capabilities
     /// offer it in PNG or JPEG), then its default style's `LegendURL` picture (the style named
     /// `default`, else the first, of its own and those it inherits; the first `LegendURL` in a
-    /// format RustGIS shows); WMS 1.1.1's alike, without the SLD version.
+    /// format KHGIS shows); WMS 1.1.1's alike, without the SLD version.
     #[test]
     fn wms_legends_from_the_service_and_the_default_style() {
         let caps = |version: &str, request: &str| {
@@ -5989,7 +5989,7 @@ mod tests {
         assert_eq!(urls(&s, "inherits"), ["https://maps.example.org/legend/parent.png"]);
         assert_eq!(urls(&s, "own"), ["https://maps.example.org/legend/first.png"], "its own style first; the GIF passed over; resolved");
         assert_eq!(urls(&s, "named default"), ["https://maps.example.org/legend/default.png"]);
-        // A picture RustGIS doesn't show, or not on the web: the parent's, or none.
+        // A picture KHGIS doesn't show, or not on the web: the parent's, or none.
         assert_eq!(urls(&s, "only svg"), Vec::<String>::new());
         assert_eq!(urls(&s, "not on the web"), Vec::<String>::new());
         assert!(s.layers.iter().flat_map(|l| &l.legends).all(|l| l.min_scale.is_none() && l.max_scale.is_none()));
@@ -6016,14 +6016,14 @@ mod tests {
             urls(&s, "inherits").first().map(String::as_str),
             Some("https://maps.example.org/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetLegendGraphic&LAYER=inherits&FORMAT=image%2Fjpeg")
         );
-        // Offered only in formats RustGIS doesn't show: not asked.
+        // Offered only in formats KHGIS doesn't show: not asked.
         let glg = r#"<GetLegendGraphic><Format>image/gif</Format></GetLegendGraphic>"#;
         let s = parse("https://maps.example.org/wms", caps("1.3.0", glg).as_bytes()).unwrap();
         assert_eq!(urls(&s, "own"), ["https://maps.example.org/legend/first.png"]);
     }
 
     /// A WMTS layer's legends: its default style's (`isDefault`, else the first), each with the
-    /// scales it is for, in formats RustGIS shows.
+    /// scales it is for, in formats KHGIS shows.
     #[test]
     fn wmts_legends_for_their_scales() {
         let xml = r#"<Capabilities xmlns="http://www.opengis.net/wmts/1.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0.0"><Contents>
@@ -6390,7 +6390,7 @@ mod tests {
         assert!(s.layers.iter().all(|l| l.time.as_ref().is_some_and(|t| t.default == "1999")));
         // (They go to the layers listed first, and the others are counted.)
         let note = format!(
-            "1450 layers keep fewer or none of their times: RustGIS keeps {MAX_DOCUMENT_TIME_VALUES} for one document, and they come after them"
+            "1450 layers keep fewer or none of their times: KHGIS keeps {MAX_DOCUMENT_TIME_VALUES} for one document, and they come after them"
         );
         assert!(s.notes.contains(&note), "{:?}", s.notes);
         assert!(s.layers[..MAX_DOCUMENT_TIME_VALUES / 1000].iter().all(|l| l.time.as_ref().is_some_and(|t| t.values.len() == 1000)));
@@ -6407,7 +6407,7 @@ mod tests {
         assert!(s.layers[..with_values].iter().all(|l| l.time.as_ref().is_some_and(|t| t.values.len() == 1000 && t.cut == 0)));
         assert!(s.layers[with_values..].iter().all(|l| l.time.as_ref().is_some_and(|t| t.values.is_empty() && t.cut == 1000)));
         let note = format!(
-            "10 layers keep fewer or none of their times: RustGIS keeps {MAX_DOCUMENT_TIME_VALUES} for one document, and they come after them"
+            "10 layers keep fewer or none of their times: KHGIS keeps {MAX_DOCUMENT_TIME_VALUES} for one document, and they come after them"
         );
         assert!(s.notes.contains(&note), "{:?}", s.notes);
         // One layer's own list past its cap: the earliest are left out, and the note counts it.
@@ -6801,7 +6801,7 @@ mod tests {
         }
         let clean = "https://h.invalid/svc?collections=roads";
         assert_eq!(resolve_tiles(clean, clean, tileset, false).unwrap().withheld_addresses, 0);
-        // Even a suffix appended by RustGIS must pass the raw-path check. The normal style
+        // Even a suffix appended by KHGIS must pass the raw-path check. The normal style
         // stays under its service; an advertised '..' style does not inherit its token.
         let address = "https://h.invalid/rest/services/a/VectorTileServer?token=RGSYNTH_style_20261103";
         let bound = crate::login_address::bind("0123456789abcdef", "https://h.invalid", address).unwrap();

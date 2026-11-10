@@ -2288,7 +2288,7 @@ pub struct LabelClass {
     #[serde(default, deserialize_with = "de_halo_color", skip_serializing_if = "Option::is_none")]
     pub halo_color: Option<Rgba>,
     /// How far the halo reaches beyond the letters (points, within [`HALO_WIDTH`]), as QGIS's
-    /// buffer size; none is RustGIS's thin halo.
+    /// buffer size; none is KHGIS's thin halo.
     #[serde(default, deserialize_with = "de_halo_width", skip_serializing_if = "Option::is_none")]
     pub halo_width: Option<f32>,
     /// Space added between letters (points, within a layout text's range), as QGIS's letter

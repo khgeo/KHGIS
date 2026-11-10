@@ -1,4 +1,4 @@
-//! Checks plugin.json files the way RustGIS does when it installs a plugin.
+//! Checks plugin.json files the way KHGIS does when it installs a plugin.
 //! cargo run -p rustgis-plugins --example check_manifest -- path/to/plugin.json …
 fn main() {
     let mut failed = false;

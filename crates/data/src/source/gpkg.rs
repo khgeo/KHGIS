@@ -253,7 +253,7 @@ impl GpkgSource {
             Some((z, m)) if z == 2 || m == 2 => match src.peek_zm() {
                 Some(true) => src.info.drop_zm(None),
                 Some(false) => {}
-                None => src.info.notes.push("couldn't tell whether it has Z or M values, which RustGIS doesn't keep".into()),
+                None => src.info.notes.push("couldn't tell whether it has Z or M values, which KHGIS doesn't keep".into()),
             },
             _ => {}
         }

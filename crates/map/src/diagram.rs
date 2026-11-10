@@ -586,7 +586,7 @@ mod tests {
         for mode in DiagramLabel::ALL {
             let d = DiagramSettings { labels: mode, ..settings() };
             let v = serde_json::to_value(&d).unwrap();
-            // "none" isn't written: an older RustGIS reads the layer as before.
+            // "none" isn't written: an older KHGIS reads the layer as before.
             assert_eq!(v.get("labels").is_none(), mode == DiagramLabel::None);
             let back: DiagramSettings = serde_json::from_value(v).unwrap();
             assert_eq!(back.labels, mode);

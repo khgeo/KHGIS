@@ -1,4 +1,4 @@
-//! GeoLibre presentation translated onto an already loaded RustGIS feature layer.
+//! GeoLibre presentation translated onto an already loaded KHGIS feature layer.
 use super::{Report, array, boolean, number, resolution, string};
 use crate::symbology::{ClassMethod, LabelPlacement};
 use crate::{Layer, Renderer, Rgba, Symbol};
@@ -13,7 +13,7 @@ pub fn apply(layer: &mut Layer, record: &Value, report: &mut Report) {
     layer.min_scale = scale(st, "minZoom", 0.0);
     layer.max_scale = scale(st, "maxZoom", 24.0);
     if layer.is_raster() {
-        report.approximated(&name, "raster colouring uses RustGIS defaults");
+        report.approximated(&name, "raster colouring uses KHGIS defaults");
         return;
     }
     let mut symbol = Symbol::default_for(layer.geometry_type(), 0);
@@ -76,7 +76,7 @@ pub fn apply(layer: &mut Layer, record: &Value, report: &mut Report) {
                 field: field.into(),
                 min: first.0,
                 classes: pairs.len(),
-                // GeoLibre stores class lower bounds and switches at equality. RustGIS
+                // GeoLibre stores class lower bounds and switches at equality. KHGIS
                 // stores inclusive upper bounds: the previous float preserves that boundary.
                 breaks: pairs.iter().skip(1).map(|p| p.0.next_down()).chain(std::iter::once(f64::MAX)).collect(),
                 symbols: pairs.iter().map(|p| painted(symbol, p.1, layer.geometry_type(), number(st, "fillOpacity", 0.6))).collect(),
@@ -145,7 +145,7 @@ pub fn apply(layer: &mut Layer, record: &Value, report: &mut Report) {
         && c.halo
         && (number(labels, "haloWidth", 1.5) != 1.0 || !matches!(string(labels, "haloColor"), "" | "#ffffff" | "#FFFFFF"))
     {
-        report.approximated(&name, "label halo uses RustGIS's default colour and width");
+        report.approximated(&name, "label halo uses KHGIS's default colour and width");
     }
     for (key, v) in [
         ("filterExpression", record.get("filterExpression")),
@@ -164,7 +164,7 @@ pub fn apply(layer: &mut Layer, record: &Value, report: &mut Report) {
     }
 }
 
-/// Zoom limits become scale denominators at the equator, using RustGIS's 0.28 mm pixel.
+/// Zoom limits become scale denominators at the equator, using KHGIS's 0.28 mm pixel.
 fn scale(v: &Value, key: &str, default: f64) -> Option<f64> {
     let z = number(v, key, default).clamp(0.0, 24.0);
     (z != default).then(|| resolution(z) / 0.00028)

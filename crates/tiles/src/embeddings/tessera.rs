@@ -69,7 +69,7 @@ pub fn parse_group(zone: u32, bytes: &[u8]) -> Result<Grid, String> {
         ([dx, 0.0, x0, 0.0, dy, y0], [h, w]) if *dx > 0.0 && *dy < 0.0 && *w > 0 && *h > 0 && x0.is_finite() && y0.is_finite() => {
             Ok(Grid { zone, x0: *x0, y0: *y0, dx: *dx, dy: *dy, width: *w, height: *h })
         }
-        _ => Err(format!("Tessera's zone {zone}: its grid isn't one RustGIS reads")),
+        _ => Err(format!("Tessera's zone {zone}: its grid isn't one KHGIS reads")),
     }
 }
 

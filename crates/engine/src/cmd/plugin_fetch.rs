@@ -158,7 +158,7 @@ pub fn checked(url: &str) -> Result<String, String> {
         let shown: String = url.chars().take(80).collect();
         return Err(format!("{shown}: plugins fetch only http:// and https:// addresses"));
     }
-    // A fragment never reaches the server (and RustGIS marks byte ranges with one).
+    // A fragment never reaches the server (and KHGIS marks byte ranges with one).
     let url = url.split('#').next().unwrap_or(url);
     address::check(url, None)?;
     if address::reach(url) != address::Reach::Public && !allow_local() {

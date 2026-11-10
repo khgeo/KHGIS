@@ -1,4 +1,4 @@
-//! QGIS raster renderers (`<pipe><rasterrenderer>`) as a RustGIS [`RasterStyle`]: singleband
+//! QGIS raster renderers (`<pipe><rasterrenderer>`) as a KHGIS [`RasterStyle`]: singleband
 //! grey as a stretch from black to white, singleband pseudocolour as a stretch along its colour
 //! map (interpolated), as classes (discrete) or as unique values (exact), paletted as unique
 //! values, multiband colour as RGB, hillshade as shaded relief; each with its contrast
@@ -13,14 +13,14 @@ use crate::color::{CustomRamp, Ramp, RampKind};
 use crate::raster::{MAX_UNIQUE_VALUES, RasterMask, RasterRenderer, RasterStyle, Resampling, Stretch};
 use crate::symbology::ClassMethod;
 
-/// The most bands a QGIS renderer is read naming (RustGIS's bands are checked against the file
+/// The most bands a QGIS renderer is read naming (KHGIS's bands are checked against the file
 /// when the style is applied).
 const MAX_BAND: usize = 10_000;
 /// The most colour map entries read.
 const MAX_ITEMS: usize = 4096;
 
 /// A raster's style from its layer's `<pipe>` (`node`: a project's `<maplayer>` or a style's
-/// root), or `None` (noted) for a renderer RustGIS has no match for.
+/// root), or `None` (noted) for a renderer KHGIS has no match for.
 pub(super) fn read(node: Node, layer: &str, report: &mut Report) -> Option<RasterStyle> {
     let pipe = child(node, "pipe")?;
     let r = child(pipe, "rasterrenderer")?;
@@ -30,7 +30,7 @@ pub(super) fn read(node: Node, layer: &str, report: &mut Report) -> Option<Raste
     // A renderer dropped where nothing said why (a band that isn't a band number, a colour map
     // too long for a ramp or with no finite value) is noted here.
     if style.is_none() && report.notes.len() == notes {
-        report.approximated(layer, format!("its raster colouring ({kind} renderer), which RustGIS couldn't read, drawn by its default"));
+        report.approximated(layer, format!("its raster colouring ({kind} renderer), which KHGIS couldn't read, drawn by its default"));
     }
     style
 }
@@ -69,7 +69,7 @@ fn renderer_style(node: Node, pipe: Node, r: Node, kind: &str, layer: &str, repo
         }
         "multibandcolor" => {
             let (Some(red), Some(green), Some(blue)) = (band("redBand"), band("greenBand"), band("blueBand")) else {
-                report.approximated(layer, "a multiband raster missing a red, green or blue band, drawn by RustGIS's default");
+                report.approximated(layer, "a multiband raster missing a red, green or blue band, drawn by KHGIS's default");
                 return None;
             };
             let enh = ["redContrastEnhancement", "greenContrastEnhancement", "blueContrastEnhancement"].map(|t| child(r, t));
@@ -120,7 +120,7 @@ fn renderer_style(node: Node, pipe: Node, r: Node, kind: &str, layer: &str, repo
     };
     if let Some(bc) = child(pipe, "brightnesscontrast") {
         let num = |k: &str| bc.attribute(k).and_then(|v| v.trim().parse::<f64>().ok()).filter(|v| v.is_finite());
-        // QGIS's brightness runs -255 to 255, RustGIS's -100 to 100; contrast is -100 to 100 in both.
+        // QGIS's brightness runs -255 to 255, KHGIS's -100 to 100; contrast is -100 to 100 in both.
         style.brightness = num("brightness").map_or(0.0, |b| (b / 2.55).clamp(-100.0, 100.0));
         style.contrast = num("contrast").map_or(0.0, |c| c.clamp(-100.0, 100.0));
         style.gamma = num("gamma").map_or(1.0, |g| g.clamp(0.1, 10.0));
@@ -137,7 +137,7 @@ fn renderer_style(node: Node, pipe: Node, r: Node, kind: &str, layer: &str, repo
 }
 
 /// Black to white (or white to black) as a two-stop ramp: QGIS's grey is the full range, where
-/// RustGIS's Greys ramp stops short of both ends.
+/// KHGIS's Greys ramp stops short of both ends.
 fn grey(black_to_white: bool) -> Option<Ramp> {
     let (lo, hi) =
         if black_to_white { (Rgba::rgb(0, 0, 0), Rgba::rgb(255, 255, 255)) } else { (Rgba::rgb(255, 255, 255), Rgba::rgb(0, 0, 0)) };
@@ -161,7 +161,7 @@ fn pseudocolor(r: Node, band: usize, mask: &mut RasterMask, layer: &str, report:
         .collect();
     items.sort_by(|a, b| a.0.total_cmp(&b.0));
     if items.is_empty() {
-        report.approximated(layer, "a pseudocolour raster without a colour map, drawn by RustGIS's default");
+        report.approximated(layer, "a pseudocolour raster without a colour map, drawn by KHGIS's default");
         return None;
     }
     let num = |k: &str| shader.attribute(k).and_then(|v| v.trim().parse::<f64>().ok()).filter(|v| v.is_finite());
@@ -199,7 +199,7 @@ fn pseudocolor(r: Node, band: usize, mask: &mut RasterMask, layer: &str, report:
     }
 }
 
-/// A colour per value, at most [`MAX_UNIQUE_VALUES`] (noted past them), sorted as RustGIS looks
+/// A colour per value, at most [`MAX_UNIQUE_VALUES`] (noted past them), sorted as KHGIS looks
 /// them up; the values as the pixels hold them (in f32).
 fn unique(band: usize, mut values: Vec<(f64, Rgba)>, layer: &str, report: &mut Report) -> Option<RasterRenderer> {
     values.retain(|v| v.0.is_finite());
@@ -243,7 +243,7 @@ fn stretch_of(r: Node, e: Option<Node>, mask: &mut RasterMask) -> Stretch {
     match e.and_then(bounds_of) {
         Some(b) => {
             clip(e, b, mask);
-            // Bounds worked out from the canvas follow the view: RustGIS's dynamic range.
+            // Bounds worked out from the canvas follow the view: KHGIS's dynamic range.
             dynamic(r).unwrap_or(Stretch::custom(b[0], b[1]))
         }
         None => Stretch::None,
@@ -251,7 +251,7 @@ fn stretch_of(r: Node, e: Option<Node>, mask: &mut RasterMask) -> Stretch {
 }
 
 /// The stretch QGIS works out again as the view changes (`<minMaxOrigin>` with a canvas extent),
-/// as RustGIS's (its dynamic range adjustment then on).
+/// as KHGIS's (its dynamic range adjustment then on).
 fn dynamic(r: Node) -> Option<Stretch> {
     let o = child(r, "minMaxOrigin")?;
     let text = |t: &str| child(o, t).and_then(|n| n.text()).map(str::trim);

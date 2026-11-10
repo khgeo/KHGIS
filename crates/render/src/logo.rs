@@ -1,5 +1,5 @@
 //! The KHGIS logo, drawn in code (no image files): three stacked map layers on a navy rounded
-//! square. KHGIS is built on RustGIS.
+//! square. KHGIS is built on KHGIS.
 
 use tiny_skia::{FillRule, Paint, PathBuilder, Pixmap, Transform};
 

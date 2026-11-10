@@ -8,7 +8,7 @@
 //!
 //! - Coordinates are integers, scaled and translated by the answer's `transform`. X and Y are
 //!   zigzag differences from the vertex before, starting over at each part; Z and M are each
-//!   vertex's own. RustGIS keeps neither Z nor M, and says so.
+//!   vertex's own. KHGIS keeps neither Z nor M, and says so.
 //! - Polygon rings are clockwise when outer and counterclockwise when holes in the outer ring
 //!   before them, as Esri writes them and as [`crate::filegdb`] reads them. A ring with no area is
 //!   left out, and said.
@@ -303,13 +303,13 @@ pub fn read_page_within(bytes: &[u8], name: &str, limit: usize) -> Result<Page> 
         report.messages.push(format!("{not_read} fields hold geometries, blobs or rasters, which aren't read, and are left out"));
     }
     if unknown > 0 {
-        report.messages.push(format!("{unknown} fields have a type RustGIS doesn't know; their values are read as text"));
+        report.messages.push(format!("{unknown} fields have a type KHGIS doesn't know; their values are read as text"));
     }
     let (code, wkt, wkt_utf8) = match reference {
         Some(bytes) => spatial_reference(bytes, &mut tally)?,
         None => (None, None, true),
     };
-    // Only when the WKT is what names the system: a code RustGIS knows goes first.
+    // Only when the WKT is what names the system: a code KHGIS knows goes first.
     if !wkt_utf8 && code.and_then(crate::filegdb::crs_of_code).is_none() {
         report.messages.push("the coordinate system's WKT isn't valid UTF-8; the bytes that can't be read are replaced with U+FFFD".into());
     }
@@ -649,7 +649,7 @@ fn field(bytes: &[u8], tally: &mut Tally) -> Result<Declared> {
     Ok(Declared { name, number, utf8: utf8 && alias_utf8, alias })
 }
 
-/// The code of an answer's coordinate system (its `latestWkid` when RustGIS knows it, else its
+/// The code of an answer's coordinate system (its `latestWkid` when KHGIS knows it, else its
 /// `wkid`), its WKT and whether that WKT was valid UTF-8. The WKT is taken from the text room
 /// before it's made.
 fn spatial_reference(bytes: &[u8], tally: &mut Tally) -> Result<(Option<u32>, Option<String>, bool)> {

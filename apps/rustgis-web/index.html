@@ -1,22 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="km">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
   <title>KHGIS</title>
-  <link rel="icon" href="https://assets.rustgis.app/images/favicon.png">
+  <link rel="icon" href="khgis-icon.svg">
   <!-- Installable as an app (docs/installation.md › Install the web app). -->
   <link data-trunk rel="copy-file" href="manifest.webmanifest" />
+  <link data-trunk rel="copy-file" href="khgis-logo.svg" />
+  <link data-trunk rel="copy-file" href="khgis-icon.svg" />
   <link data-trunk rel="copy-file" href="oauth-callback.html" />
   <link data-trunk rel="copy-file" href="../../LICENSE" />
   <link data-trunk rel="copy-file" href="../../THIRD-PARTY-LICENSES.txt" />
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#e4e8ee">
-  <link rel="apple-touch-icon" href="https://assets.rustgis.app/images/apple-touch-icon.png">
+  <link rel="apple-touch-icon" href="khgis-icon.svg">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="RustGIS">
+  <meta name="apple-mobile-web-app-title" content="KHGIS">
   <link data-trunk rel="rust" data-bin="rustgis-web" data-cargo-profile="web" data-wasm-opt="z" data-weak-refs />
   <style>
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #e4e8ee; }
@@ -44,15 +46,15 @@
 </head>
 <body>
   <canvas id="rustgis_canvas"></canvas>
-  <div id="rustgis_loading"><img src="https://assets.rustgis.app/images/logo.svg" alt=""><div>Loading RustGIS&hellip;</div></div>
+  <div id="rustgis_loading"><img src="khgis-logo.svg" alt=""><div>Loading KHGIS&hellip;</div></div>
   <div id="rustgis_local" role="alert" hidden><div>
-    <h1>RustGIS needs a web server</h1>
+    <h1>KHGIS needs a web server</h1>
     <p>Browsers do not let a page opened as a local file start the app. In this folder, run:</p>
     <code>python3 -m http.server 8080</code>
-    <p>Then open <a href="http://localhost:8080/">http://localhost:8080/</a>. Or use RustGIS at <a href="https://web.rustgis.app">web.rustgis.app</a>; there is <a href="https://rustgis.app/installation/#self-host-the-static-build">more on self-hosting</a> in the documentation.</p>
+    <p>Then open <a href="http://localhost:8080/">http://localhost:8080/</a>. Or use KHGIS at <a href="https://khgeo.github.io/KHGIS/">khgeo.github.io/KHGIS</a>.</p>
   </div></div>
   <div id="rustgis_update" role="status" hidden>
-    <span>A new version of RustGIS is available.</span>
+    <span>A new version of KHGIS is available.</span>
     <button type="button" class="reload">Reload</button>
     <button type="button" class="dismiss" aria-label="Dismiss">&times;</button>
   </div>

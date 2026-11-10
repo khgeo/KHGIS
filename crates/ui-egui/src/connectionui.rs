@@ -767,7 +767,7 @@ pub fn dialog(app: &mut RustGisApp, ui: &mut egui::Ui) -> bool {
         )
     } else if app.ui.connection.kind == "s3" {
         tl!(
-            "A named endpoint you can reuse. Keys are kept until RustGIS closes unless you choose to remember them on this computer; the connection itself never keeps them."
+            "A named endpoint you can reuse. Keys are kept until KHGIS closes unless you choose to remember them on this computer; the connection itself never keeps them."
         )
     } else {
         tl!("Web-service logins last for this session only.")

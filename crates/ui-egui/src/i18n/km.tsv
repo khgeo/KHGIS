@@ -15,8 +15,8 @@ A4 landscape sheet	ក្រដាស A4 ផ្ដេក
 A4 portrait sheet	ក្រដាស A4 បញ្ឈរ
 About	អំពី
 About plugins	អំពីកម្មវិធីបន្ថែម
-About RustGIS	អំពី RustGIS
-About RustGIS.	អំពី RustGIS។
+About KHGIS	អំពី KHGIS
+About KHGIS.	អំពី KHGIS។
 Add	បន្ថែម
 Add\nData	បន្ថែម\nទិន្នន័យ
 Add ({n})	បន្ថែម ({n})
@@ -52,7 +52,7 @@ Additional surrounds.	ធាតុជុំវិញផែនទីបន្ថ�
 Administrative Boundaries	ព្រំដែនរដ្ឋបាល
 After	ក្រោយ
 Agent threads	ខ្សែសន្ទនាភ្នាក់ងារ
-Agents on this computer that connect (Claude Code, Codex, Cursor and others) work on the map open here, with RustGIS's tools: they can open and save files and use the web. Scripts and plugin management stay off.	ភ្នាក់ងារនៅលើកុំព្យូទ័រនេះដែលតភ្ជាប់ (Claude Code, Codex, Cursor និងផ្សេងៗ) ធ្វើការលើផែនទីដែលបើកនៅទីនេះ ដោយប្រើឧបករណ៍របស់ RustGIS៖ ពួកវាអាចបើក និងរក្សាទុកឯកសារ និងប្រើវេប។ ស្គ្រីប និងការគ្រប់គ្រងកម្មវិធីបន្ថែមនៅតែបិទ។
+Agents on this computer that connect (Claude Code, Codex, Cursor and others) work on the map open here, with KHGIS's tools: they can open and save files and use the web. Scripts and plugin management stay off.	ភ្នាក់ងារនៅលើកុំព្យូទ័រនេះដែលតភ្ជាប់ (Claude Code, Codex, Cursor និងផ្សេងៗ) ធ្វើការលើផែនទីដែលបើកនៅទីនេះ ដោយប្រើឧបករណ៍របស់ KHGIS៖ ពួកវាអាចបើក និងរក្សាទុកឯកសារ និងប្រើវេប។ ស្គ្រីប និងការគ្រប់គ្រងកម្មវិធីបន្ថែមនៅតែបិទ។
 Agents then run commands, change files and use the web on this computer without asking you.	បន្ទាប់មក ភ្នាក់ងារដំណើរការពាក្យបញ្ជា កែឯកសារ និងប្រើវេបនៅលើកុំព្យូទ័រនេះ ដោយមិនសួរអ្នក។
 Aggregation	ការប្រមូលផ្ដុំ
 AI	AI
@@ -425,7 +425,7 @@ Font	ពុម្ពអក្សរ
 Forget Saved Keys	បំភ្លេចសោដែលបានរក្សាទុក
 Forget Saved Password	បំភ្លេចពាក្យសម្ងាត់ដែលបានរក្សាទុក
 Format	ទម្រង់
-Found: {names}. An agent works on this map through RustGIS's tools and with its own (web, scripts, files) in a folder of its own, kept in Documents › RustGIS › Agent work. It asks you before each action.	បានរកឃើញ៖ {names}។ ភ្នាក់ងារធ្វើការលើផែនទីនេះតាមរយៈឧបករណ៍របស់ RustGIS និងឧបករណ៍ផ្ទាល់ខ្លួន (វេប ស្គ្រីប ឯកសារ) ក្នុងថតផ្ទាល់ខ្លួន ដែលរក្សាទុកក្នុង Documents › RustGIS › Agent work។ វាសួរអ្នកមុនសកម្មភាពនីមួយៗ។
+Found: {names}. An agent works on this map through KHGIS's tools and with its own (web, scripts, files) in a folder of its own, kept in Documents › KHGIS › Agent work. It asks you before each action.	បានរកឃើញ៖ {names}។ ភ្នាក់ងារធ្វើការលើផែនទីនេះតាមរយៈឧបករណ៍របស់ KHGIS និងឧបករណ៍ផ្ទាល់ខ្លួន (វេប ស្គ្រីប ឯកសារ) ក្នុងថតផ្ទាល់ខ្លួន ដែលរក្សាទុកក្នុង Documents › KHGIS › Agent work។ វាសួរអ្នកមុនសកម្មភាពនីមួយៗ។
 France	បារាំង
 Freehand	គូរដោយដៃ
 From	ពី
@@ -509,7 +509,7 @@ In Beyond	ក្នុងហួស
 In memory	ក្នុងអង្គចងចាំ
 In place	នៅនឹងកន្លែង
 In project	ក្នុងគម្រោង
-In RustGIS, it can:	ក្នុងកម្មវិធីនេះ វាអាច៖
+In KHGIS, it can:	ក្នុងកម្មវិធីនេះ វាអាច៖
 In the middle	នៅកណ្ដាល
 Indent	ចូលបន្ទាត់
 Indices	សន្ទស្សន៍
@@ -577,7 +577,7 @@ Learning\nResources	ធនធាន\nសិក្សា
 Legend	តារាងសម្គាល់
 Length	ប្រវែង
 Let the assistant hand tasks to agents on this computer	អនុញ្ញាតឲ្យជំនួយការប្រគល់កិច្ចការទៅភ្នាក់ងារនៅលើកុំព្យូទ័រនេះ
-Let your Agents Control RustGIS	អនុញ្ញាតឲ្យភ្នាក់ងាររបស់អ្នកគ្រប់គ្រង RustGIS
+Let your Agents Control KHGIS	អនុញ្ញាតឲ្យភ្នាក់ងាររបស់អ្នកគ្រប់គ្រង KHGIS
 Level	កម្រិត
 Library	បណ្ណាល័យ
 Light and Shadow	ពន្លឺ និងស្រមោល
@@ -900,9 +900,9 @@ Run	ដំណើរការ
 Run All Steps	ដំណើរការជំហានទាំងអស់
 Run {name}	ដំណើរការ {name}
 Running…	កំពុងដំណើរការ…
-RustGIS didn't close properly last time, so it started with the World Atlas instead of your start-up project. Open the project from the Project menu when you're ready.	RustGIS មិនបានបិទត្រឹមត្រូវកាលពីលើកមុន ដូច្នេះវាបានចាប់ផ្ដើមជាមួយអាត្លាសពិភពលោក ជំនួសគម្រោងចាប់ផ្ដើមរបស់អ្នក។ សូមបើកគម្រោងពីម៉ឺនុយគម្រោង នៅពេលអ្នករួចរាល់។
-RustGIS plugin	កម្មវិធីបន្ថែម RustGIS
-RustGIS project	គម្រោង RustGIS
+KHGIS didn't close properly last time, so it started with the World Atlas instead of your start-up project. Open the project from the Project menu when you're ready.	KHGIS មិនបានបិទត្រឹមត្រូវកាលពីលើកមុន ដូច្នេះវាបានចាប់ផ្ដើមជាមួយអាត្លាសពិភពលោក ជំនួសគម្រោងចាប់ផ្ដើមរបស់អ្នក។ សូមបើកគម្រោងពីម៉ឺនុយគម្រោង នៅពេលអ្នករួចរាល់។
+KHGIS plugin	កម្មវិធីបន្ថែម KHGIS
+KHGIS project	គម្រោង KHGIS
 Satellite Embeddings…	Embeddings ផ្កាយរណប…
 Saturation	កម្រិតពណ៌ឆ្អែត
 Save	រក្សាទុក
@@ -1066,7 +1066,7 @@ The reply stopped before completion; no actions were run.	ចម្លើយប�
 The saved sign-in changed. Select your account again.	ការចូលគណនីដែលបានរក្សាទុកបានផ្លាស់ប្ដូរ។ សូមជ្រើសគណនីរបស់អ្នកម្ដងទៀត។
 The sign-in expired or was revoked. Sign in again.	ការចូលគណនីបានផុតកំណត់ ឬត្រូវបានដកហូត។ សូមចូលម្ដងទៀត។
 The start-up project {path} didn't open: {error}	គម្រោងចាប់ផ្ដើម {path} មិនអាចបើកបាន៖ {error}
-The start-up project {path} isn't a RustGIS project file.	គម្រោងចាប់ផ្ដើម {path} មិនមែនជាឯកសារគម្រោង RustGIS ទេ។
+The start-up project {path} isn't a KHGIS project file.	គម្រោងចាប់ផ្ដើម {path} មិនមែនជាឯកសារគម្រោង KHGIS ទេ។
 Theme	ស្បែក
 Third-party licences	អាជ្ញាប័ណ្ណភាគីទីបី
 this build can't download plugins	កំណែនេះមិនអាចទាញយកកម្មវិធីបន្ថែមបានទេ
@@ -1160,9 +1160,9 @@ Web Tool	ឧបករណ៍វេប
 Website	គេហទំព័រ
 Weekly usage	ការប្រើប្រាស់ប្រចាំសប្ដាហ៍
 Weights	ទម្ងន់
-Welcome to RustGIS	សូមស្វាគមន៍មកកាន់ KHGIS
+Welcome to KHGIS	សូមស្វាគមន៍មកកាន់ KHGIS
 West	លិច
-What RustGIS opens with: the World Atlas sample, a blank map, a project you choose, or the last project opened or saved.	អ្វីដែល RustGIS បើកនៅពេលចាប់ផ្ដើម៖ គំរូអាត្លាសពិភពលោក ផែនទីទទេ គម្រោងដែលអ្នកជ្រើស ឬគម្រោងចុងក្រោយដែលបានបើក ឬរក្សាទុក។
+What KHGIS opens with: the World Atlas sample, a blank map, a project you choose, or the last project opened or saved.	អ្វីដែល KHGIS បើកនៅពេលចាប់ផ្ដើម៖ គំរូអាត្លាសពិភពលោក ផែនទីទទេ គម្រោងដែលអ្នកជ្រើស ឬគម្រោងចុងក្រោយដែលបានបើក ឬរក្សាទុក។
 Whitebox and GeoLibre tools	ឧបករណ៍ Whitebox និង GeoLibre
 Width	ទទឹង
 Windows	ផ្ទាំងបង្អួច
@@ -1203,7 +1203,7 @@ Zoom to selection	ពង្រីកទៅការជ្រើសរើស
 {total} plugins	{total} កម្មវិធីបន្ថែម
 ＋ Add field	＋ បន្ថែមវាល
 About {app}	អំពី {app}
-Built on RustGIS (Apache License 2.0)	បង្កើតលើ RustGIS (អាជ្ញាប័ណ្ណ Apache 2.0)
+Built on KHGIS (Apache License 2.0)	បង្កើតលើ KHGIS (អាជ្ញាប័ណ្ណ Apache 2.0)
 Messages	សារ
 Rivers	ទន្លេ
 Lakes	បឹង

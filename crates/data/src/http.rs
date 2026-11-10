@@ -1,4 +1,4 @@
-//! The certificate trust of RustGIS's native HTTPS clients (desktop and command line).
+//! The certificate trust of KHGIS's native HTTPS clients (desktop and command line).
 //!
 //! Clients verify servers with the operating system's trust (Windows and macOS: their own
 //! verifiers, which honour what the system distrusts; Linux and the BSDs: the system bundle, or

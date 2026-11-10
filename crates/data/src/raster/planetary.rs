@@ -3,7 +3,7 @@
 //!
 //! RustGIS has no model of other bodies' coordinates yet (opengeos/RustGIS#1448). Every layer is
 //! read as the Earth's longitude/latitude, so a planetary system is only reported:
-//! - Its longitude/latitude, or a projection RustGIS unprojects, are read as they are, with a
+//! - Its longitude/latitude, or a projection KHGIS unprojects, are read as they are, with a
 //!   notice that the map, its scale bar and measurements take them for the Earth's. This works
 //!   because such a system has no shift to WGS 84, so the conversion leaves its numbers unchanged.
 //! - Data that would land in the wrong place as longitude/latitude is refused: metres that would
@@ -11,7 +11,7 @@
 //!
 //! A system is another body's when:
 //! - its ellipsoid's semi-major axis is outside [`EARTH_SEMI_MAJOR`] (6 350 to 6 400 km). Every
-//!   Earth ellipsoid and sphere in the EPSG and ESRI definitions RustGIS bundles lies inside it,
+//!   Earth ellipsoid and sphere in the EPSG and ESRI definitions KHGIS bundles lies inside it,
 //!   and a test checks each one. Venus, the body nearest the Earth in size, has a radius of
 //!   6 051.8 km (IAU 2015). This is how a definition is told apart: WKT, a GeoTIFF's keys, a PROJ
 //!   string or PROJJSON.
@@ -112,7 +112,7 @@ pub fn read_note(system: &str) -> String {
     format!("{system} belongs to another body than the Earth; it is drawn and measured as if on the Earth")
 }
 
-/// [`read_note`] for a system known only by its code. The layer keeps no system, because RustGIS
+/// [`read_note`] for a system known only by its code. The layer keeps no system, because KHGIS
 /// has no definition of the body to give it. An export of the layer can't tell, so this notice
 /// says now that exports take the data for the Earth's too.
 pub fn code_note(system: &str) -> String {
@@ -339,7 +339,7 @@ mod tests {
 
     #[test]
     fn the_earth_band_holds_every_bundled_earth_system() {
-        // Every EPSG and ESRI definition RustGIS bundles is the Earth's: none may be taken for
+        // Every EPSG and ESRI definition KHGIS bundles is the Earth's: none may be taken for
         // another body's.
         let (mut low, mut high) = (f64::INFINITY, 0.0f64);
         let defs = (0..=u16::MAX)
@@ -502,7 +502,7 @@ mod tests {
                 assert!(lonlat(projjson(&axes("GeodeticCRS", "spherical", unit, id))), "{unit} {id}");
             }
         }
-        // Junk units are no unit RustGIS knows, not a crash.
+        // Junk units are no unit KHGIS knows, not a crash.
         assert!(refused(projjson(&axes("GeographicCRS", "ellipsoidal", "[1,2]", ""))));
         assert!(refused(projjson(&axes("GeographicCRS", "ellipsoidal", r#"{"conversion_factor":"x"}"#, ""))));
         // The definition goes before the code, as in WKT: a projected or mirrored one under a

@@ -1317,7 +1317,7 @@ fn qgis_categories_by_an_expression_class_by_it_where_it_reads() {
         assert_eq!(class.as_deref(), over.then_some("Big"), "row {row}");
     }
     // Boolean categories (as QGIS writes them) by such a field: matching its text "true" and
-    // "false" as they are, a boolean field's values as RustGIS prints them.
+    // "false" as they are, a boolean field's values as KHGIS prints them.
     let bools = r#"<category value="true" type="bool" symbol="0"/><category value="false" type="bool" symbol="1"/>"#;
     // (A bare name is a field to the importer itself; one with a space is matched here.)
     for (ty, name) in [("text", "Is Big"), ("boolean", "Big Flag"), ("boolean", "big_bool")] {
@@ -1348,7 +1348,7 @@ fn qgis_categories_by_an_expression_class_by_it_where_it_reads() {
     for (row, (over, class)) in picks(l).iter().enumerate() {
         assert_eq!(class.as_deref(), Some(if *over { "true" } else { "false" }), "mixed row {row}");
     }
-    // By an expression, boolean categories match its value as RustGIS prints it.
+    // By an expression, boolean categories match its value as KHGIS prints it.
     let by_expr = "&quot;pop_max&quot; &gt; 5000000";
     let r = s.run("style.importQgis", &json!({"layer": "Cities", "text": qml(by_expr, bools)})).unwrap();
     assert!(notes(&r).is_empty(), "{:?}", notes(&r));
@@ -1618,7 +1618,7 @@ fn label_expressions_say_what_they_lose() {
 #[test]
 fn a_qgis_styles_data_defined_settings_are_kept_where_they_read() {
     let mut s = world();
-    // Size by a field Cities has; fill by a QGIS function RustGIS lacks; outline by a field it hasn't.
+    // Size by a field Cities has; fill by a QGIS function KHGIS lacks; outline by a field it hasn't.
     let dd = |name: &str, expr: &str| {
         format!(
             r#"<Option type="Map" name="{name}"><Option value="true" type="bool" name="active"/><Option value="{expr}" type="QString" name="expression"/><Option value="3" type="int" name="type"/></Option>"#
@@ -2125,7 +2125,7 @@ fn project_save_and_open_roundtrip() {
     std::fs::remove_dir_all(&dir).ok();
 }
 
-/// RustGIS files are read only from regular files: a device that reports no size and never ends
+/// KHGIS files are read only from regular files: a device that reports no size and never ends
 /// (`/dev/zero`) would exhaust memory, and a named pipe without a writer would hang the reader.
 #[cfg(unix)]
 #[test]
@@ -2572,7 +2572,7 @@ fn imported_tasks_name_outputs_and_steps_are_edited() {
     // plain output name stays in the session there too.
     assert!(!crate::cmd::items::touches_files(&s, "gp.spatialJoin", &json!({"target": "Cities", "join": "Countries", "output": "Joined"})));
     assert!(!crate::cmd::items::touches_files(&s, "gp.zonalStats", &json!({"raster": "dem", "polygons": "Countries", "output": "Zones"})));
-    // Only a plain layer name, only gp.run's (and those two's), only for RustGIS's own tools.
+    // Only a plain layer name, only gp.run's (and those two's), only for KHGIS's own tools.
     for (command, params) in [
         ("gp.run", json!({"tool": "buffer", "params": {"output": "x.shp"}})),
         ("gp.run", json!({"tool": "buffer", "params": {"output": "sub/x"}})),
@@ -2580,7 +2580,7 @@ fn imported_tasks_name_outputs_and_steps_are_edited() {
         ("gp.run", json!({"tool": "buffer", "params": {"output": ".bashrc"}})),
         ("gp.run", json!({"tool": "geolibre:slope", "params": {"output": "slope"}})),
         ("gp.run", json!({"tool": "plugin:kit/hex", "params": {"output": "hex"}})),
-        // Not one of RustGIS's own tools, even without a prefix.
+        // Not one of KHGIS's own tools, even without a prefix.
         ("gp.run", json!({"tool": "someOtherTool", "params": {"output": "x"}})),
         ("gp.run", json!({"tool": "buffer", "params": {"input": "Cities", "nested": {"output": "x"}}})),
         ("layer.rename", json!({"layer": "Cities", "output": "x"})),
@@ -3208,7 +3208,7 @@ fn hostile_params_never_panic(shard: usize) {
                 | "boundaries.countries"
                 // Asks Source Cooperative for its featured products.
                 | "sourcecoop.products"
-                // Starts a sign-in's callback server (RustGIS's own app on ArcGIS Online).
+                // Starts a sign-in's callback server (KHGIS's own app on ArcGIS Online).
                 | "arcgis.signIn"
                 // Signs every session out, which the process's other tests use (its junk is
                 // covered by an_arcgis_token_in_a_service_address_reaches_its_layers).
@@ -11210,11 +11210,11 @@ fn jupyter_python_notebooks_survive_open_and_save() {
         assert_eq!(opened.cells[0].output.as_deref(), Some("2\nab"));
         s.run("notebook.remove", &json!({"notebook": s.project.notebooks.len() - 1})).unwrap();
     }
-    // A notebook with more cells than RustGIS holds is refused rather than cut short.
+    // A notebook with more cells than KHGIS holds is refused rather than cut short.
     let many = json!({"nbformat": 4, "cells": vec![json!({"cell_type": "markdown", "source": "x"}); 1001]});
     let e = s.run("notebook.open", &json!({"text": many.to_string()})).unwrap_err();
     assert!(e.contains("1001 cells"), "{e}");
-    // So is one too large in RustGIS's own format.
+    // So is one too large in KHGIS's own format.
     let many = json!({"name": "Big", "cells": vec![json!({"kind": "markdown", "source": "x"}); 1001]});
     assert!(s.run("notebook.open", &json!({"text": many.to_string()})).unwrap_err().contains("1001 cells"));
     // Nor one with a cell that isn't an object.
@@ -11223,7 +11223,7 @@ fn jupyter_python_notebooks_survive_open_and_save() {
     // Nor is an nbformat 3 notebook, whose cells are in worksheets.
     let v3 = json!({"nbformat": 3, "worksheets": [{"cells": [{"cell_type": "code", "input": "1"}]}]});
     assert!(s.run("notebook.open", &json!({"text": v3.to_string()})).unwrap_err().contains("nbformat 3"));
-    // Nor is a cell longer than RustGIS keeps.
+    // Nor is a cell longer than KHGIS keeps.
     let long = json!({"nbformat": 4, "cells": [{"cell_type": "code", "source": "x".repeat(200_001)}]});
     assert!(s.run("notebook.open", &json!({"text": long.to_string()})).unwrap_err().contains("cell 1"));
     let long = json!({"name": "Long", "cells": [{"kind": "code", "source": "x".repeat(200_001)}]});
@@ -11315,7 +11315,7 @@ fn jupyter_python_notebooks_survive_open_and_save() {
     let id = saved["cells"][4]["id"].as_str().unwrap();
     assert!(!id.is_empty() && !["intro", "load", "boom", "raw"].contains(&id), "{id}");
     assert_eq!(saved["cells"][4]["outputs"], json!([]));
-    // A RustGIS command notebook saved as Jupyter still opens as commands.
+    // A KHGIS command notebook saved as Jupyter still opens as commands.
     s.run("notebook.new", &json!({"name": "Commands"})).unwrap();
     s.run("notebook.save", &json!({"path": path.to_str().unwrap()})).unwrap();
     s.run("notebook.open", &json!({"path": path.to_str().unwrap()})).unwrap();
@@ -14125,7 +14125,7 @@ fn adding_a_collection_of_3d_tiles_says_why_it_is_left_out() {
     let url = "https://x.example.org/ogc/v1/collections";
     let doc = r#"{"collections": [{"id": "gebouwen", "title": "3D Tiles Gebouwen", "itemType": "feature", "links": [{"rel": "items", "type": "application/json+3dtiles", "href": "https://x.example.org/ogc/v1/collections/gebouwen/3dtiles?f=json"}]}]}"#;
     let e = s.run("service.add", &json!({"url": url, "text": doc, "layer": "Gebouwen"})).unwrap_err();
-    assert!(e.contains("no layer 'Gebouwen': collection 'gebouwen' offers 3D Tiles, which RustGIS doesn't draw"), "{e}");
+    assert!(e.contains("no layer 'Gebouwen': collection 'gebouwen' offers 3D Tiles, which KHGIS doesn't draw"), "{e}");
     let e = s.run("service.add", &json!({"url": url, "text": doc, "layer": "gebouwen_x"})).unwrap_err();
     assert!(e.ends_with("(service.layers lists them)"), "{e}");
 }
@@ -14375,7 +14375,7 @@ fn a_wms_layer_past_the_time_cap_says_its_times_are_left_out() {
     assert!(s.notices_since(mark).iter().all(|n| !n.text.contains("times are left out")), "{:?}", s.notices_since(mark));
     // 50,000 times go to the first 50 layers.
     s.run("service.add", &json!({"url": url, "layer": "c55", "text": wms})).unwrap();
-    let said = "C55: 1000 of its times are left out: RustGIS keeps at most 1000 for a layer and 50000 for one document's layers";
+    let said = "C55: 1000 of its times are left out: KHGIS keeps at most 1000 for a layer and 50000 for one document's layers";
     assert!(s.notices_since(mark).iter().any(|n| n.text == said), "{:?}", s.notices_since(mark));
     let e = s.run("service.add", &json!({"url": url, "layer": "c55", "text": wms, "time": "slider"})).unwrap_err();
     assert!(e.contains("its 1000 times are left out, past the 50000"), "{e}");
@@ -14387,7 +14387,7 @@ fn a_wms_layer_past_the_time_cap_says_its_times_are_left_out() {
     let mut own_cap = Session::new(Project::default());
     let mark = own_cap.notice_mark();
     own_cap.run("service.add", &json!({"url": url, "layer": "long", "text": long})).unwrap();
-    let said = "Long: 100 of its times are left out: RustGIS keeps at most 1000 for a layer and 50000 for one document's layers";
+    let said = "Long: 100 of its times are left out: KHGIS keeps at most 1000 for a layer and 50000 for one document's layers";
     assert!(own_cap.notices_since(mark).iter().any(|n| n.text == said), "{:?}", own_cap.notices_since(mark));
 }
 
@@ -14836,7 +14836,7 @@ fn services_list_and_add_layers() {
     let r = s.run("service.add", &json!({"url": api, "layer": "lakes", "text": collections})).unwrap();
     assert_eq!(r["features"], 1);
     assert!(s.map().layer_by_name("Lakes").is_some());
-    // A document on the web can't send RustGIS into the local network.
+    // A document on the web can't send KHGIS into the local network.
     let inward = WMS.replace("https://maps.example.com/wms?", "http://127.0.0.1:8080/wms?");
     let v = s.run("service.layers", &json!({"url": url, "text": inward})).unwrap();
     assert_eq!(v["count"], 0);
@@ -15368,7 +15368,7 @@ fn a_long_document_address_lists_fewer_layers() {
     let cut = format!("only the first {listed} of 600 layers are listed; service.add takes any of them by name");
     assert_eq!(long["listedNote"], json!(cut));
     let why = format!(
-        "each listed layer repeats its document's address, {bytes} bytes long here, and RustGIS lists at most 8 MiB of them (at least one layer)"
+        "each listed layer repeats its document's address, {bytes} bytes long here, and KHGIS lists at most 8 MiB of them (at least one layer)"
     );
     assert!(says(&long, &why) && says(&long, &cut), "{}", long["notes"]);
     let e = s.run("service.add", &json!({"url": url, "layer": "nao", "text": text})).unwrap_err();
@@ -15379,7 +15379,7 @@ fn a_long_document_address_lists_fewer_layers() {
     assert!(s.run("service.groupPlan", &json!({"url": "https://api.example.org/collections", "text": text})).is_ok());
 }
 
-/// A layer past what RustGIS reads of a document is refused for that reason, not as absent.
+/// A layer past what KHGIS reads of a document is refused for that reason, not as absent.
 #[test]
 fn a_layer_past_the_read_limit_is_refused_saying_so() {
     let wfs: String = (1..=100_001).map(|i| format!("<FeatureType><Name>t:{i}</Name></FeatureType>")).collect();
@@ -15393,14 +15393,14 @@ fn a_layer_past_the_read_limit_is_refused_saying_so() {
     assert_eq!(
         listed["notes"],
         json!([
-            "RustGIS reads at most 100000 feature types from one document: 1 left out",
+            "KHGIS reads at most 100000 feature types from one document: 1 left out",
             "only the first 2000 of the 100000 layers read are listed; service.add takes any of them by name",
         ])
     );
     let e = s.run("service.add", &json!({"url": url, "layer": "t:100001", "text": wfs})).unwrap_err();
     assert!(
         e.contains(
-            "no layer 't:100001' (service.layers lists the first 2000 of the 100000 layers read; RustGIS reads at most 100000 feature types"
+            "no layer 't:100001' (service.layers lists the first 2000 of the 100000 layers read; KHGIS reads at most 100000 feature types"
         ),
         "{e}"
     );
@@ -15411,7 +15411,7 @@ fn a_layer_past_the_read_limit_is_refused_saying_so() {
     let e = s.run("service.coverage", &p).unwrap_err();
     assert!(
         e.contains(
-            "no coverage 'c100001' (service.layers lists the first 2000 of the 100000 layers read; RustGIS reads at most 100000 coverages"
+            "no coverage 'c100001' (service.layers lists the first 2000 of the 100000 layers read; KHGIS reads at most 100000 coverages"
         ),
         "{e}"
     );
@@ -15441,7 +15441,7 @@ fn a_layer_past_the_read_limit_is_refused_saying_so() {
     let p = json!({"url": url, "layer": "l2001", "text": json!({"layers": layers}).to_string()});
     let e = s.run("service.add", &p).unwrap_err();
     assert!(
-        e.contains("no layer 'l2001' (service.layers lists those read; RustGIS reads at most 2000 layers from one document: 1 left out)"),
+        e.contains("no layer 'l2001' (service.layers lists those read; KHGIS reads at most 2000 layers from one document: 1 left out)"),
         "{e}"
     );
 }
@@ -15469,7 +15469,7 @@ fn wfs_axes_judged_against_the_type_bounds() {
     s.run("service.add", &json!({"url": format!("{}/wfs", ibge.base), "layer": "PNADC:uf", "text": text, "name": "UF"})).unwrap();
     let e = s.map().layer_by_name("UF").unwrap().extent();
     assert_eq!([e.min_x, e.min_y, e.max_x, e.max_y], [-63.3, -29.7, -36.5, -5.8]);
-    // RustGIS asked for EPSG:4326, as the type doesn't list CRS84.
+    // KHGIS asked for EPSG:4326, as the type doesn't list CRS84.
     assert!(ibge.requests().iter().all(|r| r.query.iter().any(|(k, v)| k == "SRSNAME" && v == "EPSG:4326")));
 
     let text = caps(&hamburg.base, "app:bezirke", "urn:ogc:def:crs:EPSG::25832", "8.41 53.39", "10.34 53.97");
@@ -15526,7 +15526,7 @@ fn service_downloads_require_a_url_before_consuming_bytes() {
 }
 
 /// A WCS coverage (from a local server) becomes a raster of the view, asked for in EPSG:4326 within
-/// its bounds; an error answer is refused. A catalogue's records come with the links RustGIS can
+/// its bounds; an error answer is refused. A catalogue's records come with the links KHGIS can
 /// follow, those pointing inward left out.
 #[test]
 fn wcs_coverages_and_catalogue_records() {
@@ -18968,7 +18968,7 @@ fn an_in_place_layer_that_cant_be_read_says_so() {
     assert_eq!(said(&s), 1);
 }
 
-/// A project an older RustGIS saved again (it didn't know `in_place`: the layer was missing there,
+/// A project an older KHGIS saved again (it didn't know `in_place`: the layer was missing there,
 /// and saved without the key) reads its cloud-optimised GeoTIFF in place again: a raster layer
 /// whose path is a plain web address is read no other way.
 #[test]
@@ -18977,7 +18977,7 @@ fn a_project_an_older_rustgis_saved_again_reads_its_cog_in_place() {
     let mut s = Session::new(Project::default());
     s.map_mut().add_raster("Scene".to_string(), rustgis_map::raster::RasterLayer::unread_in_place(format!("{base}/scene.tif")));
     let mut text: Value = serde_json::to_value(&s.project).unwrap();
-    // As the older RustGIS saved it: the path, without `in_place`.
+    // As the older KHGIS saved it: the path, without `in_place`.
     let raster = text.pointer_mut("/maps/0/layers/0/raster").and_then(Value::as_object_mut).unwrap();
     assert_eq!(raster.remove("in_place"), Some(json!(true)));
     let mut s = Session::new(Project::default());
@@ -19307,7 +19307,7 @@ fn osm_and_boundaries() {
     }
 }
 
-/// Search Open Data against a local CKAN site: datasets with their resources (what RustGIS can't
+/// Search Open Data against a local CKAN site: datasets with their resources (what KHGIS can't
 /// add dropped, the best format first), one added by its address; bad requests are refused.
 #[test]
 fn open_data_portal_search_and_add() {
@@ -21411,7 +21411,7 @@ fn saved_cubes_keep_their_look() {
     assert_eq!(s.map().tiles[0].time_urls[0].1, with_key);
     let text = std::fs::read_to_string(&path).unwrap();
     assert!(!text.contains("s3cret") && text.contains("https://h.example/2020.tif#range=0,1000"), "{text}");
-    // Opened again before RustGIS closes, it has its token back, with its look.
+    // Opened again before KHGIS closes, it has its token back, with its look.
     t.run("project.open", &json!({"path": path})).unwrap();
     assert_eq!(t.map().tiles[0].time_urls[0].1, with_key);
 
@@ -28122,7 +28122,7 @@ fn postgis_edits_live() {
 }
 
 /// Edits go back to one local GeoPackage table atomically, without replacing the file or
-/// losing columns RustGIS doesn't edit. No external database or program is needed.
+/// losing columns KHGIS doesn't edit. No external database or program is needed.
 #[cfg(not(target_arch = "wasm32"))]
 #[test]
 fn geopackage_edits_save_back() {
@@ -33395,7 +33395,7 @@ fn obj_export_is_unchanged() {
     assert_eq!(name, "Mesh.obj");
     // Written by the exporter before the mesh builder was shared with STL.
     let golden = concat!(
-        "# Mesh exported by RustGIS\n",
+        "# Mesh exported by KHGIS\n",
         "o Mesh\n",
         "v 0.00 0.00 -0.00\n",
         "v 1113.19 0.00 -0.00\n",
@@ -34526,36 +34526,36 @@ fn importing_a_file_that_is_neither_map_nor_project_says_so() {
     // Neither a map nor a project: the refusal names what the import takes, not a failed project.
     let mut s = world();
     let e = s.run("map.import", &json!({"text": r#"{"name": 5, "layers": 3}"#})).unwrap_err();
-    assert!(e.contains("not a RustGIS map file, project or package"), "{e}");
+    assert!(e.contains("not a KHGIS map file, project or package"), "{e}");
     // Text that isn't JSON at all is said to be none of them the same way.
     let e = s.run("map.import", &json!({"text": "not json"})).unwrap_err();
-    assert!(e.contains("not a RustGIS map file, project or package"), "{e}");
-    assert!(!e.contains("not a RustGIS project"), "{e}");
+    assert!(e.contains("not a KHGIS map file, project or package"), "{e}");
+    assert!(!e.contains("not a KHGIS project"), "{e}");
     let e = s.run("style.import", &json!({"text": r#"{"name": 5, "layers": 3}"#})).unwrap_err();
-    assert!(e.contains("not a RustGIS layer file, map file or project"), "{e}");
+    assert!(e.contains("not a KHGIS layer file, map file or project"), "{e}");
     let e = s.run("style.import", &json!({"text": "not json"})).unwrap_err();
-    assert!(e.contains("not a RustGIS layer file, map file or project"), "{e}");
-    // A project from a newer RustGIS keeps its advice.
+    assert!(e.contains("not a KHGIS layer file, map file or project"), "{e}");
+    // A project from a newer KHGIS keeps its advice.
     let e = s.run("map.import", &json!({"text": r#"{"format": 99999, "maps": 3}"#})).unwrap_err();
-    assert!(e.contains("Update RustGIS"), "{e}");
+    assert!(e.contains("Update KHGIS"), "{e}");
 }
 
 #[test]
 fn model_import_refusals_name_their_cause() {
     let mut s = world();
-    // A file that is no model or web tool is said to be one, not told to update RustGIS.
+    // A file that is no model or web tool is said to be one, not told to update KHGIS.
     for text in [r#"{"type": "FeatureCollection", "features": []}"#, r#"{"version": 99, "name": "x"}"#] {
         let e = s.run("model.import", &json!({"text": text})).unwrap_err();
-        assert!(e.contains("not a RustGIS model or web tool (no graph or steps)"), "{e}");
+        assert!(e.contains("not a KHGIS model or web tool (no graph or steps)"), "{e}");
     }
-    // A model by its schema, or a web tool by its format, from a newer RustGIS that holds
+    // A model by its schema, or a web tool by its format, from a newer KHGIS that holds
     // something else is told to update.
     for text in [
         json!({"$schema": crate::model::SCHEMA, "version": "2.0.0", "name": "New", "nodes": []}),
-        json!({"format": "RustGIS web tool", "version": 2, "name": "New"}),
+        json!({"format": "KHGIS web tool", "version": 2, "name": "New"}),
     ] {
         let e = s.run("model.import", &json!({"text": text.to_string()})).unwrap_err();
-        assert!(e.contains("Update RustGIS"), "{e}");
+        assert!(e.contains("Update KHGIS"), "{e}");
     }
     // A model whose nodes would be dropped says the causes it may have.
     let graph = json!({"nodes": [{"id": "a", "kind": "input", "layer": "Cities"}, {"id": "a", "kind": "input", "layer": "Countries"}], "edges": []});

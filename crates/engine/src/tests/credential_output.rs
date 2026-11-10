@@ -793,7 +793,7 @@ fn durable_database_origins_clean_each_owned_field_without_opening_a_database() 
                 assert_eq!(serde_json::from_str::<Value>(&text).unwrap(), expected, "{kind}: {role}, private={private}");
                 assert_eq!(report.layer_addresses(), u32::from(private), "{kind}: {role}");
                 let notices = if private {
-                    vec!["1 layer address(es) were saved without their keys, tokens, passwords or URL fragments; after RustGIS closes, add those layers again to restore missing values".to_string()]
+                    vec!["1 layer address(es) were saved without their keys, tokens, passwords or URL fragments; after KHGIS closes, add those layers again to restore missing values".to_string()]
                 } else {
                     Vec::new()
                 };

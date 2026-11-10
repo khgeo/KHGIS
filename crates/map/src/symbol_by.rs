@@ -398,7 +398,7 @@ mod tests {
     #[test]
     fn kept_in_a_project_and_read_leniently() {
         let mut l = points();
-        // None isn't written: an older RustGIS reads the layer as before.
+        // None isn't written: an older KHGIS reads the layer as before.
         assert!(serde_json::to_value(&l).unwrap().get("symbol_by").is_none());
         l.symbol_by = SymbolBy { fill: Some("'#00ff00'".into()), angle: Some("deg + 5".into()), ..Default::default() };
         let v = serde_json::to_value(&l).unwrap();

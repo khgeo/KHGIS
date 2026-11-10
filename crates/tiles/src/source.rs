@@ -77,7 +77,7 @@ pub struct Resolved {
     pub style: Style,
     /// The effective style document, kept through redirects and cache hits.
     pub from: Option<address::Origin>,
-    /// The style's sprites as (id, address without `.json`/`.png`), those RustGIS can
+    /// The style's sprites as (id, address without `.json`/`.png`), those KHGIS can
     /// fetch.
     pub sprites: Vec<(String, String)>,
     /// Credits from the layer and its sources, without duplicates.
@@ -320,7 +320,7 @@ fn resolve_anew(spec: &Spec, key: String) -> Resolve {
     Resolve::Ready(r)
 }
 
-/// A style's sprites with their addresses resolved against `base`, those RustGIS can fetch, and
+/// A style's sprites with their addresses resolved against `base`, those KHGIS can fetch, and
 /// what was left out of them, and why, if a layer not hidden draws images and so misses them: the
 /// sprites are the style's choice, and one that can't be fetched only loses its own icons.
 fn resolve_sprites(style: &Style, base: &address::Origin) -> (Vec<(String, String)>, Vec<String>) {
@@ -345,7 +345,7 @@ fn resolve_sprites(style: &Style, base: &address::Origin) -> (Vec<(String, Strin
         }
     };
     say(&mapbox, "mapbox:// addresses need Mapbox's own library");
-    say(&refused, "RustGIS won't fetch their addresses");
+    say(&refused, "KHGIS won't fetch their addresses");
     if !style.layers.iter().any(|l| l.visible && l.draws_images()) {
         left_out.clear();
     }

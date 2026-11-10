@@ -55,7 +55,7 @@ fn script(s: &mut Session, _: &Value) -> CmdResult {
     let dirty = s.dirty();
     let (result, report) = crate::durable::output(&mut s.project.gp_history, None, |runs| {
         let mut text = format!(
-            "# The geoprocessing history of the RustGIS project {}, run again in order.\n\
+            "# The geoprocessing history of the KHGIS project {}, run again in order.\n\
          # Layers are named as they were then, so this opens the project they belong to.\n",
             quoted(&name)
         );

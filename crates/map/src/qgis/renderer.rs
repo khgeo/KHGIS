@@ -1,4 +1,4 @@
-//! QGIS renderers (`<renderer-v2>`) as RustGIS ones: single symbol, categorized (Unique Values, by
+//! QGIS renderers (`<renderer-v2>`) as KHGIS ones: single symbol, categorized (Unique Values, by
 //! a field or an expression), graduated (Graduated Colors), rule-based (Unique Values on one field
 //! or by an expression), the null renderer, and the renderers that wrap another (point cluster and
 //! displacement, inverted polygons, merged features) by the one inside.
@@ -146,7 +146,7 @@ type SymbolOf<'a> = dyn Fn(Option<&str>, &mut Report) -> Option<Converted> + 'a;
 
 fn categorized(r: Node, layer: &str, style: &mut Style, report: &mut Report, sym: &SymbolOf) {
     let cats: Vec<Node> = child(r, "categories").map(|c| c.children().filter(|n| n.has_tag_name("category")).collect()).unwrap_or_default();
-    // By a field, or by an expression (as RustGIS reads it; whether it reads on the layer's
+    // By a field, or by an expression (as KHGIS reads it; whether it reads on the layer's
     // fields is checked where the layer is added, and a field's name with spaces or other
     // characters, which QGIS writes unquoted, is taken as that field there).
     let attr = r.attribute("attr").unwrap_or_default();
@@ -289,7 +289,7 @@ fn graduated(r: Node, layer: &str, style: &mut Style, report: &mut Report, sym: 
         report.approximated(layer, "ranges with gaps or overlaps between them, drawn as if each began where the one before ends");
     }
     let min = ranges.first().map_or(0.0, |r| r.0);
-    // QGIS draws nothing for a value outside every range; a RustGIS graduated renderer gives it the
+    // QGIS draws nothing for a value outside every range; a KHGIS graduated renderer gives it the
     // first or last class. The import doesn't read the data, so it can't tell whether any value
     // falls outside: the note is always given, on purpose.
     report.approximated(layer, "values below the first range or above the last, drawn in the first or last class (QGIS leaves them out)");
@@ -325,7 +325,7 @@ fn graduated(r: Node, layer: &str, style: &mut Style, report: &mut Report, sym: 
 
 /// A rule of a rule-based renderer that draws: its filter and its parents' (an else rule's own
 /// left out), for an else rule and each else rule above it the siblings it takes the rest of (what
-/// none of them draws), and the scale range along the way (RustGIS's scales: drawn out to 1:`.0`,
+/// none of them draws), and the scale range along the way (KHGIS's scales: drawn out to 1:`.0`,
 /// in to 1:`.1`).
 struct Rule<'a, 'i> {
     filters: Vec<String>,
@@ -347,7 +347,7 @@ fn rules(r: Node, layer: &str, style: &mut Style, report: &mut Report, sym: &Sym
         flatten(root, Vec::new(), (None, None), Vec::new(), &mut leaves, 0, &mut left);
     }
     if left > 0 {
-        report.skipped(layer, format!("{left} of its rules, past the {MAX_CLASSES} RustGIS reads or nested more than 32 deep"));
+        report.skipped(layer, format!("{left} of its rules, past the {MAX_CLASSES} KHGIS reads or nested more than 32 deep"));
     }
     // Each symbol read once, however many ways the rules are tried (its notes said once).
     let seen: std::cell::RefCell<BTreeMap<Option<String>, Option<Converted>>> = Default::default();

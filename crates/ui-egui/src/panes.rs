@@ -1057,7 +1057,7 @@ fn source_groups(
     for (src, items) in groups {
         match &src {
             Some(s) => group_header(ui, &s.label, Some(&s.hover), t),
-            None => group_header(ui, tl!("In memory"), Some(tl!("Made in RustGIS: samples, drawings and tool outputs")), t),
+            None => group_header(ui, tl!("In memory"), Some(tl!("Made in KHGIS: samples, drawings and tool outputs")), t),
         }
         for item in items {
             match item {
@@ -3205,9 +3205,9 @@ fn geolibre_uninstall(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
         (false, false) => tl!("Uninstall"),
     };
     let tip = if web {
-        tl!("Unload the GeoLibre tools and stop loading them when RustGIS starts.")
+        tl!("Unload the GeoLibre tools and stop loading them when KHGIS starts.")
     } else {
-        tl!("Delete the GeoLibre runner that RustGIS installed. Install it again at any time.")
+        tl!("Delete the GeoLibre runner that KHGIS installed. Install it again at any time.")
     };
     let text = egui::RichText::new(label).size(11.0);
     let resp = ui.small_button(if app.gp.confirm_uninstall { text.color(t.red) } else { text }).on_hover_text(tip);

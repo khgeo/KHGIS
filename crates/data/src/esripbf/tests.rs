@@ -340,7 +340,7 @@ fn refused_answers_say_why() {
     assert!(err(&multipatch).contains("multipatch"));
     // Declared, without features: refused rather than read as an empty layer.
     assert!(err(&answer(&[number(7, MULTIPATCH)])).contains("multipatch"));
-    // So is an envelope layer, which RustGIS doesn't read either.
+    // So is an envelope layer, which KHGIS doesn't read either.
     assert!(err(&answer(&[number(7, ENVELOPE)])).contains("envelope"));
     let untransformed = answer(&[feature(&[geometry(&[], &[1, 1])])]);
     assert!(err(&untransformed).contains("no transform"));
@@ -436,7 +436,7 @@ fn a_wkt_that_isnt_utf8_is_said() {
         report.messages.first().map(String::as_str),
         Some("the coordinate system's WKT isn't valid UTF-8; the bytes that can't be read are replaced with U+FFFD")
     );
-    // Unused when a code RustGIS knows names the system: nothing to say.
+    // Unused when a code KHGIS knows names the system: nothing to say.
     let with_code = answer(&[
         message(8, &[number(1, 4326), message(5, wkt)].concat()),
         transform(false, 1.0, 0.0, 0.0),
@@ -517,7 +517,7 @@ fn answers_are_told_from_other_protocol_buffers_and_json() {
     assert!(!is_esripbf(b""));
 }
 
-/// Pages of real services read as `f=pbf`, against the same pages read as GeoJSON by RustGIS's
+/// Pages of real services read as `f=pbf`, against the same pages read as GeoJSON by KHGIS's
 /// GeoJSON reader: the same features, values and vertices, coordinates within the services'
 /// quantization. Set `RUSTGIS_ESRIPBF_DIR` to a folder of `<name>.pbf` and `<name>.geojson`
 /// pairs, fetched with `outSR=4326`, for instance:
@@ -590,7 +590,7 @@ fn a_field_type_rustgis_doesnt_know_is_read_as_text_and_said() {
     let bytes = answer(&[field("LATER", 17), field("NAME", 4), feature(&[uint(5), text("a")])]);
     let (ds, report) = read(&bytes, "t").unwrap();
     assert_eq!(ds.features[0].attrs, [Value::Text("5".into()), Value::Text("a".into())]);
-    assert_eq!(report.messages, ["1 fields have a type RustGIS doesn't know; their values are read as text"]);
+    assert_eq!(report.messages, ["1 fields have a type KHGIS doesn't know; their values are read as text"]);
     // Every type the format defines today says nothing.
     let known: Vec<Vec<u8>> = (0..=LAST_FIELD_TYPE).filter(|t| !(7..=9).contains(t)).map(|t| field(&format!("F{t}"), t)).collect();
     let (_, report) = read(&answer(&known), "t").unwrap();

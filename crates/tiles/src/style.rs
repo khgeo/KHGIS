@@ -1832,7 +1832,7 @@ impl StyleLayer {
         self.paint.get("color-relief-color")?.elevation_ramp(zoom)
     }
 
-    /// Whether it is a shown `color-relief` layer that RustGIS can't colour at some zoom it
+    /// Whether it is a shown `color-relief` layer that KHGIS can't colour at some zoom it
     /// shows at (its `color-relief-color` isn't a [`color_relief_ramp`](Self::color_relief_ramp)
     /// there), and so skips there.
     pub fn color_relief_undrawable(&self) -> bool {

@@ -66,7 +66,7 @@ A line, or markers or hash marks along it	Μια γραμμή ή δείκτες 
 A magnifying lens that follows the pointer.	Ένας μεγεθυντικός φακός που ακολουθεί τον δείκτη.
 A map, feature or coverage service's address: WMS, WMTS, WFS, WCS, OGC API Features or Tiles, or an ArcGIS FeatureServer, MapServer, ImageServer or VectorTileServer (or a services directory, to browse).	Η διεύθυνση μιας υπηρεσίας χαρτών, οντοτήτων ή καλύψεων: WMS, WMTS, WFS, WCS, OGC API Features ή Tiles, ή ενός ArcGIS FeatureServer, MapServer, ImageServer ή VectorTileServer (ή ενός καταλόγου υπηρεσιών, για περιήγηση).
 a name, or owner/name such as giswqs/geospatial	ένα όνομα ή κάτοχος/όνομα, όπως giswqs/geospatial
-A named endpoint you can reuse. Keys are kept until RustGIS closes unless you choose to remember them on this computer; the connection itself never keeps them.	Ένα επώνυμο τελικό σημείο που μπορείτε να επαναχρησιμοποιήσετε. Τα κλειδιά διατηρούνται μέχρι να κλείσει το RustGIS, εκτός αν επιλέξετε να απομνημονευτούν σε αυτόν τον υπολογιστή· η ίδια η σύνδεση δεν τα διατηρεί ποτέ.
+A named endpoint you can reuse. Keys are kept until KHGIS closes unless you choose to remember them on this computer; the connection itself never keeps them.	Ένα επώνυμο τελικό σημείο που μπορείτε να επαναχρησιμοποιήσετε. Τα κλειδιά διατηρούνται μέχρι να κλείσει το KHGIS, εκτός αν επιλέξετε να απομνημονευτούν σε αυτόν τον υπολογιστή· η ίδια η σύνδεση δεν τα διατηρεί ποτέ.
 A named endpoint you can reuse. Passwords last for this session unless you choose to remember them in this computer's password store.	Ένα επώνυμο τελικό σημείο που μπορείτε να επαναχρησιμοποιήσετε. Οι κωδικοί πρόσβασης ισχύουν για αυτήν την περίοδο λειτουργίας, εκτός αν επιλέξετε να απομνημονευτούν στον χώρο αποθήκευσης κωδικών αυτού του υπολογιστή.
 A new GeoPackage	Ένα νέο GeoPackage
 A new table in a GeoPackage	Ένας νέος πίνακας σε GeoPackage
@@ -110,8 +110,8 @@ A5 Grid	Πλέγμα A5
 A5's equal-area pentagonal cells at a resolution, over the map's extent, a layer or the world, as polygons with their ids.	Τα ισεμβαδικά πενταγωνικά κελιά του A5 σε μια ανάλυση, στην έκταση του χάρτη, ενός επιπέδου ή ολόκληρου του κόσμου, ως πολύγωνα με τα αναγνωριστικά τους.
 About	Πληροφορίες
 About plugins	Πληροφορίες για τα πρόσθετα
-About RustGIS	Πληροφορίες για το RustGIS
-About RustGIS.	Πληροφορίες για το RustGIS.
+About KHGIS	Πληροφορίες για το KHGIS
+About KHGIS.	Πληροφορίες για το KHGIS.
 Above	Επάνω
 Above Left	Επάνω αριστερά
 Above Right	Επάνω δεξιά
@@ -288,7 +288,7 @@ Agent input queue is full or disconnected; stop the agent and try again.	Η ου
 Agent threads	Νήματα πράκτορα
 Agent work	Agent work
 Agents have full access: they may run scripts, tasks, models and plugins. Click to stop the MCP relay	Οι πράκτορες έχουν πλήρη πρόσβαση: μπορούν να εκτελούν σενάρια, εργασίες, μοντέλα και πρόσθετα. Κάντε κλικ για να διακόψετε τον αναμεταδότη MCP
-Agents on this computer that connect (Claude Code, Codex, Cursor and others) work on the map open here, with RustGIS's tools: they can open and save files and use the web. Scripts and plugin management stay off.	Οι πράκτορες αυτού του υπολογιστή που συνδέονται (Claude Code, Codex, Cursor και άλλοι) εργάζονται στον χάρτη που είναι ανοιχτός εδώ, με τα εργαλεία του RustGIS: μπορούν να ανοίγουν και να αποθηκεύουν αρχεία και να χρησιμοποιούν το web. Τα σενάρια και η διαχείριση πρόσθετων παραμένουν απενεργοποιημένα.
+Agents on this computer that connect (Claude Code, Codex, Cursor and others) work on the map open here, with KHGIS's tools: they can open and save files and use the web. Scripts and plugin management stay off.	Οι πράκτορες αυτού του υπολογιστή που συνδέονται (Claude Code, Codex, Cursor και άλλοι) εργάζονται στον χάρτη που είναι ανοιχτός εδώ, με τα εργαλεία του KHGIS: μπορούν να ανοίγουν και να αποθηκεύουν αρχεία και να χρησιμοποιούν το web. Τα σενάρια και η διαχείριση πρόσθετων παραμένουν απενεργοποιημένα.
 Agents then run commands, change files and use the web on this computer without asking you.	Τότε οι πράκτορες εκτελούν εντολές, αλλάζουν αρχεία και χρησιμοποιούν το web σε αυτόν τον υπολογιστή χωρίς να σας ρωτούν.
 Aggregate Points to A5	Συνάθροιση σημείων σε A5
 Aggregation	Συνάθροιση
@@ -313,7 +313,7 @@ Allow Feature Selection	Να επιτρέπεται η επιλογή οντοτ
 Allow only certain combinations of values across fields.	Να επιτρέπονται μόνο ορισμένοι συνδυασμοί τιμών μεταξύ πεδίων.
 Allow such actions for this conversation	Αποδοχή τέτοιων ενεργειών για αυτήν τη συνομιλία
 Allow this action?	Να επιτραπεί αυτή η ενέργεια;
-Allow this agent's RustGIS action?	Να επιτραπεί αυτή η ενέργεια του πράκτορα στο RustGIS;
+Allow this agent's KHGIS action?	Να επιτραπεί αυτή η ενέργεια του πράκτορα στο KHGIS;
 Along lines	Κατά μήκος γραμμών
 Along Selected Line	Κατά μήκος της επιλεγμένης γραμμής
 Alt+	Alt+
@@ -325,7 +325,7 @@ Alternating bar	Εναλλασσόμενη ράβδος
 Altitude	Ύψος
 Always allow	Πάντα αποδοχή
 Amazon S3	Amazon S3
-Amazon S3, or an S3-compatible service (MinIO, Cloudflare R2, Wasabi…) by its endpoint. Keys are kept until RustGIS closes; a saved connection keeps its name, endpoint and region, never its secret.	Amazon S3 ή μια υπηρεσία συμβατή με S3 (MinIO, Cloudflare R2, Wasabi…) μέσω του τελικού σημείου της. Τα κλειδιά διατηρούνται μέχρι να κλείσει το RustGIS· μια αποθηκευμένη σύνδεση διατηρεί το όνομα, το τελικό σημείο και την περιοχή της, ποτέ το μυστικό της.
+Amazon S3, or an S3-compatible service (MinIO, Cloudflare R2, Wasabi…) by its endpoint. Keys are kept until KHGIS closes; a saved connection keeps its name, endpoint and region, never its secret.	Amazon S3 ή μια υπηρεσία συμβατή με S3 (MinIO, Cloudflare R2, Wasabi…) μέσω του τελικού σημείου της. Τα κλειδιά διατηρούνται μέχρι να κλείσει το KHGIS· μια αποθηκευμένη σύνδεση διατηρεί το όνομα, το τελικό σημείο και την περιοχή της, ποτέ το μυστικό της.
 amenity=cafe, shop	amenity=cafe, shop
 An agent on this computer asks to:	Ένας πράκτορας σε αυτόν τον υπολογιστή ζητά να:
 An API key sent in a header must use plain ASCII characters.	Ένα κλειδί API που αποστέλλεται σε κεφαλίδα πρέπει να χρησιμοποιεί απλούς χαρακτήρες ASCII.
@@ -379,7 +379,7 @@ Arrange	Τακτοποίηση
 Arrange Element	Διάταξη στοιχείου
 Arrow	Βέλος
 Arrowheads	Αιχμές βελών
-Ask a question about your data, or describe what to do with the map. The assistant runs RustGIS commands for you; every change can be undone.	Κάντε μια ερώτηση για τα δεδομένα σας ή περιγράψτε τι να γίνει με τον χάρτη. Ο βοηθός εκτελεί εντολές του RustGIS για εσάς και κάθε αλλαγή μπορεί να αναιρεθεί.
+Ask a question about your data, or describe what to do with the map. The assistant runs KHGIS commands for you; every change can be undone.	Κάντε μια ερώτηση για τα δεδομένα σας ή περιγράψτε τι να γίνει με τον χάρτη. Ο βοηθός εκτελεί εντολές του KHGIS για εσάς και κάθε αλλαγή μπορεί να αναιρεθεί.
 Ask about the map, or tell it what to do…	Ρωτήστε για τον χάρτη ή πείτε τι να γίνει…
 Ask about your data, or tell the assistant what to do with the map.	Ρωτήστε για τα δεδομένα σας ή πείτε στον βοηθό τι να κάνει με τον χάρτη.
 Ask Which Layers to Add	Ερώτηση για τα επίπεδα προς προσθήκη
@@ -745,7 +745,7 @@ Color Vision Simulator	Προσομοιωτής χρωματικής όραση�
 Colorbar	Ράβδος χρωμάτων
 Colormap	Χρωματικός χάρτης
 Colors from the raster's own color table.	Χρώματα από τον πίνακα χρωμάτων του ίδιου του raster.
-Colour ramps (RustGIS, QGIS, GDAL, GMT)	Χρωματικές διαβαθμίσεις (RustGIS, QGIS, GDAL, GMT)
+Colour ramps (KHGIS, QGIS, GDAL, GMT)	Χρωματικές διαβαθμίσεις (KHGIS, QGIS, GDAL, GMT)
 Columns	Στήλες
 Columns named like longitude/latitude, easting/northing or geometry are picked for you.	Οι στήλες με ονόματα όπως longitude/latitude, easting/northing ή geometry επιλέγονται αυτόματα.
 Combinations from the box above, one per line	Συνδυασμοί από το παραπάνω πλαίσιο, ένας ανά γραμμή
@@ -977,7 +977,7 @@ Delete selected rows	Διαγραφή επιλεγμένων γραμμών
 Delete Style	Διαγραφή στυλ
 Delete Task	Διαγραφή εργασίας
 Delete Task Step	Διαγραφή βήματος εργασίας
-Delete the GeoLibre runner that RustGIS installed. Install it again at any time.	Διαγραφή του εκτελεστή GeoLibre που εγκατέστησε το RustGIS. Μπορείτε να τον εγκαταστήσετε ξανά οποιαδήποτε στιγμή.
+Delete the GeoLibre runner that KHGIS installed. Install it again at any time.	Διαγραφή του εκτελεστή GeoLibre που εγκατέστησε το KHGIS. Μπορείτε να τον εγκαταστήσετε ξανά οποιαδήποτε στιγμή.
 Delete the layout {name}?	Διαγραφή της διάταξης {name};
 Delete the map {name}?	Διαγραφή του χάρτη {name};
 Delete the selected features.	Διαγραφή των επιλεγμένων οντοτήτων.
@@ -1209,7 +1209,7 @@ Element Properties	Ιδιότητες στοιχείου
 Elevation	Υψόμετρο
 Elevation model	Μοντέλο υψομέτρων
 Elevation profiles along lines, cross sections and more.	Προφίλ υψομέτρου κατά μήκος γραμμών, εγκάρσιες τομές και άλλα.
-Eligible requests in RustGIS use your ChatGPT plan. You can manage usage in ChatGPT settings.	Τα επιλέξιμα αιτήματα στο RustGIS χρησιμοποιούν τη συνδρομή ChatGPT σας. Μπορείτε να διαχειριστείτε τη χρήση στις ρυθμίσεις του ChatGPT.
+Eligible requests in KHGIS use your ChatGPT plan. You can manage usage in ChatGPT settings.	Τα επιλέξιμα αιτήματα στο KHGIS χρησιμοποιούν τη συνδρομή ChatGPT σας. Μπορείτε να διαχειριστείτε τη χρήση στις ρυθμίσεις του ChatGPT.
 Ellipse	Έλλειψη
 Embeddings	Embeddings
 Ember	Θράκα
@@ -1417,7 +1417,7 @@ Find and run geoprocessing tools.	Εύρεση και εκτέλεση εργα�
 Find any command by name (Ctrl+K).	Εύρεση οποιασδήποτε εντολής με το όνομα (Ctrl+K).
 Find Items	Εύρεση στοιχείων
 Find Place	Εύρεση τοποθεσίας
-Find plugins in the RustGIS plugin registry.	Βρείτε πρόσθετα στο μητρώο πρόσθετων του RustGIS.
+Find plugins in the KHGIS plugin registry.	Βρείτε πρόσθετα στο μητρώο πρόσθετων του KHGIS.
 Find Similar	Εύρεση παρόμοιων
 Find Tools	Εύρεση εργαλείων
 Finding routes…	Εύρεση διαδρομών…
@@ -1453,7 +1453,7 @@ Follow the System	Σύμφωνα με το σύστημα
 Follow the time slider	Ακολούθηση του ρυθμιστικού χρόνου
 Font	Γραμματοσειρά
 for a store that doesn't say	για αποθήκη που δεν το ορίζει
-For ArcGIS Online, the client ID is RustGIS's own app. For an ArcGIS Enterprise portal, register an OAuth app on it (Content › New item › Developer credentials) whose redirect URL is {redirect}, and give its client ID.	Για το ArcGIS Online, το client ID είναι η εφαρμογή του ίδιου του RustGIS. Για πύλη ArcGIS Enterprise, καταχωρίστε σε αυτήν μια εφαρμογή OAuth (Content › New item › Developer credentials) με URL ανακατεύθυνσης {redirect} και δώστε το client ID της.
+For ArcGIS Online, the client ID is KHGIS's own app. For an ArcGIS Enterprise portal, register an OAuth app on it (Content › New item › Developer credentials) whose redirect URL is {redirect}, and give its client ID.	Για το ArcGIS Online, το client ID είναι η εφαρμογή του ίδιου του KHGIS. Για πύλη ArcGIS Enterprise, καταχωρίστε σε αυτήν μια εφαρμογή OAuth (Content › New item › Developer credentials) με URL ανακατεύθυνσης {redirect} και δώστε το client ID της.
 for the layers that change with time, as they list their times (2024-06-01, 1995)	για τα επίπεδα που αλλάζουν με τον χρόνο, όπως αναφέρουν τους χρόνους τους (2024-06-01, 1995)
 Forest	Δάσος
 Forget Earthdata Login Token	Διαγραφή token Earthdata Login
@@ -1461,7 +1461,7 @@ Forget Saved Keys	Διαγραφή αποθηκευμένων κλειδιών
 Forget Saved Password	Διαγραφή αποθηκευμένου κωδικού πρόσβασης
 Forget this plugin: the app stops trying to load it at start.	Λήθη αυτού του πρόσθετου: η εφαρμογή σταματά να προσπαθεί να το φορτώσει κατά την εκκίνηση.
 Format	Μορφή
-Found: {names}. An agent works on this map through RustGIS's tools and with its own (web, scripts, files) in a folder of its own, kept in Documents › RustGIS › Agent work. It asks you before each action.	Βρέθηκαν: {names}. Ένας πράκτορας εργάζεται σε αυτόν τον χάρτη μέσω των εργαλείων του RustGIS και με τα δικά του (web, σενάρια, αρχεία), σε δικό του φάκελο στο Έγγραφα › RustGIS › Agent work. Σας ρωτά πριν από κάθε ενέργεια.
+Found: {names}. An agent works on this map through KHGIS's tools and with its own (web, scripts, files) in a folder of its own, kept in Documents › KHGIS › Agent work. It asks you before each action.	Βρέθηκαν: {names}. Ένας πράκτορας εργάζεται σε αυτόν τον χάρτη μέσω των εργαλείων του KHGIS και με τα δικά του (web, σενάρια, αρχεία), σε δικό του φάκελο στο Έγγραφα › KHGIS › Agent work. Σας ρωτά πριν από κάθε ενέργεια.
 Frame rate	Ρυθμός καρέ
 Frame rate, draw time, data size and memory.	Ρυθμός καρέ, χρόνος σχεδίασης, μέγεθος δεδομένων και μνήμη.
 France	Γαλλία
@@ -1630,7 +1630,7 @@ host=… dbname=… user=…	host=… dbname=… user=…
 Hosted Imagery	Φιλοξενούμενες εικόνες
 Hour	Ώρα
 How much of each zone each class of polygons covers, with the classes' totals shared out to the zones by area.	Πόσο από κάθε ζώνη καλύπτει κάθε κλάση πολυγώνων, με τα σύνολα των κλάσεων να κατανέμονται στις ζώνες κατά εμβαδόν.
-How often RustGIS keeps a copy of unsaved work, to offer it back after a crash.	Πόσο συχνά το RustGIS διατηρεί αντίγραφο της μη αποθηκευμένης εργασίας, για να το προσφέρει μετά από κατάρρευση.
+How often KHGIS keeps a copy of unsaved work, to offer it back after a crash.	Πόσο συχνά το KHGIS διατηρεί αντίγραφο της μη αποθηκευμένης εργασίας, για να το προσφέρει μετά από κατάρρευση.
 How the layer's colours combine with the tile layers and basemap beneath.	Πώς συνδυάζονται τα χρώματα του επιπέδου με τα επίπεδα tiles και το basemap από κάτω.
 How the layer's colours combine with what's beneath.	Πώς συνδυάζονται τα χρώματα του επιπέδου με ό,τι βρίσκεται από κάτω.
 HTTP failure	Αποτυχία HTTP
@@ -1703,7 +1703,7 @@ In place, holding a {w} × {h} overview	Επί τόπου, με επισκόπη
 In Progress	Σε εξέλιξη
 in progress	σε εξέλιξη
 In project	Στο έργο
-In RustGIS, it can:	Στο RustGIS, μπορεί να:
+In KHGIS, it can:	Στο KHGIS, μπορεί να:
 In the browser, pick the .shp and .dbf together, with any sidecars, or pick a ZIP. The override applies to every Shapefile in the ZIP.	Στο πρόγραμμα περιήγησης, επιλέξτε μαζί τα .shp και .dbf, με τυχόν συνοδευτικά αρχεία, ή επιλέξτε ένα ZIP. Η παράκαμψη ισχύει για κάθε Shapefile στο ZIP.
 In the coordinate system's units: metres for UTM.	Στις μονάδες του συστήματος συντεταγμένων: μέτρα για UTM.
 In the middle	Στη μέση
@@ -1803,7 +1803,7 @@ Item {id}	Στοιχείο {id}
 its copy kept in the browser is damaged: {error}	το αντίγραφό του που διατηρείται στο πρόγραμμα περιήγησης είναι κατεστραμμένο: {error}
 its default	η προεπιλογή του
 Its default: {default}. Its times: {times}	Προεπιλογή: {default}. Χρόνοι: {times}
-Its firewall ({firewall}) blocked RustGIS. The service may only allow some applications: contact its administrator and send them the details below.	Το τείχος προστασίας ({firewall}) της υπηρεσίας απέκλεισε το RustGIS. Η υπηρεσία ίσως επιτρέπει μόνο ορισμένες εφαρμογές: επικοινωνήστε με τον διαχειριστή της και στείλτε του τις παρακάτω λεπτομέρειες.
+Its firewall ({firewall}) blocked KHGIS. The service may only allow some applications: contact its administrator and send them the details below.	Το τείχος προστασίας ({firewall}) της υπηρεσίας απέκλεισε το KHGIS. Η υπηρεσία ίσως επιτρέπει μόνο ορισμένες εφαρμογές: επικοινωνήστε με τον διαχειριστή της και στείλτε του τις παρακάτω λεπτομέρειες.
 its layer was removed	το επίπεδό του αφαιρέθηκε
 Its tool isn't available now (a plugin's, not loaded, or a suite's, not installed)	Το εργαλείο του δεν είναι διαθέσιμο τώρα (ανήκει σε πρόσθετο που δεν έχει φορτωθεί ή σε σουίτα που δεν έχει εγκατασταθεί)
 Jobs	Διεργασίες
@@ -1835,7 +1835,7 @@ Keep Tool	Διατήρηση εργαλείου
 Keep value	Διατήρηση τιμής
 Keeps the access key ID and secret access key in this computer's credential store, never in the connection or the project.	Φυλάσσει το αναγνωριστικό κλειδιού πρόσβασης και το μυστικό κλειδί πρόσβασης στον χώρο αποθήκευσης διαπιστευτηρίων αυτού του υπολογιστή, ποτέ στη σύνδεση ή στο έργο.
 Keeps the parts of two polygon layers that only one of them covers, with that layer's attributes.	Διατηρεί τα τμήματα δύο πολυγωνικών επιπέδων που καλύπτει μόνο το ένα από αυτά, με τα γνωρίσματα εκείνου του επιπέδου.
-Keeps the token in the system's credential store, so it is there when RustGIS starts again. Unticked, a token remembered before is deleted when you save another.	Διατηρεί το token στο χώρο αποθήκευσης διαπιστευτηρίων του συστήματος, ώστε να υπάρχει όταν το RustGIS ξεκινήσει ξανά. Αν δεν είναι επιλεγμένο, ένα token που είχε απομνημονευτεί διαγράφεται όταν αποθηκεύσετε άλλο.
+Keeps the token in the system's credential store, so it is there when KHGIS starts again. Unticked, a token remembered before is deleted when you save another.	Διατηρεί το token στο χώρο αποθήκευσης διαπιστευτηρίων του συστήματος, ώστε να υπάρχει όταν το KHGIS ξεκινήσει ξανά. Αν δεν είναι επιλεγμένο, ένα token που είχε απομνημονευτεί διαγράφεται όταν αποθηκεύσετε άλλο.
 Kernel Density	Πυκνότητα πυρήνα
 Kernel Type	Τύπος πυρήνα
 Key	Κλειδί
@@ -1918,7 +1918,7 @@ Legend label. Clear it to show the value again.	Ετικέτα υπομνήμα�
 Length	Μήκος
 Length {length} · gain {gain} · loss {loss}	Μήκος {length} · άνοδος {gain} · κάθοδος {loss}
 Let the assistant hand tasks to agents on this computer	Να επιτρέπεται στον βοηθό να αναθέτει εργασίες σε πράκτορες αυτού του υπολογιστή
-Let your Agents Control RustGIS	Έλεγχος του RustGIS από τους πράκτορές σας
+Let your Agents Control KHGIS	Έλεγχος του KHGIS από τους πράκτορές σας
 Letter spacing	Απόσταση χαρακτήρων
 Level	Στάθμη
 Library	Βιβλιοθήκη
@@ -1977,7 +1977,7 @@ List The National Map Services	Λίστα υπηρεσιών The National Map
 List the provider's models	Λίστα μοντέλων του παρόχου
 List this layer in the legend	Εμφάνιση αυτού του επιπέδου στο υπόμνημα
 List what it holds	Λίστα περιεχομένων
-Listed for discovery: RustGIS doesn't read this dataset yet. Its data and paper are linked above.	Καταχωρίζεται για ανακάλυψη: το RustGIS δεν διαβάζει ακόμη αυτό το σύνολο δεδομένων. Οι σύνδεσμοι για τα δεδομένα και τη δημοσίευσή του βρίσκονται παραπάνω.
+Listed for discovery: KHGIS doesn't read this dataset yet. Its data and paper are linked above.	Καταχωρίζεται για ανακάλυψη: το KHGIS δεν διαβάζει ακόμη αυτό το σύνολο δεδομένων. Οι σύνδεσμοι για τα δεδομένα και τη δημοσίευσή του βρίσκονται παραπάνω.
 Listing datasets…	Λήψη λίστας συνόλων δεδομένων…
 Listing…	Ανάκτηση λίστας…
 Lit	Φωτισμένο
@@ -2033,7 +2033,7 @@ Look for {name}, outlined on the ribbon.	Αναζητήστε το στοιχε�
 Looking up the place…	Αναζήτηση τοποθεσίας…
 Loop	Βρόχος
 Lower Priority	Χαμηλότερη προτεραιότητα
-Made in RustGIS: samples, drawings and tool outputs	Δημιουργήθηκαν στο RustGIS: δείγματα, σχέδια και αποτελέσματα εργαλείων
+Made in KHGIS: samples, drawings and tool outputs	Δημιουργήθηκαν στο KHGIS: δείγματα, σχέδια και αποτελέσματα εργαλείων
 Magnifier	Μεγεθυντικός φακός
 Major Lakes	Μεγάλες λίμνες
 Major Rivers	Μεγάλοι ποταμοί
@@ -2301,7 +2301,7 @@ No command matches	Καμία εντολή δεν ταιριάζει
 No data at the points picked.	Δεν υπάρχουν δεδομένα στα επιλεγμένα σημεία.
 No data cube matches	Κανένας κύβος δεδομένων δεν ταιριάζει
 No datasets match.	Κανένα σύνολο δεδομένων δεν ταιριάζει.
-No datasets with data RustGIS can add	Δεν υπάρχουν σύνολα δεδομένων με δεδομένα που μπορεί να προσθέσει το RustGIS
+No datasets with data KHGIS can add	Δεν υπάρχουν σύνολα δεδομένων με δεδομένα που μπορεί να προσθέσει το KHGIS
 no date in the name	χωρίς ημερομηνία στο όνομα
 No diagnostic entries match this filter.	Καμία καταχώριση διαγνωστικών δεν ταιριάζει με αυτό το φίλτρο.
 no download service	καμία υπηρεσία λήψης
@@ -2371,8 +2371,8 @@ North Polar Stereographic	Βόρεια πολική στερεογραφική
 NOT	NOT
 Not a GeoLibre project	Δεν είναι έργο GeoLibre
 not a picture	δεν είναι εικόνα
-not a RustGIS layout	δεν είναι διάταξη RustGIS
-not a RustGIS project	δεν είναι έργο RustGIS
+not a KHGIS layout	δεν είναι διάταξη KHGIS
+not a KHGIS project	δεν είναι έργο KHGIS
 not a UTM or MGRS grid reference	δεν είναι αναφορά πλέγματος UTM ή MGRS
 Not added: a drawn line holds at most 10,000 points	Δεν προστέθηκε: μια σχεδιασμένη γραμμή έχει το πολύ 10.000 σημεία
 Not applied yet.	Δεν έχει εφαρμοστεί ακόμη.
@@ -2450,7 +2450,7 @@ Open a Data Cube	Άνοιγμα κύβου δεδομένων
 open a layout first	ανοίξτε πρώτα μια διάταξη
 Open a model file (*.model.json)	Άνοιγμα αρχείου μοντέλου (*.model.json)
 Open a model of this project	Άνοιγμα μοντέλου αυτού του έργου
-Open a RustGIS or Jupyter notebook.	Ανοίγει ένα σημειωματάριο RustGIS ή Jupyter.
+Open a KHGIS or Jupyter notebook.	Ανοίγει ένα σημειωματάριο KHGIS ή Jupyter.
 Open an offline area to edit.	Ανοίξτε μια περιοχή εκτός σύνδεσης για επεξεργασία.
 Open browser again	Νέο άνοιγμα προγράμματος περιήγησης
 Open Custom Template	Άνοιγμα προσαρμοσμένου προτύπου
@@ -2479,7 +2479,7 @@ Open the layer's attribute table.	Ανοίγει τον πίνακα γνωρι�
 Open the layer's table.	Ανοίγει τον πίνακα του επιπέδου.
 Open the plugin's panel.	Ανοίγει το πλαίσιο του πρόσθετου.
 Open the Release Page	Άνοιγμα της σελίδας έκδοσης
-Open the RustGIS user guide.	Ανοίγει τον οδηγό χρήσης του RustGIS.
+Open the KHGIS user guide.	Ανοίγει τον οδηγό χρήσης του KHGIS.
 Open the selected layer's table.	Ανοίγει τον πίνακα του επιλεγμένου επιπέδου.
 Open the Symbology pane.	Ανοίγει το πλαίσιο συμβολισμού.
 Open the task's steps	Άνοιγμα των βημάτων της εργασίας
@@ -2659,7 +2659,7 @@ Plugin registry	Μητρώο πρόσθετων
 Plugins	Πρόσθετα
 Plugins are .rgplugin files. Install only plugins from people you trust.	Τα πρόσθετα είναι αρχεία .rgplugin. Εγκαθιστάτε μόνο πρόσθετα από άτομα που εμπιστεύεστε.
 Plugins marked Not sandboxed run as programs on your computer instead, and can do anything you can.	Τα πρόσθετα με την ένδειξη «Χωρίς sandbox» εκτελούνται αντί γι' αυτό ως προγράμματα στον υπολογιστή σας και μπορούν να κάνουν ό,τι μπορείτε κι εσείς.
-Plugins run in a sandbox: they can't reach your files or the network, and they change the project only through RustGIS's own commands, within the permissions you accept.	Τα πρόσθετα εκτελούνται σε sandbox: δεν έχουν πρόσβαση στα αρχεία σας ή στο δίκτυο, και αλλάζουν το έργο μόνο μέσω των εντολών του ίδιου του RustGIS, εντός των δικαιωμάτων που αποδέχεστε.
+Plugins run in a sandbox: they can't reach your files or the network, and they change the project only through KHGIS's own commands, within the permissions you accept.	Τα πρόσθετα εκτελούνται σε sandbox: δεν έχουν πρόσβαση στα αρχεία σας ή στο δίκτυο, και αλλάζουν το έργο μόνο μέσω των εντολών του ίδιου του KHGIS, εντός των δικαιωμάτων που αποδέχεστε.
 PMTiles archive	Αρχειοθήκη PMTiles
 PNG frames (zip)	Καρέ PNG (zip)
 PNG image or GeoTIFF	Εικόνα PNG ή GeoTIFF
@@ -2740,7 +2740,7 @@ Project Template	Πρότυπο έργου
 project's path is required	απαιτείται το path του project
 Projection	Προβολή
 Projections	Προβολές
-Projects and JSON data (RustGIS, QGIS, GeoLibre)	Έργα και δεδομένα JSON (RustGIS, QGIS, GeoLibre)
+Projects and JSON data (KHGIS, QGIS, GeoLibre)	Έργα και δεδομένα JSON (KHGIS, QGIS, GeoLibre)
 Properties	Ιδιότητες
 Property	Ιδιότητα
 Proportional Symbols	Αναλογικά σύμβολα
@@ -2803,7 +2803,7 @@ Read error	Σφάλμα ανάγνωσης
 Read the bands picked for the view (at most about 6 km a side)	Ανάγνωση των καναλιών που επιλέχθηκαν για την προβολή (έως περίπου 6 km ανά πλευρά)
 Read the map's layers and features	Ανάγνωση των επιπέδων και των οντοτήτων του χάρτη
 Read the points in the view, coloured by their principal components	Ανάγνωση των σημείων στην προβολή, χρωματισμένων κατά τις κύριες συνιστώσες τους
-Reading a granule's files needs an Earthdata Login token, which works for every NASA DAAC. It is kept until RustGIS closes unless you tick Remember, never in the project, and sent only to NASA's Earthdata data servers.	Η ανάγνωση των αρχείων ενός granule χρειάζεται token Earthdata Login, που λειτουργεί για κάθε NASA DAAC. Διατηρείται μέχρι να κλείσει το RustGIS, εκτός αν επιλέξετε «Απομνημόνευση», ποτέ στο έργο, και αποστέλλεται μόνο στους διακομιστές δεδομένων Earthdata της NASA.
+Reading a granule's files needs an Earthdata Login token, which works for every NASA DAAC. It is kept until KHGIS closes unless you tick Remember, never in the project, and sent only to NASA's Earthdata data servers.	Η ανάγνωση των αρχείων ενός granule χρειάζεται token Earthdata Login, που λειτουργεί για κάθε NASA DAAC. Διατηρείται μέχρι να κλείσει το KHGIS, εκτός αν επιλέξετε «Απομνημόνευση», ποτέ στο έργο, και αποστέλλεται μόνο στους διακομιστές δεδομένων Earthdata της NASA.
 Reading in place…	Ανάγνωση επί τόπου…
 Reading the catalog: {n} documents read, {m} items found…	Ανάγνωση του καταλόγου: διαβάστηκαν {n} έγγραφα, βρέθηκαν {m} στοιχεία…
 Reading the catalog…	Ανάγνωση του καταλόγου…
@@ -3001,35 +3001,35 @@ Run Tool	Εκτέλεση εργαλείου
 Run {name}	Εκτέλεση {name}
 Running the query for the map…	Εκτέλεση του ερωτήματος για τον χάρτη…
 Running…	Εκτέλεση…
-RustGIS	RustGIS
-RustGIS bookmarks	Σελιδοδείκτες RustGIS
-RustGIS could not confirm that any previously saved key was deleted from the system keychain.	Το RustGIS δεν μπόρεσε να επιβεβαιώσει ότι διαγράφηκε από την κλειδοθήκη του συστήματος κάποιο κλειδί που είχε αποθηκευτεί προηγουμένως.
-RustGIS couldn't reach the server.	Το RustGIS δεν μπόρεσε να επικοινωνήσει με τον διακομιστή.
-RustGIS deep learning package	Πακέτο βαθιάς μάθησης RustGIS
-RustGIS didn't close properly last time, so it started with the World Atlas instead of your start-up project. Open the project from the Project menu when you're ready.	Το RustGIS δεν έκλεισε σωστά την τελευταία φορά, οπότε ξεκίνησε με το World Atlas αντί για το έργο εκκίνησής σας. Ανοίξτε το έργο από το μενού «Έργο» όταν είστε έτοιμοι.
-RustGIS didn't close properly last time.	Το RustGIS δεν έκλεισε σωστά την τελευταία φορά.
-RustGIS doesn't have this tool. Install the tools it comes from, or delete the node.	Το RustGIS δεν διαθέτει αυτό το εργαλείο. Εγκαταστήστε τα εργαλεία από τα οποία προέρχεται ή διαγράψτε τον κόμβο.
-RustGIS is a free and open-source GIS written in pure Rust. It runs on the desktop and in the browser, and every action is a command you can also run from the command line.	Το RustGIS είναι ένα δωρεάν GIS ανοιχτού κώδικα, γραμμένο αποκλειστικά σε Rust. Λειτουργεί σε υπολογιστή και σε πρόγραμμα περιήγησης, και κάθε ενέργεια είναι μια εντολή που μπορείτε να εκτελέσετε και από τη γραμμή εντολών.
-RustGIS layer file	Αρχείο επιπέδου RustGIS
-RustGIS layers, maps and projects	Επίπεδα, χάρτες και έργα RustGIS
-RustGIS layout	Διάταξη RustGIS
-RustGIS maps and projects	Χάρτες και έργα RustGIS
-RustGIS model	Μοντέλο RustGIS
-RustGIS or Jupyter notebook	Σημειωματάριο RustGIS ή Jupyter
-RustGIS plugin	Πρόσθετο RustGIS
-RustGIS presentation	Παρουσίαση RustGIS
-RustGIS project	Έργο RustGIS
-RustGIS project template	Πρότυπο έργου RustGIS
-RustGIS ran into an internal error last time. The details are in {path}; please attach them to a bug report.	Το RustGIS αντιμετώπισε εσωτερικό σφάλμα την τελευταία φορά. Οι λεπτομέρειες βρίσκονται στο {path}. Επισυνάψτε τες σε μια αναφορά σφάλματος.
-RustGIS report or report template	Αναφορά ή πρότυπο αναφοράς RustGIS
-RustGIS styles	Στυλ RustGIS
-RustGIS task	Εργασία RustGIS
-RustGIS was quit last time without saving your changes.	Το RustGIS τερματίστηκε την τελευταία φορά χωρίς να αποθηκευτούν οι αλλαγές σας.
-RustGIS was updated to {version}.	Το RustGIS ενημερώθηκε στην έκδοση {version}.
-RustGIS {latest} is available.	Το RustGIS {latest} είναι διαθέσιμο.
-RustGIS {version} installs when RustGIS closes.	Το RustGIS {version} εγκαθίσταται όταν κλείσει το RustGIS.
-RustGIS {version} is the latest version.	Το RustGIS {version} είναι η πιο πρόσφατη έκδοση.
-RustGIS {version} wasn't installed: try again from Help › Check for Updates, or install it from the release page.	Το RustGIS {version} δεν εγκαταστάθηκε: δοκιμάστε ξανά από Βοήθεια › Έλεγχος για ενημερώσεις ή εγκαταστήστε το από τη σελίδα της έκδοσης.
+KHGIS	KHGIS
+KHGIS bookmarks	Σελιδοδείκτες KHGIS
+KHGIS could not confirm that any previously saved key was deleted from the system keychain.	Το KHGIS δεν μπόρεσε να επιβεβαιώσει ότι διαγράφηκε από την κλειδοθήκη του συστήματος κάποιο κλειδί που είχε αποθηκευτεί προηγουμένως.
+KHGIS couldn't reach the server.	Το KHGIS δεν μπόρεσε να επικοινωνήσει με τον διακομιστή.
+KHGIS deep learning package	Πακέτο βαθιάς μάθησης KHGIS
+KHGIS didn't close properly last time, so it started with the World Atlas instead of your start-up project. Open the project from the Project menu when you're ready.	Το KHGIS δεν έκλεισε σωστά την τελευταία φορά, οπότε ξεκίνησε με το World Atlas αντί για το έργο εκκίνησής σας. Ανοίξτε το έργο από το μενού «Έργο» όταν είστε έτοιμοι.
+KHGIS didn't close properly last time.	Το KHGIS δεν έκλεισε σωστά την τελευταία φορά.
+KHGIS doesn't have this tool. Install the tools it comes from, or delete the node.	Το KHGIS δεν διαθέτει αυτό το εργαλείο. Εγκαταστήστε τα εργαλεία από τα οποία προέρχεται ή διαγράψτε τον κόμβο.
+KHGIS is a free and open-source GIS written in pure Rust. It runs on the desktop and in the browser, and every action is a command you can also run from the command line.	Το KHGIS είναι ένα δωρεάν GIS ανοιχτού κώδικα, γραμμένο αποκλειστικά σε Rust. Λειτουργεί σε υπολογιστή και σε πρόγραμμα περιήγησης, και κάθε ενέργεια είναι μια εντολή που μπορείτε να εκτελέσετε και από τη γραμμή εντολών.
+KHGIS layer file	Αρχείο επιπέδου KHGIS
+KHGIS layers, maps and projects	Επίπεδα, χάρτες και έργα KHGIS
+KHGIS layout	Διάταξη KHGIS
+KHGIS maps and projects	Χάρτες και έργα KHGIS
+KHGIS model	Μοντέλο KHGIS
+KHGIS or Jupyter notebook	Σημειωματάριο KHGIS ή Jupyter
+KHGIS plugin	Πρόσθετο KHGIS
+KHGIS presentation	Παρουσίαση KHGIS
+KHGIS project	Έργο KHGIS
+KHGIS project template	Πρότυπο έργου KHGIS
+KHGIS ran into an internal error last time. The details are in {path}; please attach them to a bug report.	Το KHGIS αντιμετώπισε εσωτερικό σφάλμα την τελευταία φορά. Οι λεπτομέρειες βρίσκονται στο {path}. Επισυνάψτε τες σε μια αναφορά σφάλματος.
+KHGIS report or report template	Αναφορά ή πρότυπο αναφοράς KHGIS
+KHGIS styles	Στυλ KHGIS
+KHGIS task	Εργασία KHGIS
+KHGIS was quit last time without saving your changes.	Το KHGIS τερματίστηκε την τελευταία φορά χωρίς να αποθηκευτούν οι αλλαγές σας.
+KHGIS was updated to {version}.	Το KHGIS ενημερώθηκε στην έκδοση {version}.
+KHGIS {latest} is available.	Το KHGIS {latest} είναι διαθέσιμο.
+KHGIS {version} installs when KHGIS closes.	Το KHGIS {version} εγκαθίσταται όταν κλείσει το KHGIS.
+KHGIS {version} is the latest version.	Το KHGIS {version} είναι η πιο πρόσφατη έκδοση.
+KHGIS {version} wasn't installed: try again from Help › Check for Updates, or install it from the release page.	Το KHGIS {version} δεν εγκαταστάθηκε: δοκιμάστε ξανά από Βοήθεια › Έλεγχος για ενημερώσεις ή εγκαταστήστε το από τη σελίδα της έκδοσης.
 RUSTGIS_ASSISTANT_MODEL	RUSTGIS_ASSISTANT_MODEL
 RUSTGIS_ASSISTANT_PROVIDER	RUSTGIS_ASSISTANT_PROVIDER
 RUSTGIS_GPU	RUSTGIS_GPU
@@ -3040,7 +3040,7 @@ S3 Buckets	Buckets S3
 S3 Connections	Συνδέσεις S3
 S3…	S3…
 Sample data (Natural Earth)	Δείγματα δεδομένων (Natural Earth)
-Sample data © Natural Earth (public domain). RustGIS is licensed under Apache-2.0.	Δείγματα δεδομένων © Natural Earth (κοινό κτήμα). Το RustGIS διατίθεται με άδεια Apache-2.0.
+Sample data © Natural Earth (public domain). KHGIS is licensed under Apache-2.0.	Δείγματα δεδομένων © Natural Earth (κοινό κτήμα). Το KHGIS διατίθεται με άδεια Apache-2.0.
 Sample data: Natural Earth (public domain). Licensed under Apache-2.0.	Δείγματα δεδομένων: Natural Earth (κοινό κτήμα). Άδεια Apache-2.0.
 Sans-serif	Sans-serif
 Satellite Embedding Datasets	Σύνολα δεδομένων δορυφορικών embeddings
@@ -3190,7 +3190,7 @@ Sections	Ενότητες
 See and set the camera's position and scale.	Δείτε και ορίστε τη θέση και την κλίμακα της κάμερας.
 See the map as people with colour vision deficiencies do.	Δείτε τον χάρτη όπως τον βλέπουν άτομα με διαταραχές χρωματικής όρασης.
 See the tools you've run.	Δείτε τα εργαλεία που έχετε εκτελέσει.
-See whether a newer RustGIS has been released.	Ελέγξτε αν έχει κυκλοφορήσει νεότερη έκδοση του RustGIS.
+See whether a newer KHGIS has been released.	Ελέγξτε αν έχει κυκλοφορήσει νεότερη έκδοση του KHGIS.
 SELECT	SELECT
 Select	Επιλογή
 Select (click)	Επιλογή (κλικ)
@@ -3396,8 +3396,8 @@ Sign-in timed out. Start again and allow the browser to reach this computer's lo
 signed in	σε σύνδεση
 Signed in to {portal}	Συνδεθήκατε στο {portal}
 Signed in to {portal} as {user}	Συνδεθήκατε στο {portal} ως {user}
-Signed out on this computer, but OpenAI didn't confirm it. You can disconnect RustGIS in ChatGPT's settings.	Αποσυνδεθήκατε σε αυτόν τον υπολογιστή, αλλά το OpenAI δεν το επιβεβαίωσε. Μπορείτε να αποσυνδέσετε το RustGIS από τις ρυθμίσεις του ChatGPT.
-Signed out on this computer, but the system keychain couldn't be read, so OpenAI wasn't asked to end the session. You can disconnect RustGIS in ChatGPT's settings.	Αποσυνδεθήκατε σε αυτόν τον υπολογιστή, αλλά η κλειδοθήκη του συστήματος δεν ήταν δυνατό να διαβαστεί, οπότε δεν ζητήθηκε από το OpenAI να τερματίσει τη συνεδρία. Μπορείτε να αποσυνδέσετε το RustGIS από τις ρυθμίσεις του ChatGPT.
+Signed out on this computer, but OpenAI didn't confirm it. You can disconnect KHGIS in ChatGPT's settings.	Αποσυνδεθήκατε σε αυτόν τον υπολογιστή, αλλά το OpenAI δεν το επιβεβαίωσε. Μπορείτε να αποσυνδέσετε το KHGIS από τις ρυθμίσεις του ChatGPT.
+Signed out on this computer, but the system keychain couldn't be read, so OpenAI wasn't asked to end the session. You can disconnect KHGIS in ChatGPT's settings.	Αποσυνδεθήκατε σε αυτόν τον υπολογιστή, αλλά η κλειδοθήκη του συστήματος δεν ήταν δυνατό να διαβαστεί, οπότε δεν ζητήθηκε από το OpenAI να τερματίσει τη συνεδρία. Μπορείτε να αποσυνδέσετε το KHGIS από τις ρυθμίσεις του ChatGPT.
 Significance level	Επίπεδο σημαντικότητας
 Signing in with ChatGPT works in the desktop app.	Η σύνδεση με ChatGPT λειτουργεί στην εφαρμογή για υπολογιστή.
 Signing the asset (Planetary Computer)…	Υπογραφή του αρχείου (Planetary Computer)…
@@ -3657,7 +3657,7 @@ The assistant follows a skill's instructions when it uses it. Whatever they say,
 The assistant is busy; stop it or wait for it to finish.	Ο βοηθός είναι απασχολημένος. Διακόψτε τον ή περιμένετε να τελειώσει.
 The assistant wants to run this, and {why}:	Ο βοηθός θέλει να εκτελέσει αυτό, και {why}:
 The Basemaps plugin's tab of public basemaps.	Η καρτέλα δημόσιων basemaps του πρόσθετου Basemaps.
-The browser didn't give RustGIS the clipboard ({why}): paste with {keys}.	Το πρόγραμμα περιήγησης δεν έδωσε στο RustGIS το πρόχειρο ({why}): επικολλήστε με {keys}.
+The browser didn't give KHGIS the clipboard ({why}): paste with {keys}.	Το πρόγραμμα περιήγησης δεν έδωσε στο KHGIS το πρόχειρο ({why}): επικολλήστε με {keys}.
 the browser kept neither a copy of it nor where to download it	το πρόγραμμα περιήγησης δεν διατήρησε ούτε αντίγραφο ούτε τη θέση λήψης του
 the capture failed unexpectedly	η καταγραφή απέτυχε απρόσμενα
 The class these label groups and the Labeling pane edit.	Η κλάση που επεξεργάζονται αυτές οι ομάδες ετικετών και το πλαίσιο Απόδοση ετικετών.
@@ -3667,7 +3667,7 @@ the connection has no id	η σύνδεση δεν έχει id
 The coordinate format must be decimal, dms, utm or mgrs	Η μορφή συντεταγμένων πρέπει να είναι decimal, dms, utm ή mgrs
 The country list couldn't be read ({e}): type a country's code	Δεν ήταν δυνατή η ανάγνωση της λίστας χωρών ({e}): πληκτρολογήστε τον κωδικό μιας χώρας
 The current elevation stays in effect while you edit inputs. Click Apply elevation to apply the value and units.	Το τρέχον υψόμετρο παραμένει σε ισχύ όσο επεξεργάζεστε τις τιμές. Κάντε κλικ στο «Εφαρμογή υψομέτρου» για να εφαρμόσετε την τιμή και τις μονάδες.
-The dataset has nothing RustGIS can add	Το σύνολο δεδομένων δεν περιέχει τίποτα που μπορεί να προσθέσει το RustGIS
+The dataset has nothing KHGIS can add	Το σύνολο δεδομένων δεν περιέχει τίποτα που μπορεί να προσθέσει το KHGIS
 The desktop app adds data cubes	Η εφαρμογή επιφάνειας εργασίας προσθέτει κύβους δεδομένων
 The distance between two marks along the line	Η απόσταση μεταξύ δύο σημάνσεων κατά μήκος της γραμμής
 The environment (AWS_ACCESS_KEY_ID…)	Το περιβάλλον (AWS_ACCESS_KEY_ID…)
@@ -3680,7 +3680,7 @@ The first {n} rows	Οι πρώτες {n} γραμμές
 The flowtrace didn't answer: the whole flowline nearest the point is shown.	Το flowtrace δεν απάντησε: εμφανίζεται ολόκληρη η γραμμή ροής που βρίσκεται πλησιέστερα στο σημείο.
 the grid digits must be an even count of 0 to 10, half for the easting and half for the northing	τα ψηφία πλέγματος πρέπει να είναι άρτιο πλήθος από 0 έως 10, τα μισά για το easting και τα μισά για το northing
 The installed GeoLibre runner lists no tools.	Ο εγκατεστημένος εκτελεστής GeoLibre δεν παραθέτει κανένα εργαλείο.
-The installer is downloaded and checked. RustGIS closes, installs the update and opens again.	Το πρόγραμμα εγκατάστασης λαμβάνεται και ελέγχεται. Το RustGIS κλείνει, εγκαθιστά την ενημέρωση και ανοίγει ξανά.
+The installer is downloaded and checked. KHGIS closes, installs the update and opens again.	Το πρόγραμμα εγκατάστασης λαμβάνεται και ελέγχεται. Το KHGIS κλείνει, εγκαθιστά την ενημέρωση και ανοίγει ξανά.
 The interface colours, spacing and text sizes: a built-in theme or a file from the themes folder.	Τα χρώματα, οι αποστάσεις και τα μεγέθη κειμένου της διεπαφής: ένα ενσωματωμένο θέμα ή ένα αρχείο από τον φάκελο θεμάτων.
 The job covers the map view	Η διεργασία καλύπτει την προβολή χάρτη
 The key is kept for this session only.	Το κλειδί διατηρείται μόνο για αυτήν την περίοδο λειτουργίας.
@@ -3699,7 +3699,7 @@ The layer's fills	Τα γεμίσματα του επιπέδου
 The layer's strokes	Οι πινελιές του επιπέδου
 the layout export failed unexpectedly	η εξαγωγή της διάταξης απέτυχε απρόσμενα
 The link doesn't say its STAC API: Find Items searches {api}	Ο σύνδεσμος δεν αναφέρει το STAC API του: η «Εύρεση στοιχείων» αναζητά στο {api}
-The list of plugins to browse. Leave it empty for the RustGIS plugin registry.	Η λίστα πρόσθετων για περιήγηση. Αφήστε την κενή για το μητρώο πρόσθετων του RustGIS.
+The list of plugins to browse. Leave it empty for the KHGIS plugin registry.	Η λίστα πρόσθετων για περιήγηση. Αφήστε την κενή για το μητρώο πρόσθετων του KHGIS.
 The log cut it short or took its secrets out: it would run only in part	Το αρχείο καταγραφής την περιέκοψε ή αφαίρεσε τα μυστικά της: θα εκτελούνταν μόνο εν μέρει
 The longest a callout's line may be.	Το μέγιστο μήκος της γραμμής μιας επεξήγησης.
 The map at the left; the title, locator, legend, sources and reference in a panel at the right.	Ο χάρτης αριστερά· ο τίτλος, ο εντοπιστής, το υπόμνημα, οι πηγές και η αναφορά σε πάνελ στα δεξιά.
@@ -3708,7 +3708,7 @@ the map has no layers	ο χάρτης δεν έχει επίπεδα
 the map has no PostGIS layer loaded for editing (Home › Add Data › Database…, Load for editing)	ο χάρτης δεν έχει επίπεδο PostGIS φορτωμένο για επεξεργασία (Αρχική › Προσθήκη δεδομένων › Βάση δεδομένων…, Φόρτωση για επεξεργασία)
 The map has no tile archive read from a file.	Ο χάρτης δεν έχει αρχείο tiles που διαβάστηκε από αρχείο.
 The map is drawn in this coordinate system; layers are projected on the fly.	Ο χάρτης σχεδιάζεται σε αυτό το σύστημα συντεταγμένων. Τα επίπεδα προβάλλονται δυναμικά.
-the map isn't on screen in RustGIS (a layout or the catalog is shown), so it was drawn offscreen	ο χάρτης δεν εμφανίζεται στην οθόνη του RustGIS (εμφανίζεται διάταξη ή ο κατάλογος), οπότε σχεδιάστηκε εκτός οθόνης
+the map isn't on screen in KHGIS (a layout or the catalog is shown), so it was drawn offscreen	ο χάρτης δεν εμφανίζεται στην οθόνη του KHGIS (εμφανίζεται διάταξη ή ο κατάλογος), οπότε σχεδιάστηκε εκτός οθόνης
 the map it was asked for isn't open	ο χάρτης που ζητήθηκε δεν είναι ανοιχτός
 The map view as it is now	Η προβολή χάρτη όπως είναι τώρα
 The map's extent isn't known yet	Η έκταση του χάρτη δεν είναι ακόμη γνωστή
@@ -3793,7 +3793,7 @@ The sign-in is still kept in the app's settings folder, readable by your user ac
 The significance level is a number, such as 0.05	Το επίπεδο σημαντικότητας είναι αριθμός, όπως 0.05
 The size of the menu, the panes and the text drawn in them.	Το μέγεθος του μενού, των πλαισίων και του κειμένου που σχεδιάζεται σε αυτά.
 The start-up project {path} didn't open: {error}	Το έργο εκκίνησης {path} δεν άνοιξε: {error}
-The start-up project {path} isn't a RustGIS project file.	Το έργο εκκίνησης {path} δεν είναι αρχείο έργου RustGIS.
+The start-up project {path} isn't a KHGIS project file.	Το έργο εκκίνησης {path} δεν είναι αρχείο έργου KHGIS.
 The step's layer {name} isn't in the map.	Το επίπεδο {name} του βήματος δεν υπάρχει στον χάρτη.
 The store has no variables with two or more dimensions.	Η αποθήκη δεν έχει μεταβλητές με δύο ή περισσότερες διαστάσεις.
 the store is gone	η αποθήκη δεν υπάρχει πλέον
@@ -3802,7 +3802,7 @@ The summary failed unexpectedly	Η σύνοψη απέτυχε απρόσμεν�
 The summary finished after another project was opened, so it wasn't added	Η σύνοψη ολοκληρώθηκε αφού άνοιξε άλλο έργο, οπότε δεν προστέθηκε
 The system keychain could not complete the request.	Η κλειδοθήκη του συστήματος δεν μπόρεσε να ολοκληρώσει το αίτημα.
 The system keychain is locked or access was refused.	Η κλειδοθήκη του συστήματος είναι κλειδωμένη ή η πρόσβαση απορρίφθηκε.
-The system keychain is unavailable, so this sign-in won't be remembered: it lasts until RustGIS closes.	Η κλειδοθήκη του συστήματος δεν είναι διαθέσιμη, οπότε αυτή η σύνδεση δεν θα απομνημονευτεί: ισχύει μέχρι να κλείσει το RustGIS.
+The system keychain is unavailable, so this sign-in won't be remembered: it lasts until KHGIS closes.	Η κλειδοθήκη του συστήματος δεν είναι διαθέσιμη, οπότε αυτή η σύνδεση δεν θα απομνημονευτεί: ισχύει μέχρι να κλείσει το KHGIS.
 The system keychain is unavailable.	Η κλειδοθήκη του συστήματος δεν είναι διαθέσιμη.
 The task's steps changed, so the step being edited was closed: edit it again.	Τα βήματα της εργασίας άλλαξαν, οπότε το βήμα που επεξεργαζόσασταν έκλεισε: επεξεργαστείτε το ξανά.
 the time slider is off	το ρυθμιστικό χρόνου είναι απενεργοποιημένο
@@ -3856,7 +3856,7 @@ This map's thumbnail, from an image.	Η μικρογραφία αυτού του
 This map's thumbnail, from the view.	Η μικρογραφία αυτού του χάρτη, από την προβολή.
 This platform does not report the system theme	Αυτή η πλατφόρμα δεν αναφέρει το θέμα του συστήματος
 This plugin can:	Αυτό το πρόσθετο μπορεί να:
-This plugin runs as a program on your computer, outside RustGIS's sandbox. It can do anything you can: read and change your files, use the network and run other programs. Install it only if you trust its author.	Αυτό το πρόσθετο εκτελείται ως πρόγραμμα στον υπολογιστή σας, εκτός του απομονωμένου περιβάλλοντος (sandbox) του RustGIS. Μπορεί να κάνει οτιδήποτε μπορείτε κι εσείς: να διαβάζει και να αλλάζει τα αρχεία σας, να χρησιμοποιεί το δίκτυο και να εκτελεί άλλα προγράμματα. Εγκαταστήστε το μόνο αν εμπιστεύεστε τον δημιουργό του.
+This plugin runs as a program on your computer, outside KHGIS's sandbox. It can do anything you can: read and change your files, use the network and run other programs. Install it only if you trust its author.	Αυτό το πρόσθετο εκτελείται ως πρόγραμμα στον υπολογιστή σας, εκτός του απομονωμένου περιβάλλοντος (sandbox) του KHGIS. Μπορεί να κάνει οτιδήποτε μπορείτε κι εσείς: να διαβάζει και να αλλάζει τα αρχεία σας, να χρησιμοποιεί το δίκτυο και να εκτελεί άλλα προγράμματα. Εγκαταστήστε το μόνο αν εμπιστεύεστε τον δημιουργό του.
 This project	Αυτό το έργο
 This project uses a connection for {origin} that is not saved on this computer.	Αυτό το έργο χρησιμοποιεί σύνδεση για {origin} που δεν είναι αποθηκευμένη σε αυτόν τον υπολογιστή.
 This read was already started	Αυτή η ανάγνωση είχε ήδη ξεκινήσει
@@ -4002,7 +4002,7 @@ unknown (an older project)	άγνωστο (παλαιότερο έργο)
 Unknown shortcut binding field.	Άγνωστο πεδίο σύνδεσης συντόμευσης.
 Unknown shortcut command.	Άγνωστη εντολή συντόμευσης.
 UNKNOWN TOOL	ΑΓΝΩΣΤΟ ΕΡΓΑΛΕΙΟ
-Unload the GeoLibre tools and stop loading them when RustGIS starts.	Αποφόρτωση των εργαλείων GeoLibre και διακοπή της φόρτωσής τους κατά την εκκίνηση του RustGIS.
+Unload the GeoLibre tools and stop loading them when KHGIS starts.	Αποφόρτωση των εργαλείων GeoLibre και διακοπή της φόρτωσής τους κατά την εκκίνηση του KHGIS.
 Unsaved changes	Μη αποθηκευμένες αλλαγές
 Unsplit Line	Συνένωση γραμμής
 Unsupervised classes (k-means)	Μη επιβλεπόμενες κλάσεις (k-means)
@@ -4143,14 +4143,14 @@ Web-service logins last for this session only.	Οι συνδέσεις σε υπ
 Website	Ιστότοπος
 Weekly usage	Εβδομαδιαία χρήση
 Weights	Βάρη
-Welcome to RustGIS	Καλώς ήρθατε στο RustGIS
+Welcome to KHGIS	Καλώς ήρθατε στο KHGIS
 West	Δύση
 WFS	WFS
 WGS 84 / Globe	WGS 84 / Υδρόγειος
 WGS 84 / Web Mercator	WGS 84 / Web Mercator
 What each slice or bar says beside it: its value, its share in percent, or both	Τι γράφει κάθε τομέας ή ράβδος δίπλα του: την τιμή του, το ποσοστό του ή και τα δύο
-What RustGIS opens with: the World Atlas sample or a blank map.	Τι ανοίγει το RustGIS κατά την εκκίνηση: το δείγμα World Atlas ή έναν κενό χάρτη.
-What RustGIS opens with: the World Atlas sample, a blank map, a project you choose, or the last project opened or saved.	Τι ανοίγει το RustGIS κατά την εκκίνηση: το δείγμα World Atlas, έναν κενό χάρτη, ένα έργο που επιλέγετε ή το τελευταίο έργο που ανοίξατε ή αποθηκεύσατε.
+What KHGIS opens with: the World Atlas sample or a blank map.	Τι ανοίγει το KHGIS κατά την εκκίνηση: το δείγμα World Atlas ή έναν κενό χάρτη.
+What KHGIS opens with: the World Atlas sample, a blank map, a project you choose, or the last project opened or saved.	Τι ανοίγει το KHGIS κατά την εκκίνηση: το δείγμα World Atlas, έναν κενό χάρτη, ένα έργο που επιλέγετε ή το τελευταίο έργο που ανοίξατε ή αποθηκεύσατε.
 What to do, where to find it and why	Τι να κάνετε, πού θα το βρείτε και γιατί
 What's near a point	Τι βρίσκεται κοντά σε ένα σημείο
 What's new	Τι νέο υπάρχει

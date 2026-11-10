@@ -66,7 +66,7 @@ A line, or markers or hash marks along it	ເສັ້ນ, ຫຼື ຈຸດ�
 A magnifying lens that follows the pointer.	ແວ່ນຂະຫຍາຍທີ່ຍ້າຍຕາມຕົວຊີ້ເມົາສ໌.
 A map, feature or coverage service's address: WMS, WMTS, WFS, WCS, OGC API Features or Tiles, or an ArcGIS FeatureServer, MapServer, ImageServer or VectorTileServer (or a services directory, to browse).	ທີ່ຢູ່ບໍລິການແຜນທີ່, ຟີເຈີ ຫຼື ພື້ນຜິວ: WMS, WMTS, WFS, WCS, OGC API Features ຫຼື Tiles, ຫຼື ArcGIS FeatureServer, MapServer, ImageServer ຫຼື VectorTileServer (ຫຼື ໄດເຣັກໂທຣີບໍລິການ ເພື່ອເລືອກເບິ່ງ).
 a name, or owner/name such as giswqs/geospatial	ຊື່, ຫຼື ເຈົ້າຂອງ/ຊື່ ເຊັ່ນ giswqs/geospatial
-A named endpoint you can reuse. Keys are kept until RustGIS closes unless you choose to remember them on this computer; the connection itself never keeps them.	ຈຸດເຊື່ອມຕໍ່ທີ່ມີຊື່ເຊິ່ງນຳໃຊ້ຄືນໄດ້. ຄີຈະຖືກເກັບໄວ້ຈົນກວ່າ RustGIS ຈະປິດ ເວັ້ນເສຍແຕ່ທ່ານເລືອກໃຫ້ຈື່ໄວ້ໃນຄອມພິວເຕີນີ້; ຕົວເຊື່ອມຕໍ່ເອງຈະບໍ່ເກັບຄີໄວ້ເລີຍ.
+A named endpoint you can reuse. Keys are kept until KHGIS closes unless you choose to remember them on this computer; the connection itself never keeps them.	ຈຸດເຊື່ອມຕໍ່ທີ່ມີຊື່ເຊິ່ງນຳໃຊ້ຄືນໄດ້. ຄີຈະຖືກເກັບໄວ້ຈົນກວ່າ KHGIS ຈະປິດ ເວັ້ນເສຍແຕ່ທ່ານເລືອກໃຫ້ຈື່ໄວ້ໃນຄອມພິວເຕີນີ້; ຕົວເຊື່ອມຕໍ່ເອງຈະບໍ່ເກັບຄີໄວ້ເລີຍ.
 A named endpoint you can reuse. Passwords last for this session unless you choose to remember them in this computer's password store.	ຈຸດເຊື່ອມຕໍ່ທີ່ມີຊື່ເຊິ່ງນຳໃຊ້ຄືນໄດ້. ລະຫັດຜ່ານຈະຢູ່ສະເພາະຮອບການໃຊ້ນີ້ ເວັ້ນເສຍແຕ່ທ່ານເລືອກໃຫ້ບັນທຶກໄວ້ໃນບ່ອນເກັບລະຫັດຜ່ານຂອງຄອມພິວເຕີນີ້.
 A new GeoPackage	GeoPackage ໃໝ່
 A new table in a GeoPackage	ຕາຕະລາງໃໝ່ໃນ GeoPackage
@@ -110,8 +110,8 @@ A5 Grid	ຕາໜ່າງ A5
 A5's equal-area pentagonal cells at a resolution, over the map's extent, a layer or the world, as polygons with their ids.	ຮູບຫ້າແຈເນື້ອທີ່ເທົ່າກັນຂອງ A5 ຕາມຄວາມລະອຽດທີ່ເລືອກ, ຄຸມພື້ນທີ່ແຜນທີ່, ຊັ້ນຂໍ້ມູນ ຫຼື ທົ່ວໂລກ, ໃນຮູບແບບຮູບຫຼາຍແຈພ້ອມລະຫັດ.
 About	ກ່ຽວກັບ
 About plugins	ກ່ຽວກັບປລັກອິນ
-About RustGIS	ກ່ຽວກັບ RustGIS
-About RustGIS.	ກ່ຽວກັບ RustGIS.
+About KHGIS	ກ່ຽວກັບ KHGIS
+About KHGIS.	ກ່ຽວກັບ KHGIS.
 Above	ເທິງ
 Above Left	ເທິງຊ້າຍ
 Above Right	ເທິງຂວາ
@@ -288,7 +288,7 @@ Agent input queue is full or disconnected; stop the agent and try again.	ຄິ�
 Agent threads	ເທຣດຂອງເອເຈັນ
 Agent work	ການເຮັດວຽກຂອງເອເຈັນ
 Agents have full access: they may run scripts, tasks, models and plugins. Click to stop the MCP relay	ເອເຈັນມີສິດເຂົ້າເຖິງເຕັມຮູບແບບ: ອາດຈະສັ່ງລັນສະຄຣິບ, ໜ້າວຽກ, ໂມເດວ ແລະ ປລັກອິນ. ກົດເພື່ອຢຸດຕົວສົ່ງຕໍ່ MCP
-Agents on this computer that connect (Claude Code, Codex, Cursor and others) work on the map open here, with RustGIS's tools: they can open and save files and use the web. Scripts and plugin management stay off.	ເອເຈັນໃນເຄື່ອງນີ້ທີ່ເຊື່ອມຕໍ່ (Claude Code, Codex, Cursor ແລະ ອື່ນໆ) ເຮັດວຽກເທິງແຜນທີ່ທີ່ເປີດຢູ່ນີ້ ດ້ວຍເຄື່ອງມືຂອງ RustGIS: ສາມາດເປີດ, ບັນທຶກໄຟລ໌ ແລະ ໃຊ້ອິນເຕີເນັດໄດ້. ສ່ວນສະຄຣິບ ແລະ ການຈັດການປລັກອິນຈະຍັງປິດຢູ່.
+Agents on this computer that connect (Claude Code, Codex, Cursor and others) work on the map open here, with KHGIS's tools: they can open and save files and use the web. Scripts and plugin management stay off.	ເອເຈັນໃນເຄື່ອງນີ້ທີ່ເຊື່ອມຕໍ່ (Claude Code, Codex, Cursor ແລະ ອື່ນໆ) ເຮັດວຽກເທິງແຜນທີ່ທີ່ເປີດຢູ່ນີ້ ດ້ວຍເຄື່ອງມືຂອງ KHGIS: ສາມາດເປີດ, ບັນທຶກໄຟລ໌ ແລະ ໃຊ້ອິນເຕີເນັດໄດ້. ສ່ວນສະຄຣິບ ແລະ ການຈັດການປລັກອິນຈະຍັງປິດຢູ່.
 Agents then run commands, change files and use the web on this computer without asking you.	ເອເຈັນຈະສັ່ງຄຳສັ່ງ, ແກ້ໄຂໄຟລ໌ ແລະ ໃຊ້ອິນເຕີເນັດໃນເຄື່ອງນີ້ໂດຍບໍ່ໄດ້ຖາມທ່ານ.
 Aggregate Points to A5	ຮວບຮວມຈຸດເຂົ້າສູ່ A5
 Aggregation	ການຮວບຮວມ
@@ -313,7 +313,7 @@ Allow Feature Selection	ອະນຸຍາດໃຫ້ເລືອກຟີເ�
 Allow only certain combinations of values across fields.	ອະນຸຍາດສະເພາະຄ່າທີ່ເຂົ້າຄູ່ກັນໄດ້ລະຫວ່າງຟິວເທົ່ານັ້ນ.
 Allow such actions for this conversation	ອະນຸຍາດການກະທຳດັ່ງກ່າວສຳລັບການສົນທະນານີ້
 Allow this action?	ອະນຸຍາດການກະທຳນີ້ບໍ?
-Allow this agent's RustGIS action?	ອະນຸຍາດການກະທຳຂອງເອເຈັນນີ້ໃນ RustGIS ບໍ?
+Allow this agent's KHGIS action?	ອະນຸຍາດການກະທຳຂອງເອເຈັນນີ້ໃນ KHGIS ບໍ?
 Along lines	ຕາມແນວເສັ້ນ
 Along Selected Line	ຕາມແນວເສັ້ນທີ່ເລືອກ
 Alt+	Alt+
@@ -325,7 +325,7 @@ Alternating bar	ແຖບສີສະຫຼັບ
 Altitude	ລະດັບຄວາມສູງ
 Always allow	ອະນຸຍາດສະເໝີ
 Amazon S3	Amazon S3
-Amazon S3, or an S3-compatible service (MinIO, Cloudflare R2, Wasabi…) by its endpoint. Keys are kept until RustGIS closes; a saved connection keeps its name, endpoint and region, never its secret.	Amazon S3 ຫຼື ບໍລິການທີ່ຮອງຮັບ S3 (MinIO, Cloudflare R2, Wasabi…) ດ້ວຍ endpoint. ຄີຈະຖືກເກັບຈົນກວ່າ RustGIS ປິດ; ການເຊື່ອມຕໍ່ທີ່ບັນທຶກຈະເກັບພຽງຊື່, endpoint ແລະ region, ບໍ່ເກັບ secret ເລີຍ.
+Amazon S3, or an S3-compatible service (MinIO, Cloudflare R2, Wasabi…) by its endpoint. Keys are kept until KHGIS closes; a saved connection keeps its name, endpoint and region, never its secret.	Amazon S3 ຫຼື ບໍລິການທີ່ຮອງຮັບ S3 (MinIO, Cloudflare R2, Wasabi…) ດ້ວຍ endpoint. ຄີຈະຖືກເກັບຈົນກວ່າ KHGIS ປິດ; ການເຊື່ອມຕໍ່ທີ່ບັນທຶກຈະເກັບພຽງຊື່, endpoint ແລະ region, ບໍ່ເກັບ secret ເລີຍ.
 amenity=cafe, shop	amenity=cafe, shop
 An agent on this computer asks to:	ເອເຈັນໃນເຄື່ອງນີ້ຮ້ອງຂໍເພື່ອ:
 An API key sent in a header must use plain ASCII characters.	API key ທີ່ສົ່ງໃນ header ຕ້ອງໃຊ້ຕົວອັກສອນ ASCII ທຳມະດາ.
@@ -379,7 +379,7 @@ Arrange	ຈັດລຽງ
 Arrange Element	ຈັດລຽງອົງປະກອບ
 Arrow	ລູກສອນ
 Arrowheads	ຫົວລູກສອນ
-Ask a question about your data, or describe what to do with the map. The assistant runs RustGIS commands for you; every change can be undone.	ຖາມຄຳຖາມກ່ຽວກັບຂໍ້ມູນຂອງທ່ານ ຫຼື ອະທິບາຍສິ່ງທີ່ຕ້ອງການເຮັດກັບແຜນທີ່. ຜູ້ຊ່ວຍຈະສັ່ງຄຳສັ່ງ RustGIS ໃຫ້ທ່ານ; ທຸກການປ່ຽນແປງສາມາດຍົກເລີກ (undo) ໄດ້.
+Ask a question about your data, or describe what to do with the map. The assistant runs KHGIS commands for you; every change can be undone.	ຖາມຄຳຖາມກ່ຽວກັບຂໍ້ມູນຂອງທ່ານ ຫຼື ອະທິບາຍສິ່ງທີ່ຕ້ອງການເຮັດກັບແຜນທີ່. ຜູ້ຊ່ວຍຈະສັ່ງຄຳສັ່ງ KHGIS ໃຫ້ທ່ານ; ທຸກການປ່ຽນແປງສາມາດຍົກເລີກ (undo) ໄດ້.
 Ask about the map, or tell it what to do…	ຖາມກ່ຽວກັບແຜນທີ່ ຫຼື ບອກສິ່ງທີ່ຕ້ອງການໃຫ້ເຮັດ…
 Ask about your data, or tell the assistant what to do with the map.	ຖາມກ່ຽວກັບຂໍ້ມູນ ຫຼື ບອກຜູ້ຊ່ວຍສິ່ງທີ່ຕ້ອງການໃຫ້ເຮັດກັບແຜນທີ່.
 Ask Which Layers to Add	ຖາມວ່າຈະເພີ່ມຊັ້ນຂໍ້ມູນໃດແດ່
@@ -745,7 +745,7 @@ Color Vision Simulator	ຕົວຈຳລອງສາຍຕາບອດສີ
 Colorbar	ແຖບສີ
 Colormap	ແຜນຜັງສີ
 Colors from the raster's own color table.	ສີຈາກຕາຕະລາງສີຂອງຣາສເຕີເອງ.
-Colour ramps (RustGIS, QGIS, GDAL, GMT)	ຊຸດສີ (RustGIS, QGIS, GDAL, GMT)
+Colour ramps (KHGIS, QGIS, GDAL, GMT)	ຊຸດສີ (KHGIS, QGIS, GDAL, GMT)
 Columns	ຖັນ
 Columns named like longitude/latitude, easting/northing or geometry are picked for you.	ຖັນທີ່ມີຊື່ເຊັ່ນ longitude/latitude, easting/northing ຫຼື geometry ຈະຖືກເລືອກໃຫ້ອັດຕະໂນມັດ.
 Combinations from the box above, one per line	ຄ່າປະສົມຈາກກ່ອງຂ້າງເທິງ, ໜຶ່ງອັນຕໍ່ແຖວ
@@ -977,7 +977,7 @@ Delete selected rows	ລຶບແຖວທີ່ເລືອກ
 Delete Style	ລຶບສະໄຕລ໌
 Delete Task	ລຶບໜ້າວຽກ
 Delete Task Step	ລຶບຂັ້ນຕອນໜ້າວຽກ
-Delete the GeoLibre runner that RustGIS installed. Install it again at any time.	ລຶບຕົວເປີດໃຊ້ GeoLibre ທີ່ RustGIS ຕິດຕັ້ງໄວ້. ທ່ານສາມາດຕິດຕັ້ງໃໝ່ໄດ້ທຸກເວລາ.
+Delete the GeoLibre runner that KHGIS installed. Install it again at any time.	ລຶບຕົວເປີດໃຊ້ GeoLibre ທີ່ KHGIS ຕິດຕັ້ງໄວ້. ທ່ານສາມາດຕິດຕັ້ງໃໝ່ໄດ້ທຸກເວລາ.
 Delete the layout {name}?	ລຶບໜ້າຈັດວາງ {name} ບໍ?
 Delete the map {name}?	ລຶບແຜນທີ່ {name} ບໍ?
 Delete the selected features.	ລຶບຟີເຈີທີ່ເລືອກອອກ.
@@ -1209,7 +1209,7 @@ Element Properties	ຄຸນສົມບັດອົງປະກອບ
 Elevation	ລະດັບຄວາມສູງ
 Elevation model	ໂມເດວຄວາມສູງ
 Elevation profiles along lines, cross sections and more.	ຮູບຕັດໜ້າດິນຕາມເສັ້ນ, ໜ້າຕັດຂວາງ ແລະ ອື່ນໆ.
-Eligible requests in RustGIS use your ChatGPT plan. You can manage usage in ChatGPT settings.	ຄຳຮ້ອງຂໍທີ່ເຂົ້າເງື່ອນໄຂໃນ RustGIS ຈະໃຊ້ແພັກເກດ ChatGPT ຂອງທ່ານ. ທ່ານສາມາດຈັດການການນຳໃຊ້ໄດ້ໃນການຕັ້ງຄ່າ ChatGPT.
+Eligible requests in KHGIS use your ChatGPT plan. You can manage usage in ChatGPT settings.	ຄຳຮ້ອງຂໍທີ່ເຂົ້າເງື່ອນໄຂໃນ KHGIS ຈະໃຊ້ແພັກເກດ ChatGPT ຂອງທ່ານ. ທ່ານສາມາດຈັດການການນຳໃຊ້ໄດ້ໃນການຕັ້ງຄ່າ ChatGPT.
 Ellipse	ຮູບວົງຮີ
 Embeddings	Embeddings
 Ember	ສີຖານໄຟ
@@ -1418,7 +1418,7 @@ Find and run geoprocessing tools.	ຄົ້ນຫາ ແລະ ລັນເຄ�
 Find any command by name (Ctrl+K).	ຄົ້ນຫາທຸກຄຳສັ່ງຕາມຊື່ (Ctrl+K).
 Find Items	ຊອກຫາລາຍການ
 Find Place	ຄົ້ນຫາສະຖານທີ່
-Find plugins in the RustGIS plugin registry.	ຊອກຫາປລັກອິນໃນທະບຽນປລັກອິນຂອງ RustGIS.
+Find plugins in the KHGIS plugin registry.	ຊອກຫາປລັກອິນໃນທະບຽນປລັກອິນຂອງ KHGIS.
 Find Similar	ຄົ້ນຫາອັນທີ່ຄ້າຍຄືກັນ
 Find Tools	ຄົ້ນຫາເຄື່ອງມື
 Finding routes…	ກຳລັງຊອກຫາເສັ້ນທາງ…
@@ -1454,7 +1454,7 @@ Follow the System	ຕາມລະບົບ
 Follow the time slider	ປ່ຽນຕາມແຖບເລື່ອນເວລາ
 Font	ຟອນ
 for a store that doesn't say	ສຳລັບບ່ອນເກັບຂໍ້ມູນທີ່ບໍ່ໄດ້ລະບຸ
-For ArcGIS Online, the client ID is RustGIS's own app. For an ArcGIS Enterprise portal, register an OAuth app on it (Content › New item › Developer credentials) whose redirect URL is {redirect}, and give its client ID.	ສຳລັບ ArcGIS Online, ລະຫັດ client ID ແມ່ນແອັບຂອງ RustGIS ເອງ. ສຳລັບ ArcGIS Enterprise portal, ໃຫ້ລົງທະບຽນແອັບ OAuth ໃນລະບົບ (ເນື້ອຫາ › ລາຍການໃໝ່ › ຂໍ້ມູນປະຈຳຕົວນັກພັດທະນາ) ທີ່ກຳນົດ redirect URL ເປັນ {redirect}, ແລ້ວປ້ອນ client ID ນັ້ນ.
+For ArcGIS Online, the client ID is KHGIS's own app. For an ArcGIS Enterprise portal, register an OAuth app on it (Content › New item › Developer credentials) whose redirect URL is {redirect}, and give its client ID.	ສຳລັບ ArcGIS Online, ລະຫັດ client ID ແມ່ນແອັບຂອງ KHGIS ເອງ. ສຳລັບ ArcGIS Enterprise portal, ໃຫ້ລົງທະບຽນແອັບ OAuth ໃນລະບົບ (ເນື້ອຫາ › ລາຍການໃໝ່ › ຂໍ້ມູນປະຈຳຕົວນັກພັດທະນາ) ທີ່ກຳນົດ redirect URL ເປັນ {redirect}, ແລ້ວປ້ອນ client ID ນັ້ນ.
 for the layers that change with time, as they list their times (2024-06-01, 1995)	ສຳລັບຊັ້ນຂໍ້ມູນທີ່ປ່ຽນແປງຕາມເວລາ, ຕາມຮູບແບບເວລາທີ່ລະບຸໄວ້ (2024-06-01, 1995)
 Forest	ປ່າໄມ້
 Forget Earthdata Login Token	ລຶບໂທເຄັນ Earthdata Login ທີ່ຈື່ໄວ້
@@ -1462,7 +1462,7 @@ Forget Saved Keys	ລຶບຄີທີ່ບັນທຶກໄວ້
 Forget Saved Password	ລຶບລະຫັດຜ່ານທີ່ບັນທຶກໄວ້
 Forget this plugin: the app stops trying to load it at start.	ລືມປລັກອິນນີ້: ແອັບຈະເຊົາພະຍາຍາມໂຫຼດມັນຕອນເລີ່ມຕົ້ນ.
 Format	ຮູບແບບ
-Found: {names}. An agent works on this map through RustGIS's tools and with its own (web, scripts, files) in a folder of its own, kept in Documents › RustGIS › Agent work. It asks you before each action.	ພົບ: {names}. ເອເຈັນເຮັດວຽກເທິງແຜນທີ່ນີ້ຜ່ານເຄື່ອງມືຂອງ RustGIS ແລະ ເຄື່ອງມືຂອງມັນເອງ (ເວັບ, ສະຄຣິບ, ໄຟລ໌) ໃນໂຟນເດີສະເພາະ ເຊິ່ງເກັບໄວ້ທີ່ ເອກະສານ › RustGIS › Agent work. ມັນຈະຖາມທ່ານກ່ອນທຸກການກະທຳ.
+Found: {names}. An agent works on this map through KHGIS's tools and with its own (web, scripts, files) in a folder of its own, kept in Documents › KHGIS › Agent work. It asks you before each action.	ພົບ: {names}. ເອເຈັນເຮັດວຽກເທິງແຜນທີ່ນີ້ຜ່ານເຄື່ອງມືຂອງ KHGIS ແລະ ເຄື່ອງມືຂອງມັນເອງ (ເວັບ, ສະຄຣິບ, ໄຟລ໌) ໃນໂຟນເດີສະເພາະ ເຊິ່ງເກັບໄວ້ທີ່ ເອກະສານ › KHGIS › Agent work. ມັນຈະຖາມທ່ານກ່ອນທຸກການກະທຳ.
 Frame rate	ອັດຕາເຟຣມ (Frame rate)
 Frame rate, draw time, data size and memory.	ອັດຕາເຟຣມ, ເວລາສະແດງຜົນ, ຂະໜາດຂໍ້ມູນ ແລະ ໜ່ວຍຄວາມຈຳ.
 France	ຝຣັ່ງ
@@ -1631,7 +1631,7 @@ host=… dbname=… user=…	host=… dbname=… user=…
 Hosted Imagery	ຮູບພາບພາບຖ່າຍດາວທຽມເທິງໂຮສຕ໌
 Hour	ຊົ່ວໂມງ
 How much of each zone each class of polygons covers, with the classes' totals shared out to the zones by area.	ແຕ່ລະເຂດຖືກປົກຄຸມໂດຍແຕ່ລະຄລາສຂອງຮູບຫຼາຍແຈຫຼາຍປານໃດ, ໂດຍແບ່ງຍອດລວມຂອງຄລາສໃຫ້ແຕ່ລະເຂດຕາມພື້ນທີ່.
-How often RustGIS keeps a copy of unsaved work, to offer it back after a crash.	ຄວາມຖີ່ທີ່ RustGIS ບັນທຶກສຳເນົາວຽກທີ່ຍັງບໍ່ໄດ້ບັນທຶກ ເພື່ອນຳກັບມາຄືນຫຼັງຈາກໂປຣແກຣມຄ້າງ ຫຼື ດັບ.
+How often KHGIS keeps a copy of unsaved work, to offer it back after a crash.	ຄວາມຖີ່ທີ່ KHGIS ບັນທຶກສຳເນົາວຽກທີ່ຍັງບໍ່ໄດ້ບັນທຶກ ເພື່ອນຳກັບມາຄືນຫຼັງຈາກໂປຣແກຣມຄ້າງ ຫຼື ດັບ.
 How the layer's colours combine with the tile layers and basemap beneath.	ວິທີທີ່ສີຂອງຊັ້ນຂໍ້ມູນປະສົມປະສານກັບຊັ້ນຂໍ້ມູນໄທລ໌ ແລະ ແຜນທີ່ພື້ນຖານດ້ານລຸ່ມ.
 How the layer's colours combine with what's beneath.	ວິທີທີ່ສີຂອງຊັ້ນຂໍ້ມູນປະສົມປະສານກັບສິ່ງທີ່ຢູ່ດ້ານລຸ່ມ.
 HTTP failure	HTTP ລົ້ມເຫຼວ
@@ -1704,7 +1704,7 @@ In place, holding a {w} × {h} overview	ໃນບ່ອນເດີມ, ພ້�
 In Progress	ກຳລັງດຳເນີນການ
 in progress	ກຳລັງດຳເນີນການ
 In project	ໃນໂຄງການ
-In RustGIS, it can:	ໃນ RustGIS ສາມາດ:
+In KHGIS, it can:	ໃນ KHGIS ສາມາດ:
 In the browser, pick the .shp and .dbf together, with any sidecars, or pick a ZIP. The override applies to every Shapefile in the ZIP.	ໃນບຣາວເຊີ, ໃຫ້ເລືອກ .shp ແລະ .dbf ພ້ອມກັນກັບໄຟລ໌ເສີມ, ຫຼື ເລືອກໄຟລ໌ ZIP. ການກຳນົດທັບຈະນຳໃຊ້ກັບທຸກໆ Shapefile ໃນ ZIP ນັ້ນ.
 In the coordinate system's units: metres for UTM.	ໃນຫົວໜ່ວຍຂອງລະບົບພິກັດ: ແມັດ ສຳລັບ UTM.
 In the middle	ຢູ່ເຄິ່ງກາງ
@@ -1804,7 +1804,7 @@ Item {id}	ລາຍການ {id}
 its copy kept in the browser is damaged: {error}	ສຳເນົາທີ່ເກັບໄວ້ໃນບຣາວເຊີເສຍຫາຍ: {error}
 its default	ຄ່າເລີ່ມຕົ້ນຂອງມັນ
 Its default: {default}. Its times: {times}	ຄ່າເລີ່ມຕົ້ນຂອງມັນ: {default}. ເວລາຂອງມັນ: {times}
-Its firewall ({firewall}) blocked RustGIS. The service may only allow some applications: contact its administrator and send them the details below.	ໄຟວໍລ໌ ({firewall}) ໄດ້ບລັອກ RustGIS. ບໍລິການອາດອະນຸຍາດສະເພາະບາງແອັບພລິເຄຊັນ: ໃຫ້ຕິດຕໍ່ຜູ້ເບິ່ງແຍງລະບົບ ແລະ ສົ່ງລາຍລະອຽດດ້ານລຸ່ມນີ້ໃຫ້ເຂົາເຈົ້າ.
+Its firewall ({firewall}) blocked KHGIS. The service may only allow some applications: contact its administrator and send them the details below.	ໄຟວໍລ໌ ({firewall}) ໄດ້ບລັອກ KHGIS. ບໍລິການອາດອະນຸຍາດສະເພາະບາງແອັບພລິເຄຊັນ: ໃຫ້ຕິດຕໍ່ຜູ້ເບິ່ງແຍງລະບົບ ແລະ ສົ່ງລາຍລະອຽດດ້ານລຸ່ມນີ້ໃຫ້ເຂົາເຈົ້າ.
 its layer was removed	ຊັ້ນຂໍ້ມູນຂອງມັນຖືກລຶບອອກ
 Its tool isn't available now (a plugin's, not loaded, or a suite's, not installed)	ເຄື່ອງມືນີ້ບໍ່ພ້ອມໃຊ້ງານໃນຕອນນີ້ (ເປັນຂອງປລັກອິນທີ່ຍັງບໍ່ໄດ້ໂຫຼດ, ຫຼື ເຄື່ອງມືຊຸດທີ່ຍັງບໍ່ໄດ້ຕິດຕັ້ງ)
 Jobs	ໜ້າວຽກລະບົບ
@@ -1836,7 +1836,7 @@ Keep Tool	ຮັກສາເຄື່ອງມືໄວ້
 Keep value	ຮັກສາຄ່າໄວ້
 Keeps the access key ID and secret access key in this computer's credential store, never in the connection or the project.	ເກັບລະຫັດ Access Key ID ແລະ Secret Access Key ໄວ້ໃນບ່ອນເກັບຂໍ້ມູນປະຈຳຕົວຂອງຄອມພິວເຕີເຄື່ອງນີ້, ຈະບໍ່ເກັບໄວ້ໃນການເຊື່ອມຕໍ່ ຫຼື ໂຄງການຢ່າງເດັດຂາດ.
 Keeps the parts of two polygon layers that only one of them covers, with that layer's attributes.	ຮັກສາພາກສ່ວນຂອງສອງຊັ້ນຂໍ້ມູນຮູບຫຼາຍແຈທີ່ມີພຽງຊັ້ນດຽວກວມເອົາ ພ້ອມກັບຄຸນລັກສະນະຂອງຊັ້ນຂໍ້ມູນນັ້ນ.
-Keeps the token in the system's credential store, so it is there when RustGIS starts again. Unticked, a token remembered before is deleted when you save another.	ເກັບໂທເຄັນໄວ້ໃນບ່ອນເກັບຂໍ້ມູນປະຈຳຕົວຂອງລະບົບ ເພື່ອໃຫ້ພ້ອມໃຊ້ເມື່ອ RustGIS ເລີ່ມຕົ້ນໃໝ່. ຖ້າບໍ່ເລືອກ, ໂທເຄັນທີ່ຈື່ໄວ້ກ່ອນໜ້າຈະຖືກລຶບອອກເມື່ອທ່ານບັນທຶກອັນໃໝ່.
+Keeps the token in the system's credential store, so it is there when KHGIS starts again. Unticked, a token remembered before is deleted when you save another.	ເກັບໂທເຄັນໄວ້ໃນບ່ອນເກັບຂໍ້ມູນປະຈຳຕົວຂອງລະບົບ ເພື່ອໃຫ້ພ້ອມໃຊ້ເມື່ອ KHGIS ເລີ່ມຕົ້ນໃໝ່. ຖ້າບໍ່ເລືອກ, ໂທເຄັນທີ່ຈື່ໄວ້ກ່ອນໜ້າຈະຖືກລຶບອອກເມື່ອທ່ານບັນທຶກອັນໃໝ່.
 Kernel Density	ຄວາມໜາແໜ້ນເຄີເນວ
 Kernel Type	ປະເພດເຄີເນວ
 Key	ຄີ
@@ -1919,7 +1919,7 @@ Legend label. Clear it to show the value again.	ປ້າຍຄຳອະທິ�
 Length	ລວງຍາວ
 Length {length} · gain {gain} · loss {loss}	ລວງຍາວ {length} · ເພີ່ມຂຶ້ນ {gain} · ຫຼຸດລົງ {loss}
 Let the assistant hand tasks to agents on this computer	ອະນຸຍາດໃຫ້ຜູ້ຊ່ວຍມອບໝາຍວຽກໃຫ້ກັບຕົວແທນໃນຄອມພິວເຕີເຄື່ອງນີ້
-Let your Agents Control RustGIS	ອະນຸຍາດໃຫ້ຕົວແທນຂອງທ່ານຄວບຄຸມ RustGIS
+Let your Agents Control KHGIS	ອະນຸຍາດໃຫ້ຕົວແທນຂອງທ່ານຄວບຄຸມ KHGIS
 Letter spacing	ໄລຍະຫ່າງຕົວອັກສອນ
 Level	ລະດັບ
 Library	ຄັງເກັບ
@@ -1978,7 +1978,7 @@ List The National Map Services	ສະແດງລາຍການບໍລິກ�
 List the provider's models	ສະແດງລາຍການຕົວແບບຂອງຜູ້ໃຫ້ບໍລິການ
 List this layer in the legend	ສະແດງຊັ້ນຂໍ້ມູນນີ້ໃນຄຳອະທິບາຍສັນຍະລັກ
 List what it holds	ສະແດງລາຍການສິ່ງທີ່ບັນຈຸພາຍໃນ
-Listed for discovery: RustGIS doesn't read this dataset yet. Its data and paper are linked above.	ສະແດງໄວ້ເພື່ອການຄົ້ນຫາ: RustGIS ຍັງບໍ່ສາມາດອ່ານຊຸດຂໍ້ມູນນີ້ໄດ້. ຂໍ້ມູນ ແລະ ບົດຄົ້ນຄວ້າໄດ້ຖືກເຊື່ອມໂຍງໄວ້ຂ້າງເທິງ.
+Listed for discovery: KHGIS doesn't read this dataset yet. Its data and paper are linked above.	ສະແດງໄວ້ເພື່ອການຄົ້ນຫາ: KHGIS ຍັງບໍ່ສາມາດອ່ານຊຸດຂໍ້ມູນນີ້ໄດ້. ຂໍ້ມູນ ແລະ ບົດຄົ້ນຄວ້າໄດ້ຖືກເຊື່ອມໂຍງໄວ້ຂ້າງເທິງ.
 Listing datasets…	ກຳລັງສະແດງລາຍການຊຸດຂໍ້ມູນ…
 Listing…	ກຳລັງສະແດງລາຍການ…
 Lit	ດ້ານສະຫວ່າງ
@@ -2034,7 +2034,7 @@ Look for {name}, outlined on the ribbon.	ຊອກຫາ {name}, ທີ່ເນ
 Looking up the place…	ກຳລັງຊອກຫາສະຖານທີ່…
 Loop	ວົນຊ້ຳ
 Lower Priority	ຫຼຸດລຳດັບຄວາມສຳຄັນ
-Made in RustGIS: samples, drawings and tool outputs	ສ້າງຂຶ້ນໃນ RustGIS: ຕົວຢ່າງ, ຮູບແຕ້ມ ແລະ ຜົນຮັບຈາກເຄື່ອງມື
+Made in KHGIS: samples, drawings and tool outputs	ສ້າງຂຶ້ນໃນ KHGIS: ຕົວຢ່າງ, ຮູບແຕ້ມ ແລະ ຜົນຮັບຈາກເຄື່ອງມື
 Magnifier	ແວ່ນຂະຫຍາຍ
 Major Lakes	ທະເລສາບສຳຄັນ
 Major Rivers	ແມ່ນ້ຳສຳຄັນ
@@ -2302,7 +2302,7 @@ No command matches	ບໍ່ມີຄຳສັ່ງທີ່ກົງກັນ
 No data at the points picked.	ບໍ່ມີຂໍ້ມູນຢູ່ຈຸດທີ່ເລືອກ.
 No data cube matches	ບໍ່ມີກ້ອນຂໍ້ມູນ (Data Cube) ທີ່ກົງກັນ
 No datasets match.	ບໍ່ມີຊຸດຂໍ້ມູນທີ່ກົງກັນ.
-No datasets with data RustGIS can add	ບໍ່ມີຊຸດຂໍ້ມູນທີ່ມີຮູບແບບທີ່ RustGIS ສາມາດເພີ່ມໄດ້
+No datasets with data KHGIS can add	ບໍ່ມີຊຸດຂໍ້ມູນທີ່ມີຮູບແບບທີ່ KHGIS ສາມາດເພີ່ມໄດ້
 no date in the name	ບໍ່ມີວັນທີໃນຊື່
 No diagnostic entries match this filter.	ບໍ່ມີລາຍການກວດວິນິດໄສທີ່ກົງກັບຕົວກັ່ນຕອງນີ້.
 no download service	ບໍ່ມີບໍລິການດາວໂຫຼດ
@@ -2372,8 +2372,8 @@ North Polar Stereographic	ສະເຕຣິໂອກຣາຟິກຂົ້ວ
 NOT	NOT
 Not a GeoLibre project	ບໍ່ແມ່ນໂຄງການ GeoLibre
 not a picture	ບໍ່ແມ່ນຮູບພາບ
-not a RustGIS layout	ບໍ່ແມ່ນໜ້າຈັດວາງ RustGIS
-not a RustGIS project	ບໍ່ແມ່ນໂຄງການ RustGIS
+not a KHGIS layout	ບໍ່ແມ່ນໜ້າຈັດວາງ KHGIS
+not a KHGIS project	ບໍ່ແມ່ນໂຄງການ KHGIS
 not a UTM or MGRS grid reference	ບໍ່ແມ່ນພິກັດຕາໜ່າງ UTM ຫຼື MGRS
 Not added: a drawn line holds at most 10,000 points	ບໍ່ໄດ້ເພີ່ມ: ເສັ້ນທີ່ແຕ້ມມີໄດ້ສູງສຸດ 10,000 ຈຸດ
 Not applied yet.	ຍັງບໍ່ທັນນຳໃຊ້ເທື່ອ.
@@ -2451,7 +2451,7 @@ Open a Data Cube	ເປີດກ້ອນຂໍ້ມູນ (Data Cube)
 open a layout first	ກະລຸນາເປີດໜ້າຈັດວາງກ່ອນ
 Open a model file (*.model.json)	ເປີດໄຟລ໌ຕົວແບບ (*.model.json)
 Open a model of this project	ເປີດຕົວແບບຂອງໂຄງການນີ້
-Open a RustGIS or Jupyter notebook.	ເປີດໂນ້ດບຸກ RustGIS ຫຼື Jupyter.
+Open a KHGIS or Jupyter notebook.	ເປີດໂນ້ດບຸກ KHGIS ຫຼື Jupyter.
 Open an offline area to edit.	ເປີດພື້ນທີ່ອອບລາຍນ໌ເພື່ອແກ້ໄຂ.
 Open browser again	ເປີດບຣາວເຊີອີກຄັ້ງ
 Open Custom Template	ເປີດແມ່ແບບກຳນົດເອງ
@@ -2480,7 +2480,7 @@ Open the layer's attribute table.	ເປີດຕາຕະລາງຄຸນລ�
 Open the layer's table.	ເປີດຕາຕະລາງຂອງຊັ້ນຂໍ້ມູນ.
 Open the plugin's panel.	ເປີດແຜງປລັກອິນ.
 Open the Release Page	ເປີດໜ້າລຸ້ນປ່ອຍ
-Open the RustGIS user guide.	ເປີດຄູ່ມືຜູ້ໃຊ້ RustGIS.
+Open the KHGIS user guide.	ເປີດຄູ່ມືຜູ້ໃຊ້ KHGIS.
 Open the selected layer's table.	ເປີດຕາຕະລາງຂອງຊັ້ນຂໍ້ມູນທີ່ເລືອກ.
 Open the Symbology pane.	ເປີດຊ່ອງສັນຍະລັກ.
 Open the task's steps	ເປີດຂັ້ນຕອນຂອງໜ້າວຽກ
@@ -2660,7 +2660,7 @@ Plugin registry	ຄັງທະບຽນປລັກອິນ
 Plugins	ປລັກອິນ
 Plugins are .rgplugin files. Install only plugins from people you trust.	ປລັກອິນແມ່ນໄຟລ໌ .rgplugin. ຕິດຕັ້ງສະເພາະປລັກອິນຈາກບຸກຄົນທີ່ທ່ານໄວ້ວາງໃຈເທົ່ານັ້ນ.
 Plugins marked Not sandboxed run as programs on your computer instead, and can do anything you can.	ປລັກອິນທີ່ໝາຍວ່າ 'ຢູ່ນອກ Sandbox' ຈະເຮັດວຽກເປັນໂປຣແກຣມເທິງຄອມພິວເຕີຂອງທ່ານໂດຍກົງ, ແລະ ສາມາດເຮັດໄດ້ທຸກຢ່າງທີ່ທ່ານສາມາດເຮັດໄດ້.
-Plugins run in a sandbox: they can't reach your files or the network, and they change the project only through RustGIS's own commands, within the permissions you accept.	ປລັກອິນເຮັດວຽກໃນ Sandbox: ພວກມັນບໍ່ສາມາດເຂົ້າເຖິງໄຟລ໌ ຫຼື ເຄືອຂ່າຍຂອງທ່ານໄດ້, ແລະ ຈະປ່ຽນແປງໂຄງການຜ່ານຄຳສັ່ງຂອງ RustGIS ເອງເທົ່ານັ້ນ, ພາຍໃຕ້ສິດອະນຸຍາດທີ່ທ່ານຍອມຮັບ.
+Plugins run in a sandbox: they can't reach your files or the network, and they change the project only through KHGIS's own commands, within the permissions you accept.	ປລັກອິນເຮັດວຽກໃນ Sandbox: ພວກມັນບໍ່ສາມາດເຂົ້າເຖິງໄຟລ໌ ຫຼື ເຄືອຂ່າຍຂອງທ່ານໄດ້, ແລະ ຈະປ່ຽນແປງໂຄງການຜ່ານຄຳສັ່ງຂອງ KHGIS ເອງເທົ່ານັ້ນ, ພາຍໃຕ້ສິດອະນຸຍາດທີ່ທ່ານຍອມຮັບ.
 PMTiles archive	ຄັງເກັບ PMTiles
 PNG frames (zip)	ເຟຣມ PNG (zip)
 PNG image or GeoTIFF	ຮູບພາບ PNG ຫຼື GeoTIFF
@@ -2741,7 +2741,7 @@ Project Template	ແມ່ແບບໂຄງການ
 project's path is required	ຈຳເປັນຕ້ອງມີເສັ້ນທາງໄຟລ໌ໂຄງການ
 Projection	ການສາຍແຜນທີ່
 Projections	ການສາຍແຜນທີ່
-Projects and JSON data (RustGIS, QGIS, GeoLibre)	ໂຄງການ ແລະ ຂໍ້ມູນ JSON (RustGIS, QGIS, GeoLibre)
+Projects and JSON data (KHGIS, QGIS, GeoLibre)	ໂຄງການ ແລະ ຂໍ້ມູນ JSON (KHGIS, QGIS, GeoLibre)
 Properties	ຄຸນສົມບັດ
 Property	ຄຸນສົມບັດ
 Proportional Symbols	ສັນຍະລັກຕາມສັດສ່ວນ
@@ -2804,7 +2804,7 @@ Read error	ເກີດຂໍ້ຜິດພາດໃນການອ່ານ
 Read the bands picked for the view (at most about 6 km a side)	ອ່ານແຖບຄື້ນທີ່ເລືອກສຳລັບມຸມມອງ (ສູງສຸດປະມານ 6 ກມ ຕໍ່ດ້ານ)
 Read the map's layers and features	ອ່ານຊັ້ນຂໍ້ມູນ ແລະ ຟີເຈີຂອງແຜນທີ່
 Read the points in the view, coloured by their principal components	ອ່ານຈຸດໃນມຸມມອງ, ໃສ່ສີຕາມອົງປະກອບຫຼັກ (Principal Components) ຂອງພວກມັນ
-Reading a granule's files needs an Earthdata Login token, which works for every NASA DAAC. It is kept until RustGIS closes unless you tick Remember, never in the project, and sent only to NASA's Earthdata data servers.	ການອ່ານໄຟລ໌ Granule ຈຳເປັນຕ້ອງມີໂທເຄັນ Earthdata Login ເຊິ່ງໃຊ້ໄດ້ກັບທຸກໆ NASA DAAC. ມັນຈະຖືກເກັບໄວ້ຈົນກວ່າ RustGIS ຈະປິດ ລົງເວັ້ນແຕ່ທ່ານຈະເລືອກ 'ຈົດຈຳ', ຈະບໍ່ເກັບໄວ້ໃນໂຄງການຢ່າງເດັດຂາດ, ແລະ ຈະສົ່ງໄປຍັງເຊີບເວີຂໍ້ມູນ Earthdata ຂອງ NASA ເທົ່ານັ້ນ.
+Reading a granule's files needs an Earthdata Login token, which works for every NASA DAAC. It is kept until KHGIS closes unless you tick Remember, never in the project, and sent only to NASA's Earthdata data servers.	ການອ່ານໄຟລ໌ Granule ຈຳເປັນຕ້ອງມີໂທເຄັນ Earthdata Login ເຊິ່ງໃຊ້ໄດ້ກັບທຸກໆ NASA DAAC. ມັນຈະຖືກເກັບໄວ້ຈົນກວ່າ KHGIS ຈະປິດ ລົງເວັ້ນແຕ່ທ່ານຈະເລືອກ 'ຈົດຈຳ', ຈະບໍ່ເກັບໄວ້ໃນໂຄງການຢ່າງເດັດຂາດ, ແລະ ຈະສົ່ງໄປຍັງເຊີບເວີຂໍ້ມູນ Earthdata ຂອງ NASA ເທົ່ານັ້ນ.
 Reading in place…	ກຳລັງອ່ານໃນບ່ອນເດີມ…
 Reading the catalog: {n} documents read, {m} items found…	ກຳລັງອ່ານແຄັດຕາລັອກ: ອ່ານແລ້ວ {n} ເອກະສານ, ພົບ {m} ລາຍການ…
 Reading the catalog…	ກຳລັງອ່ານແຄັດຕາລັອກ…
@@ -3002,35 +3002,35 @@ Run Tool	ດຳເນີນການເຄື່ອງມື
 Run {name}	ດຳເນີນການ {name}
 Running the query for the map…	ກຳລັງດຳເນີນການສອບຖາມສຳລັບແຜນທີ່…
 Running…	ກຳລັງດຳເນີນການ…
-RustGIS	RustGIS
-RustGIS bookmarks	ບຸກມາກ RustGIS
-RustGIS could not confirm that any previously saved key was deleted from the system keychain.	RustGIS ບໍ່ສາມາດຢືນຢັນໄດ້ວ່າຄີທີ່ບັນທຶກໄວ້ກ່ອນໜ້ານີ້ຖືກລຶບອອກຈາກ System Keychain ແລ້ວຫຼືບໍ່.
-RustGIS couldn't reach the server.	RustGIS ບໍ່ສາມາດເຊື່ອມຕໍ່ຫາເຊີບເວີໄດ້.
-RustGIS deep learning package	ແພັກເກດ Deep Learning ຂອງ RustGIS
-RustGIS didn't close properly last time, so it started with the World Atlas instead of your start-up project. Open the project from the Project menu when you're ready.	ຄັ້ງກ່ອນໜ້າ RustGIS ບໍ່ໄດ້ຖືກປິດຢ່າງຖືກຕ້ອງ, ຈຶ່ງເລີ່ມຕົ້ນດ້ວຍແຜນທີ່ World Atlas ແທນທີ່ຈະເປັນໂຄງການເລີ່ມຕົ້ນຂອງທ່ານ. ໃຫ້ເປີດໂຄງການຈາກເມນູໂຄງການເມື່ອທ່ານພ້ອມ.
-RustGIS didn't close properly last time.	ຄັ້ງກ່ອນໜ້າ RustGIS ບໍ່ໄດ້ຖືກປິດຢ່າງຖືກຕ້ອງ.
-RustGIS doesn't have this tool. Install the tools it comes from, or delete the node.	RustGIS ບໍ່ມີເຄື່ອງມືນີ້. ໃຫ້ຕິດຕັ້ງຊຸດເຄື່ອງມືທີ່ກ່ຽວຂ້ອງ, ຫຼື ລຶບໂນດນີ້ອອກ.
-RustGIS is a free and open-source GIS written in pure Rust. It runs on the desktop and in the browser, and every action is a command you can also run from the command line.	RustGIS ເປັນ GIS ຟຣີ ແລະ ເປີດເຜີຍລະຫັດຕົ້ນສະບັບ (Open Source) ທີ່ຂຽນດ້ວຍພາສາ Rust ແທ້ໆ. ສາມາດເຮັດວຽກເທິງເດັສທັອບ ແລະ ໃນບຣາວເຊີ, ທຸກໆການກະທຳແມ່ນຄຳສັ່ງທີ່ທ່ານສາມາດສັ່ງງານຜ່ານແຖວຄຳສັ່ງ (Command line) ໄດ້ເຊັ່ນກັນ.
-RustGIS layer file	ໄຟລ໌ຊັ້ນຂໍ້ມູນ RustGIS
-RustGIS layers, maps and projects	ຊັ້ນຂໍ້ມູນ, ແຜນທີ່ ແລະ ໂຄງການ RustGIS
-RustGIS layout	ໜ້າຈັດວາງ RustGIS
-RustGIS maps and projects	ແຜນທີ່ ແລະ ໂຄງການ RustGIS
-RustGIS model	ຕົວແບບ RustGIS
-RustGIS or Jupyter notebook	ໂນ້ດບຸກ RustGIS ຫຼື Jupyter
-RustGIS plugin	ປລັກອິນ RustGIS
-RustGIS presentation	ການນຳສະເໜີ RustGIS
-RustGIS project	ໂຄງການ RustGIS
-RustGIS project template	ແມ່ແບບໂຄງການ RustGIS
-RustGIS ran into an internal error last time. The details are in {path}; please attach them to a bug report.	ຄັ້ງກ່ອນໜ້ານີ້ RustGIS ພົບຂໍ້ຜິດພາດພາຍໃນ. ລາຍລະອຽດຢູ່ໃນ {path}; ກະລຸນາຄັດຕິດຂໍ້ມູນດັ່ງກ່າວໄປກັບການລາຍງານຂໍ້ຜິດພາດ.
-RustGIS report or report template	ນິພົນ ຫຼື ແມ່ແບບນິພົນ RustGIS
-RustGIS styles	ຮູບແບບ RustGIS
-RustGIS task	ໜ້າວຽກ RustGIS
-RustGIS was quit last time without saving your changes.	ຄັ້ງກ່ອນໜ້ານີ້ RustGIS ຖືກປິດອອກໄປໂດຍບໍ່ໄດ້ບັນທຶກການປ່ຽນແປງຂອງທ່ານ.
-RustGIS was updated to {version}.	RustGIS ຖືກອັບເດດເປັນ {version} ແລ້ວ.
-RustGIS {latest} is available.	ມີ RustGIS ລຸ້ນ {latest} ພ້ອມໃຫ້ໃຊ້ງານແລ້ວ.
-RustGIS {version} installs when RustGIS closes.	RustGIS {version} ຈະຕິດຕັ້ງເມື່ອປິດ RustGIS.
-RustGIS {version} is the latest version.	RustGIS {version} ແມ່ນລຸ້ນຫຼ້າສຸດແລ້ວ.
-RustGIS {version} wasn't installed: try again from Help › Check for Updates, or install it from the release page.	RustGIS {version} ບໍ່ໄດ້ຖືກຕິດຕັ້ງ: ລອງອີກຄັ້ງຈາກ ການຊ່ວຍເຫຼືອ › ກວດສອບການອັບເດດ, ຫຼື ຕິດຕັ້ງຈາກໜ້າລຸ້ນປ່ອຍ.
+KHGIS	KHGIS
+KHGIS bookmarks	ບຸກມາກ KHGIS
+KHGIS could not confirm that any previously saved key was deleted from the system keychain.	KHGIS ບໍ່ສາມາດຢືນຢັນໄດ້ວ່າຄີທີ່ບັນທຶກໄວ້ກ່ອນໜ້ານີ້ຖືກລຶບອອກຈາກ System Keychain ແລ້ວຫຼືບໍ່.
+KHGIS couldn't reach the server.	KHGIS ບໍ່ສາມາດເຊື່ອມຕໍ່ຫາເຊີບເວີໄດ້.
+KHGIS deep learning package	ແພັກເກດ Deep Learning ຂອງ KHGIS
+KHGIS didn't close properly last time, so it started with the World Atlas instead of your start-up project. Open the project from the Project menu when you're ready.	ຄັ້ງກ່ອນໜ້າ KHGIS ບໍ່ໄດ້ຖືກປິດຢ່າງຖືກຕ້ອງ, ຈຶ່ງເລີ່ມຕົ້ນດ້ວຍແຜນທີ່ World Atlas ແທນທີ່ຈະເປັນໂຄງການເລີ່ມຕົ້ນຂອງທ່ານ. ໃຫ້ເປີດໂຄງການຈາກເມນູໂຄງການເມື່ອທ່ານພ້ອມ.
+KHGIS didn't close properly last time.	ຄັ້ງກ່ອນໜ້າ KHGIS ບໍ່ໄດ້ຖືກປິດຢ່າງຖືກຕ້ອງ.
+KHGIS doesn't have this tool. Install the tools it comes from, or delete the node.	KHGIS ບໍ່ມີເຄື່ອງມືນີ້. ໃຫ້ຕິດຕັ້ງຊຸດເຄື່ອງມືທີ່ກ່ຽວຂ້ອງ, ຫຼື ລຶບໂນດນີ້ອອກ.
+KHGIS is a free and open-source GIS written in pure Rust. It runs on the desktop and in the browser, and every action is a command you can also run from the command line.	KHGIS ເປັນ GIS ຟຣີ ແລະ ເປີດເຜີຍລະຫັດຕົ້ນສະບັບ (Open Source) ທີ່ຂຽນດ້ວຍພາສາ Rust ແທ້ໆ. ສາມາດເຮັດວຽກເທິງເດັສທັອບ ແລະ ໃນບຣາວເຊີ, ທຸກໆການກະທຳແມ່ນຄຳສັ່ງທີ່ທ່ານສາມາດສັ່ງງານຜ່ານແຖວຄຳສັ່ງ (Command line) ໄດ້ເຊັ່ນກັນ.
+KHGIS layer file	ໄຟລ໌ຊັ້ນຂໍ້ມູນ KHGIS
+KHGIS layers, maps and projects	ຊັ້ນຂໍ້ມູນ, ແຜນທີ່ ແລະ ໂຄງການ KHGIS
+KHGIS layout	ໜ້າຈັດວາງ KHGIS
+KHGIS maps and projects	ແຜນທີ່ ແລະ ໂຄງການ KHGIS
+KHGIS model	ຕົວແບບ KHGIS
+KHGIS or Jupyter notebook	ໂນ້ດບຸກ KHGIS ຫຼື Jupyter
+KHGIS plugin	ປລັກອິນ KHGIS
+KHGIS presentation	ການນຳສະເໜີ KHGIS
+KHGIS project	ໂຄງການ KHGIS
+KHGIS project template	ແມ່ແບບໂຄງການ KHGIS
+KHGIS ran into an internal error last time. The details are in {path}; please attach them to a bug report.	ຄັ້ງກ່ອນໜ້ານີ້ KHGIS ພົບຂໍ້ຜິດພາດພາຍໃນ. ລາຍລະອຽດຢູ່ໃນ {path}; ກະລຸນາຄັດຕິດຂໍ້ມູນດັ່ງກ່າວໄປກັບການລາຍງານຂໍ້ຜິດພາດ.
+KHGIS report or report template	ນິພົນ ຫຼື ແມ່ແບບນິພົນ KHGIS
+KHGIS styles	ຮູບແບບ KHGIS
+KHGIS task	ໜ້າວຽກ KHGIS
+KHGIS was quit last time without saving your changes.	ຄັ້ງກ່ອນໜ້ານີ້ KHGIS ຖືກປິດອອກໄປໂດຍບໍ່ໄດ້ບັນທຶກການປ່ຽນແປງຂອງທ່ານ.
+KHGIS was updated to {version}.	KHGIS ຖືກອັບເດດເປັນ {version} ແລ້ວ.
+KHGIS {latest} is available.	ມີ KHGIS ລຸ້ນ {latest} ພ້ອມໃຫ້ໃຊ້ງານແລ້ວ.
+KHGIS {version} installs when KHGIS closes.	KHGIS {version} ຈະຕິດຕັ້ງເມື່ອປິດ KHGIS.
+KHGIS {version} is the latest version.	KHGIS {version} ແມ່ນລຸ້ນຫຼ້າສຸດແລ້ວ.
+KHGIS {version} wasn't installed: try again from Help › Check for Updates, or install it from the release page.	KHGIS {version} ບໍ່ໄດ້ຖືກຕິດຕັ້ງ: ລອງອີກຄັ້ງຈາກ ການຊ່ວຍເຫຼືອ › ກວດສອບການອັບເດດ, ຫຼື ຕິດຕັ້ງຈາກໜ້າລຸ້ນປ່ອຍ.
 RUSTGIS_ASSISTANT_MODEL	RUSTGIS_ASSISTANT_MODEL
 RUSTGIS_ASSISTANT_PROVIDER	RUSTGIS_ASSISTANT_PROVIDER
 RUSTGIS_GPU	RUSTGIS_GPU
@@ -3041,7 +3041,7 @@ S3 Buckets	ຖັງ S3
 S3 Connections	ການເຊື່ອມຕໍ່ S3
 S3…	S3…
 Sample data (Natural Earth)	ຂໍ້ມູນຕົວຢ່າງ (Natural Earth)
-Sample data © Natural Earth (public domain). RustGIS is licensed under Apache-2.0.	ຂໍ້ມູນຕົວຢ່າງ © Natural Earth (ສາທາລະນະ). RustGIS ຢູ່ໃຕ້ສັນຍາອະນຸຍາດ Apache-2.0.
+Sample data © Natural Earth (public domain). KHGIS is licensed under Apache-2.0.	ຂໍ້ມູນຕົວຢ່າງ © Natural Earth (ສາທາລະນະ). KHGIS ຢູ່ໃຕ້ສັນຍາອະນຸຍາດ Apache-2.0.
 Sample data: Natural Earth (public domain). Licensed under Apache-2.0.	ຂໍ້ມູນຕົວຢ່າງ: Natural Earth (ສາທາລະນະ). ຢູ່ໃຕ້ສັນຍາອະນຸຍາດ Apache-2.0.
 Sans-serif	Sans-serif
 Satellite Embedding Datasets	ຊຸດຂໍ້ມູນຕົວຝັງແວັກເຕີພາບດາວທຽມ
@@ -3191,7 +3191,7 @@ Sections	ພາກສ່ວນ
 See and set the camera's position and scale.	ກວດເບິ່ງ ແລະ ຕັ້ງຄ່າຕຳແໜ່ງພ້ອມທັງມາດຕາສ່ວນຂອງກ້ອງ.
 See the map as people with colour vision deficiencies do.	ເບິ່ງແຜນທີ່ໃນມຸມມອງຂອງຜູ້ທີ່ມີຄວາມບົກຜ່ອງທາງການເບິ່ງເຫັນສີ.
 See the tools you've run.	ເບິ່ງເຄື່ອງມືທີ່ທ່ານເຄີຍດຳເນີນການ.
-See whether a newer RustGIS has been released.	ກວດສອບວ່າມີ RustGIS ລຸ້ນໃໝ່ອອກມາແລ້ວຫຼືບໍ່.
+See whether a newer KHGIS has been released.	ກວດສອບວ່າມີ KHGIS ລຸ້ນໃໝ່ອອກມາແລ້ວຫຼືບໍ່.
 SELECT	SELECT
 Select	ເລືອກ
 Select (click)	ເລືອກ (ຄລິກ)
@@ -3397,8 +3397,8 @@ Sign-in timed out. Start again and allow the browser to reach this computer's lo
 signed in	ເຂົ້າສູ່ລະບົບແລ້ວ
 Signed in to {portal}	ເຂົ້າສູ່ລະບົບ {portal} ແລ້ວ
 Signed in to {portal} as {user}	ເຂົ້າສູ່ລະບົບ {portal} ໃນນາມ {user} ແລ້ວ
-Signed out on this computer, but OpenAI didn't confirm it. You can disconnect RustGIS in ChatGPT's settings.	ອອກຈາກລະບົບໃນຄອມພິວເຕີເຄື່ອງນີ້ແລ້ວ, ແຕ່ OpenAI ບໍ່ໄດ້ຢືນຢັນ. ທ່ານສາມາດຕັດການເຊື່ອມຕໍ່ RustGIS ໃນການຕັ້ງຄ່າຂອງ ChatGPT ໄດ້.
-Signed out on this computer, but the system keychain couldn't be read, so OpenAI wasn't asked to end the session. You can disconnect RustGIS in ChatGPT's settings.	ອອກຈາກລະບົບໃນຄອມພິວເຕີເຄື່ອງນີ້ແລ້ວ, ແຕ່ບໍ່ສາມາດອ່ານ keychain ຂອງລະບົບໄດ້ ຈຶ່ງບໍ່ໄດ້ຮ້ອງຂໍໃຫ້ OpenAI ສິ້ນສຸດວາລະ. ທ່ານສາມາດຕັດການເຊື່ອມຕໍ່ RustGIS ໃນການຕັ້ງຄ່າຂອງ ChatGPT ໄດ້.
+Signed out on this computer, but OpenAI didn't confirm it. You can disconnect KHGIS in ChatGPT's settings.	ອອກຈາກລະບົບໃນຄອມພິວເຕີເຄື່ອງນີ້ແລ້ວ, ແຕ່ OpenAI ບໍ່ໄດ້ຢືນຢັນ. ທ່ານສາມາດຕັດການເຊື່ອມຕໍ່ KHGIS ໃນການຕັ້ງຄ່າຂອງ ChatGPT ໄດ້.
+Signed out on this computer, but the system keychain couldn't be read, so OpenAI wasn't asked to end the session. You can disconnect KHGIS in ChatGPT's settings.	ອອກຈາກລະບົບໃນຄອມພິວເຕີເຄື່ອງນີ້ແລ້ວ, ແຕ່ບໍ່ສາມາດອ່ານ keychain ຂອງລະບົບໄດ້ ຈຶ່ງບໍ່ໄດ້ຮ້ອງຂໍໃຫ້ OpenAI ສິ້ນສຸດວາລະ. ທ່ານສາມາດຕັດການເຊື່ອມຕໍ່ KHGIS ໃນການຕັ້ງຄ່າຂອງ ChatGPT ໄດ້.
 Significance level	ລະດັບໄນສຳຄັນ
 Signing in with ChatGPT works in the desktop app.	ການເຂົ້າສູ່ລະບົບດ້ວຍ ChatGPT ສາມາດໃຊ້ງານໄດ້ໃນແອັບເດັສທັອບ.
 Signing the asset (Planetary Computer)…	ກຳລັງເຊັນກຳກັບຊັບສິນ (Planetary Computer)…
@@ -3658,7 +3658,7 @@ The assistant follows a skill's instructions when it uses it. Whatever they say,
 The assistant is busy; stop it or wait for it to finish.	ຜູ້ຊ່ວຍກຳລັງຕິດວຽກຢູ່; ສັ່ງຢຸດ ຫຼື ລໍຖ້າໃຫ້ສຳເລັດກ່ອນ.
 The assistant wants to run this, and {why}:	ຜູ້ຊ່ວຍຕ້ອງການດຳເນີນການນີ້, ເນື່ອງຈາກ {why}:
 The Basemaps plugin's tab of public basemaps.	ແທັບແຜນທີ່ພື້ນຖານສາທາລະນະຂອງປລັກອິນ Basemaps.
-The browser didn't give RustGIS the clipboard ({why}): paste with {keys}.	ບຣາວເຊີບໍ່ໄດ້ສົ່ງຄລິບບອດໃຫ້ RustGIS ({why}): ວາງດ້ວຍ {keys}.
+The browser didn't give KHGIS the clipboard ({why}): paste with {keys}.	ບຣາວເຊີບໍ່ໄດ້ສົ່ງຄລິບບອດໃຫ້ KHGIS ({why}): ວາງດ້ວຍ {keys}.
 the browser kept neither a copy of it nor where to download it	ບຣາວເຊີບໍ່ໄດ້ເກັບທັງສຳເນົາຂອງມັນ ແລະ ບ່ອນທີ່ຈະດາວໂຫຼດມັນ
 the capture failed unexpectedly	ການບັນທຶກພາບລົ້ມເຫຼວຢ່າງບໍ່ຄາດຄິດ
 The class these label groups and the Labeling pane edit.	ຄລາສທີ່ກຸ່ມປ້າຍກຳກັບເຫຼົ່ານີ້ ແລະ ໜ້າຕ່າງການໃສ່ປ້າຍກຳກັບໃຊ້ດັດແກ້.
@@ -3668,7 +3668,7 @@ the connection has no id	ການເຊື່ອມຕໍ່ບໍ່ມີລ�
 The coordinate format must be decimal, dms, utm or mgrs	ຮູບແບບພິກັດຕ້ອງເປັນ decimal, dms, utm ຫຼື mgrs
 The country list couldn't be read ({e}): type a country's code	ບໍ່ສາມາດອ່ານລາຍຊື່ປະເທດໄດ້ ({e}): ພິມລະຫັດປະເທດ
 The current elevation stays in effect while you edit inputs. Click Apply elevation to apply the value and units.	ລະດັບຄວາມສູງປະຈຸບັນຍັງຄົງມີຜົນໃນຂະນະທີ່ທ່ານດັດແກ້ຂໍ້ມູນຂາເຂົ້າ. ຄລິກ 'ນຳໃຊ້ລະດັບຄວາມສູງ' ເພື່ອນຳໃຊ້ຄ່າ ແລະ ຫົວໜ່ວຍ.
-The dataset has nothing RustGIS can add	ຊຸດຂໍ້ມູນນີ້ບໍ່ມີສິ່ງທີ່ RustGIS ສາມາດເພີ່ມໄດ້
+The dataset has nothing KHGIS can add	ຊຸດຂໍ້ມູນນີ້ບໍ່ມີສິ່ງທີ່ KHGIS ສາມາດເພີ່ມໄດ້
 The desktop app adds data cubes	ແອັບເດັສທັອບສາມາດເພີ່ມກ້ອນຂໍ້ມູນ (data cubes) ໄດ້
 The distance between two marks along the line	ໄລຍະຫ່າງລະຫວ່າງສອງເຄື່ອງໝາຍຕາມລວງເສັ້ນ
 The environment (AWS_ACCESS_KEY_ID…)	ສະພາບແວດລ້ອມລະບົບ (AWS_ACCESS_KEY_ID…)
@@ -3681,7 +3681,7 @@ The first {n} rows	{n} ແຖວທຳອິດ
 The flowtrace didn't answer: the whole flowline nearest the point is shown.	ການຕິດຕາມສາຍນ້ຳໄຫຼບໍ່ມີການຕອບສະໜອງ: ສະແດງສາຍນ້ຳໄຫຼທັງໝົດທີ່ຢູ່ໃກ້ຈຸດທີ່ສຸດ.
 the grid digits must be an even count of 0 to 10, half for the easting and half for the northing	ຕົວເລກຕາໜ່າງຕ້ອງເປັນຈຳນວນຄູ່ຈາກ 0 ຫາ 10, ເຄິ່ງໜຶ່ງສຳລັບ easting ແລະ ເຄິ່ງໜຶ່ງສຳລັບ northing
 The installed GeoLibre runner lists no tools.	ຕົວດຳເນີນການ GeoLibre ທີ່ຕິດຕັ້ງໄວ້ບໍ່ມີລາຍການເຄື່ອງມື.
-The installer is downloaded and checked. RustGIS closes, installs the update and opens again.	ຕົວຕິດຕັ້ງຖືກດາວໂຫຼດ ແລະ ກວດສອບແລ້ວ. RustGIS ຈະປິດ, ຕິດຕັ້ງການອັບເດດ ແລະ ເປີດຄືນໃໝ່.
+The installer is downloaded and checked. KHGIS closes, installs the update and opens again.	ຕົວຕິດຕັ້ງຖືກດາວໂຫຼດ ແລະ ກວດສອບແລ້ວ. KHGIS ຈະປິດ, ຕິດຕັ້ງການອັບເດດ ແລະ ເປີດຄືນໃໝ່.
 The interface colours, spacing and text sizes: a built-in theme or a file from the themes folder.	ສີ, ໄລຍະຫ່າງ ແລະ ຂະໜາດຕົວອັກສອນຂອງສ່ວນຕິດຕໍ່: ຮູບແບບສີສັນທີ່ມີໃນຕົວ ຫຼື ໄຟລ໌ຈາກໂຟນເດີ themes.
 The job covers the map view	ວຽກກວມເອົາມຸມມອງແຜນທີ່
 The key is kept for this session only.	ຄີຈະຖືກເກັບໄວ້ສະເພາະວາລະນີ້ເທົ່ານັ້ນ.
@@ -3700,7 +3700,7 @@ The layer's fills	ສີຕື່ມຂອງຊັ້ນຂໍ້ມູນ
 The layer's strokes	ເສັ້ນຂອງຊັ້ນຂໍ້ມູນ
 the layout export failed unexpectedly	ການສົ່ງອອກການຈັດໜ້າລົ້ມເຫຼວຢ່າງບໍ່ຄາດຄິດ
 The link doesn't say its STAC API: Find Items searches {api}	ລິ້ງບໍ່ໄດ້ລະບຸ STAC API: ການຄົ້ນຫາລາຍການຈະຄົ້ນຫາ {api}
-The list of plugins to browse. Leave it empty for the RustGIS plugin registry.	ລາຍຊື່ປລັກອິນທີ່ຈະເບິ່ງ. ປະວ່າງໄວ້ເພື່ອໃຊ້ຄັງລົງທະບຽນປລັກອິນຂອງ RustGIS.
+The list of plugins to browse. Leave it empty for the KHGIS plugin registry.	ລາຍຊື່ປລັກອິນທີ່ຈະເບິ່ງ. ປະວ່າງໄວ້ເພື່ອໃຊ້ຄັງລົງທະບຽນປລັກອິນຂອງ KHGIS.
 The log cut it short or took its secrets out: it would run only in part	ບັນທຶກໄດ້ຕັດມັນໃຫ້ສັ້ນ ຫຼື ເອົາຂໍ້ມູນລັບອອກ: ມັນຈະເຮັດວຽກໄດ້ພຽງບາງສ່ວນ
 The longest a callout's line may be.	ຄວາມຍາວສູງສຸດຂອງເສັ້ນຊີ້.
 The map at the left; the title, locator, legend, sources and reference in a panel at the right.	ແຜນທີ່ຢູ່ເບື້ອງຊ້າຍ; ຫົວຂໍ້, ແຜນທີ່ດັດຊະນີ, ຄຳອະທິບາຍສັນຍະລັກ, ແຫຼ່ງຂໍ້ມູນ ແລະ ອ້າງອີງ ຢູ່ໃນແຜງເບື້ອງຂວາ.
@@ -3709,7 +3709,7 @@ the map has no layers	ແຜນທີ່ບໍ່ມີຊັ້ນຂໍ້ມ�
 the map has no PostGIS layer loaded for editing (Home › Add Data › Database…, Load for editing)	ແຜນທີ່ບໍ່ມີຊັ້ນຂໍ້ມູນ PostGIS ທີ່ໂຫຼດມາເພື່ອດັດແກ້ (ໜ້າຫຼັກ › ເພີ່ມຂໍ້ມູນ › ຖານຂໍ້ມູນ…, ໂຫຼດເພື່ອດັດແກ້)
 The map has no tile archive read from a file.	ແຜນທີ່ບໍ່ມີຄັງເກັບໄທລ໌ທີ່ອ່ານຈາກໄຟລ໌.
 The map is drawn in this coordinate system; layers are projected on the fly.	ແຜນທີ່ຖືກແຕ້ມໃນລະບົບພິກັດນີ້; ຊັ້ນຂໍ້ມູນຈະຖືກແປງເສັ້ນໂຄງໃນທັນທີ.
-the map isn't on screen in RustGIS (a layout or the catalog is shown), so it was drawn offscreen	ແຜນທີ່ບໍ່ໄດ້ສະແດງເທິງໜ້າຈໍໃນ RustGIS (ສະແດງການຈັດໜ້າ ຫຼື ຄາຕາລັອກຢູ່), ດັ່ງນັ້ນຈຶ່ງຖືກແຕ້ມຢູ່ນອກໜ້າຈໍ
+the map isn't on screen in KHGIS (a layout or the catalog is shown), so it was drawn offscreen	ແຜນທີ່ບໍ່ໄດ້ສະແດງເທິງໜ້າຈໍໃນ KHGIS (ສະແດງການຈັດໜ້າ ຫຼື ຄາຕາລັອກຢູ່), ດັ່ງນັ້ນຈຶ່ງຖືກແຕ້ມຢູ່ນອກໜ້າຈໍ
 the map it was asked for isn't open	ແຜນທີ່ທີ່ຮ້ອງຂໍບໍ່ໄດ້ເປີດຢູ່
 The map view as it is now	ມຸມມອງແຜນທີ່ຕາມທີ່ເປັນຢູ່ຕອນນີ້
 The map's extent isn't known yet	ຍັງບໍ່ທັນຮູ້ຂອບເຂດຂອງແຜນທີ່ເທື່ອ
@@ -3794,7 +3794,7 @@ The sign-in is still kept in the app's settings folder, readable by your user ac
 The significance level is a number, such as 0.05	ລະດັບໄນສຳຄັນແມ່ນຕົວເລກ ເຊັ່ນ 0.05
 The size of the menu, the panes and the text drawn in them.	ຂະໜາດຂອງເມນູ, ໜ້າຕ່າງ ແລະ ຂໍ້ຄວາມທີ່ແຕ້ມໃນພວກມັນ.
 The start-up project {path} didn't open: {error}	ໂຄງການເລີ່ມຕົ້ນ {path} ບໍ່ສາມາດເປີດໄດ້: {error}
-The start-up project {path} isn't a RustGIS project file.	ໂຄງການເລີ່ມຕົ້ນ {path} ບໍ່ແມ່ນໄຟລ໌ໂຄງການ RustGIS.
+The start-up project {path} isn't a KHGIS project file.	ໂຄງການເລີ່ມຕົ້ນ {path} ບໍ່ແມ່ນໄຟລ໌ໂຄງການ KHGIS.
 The step's layer {name} isn't in the map.	ຊັ້ນຂໍ້ມູນ {name} ຂອງຂັ້ນຕອນນີ້ບໍ່ມີຢູ່ໃນແຜນທີ່.
 The store has no variables with two or more dimensions.	ບ່ອນເກັບຂໍ້ມູນບໍ່ມີຕົວປ່ຽນທີ່ມີ 2 ມິຕິຂຶ້ນໄປ.
 the store is gone	ບ່ອນເກັບຂໍ້ມູນບໍ່ມີແລ້ວ
@@ -3803,7 +3803,7 @@ The summary failed unexpectedly	ການສະຫຼຸບລົ້ມເຫຼ
 The summary finished after another project was opened, so it wasn't added	ການສະຫຼຸບສຳເລັດຫຼັງຈາກເປີດໂຄງການອື່ນແລ້ວ ຈຶ່ງບໍ່ໄດ້ຖືກເພີ່ມເຂົ້າ
 The system keychain could not complete the request.	keychain ຂອງລະບົບບໍ່ສາມາດປະຕິບັດຕາມຄຳຮ້ອງຂໍໄດ້ສຳເລັດ.
 The system keychain is locked or access was refused.	keychain ຂອງລະບົບຖືກລັອກ ຫຼື ການເຂົ້າເຖິງຖືກປະຕິເສດ.
-The system keychain is unavailable, so this sign-in won't be remembered: it lasts until RustGIS closes.	keychain ຂອງລະບົບບໍ່ພ້ອມໃຊ້ງານ ດັ່ງນັ້ນການເຂົ້າສູ່ລະບົບນີ້ຈະບໍ່ຖືກຈື່ໄວ້: ມັນຈະຄົງຢູ່ຈົນກວ່າຈະປິດ RustGIS.
+The system keychain is unavailable, so this sign-in won't be remembered: it lasts until KHGIS closes.	keychain ຂອງລະບົບບໍ່ພ້ອມໃຊ້ງານ ດັ່ງນັ້ນການເຂົ້າສູ່ລະບົບນີ້ຈະບໍ່ຖືກຈື່ໄວ້: ມັນຈະຄົງຢູ່ຈົນກວ່າຈະປິດ KHGIS.
 The system keychain is unavailable.	keychain ຂອງລະບົບບໍ່ພ້ອມໃຊ້ງານ.
 The task's steps changed, so the step being edited was closed: edit it again.	ຂັ້ນຕອນຂອງວຽກມີການປ່ຽນແປງ ຈຶ່ງປິດຂັ້ນຕອນທີ່ກຳລັງດັດແກ້ຢູ່: ກະລຸນາດັດແກ້ໃໝ່ອີກຄັ້ງ.
 the time slider is off	ແຖບເລື່ອນເວລາປິດຢູ່
@@ -3857,7 +3857,7 @@ This map's thumbnail, from an image.	ຮູບຕົວຢ່າງຂອງແ�
 This map's thumbnail, from the view.	ຮູບຕົວຢ່າງຂອງແຜນທີ່ນີ້, ຈາກມຸມມອງ.
 This platform does not report the system theme	ແພລດຟອມນີ້ບໍ່ລາຍງານຮູບແບບສີສັນຂອງລະບົບ
 This plugin can:	ປລັກອິນນີ້ສາມາດ:
-This plugin runs as a program on your computer, outside RustGIS's sandbox. It can do anything you can: read and change your files, use the network and run other programs. Install it only if you trust its author.	ປລັກອິນນີ້ເຮັດວຽກເປັນໂປຣແກຣມໃນຄອມພິວເຕີຂອງທ່ານ ຢູ່ນອກແຊນບ໋ອກຂອງ RustGIS. ມັນສາມາດເຮັດໄດ້ທຸກຢ່າງທີ່ທ່ານເຮັດໄດ້: ອ່ານ ແລະ ປ່ຽນແປງໄຟລ໌ຂອງທ່ານ, ໃຊ້ເຄືອຂ່າຍ ແລະ ຮັນໂປຣແກຣມອື່ນໆ. ຕິດຕັ້ງສະເພາະເມື່ອທ່ານເຊື່ອຖືຜູ້ພັດທະນາເທົ່ານັ້ນ.
+This plugin runs as a program on your computer, outside KHGIS's sandbox. It can do anything you can: read and change your files, use the network and run other programs. Install it only if you trust its author.	ປລັກອິນນີ້ເຮັດວຽກເປັນໂປຣແກຣມໃນຄອມພິວເຕີຂອງທ່ານ ຢູ່ນອກແຊນບ໋ອກຂອງ KHGIS. ມັນສາມາດເຮັດໄດ້ທຸກຢ່າງທີ່ທ່ານເຮັດໄດ້: ອ່ານ ແລະ ປ່ຽນແປງໄຟລ໌ຂອງທ່ານ, ໃຊ້ເຄືອຂ່າຍ ແລະ ຮັນໂປຣແກຣມອື່ນໆ. ຕິດຕັ້ງສະເພາະເມື່ອທ່ານເຊື່ອຖືຜູ້ພັດທະນາເທົ່ານັ້ນ.
 This project	ໂຄງການນີ້
 This project uses a connection for {origin} that is not saved on this computer.	ໂຄງການນີ້ໃຊ້ການເຊື່ອມຕໍ່ສຳລັບ {origin} ທີ່ບໍ່ໄດ້ບັນທຶກໄວ້ໃນຄອມພິວເຕີນີ້.
 This read was already started	ການອ່ານນີ້ໄດ້ເລີ່ມແລ້ວ
@@ -4003,7 +4003,7 @@ unknown (an older project)	ບໍ່ຮູ້ຈັກ (ໂຄງການເກ
 Unknown shortcut binding field.	ບໍ່ຮູ້ຈັກຟິວກຳນົດປຸ່ມລັດ.
 Unknown shortcut command.	ບໍ່ຮູ້ຈັກຄຳສັ່ງປຸ່ມລັດ.
 UNKNOWN TOOL	ເຄື່ອງມືທີ່ບໍ່ຮູ້ຈັກ
-Unload the GeoLibre tools and stop loading them when RustGIS starts.	ເອົາເຄື່ອງມື GeoLibre ອອກ ແລະ ຢຸດການໂຫຼດພວກມັນເມື່ອ RustGIS ເລີ່ມຕົ້ນ.
+Unload the GeoLibre tools and stop loading them when KHGIS starts.	ເອົາເຄື່ອງມື GeoLibre ອອກ ແລະ ຢຸດການໂຫຼດພວກມັນເມື່ອ KHGIS ເລີ່ມຕົ້ນ.
 Unsaved changes	ການປ່ຽນແປງທີ່ຍັງບໍ່ໄດ້ບັນທຶກ
 Unsplit Line	ເຊື່ອມເສັ້ນທີ່ແຍກກັນ
 Unsupervised classes (k-means)	ຊັ້ນຂໍ້ມູນແບບບໍ່ມີຜູ້ກຳກັບ (k-means)
@@ -4144,14 +4144,14 @@ Web-service logins last for this session only.	ການເຂົ້າສູ່
 Website	ເວັບໄຊ
 Weekly usage	ການນຳໃຊ້ປະຈຳອາທິດ
 Weights	ນ້ຳໜັກ
-Welcome to RustGIS	ຍິນດີຕ້ອນຮັບສູ່ RustGIS
+Welcome to KHGIS	ຍິນດີຕ້ອນຮັບສູ່ KHGIS
 West	ຕາເວັນຕົກ
 WFS	WFS
 WGS 84 / Globe	WGS 84 / ໜ່ວຍໂລກ
 WGS 84 / Web Mercator	WGS 84 / Web Mercator
 What each slice or bar says beside it: its value, its share in percent, or both	ສິ່ງທີ່ແຕ່ລະສ່ວນ ຫຼື ແທ່ງສະແດງຢູ່ຂ້າງມັນ: ຄ່າ, ສ່ວນແບ່ງເປັນເປີເຊັນ, ຫຼື ທັງສອງ
-What RustGIS opens with: the World Atlas sample or a blank map.	ສິ່ງທີ່ RustGIS ຈະເປີດຂຶ້ນມາ: ຕົວຢ່າງ World Atlas ຫຼື ແຜນທີ່ຫວ່າງເປົ່າ.
-What RustGIS opens with: the World Atlas sample, a blank map, a project you choose, or the last project opened or saved.	ສິ່ງທີ່ RustGIS ຈະເປີດຂຶ້ນມາ: ຕົວຢ່າງ World Atlas, ແຜນທີ່ຫວ່າງເປົ່າ, ໂຄງການທີ່ທ່ານເລືອກ ຫຼື ໂຄງການຫຼ້າສຸດທີ່ເປີດ ຫຼື ບັນທຶກໄວ້.
+What KHGIS opens with: the World Atlas sample or a blank map.	ສິ່ງທີ່ KHGIS ຈະເປີດຂຶ້ນມາ: ຕົວຢ່າງ World Atlas ຫຼື ແຜນທີ່ຫວ່າງເປົ່າ.
+What KHGIS opens with: the World Atlas sample, a blank map, a project you choose, or the last project opened or saved.	ສິ່ງທີ່ KHGIS ຈະເປີດຂຶ້ນມາ: ຕົວຢ່າງ World Atlas, ແຜນທີ່ຫວ່າງເປົ່າ, ໂຄງການທີ່ທ່ານເລືອກ ຫຼື ໂຄງການຫຼ້າສຸດທີ່ເປີດ ຫຼື ບັນທຶກໄວ້.
 What to do, where to find it and why	ສິ່ງທີ່ຕ້ອງເຮັດ, ບ່ອນທີ່ຈະຊອກຫາ ແລະ ເຫດຜົນ
 What's near a point	ສິ່ງທີ່ຢູ່ໃກ້ຈຸດ
 What's new	ມີຫຍັງໃໝ່

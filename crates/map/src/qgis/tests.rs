@@ -156,7 +156,7 @@ fn a_project_reads_into_layers_in_tree_order_with_their_styles() {
     assert_eq!(field, "class");
     assert_eq!(classes.iter().map(|c| c.0.as_str()).collect::<Vec<_>>(), ["motorway", "track"]);
     assert_eq!(classes[1].1.stroke.a(), 0, "not rendered: hidden");
-    assert_eq!(other.stroke.a(), 0, "a marker line only: nothing RustGIS draws");
+    assert_eq!(other.stroke.a(), 0, "a marker line only: nothing KHGIS draws");
     let motorway = &class_strokes["motorway"];
     assert_eq!(motorway.len(), 2);
     assert_eq!((motorway[0].cap, motorway[0].level, motorway[1].level), (LineCap::Butt, Some(0), Some(3)));
@@ -450,7 +450,7 @@ fn a_labels_buffer_and_letter_spacing_carry_over_in_their_units() {
     assert!((c.halo_width.unwrap() - 72.0 / 25.4).abs() < 1e-4);
     let (c, _) = read(r#"<text-style fieldName="name" fontLetterSpacing="junk"><text-buffer bufferDraw="0" bufferSize="3"/></text-style>"#);
     assert_eq!((c.halo, c.halo_color, c.halo_width, c.spacing), (false, None, None, 0.0));
-    // Crafted sizes stay within RustGIS's ranges.
+    // Crafted sizes stay within KHGIS's ranges.
     let (c, _) =
         read(r#"<text-style fieldName="name" fontLetterSpacing="1e30"><text-buffer bufferDraw="1" bufferSize="1e30"/></text-style>"#);
     assert_eq!((c.halo_width, c.spacing), (Some(10.0), 50.0));
@@ -523,7 +523,7 @@ fn a_labels_background_and_offset_carry_over_in_their_units() {
     );
     assert_eq!(c.background.and_then(|b| b.fill), Some(Rgba::rgb(1, 2, 3)));
     assert!(report.notes.iter().any(|n| n.text.contains("patterns or gradients")), "{:?}", report.notes);
-    // Crafted sizes stay within RustGIS's ranges.
+    // Crafted sizes stay within KHGIS's ranges.
     let (c, _) = read(
         r#"<text-style fieldName="nr"><background shapeDraw="1" shapeSizeX="1e30" shapeSizeY="-5" shapeBorderWidth="1e30" shapeRadiiX="1e30" shapeRadiiY="1e30"/></text-style>"#,
     );
@@ -590,7 +590,7 @@ fn a_labels_wrapping_and_repeat_carry_over() {
     assert_eq!((follow("3"), follow("5"), follow("4")), (TextAlign::Right, TextAlign::Left, TextAlign::Center));
     // Without a `<text-format>` too, as QGIS defaults to following the placement.
     assert_eq!(read(r#"<placement placement="1" quadOffset="3"/>"#).0.line_align, TextAlign::Right);
-    // A shortest line length, and justified lines: as near as RustGIS draws them, and noted.
+    // A shortest line length, and justified lines: as near as KHGIS draws them, and noted.
     let (c, report) = read(r#"<text-format autoWrapLength="1e9" useMaxLineLengthForAutoWrap="0" multilineAlign="4"/>"#);
     assert_eq!((c.wrap_length, c.line_align), (crate::symbology::MAX_WRAP_LENGTH, TextAlign::Center));
     for part in ["shortest line length", "justified"] {
@@ -602,7 +602,7 @@ fn a_labels_wrapping_and_repeat_carry_over() {
     let (c, report) = read(r#"<placement placement="1" repeatDistance="30"/>"#);
     assert_eq!(c.repeat, None);
     assert!(report.notes.is_empty(), "QGIS repeats no label off a line: {:?}", report.notes);
-    // Within RustGIS's range; one of no number is none.
+    // Within KHGIS's range; one of no number is none.
     let (c, _) = read(r#"<placement placement="2" repeatDistance="0.001" repeatDistanceUnits="Point"/>"#);
     assert_eq!(c.repeat, Some(10.0));
     let (c, _) = read(r#"<placement placement="2" repeatDistance="lots"/>"#);
@@ -612,7 +612,7 @@ fn a_labels_wrapping_and_repeat_carry_over() {
     assert_eq!(c.repeat, Some(30.0));
     let (c, _) = read(r#"<placement placement="2" repeatDistance="30" repeatDistanceUnit="1"/>"#);
     assert!(c.repeat.is_some_and(|r| (r - 30.0 * 72.0 / 25.4).abs() < 1e-3), "{:?}", c.repeat);
-    // Round polygons RustGIS labels once, and says so.
+    // Round polygons KHGIS labels once, and says so.
     let (c, report) = read(r#"<placement placement="7" repeatDistance="30"/>"#);
     assert_eq!(c.repeat, None);
     assert!(report.notes.iter().any(|n| n.text.contains("repeated round polygons")), "{:?}", report.notes);
@@ -1232,7 +1232,7 @@ fn label_expressions_and_data_defined_label_settings_carry_over() {
         (Some(r#""value" / 5 + 6"#), Some(r#""kind""#), Some(r#""angle""#))
     );
     assert!(!report.notes.iter().any(|n| n.text.contains("data-defined")), "{:?}", report.notes);
-    // A size in millimetres, QGIS 2's counterclockwise rotation, and one RustGIS has no place for.
+    // A size in millimetres, QGIS 2's counterclockwise rotation, and one KHGIS has no place for.
     let qml = |unit: &str, props: &str| {
         format!(
             r#"<qgis version="3.40.0"><labeling type="simple"><settings><text-style fieldName="name" fontSize="3" fontSizeUnit="{unit}"/>
@@ -1328,7 +1328,7 @@ fn data_defined_symbol_settings_carry_over_as_expressions() {
     let mut report = Report::default();
     let s = read_style(&line, "roads", &mut report).unwrap();
     let by = s.symbol_by.unwrap();
-    // QGIS's map scale read as RustGIS's.
+    // QGIS's map scale read as KHGIS's.
     let k = QGIS_SCALE;
     assert_eq!(by.stroke_width.as_deref(), Some(format!("(if((@map_scale / {k}) < 4656581, 1.0, 0)) * 1.333333").as_str()), "{by:?}");
     assert_eq!(by.stroke.as_deref(), Some("color_rgb(255, 0, 0)"));
@@ -1463,7 +1463,7 @@ fn a_rule_based_renderer_classes_each_feature_by_the_first_rule_it_meets() {
     assert_eq!(at(None), named(&[Some("a"), Some("big"), Some("fn"), Some("inner"), None]));
 }
 
-/// A categorized renderer by an expression is Unique Values by that expression (as RustGIS reads
+/// A categorized renderer by an expression is Unique Values by that expression (as KHGIS reads
 /// it), each category a class; graduated ranges by an expression are still left out, noted.
 #[test]
 fn a_categorized_renderer_by_an_expression_classes_by_it() {
@@ -1481,7 +1481,7 @@ fn a_categorized_renderer_by_an_expression_classes_by_it() {
     let named = |v: &[Option<&str>]| v.iter().map(|k| k.map(str::to_string)).collect::<Vec<_>>();
     assert_eq!(rule_classes(&l, None), named(&[Some("A"), None, Some("A")]));
 
-    // The map's scale reads as RustGIS's; a field alone (quoted or not) is still a field.
+    // The map's scale reads as KHGIS's; a field alone (quoted or not) is still a field.
     let by = |attr: &str| {
         let qml = format!(
             r#"<qgis version="3.40.0"><renderer-v2 type="categorizedSymbol" attr="{attr}"><categories><category value="1" symbol="0" label="One"/></categories>

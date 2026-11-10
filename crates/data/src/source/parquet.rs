@@ -273,7 +273,7 @@ impl ParquetSource {
         };
         info.note_columns(
             &left_out,
-            ["of a type RustGIS has no field for was left out", "of types RustGIS has no field for were left out"],
+            ["of a type KHGIS has no field for was left out", "of types KHGIS has no field for were left out"],
         );
         info.note_columns(&as_numbers, ["of dates or times was read as whole numbers", "of dates or times were read as whole numbers"]);
         // An empty file loses nothing.
@@ -297,7 +297,7 @@ impl ParquetSource {
             match src.peek_zm() {
                 Some(true) => src.info.drop_zm(None),
                 Some(false) => {}
-                None => src.info.notes.push("couldn't tell whether it has Z or M values, which RustGIS doesn't keep".into()),
+                None => src.info.notes.push("couldn't tell whether it has Z or M values, which KHGIS doesn't keep".into()),
             }
         }
         if src.info.geometry_type == GeometryType::None {
@@ -1351,7 +1351,7 @@ pub(crate) fn write_features<W: std::io::Write + Send>(
 
     let mut props = WriterProperties::builder()
         .set_compression(Compression::ZSTD(ZstdLevel::try_new(9).map_err(err)?))
-        .set_created_by("RustGIS".to_string());
+        .set_created_by("KHGIS".to_string());
     if has_geom {
         // Keep the covering for range reads; split its doubles into byte streams so Zstd can
         // compress their shared exponent bytes without rounding any coordinate values.

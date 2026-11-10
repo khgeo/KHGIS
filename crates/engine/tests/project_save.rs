@@ -78,8 +78,8 @@ fn project_from_newer_rustgis_reports_update_message() {
     })
     .to_string();
     let err = Project::from_json(&json).unwrap_err();
-    assert!(err.contains("saved by a newer RustGIS"));
-    assert!(err.contains("Update RustGIS to open it"));
+    assert!(err.contains("saved by a newer KHGIS"));
+    assert!(err.contains("Update KHGIS to open it"));
 }
 
 #[test]
@@ -94,7 +94,7 @@ fn project_with_unknown_variant_suggests_newer_version() {
     })
     .to_string();
     let err = Project::from_json(&json).unwrap_err();
-    assert!(err.contains("may have been saved by a newer RustGIS") || err.contains("Update RustGIS to open it"));
+    assert!(err.contains("may have been saved by a newer KHGIS") || err.contains("Update KHGIS to open it"));
 }
 
 /// Future metadata wins over incompatible payloads through direct, alternate and package imports.
@@ -117,7 +117,7 @@ fn file_compatibility_rejects_future_formats_before_importing() -> Result<(), St
             .chain([("project.openText", json!({"text": text})), ("project.openText", json!({"text": text, "package": true}))])
         {
             let error = s.run(command, &params).unwrap_err();
-            assert!(error.contains("Update RustGIS to open it") && error.contains(&format!("format {format}")), "{command}: {error}");
+            assert!(error.contains("Update KHGIS to open it") && error.contains(&format!("format {format}")), "{command}: {error}");
             assert_eq!(serde_json::to_value(&s.project).map_err(|e| e.to_string())?, before, "{command}");
             assert_eq!((s.undo_depth(), s.undo_label(), s.redo_label()), history, "{command}");
             assert_eq!(s.path.as_deref(), Some(std::path::Path::new("original.rgis")));
@@ -128,7 +128,7 @@ fn file_compatibility_rejects_future_formats_before_importing() -> Result<(), St
             let data = base64::engine::general_purpose::STANDARD.encode(package);
             for command in ["map.import", "style.import"] {
                 let error = s.run(command, &json!({"data": data})).unwrap_err();
-                assert!(error.contains("Update RustGIS to open it"), "{file}, {command}: {error}");
+                assert!(error.contains("Update KHGIS to open it"), "{file}, {command}: {error}");
                 assert_eq!(serde_json::to_value(&s.project).map_err(|e| e.to_string())?, before);
             }
         }
@@ -184,7 +184,7 @@ fn file_compatibility_rejects_malformed_metadata() -> Result<(), String> {
         for command in ["map.import", "style.import"] {
             let mut s = Session::new(Project::new("Original"));
             let error = s.run(command, &json!({"text": map.to_string()})).unwrap_err();
-            assert!(error.contains("not a RustGIS"), "{command}: {error}");
+            assert!(error.contains("not a KHGIS"), "{command}: {error}");
             assert_eq!(s.project.maps.len(), 1);
             assert!(s.project.styles.is_empty());
         }
@@ -194,7 +194,7 @@ fn file_compatibility_rejects_malformed_metadata() -> Result<(), String> {
     project["maps"][0]["projection"] = json!("FutureProjection");
     for command in ["map.import", "style.import"] {
         let error = Session::new(Project::default()).run(command, &json!({"text": project.to_string()})).unwrap_err();
-        assert!(error.contains("Update RustGIS to open it"), "{command}: {error}");
+        assert!(error.contains("Update KHGIS to open it"), "{command}: {error}");
     }
     Ok(())
 }

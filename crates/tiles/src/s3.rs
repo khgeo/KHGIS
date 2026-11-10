@@ -492,7 +492,7 @@ pub fn public_region(url: &str, probe: impl Fn(&str) -> Result<(), crate::failur
     let (bucket, _) = parse(url)?;
     let refused = |f: &crate::failure::Failure| match f.status() {
         Some(401 | 403) => format!(
-            "s3://{bucket} doesn't let its files be read anonymously (a private or requester-pays bucket), so RustGIS can't read them"
+            "s3://{bucket} doesn't let its files be read anonymously (a private or requester-pays bucket), so KHGIS can't read them"
         ),
         _ => format!("s3://{bucket}: {}", f.message),
     };

@@ -250,7 +250,7 @@ impl History {
     /// local time; a status or duration the request didn't have is left out.
     pub fn report(&self, filter: Filter) -> String {
         let records = self.records();
-        let mut report = String::from("RustGIS Diagnostics\nTimestamps: Unix milliseconds (UTC)\n");
+        let mut report = String::from("KHGIS Diagnostics\nTimestamps: Unix milliseconds (UTC)\n");
         for record in records.iter().filter(|record| filter.matches(record)) {
             let _ = writeln!(
                 report,
@@ -939,11 +939,11 @@ mod tests {
 
     #[test]
     fn prose_naming_credentials_keeps_its_words() {
-        // RustGIS's own notices name credentials without holding one: redacting must not
+        // KHGIS's own notices name credentials without holding one: redacting must not
         // swallow the rest of the message.
         for text in [
             "The saved password is missing or doesn't match this connection.",
-            "4 layer address(es) were saved without their keys, tokens, passwords or URL fragments; after RustGIS closes, add those layers again to restore missing values",
+            "4 layer address(es) were saved without their keys, tokens, passwords or URL fragments; after KHGIS closes, add those layers again to restore missing values",
             "3 layer(s) read the database of the connection 'db' and need its password: right-click the connection in Data Sources › Connections, or one of the layers, and choose Log In…",
             "Set Color's step keeps its key parameter. If that is an access key, delete the step (Edit Steps) before sharing the task.",
             "Exported /data/a[1].png",

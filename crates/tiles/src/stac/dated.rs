@@ -37,7 +37,7 @@ fn layout(collection: &Value) -> Result<Option<Layout>, String> {
         "MM" | "MM-DD" => return Err("its dates have no year (it is a climatology), so they make no time series".into()),
         "YYYY-MM/DD-hh" => return Err("it is hourly, and a data cube has one file per day".into()),
         "" => return Err(format!("its date format {} isn't text", format.to_string().chars().take(40).collect::<String>())),
-        f => return Err(format!("its dates are written {}, which RustGIS doesn't read yet", f.chars().take(40).collect::<String>())),
+        f => return Err(format!("its dates are written {}, which KHGIS doesn't read yet", f.chars().take(40).collect::<String>())),
     };
     let level = first("je:cog_level_max").and_then(|l| l.as_u64()).ok_or("it doesn't say which level holds the full images")?;
     Ok(Some(Layout { day_folders, level: level.to_string() }))

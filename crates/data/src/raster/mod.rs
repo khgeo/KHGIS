@@ -1395,8 +1395,8 @@ fn read_ascii(path: &Path, text: &str, name: &str, nodata: Option<f64>) -> Resul
     Ok(r)
 }
 
-/// The coordinate system in the `.prj` next to an ASCII grid, when RustGIS understands it. Else
-/// why it doesn't, so the grid is read without it and says so. Another body's system RustGIS
+/// The coordinate system in the `.prj` next to an ASCII grid, when KHGIS understands it. Else
+/// why it doesn't, so the grid is read without it and says so. Another body's system KHGIS
 /// doesn't understand is an error instead, because the grid would land in the wrong place as
 /// longitude/latitude.
 fn sidecar_crs(path: &Path) -> Result<(Option<Crs>, Option<String>)> {
@@ -1870,7 +1870,7 @@ mod scan_tests {
         let r = read_scan_limited("big", Cursor::new(&png), 900).unwrap();
         assert_scan(&r, (20, 15), 3, ColorHint::Rgb { alpha: false });
         assert_eq!(r.overview, Some((40, 30)));
-        // Past the decoded-size allowance it is refused rather than allocated, in RustGIS's words.
+        // Past the decoded-size allowance it is refused rather than allocated, in KHGIS's words.
         let e = read_scan_limited("big", Cursor::new(&png), 100).unwrap_err().to_string();
         assert!(e.contains("save it as a TIFF"), "{e}");
         // A file larger than the allowance is refused before it is read (whatever its extension).

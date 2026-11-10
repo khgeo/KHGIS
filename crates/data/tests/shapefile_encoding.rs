@@ -168,7 +168,7 @@ fn language_drivers_dbase_lacks_decode_text_without_cpg_in_all_readers() {
     }
 }
 
-/// A language driver whose code page RustGIS can't decode (DOS 863, French Canadian) is named in
+/// A language driver whose code page KHGIS can't decode (DOS 863, French Canadian) is named in
 /// the note, and the text read as UTF-8.
 #[test]
 fn undecodable_dbf_code_page_is_named_in_the_utf8_fallback() {

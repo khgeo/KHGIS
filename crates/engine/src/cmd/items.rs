@@ -89,7 +89,7 @@ pub fn commands() -> Vec<C> {
         C::new("style.add", "Add Style", "Style › Styles", |s, p| {
             let text = read_text(p)?;
             crate::project::check_format(&text, "style file")?;
-            let items: Vec<StyleItem> = serde_json::from_str(&text).map_err(|e| format!("not a RustGIS style file: {e}"))?;
+            let items: Vec<StyleItem> = serde_json::from_str(&text).map_err(|e| format!("not a KHGIS style file: {e}"))?;
             let mut n = 0;
             for it in items.into_iter().take(1000) {
                 add_style(s, it);
@@ -149,7 +149,7 @@ pub fn commands() -> Vec<C> {
         // Custom colour ramps.
         C::new("ramp.add", "Add Color Ramps", "Style › Styles", |s, p| {
             let text = read_text(p)?;
-            // RustGIS's own files, QGIS styles, GDAL colour-relief text and GMT palettes.
+            // KHGIS's own files, QGIS styles, GDAL colour-relief text and GMT palettes.
             let format = match ps(p, "format") {
                 Some(f) => Some(RampFormat::from_name(f).ok_or_else(|| format!("unknown colour ramp format '{f}'"))?),
                 None => None,
@@ -204,7 +204,7 @@ pub fn commands() -> Vec<C> {
                 Ok(proj) => proj,
                 Err(error) => {
                     super::connections::restore_active(s);
-                    return Err(error.replace("RustGIS project", "RustGIS template"));
+                    return Err(error.replace("KHGIS project", "KHGIS template"));
                 }
             };
             proj.name = ps(p, "name").map(str::trim).filter(|n| !n.is_empty()).unwrap_or("Untitled").chars().take(200).collect();
@@ -344,7 +344,7 @@ pub fn commands() -> Vec<C> {
         .params(r#"{"task"?: name, "path": "*.rgistask"}"#),
         C::new("task.import", "Import Task", "Analyze › Tasks", |s, p| {
             let text = read_text(p)?;
-            let t: Task = serde_json::from_str(&text).map_err(|e| format!("not a RustGIS task: {e}"))?;
+            let t: Task = serde_json::from_str(&text).map_err(|e| format!("not a KHGIS task: {e}"))?;
             // A task from a file is someone else's: it may not read or write files, or run scripts.
             if let Some((i, st)) = t.steps.iter().enumerate().find(|(_, st)| touches_files(s, &st.command, &st.params)) {
                 return Err(format!("step {} ({}) reads or writes files, uses the network or runs other software or reserved actions, which imported tasks can't do", i + 1, st.command));
@@ -385,7 +385,7 @@ pub(crate) fn read_text(p: &Value) -> Result<String, String> {
             if bytes.starts_with(b"PK") {
                 return package_text(&bytes);
             }
-            String::from_utf8(bytes).map_err(|_| format!("{path} isn't a RustGIS file"))
+            String::from_utf8(bytes).map_err(|_| format!("{path} isn't a KHGIS file"))
         }
         (None, None) => Err("path or text is required".into()),
     }
@@ -507,11 +507,11 @@ fn import_maps(s: &mut Session, p: &Value) -> CmdResult {
 }
 
 /// A project read's refusal for an import that also takes `kinds`: text that is none of them is
-/// said to be none of them, not only a failed project. Other refusals (such as "Update RustGIS")
+/// said to be none of them, not only a failed project. Other refusals (such as "Update KHGIS")
 /// are kept as they are.
 fn not_a(error: String, kinds: &str) -> String {
-    match error.strip_prefix("not a RustGIS project: ") {
-        Some(why) => format!("not a RustGIS {kinds}: {why}"),
+    match error.strip_prefix("not a KHGIS project: ") {
+        Some(why) => format!("not a KHGIS {kinds}: {why}"),
         None => error,
     }
 }
@@ -677,7 +677,7 @@ fn package_project(s: &mut Session) -> Result<Vec<u8>, String> {
         *m = embedded_map(m, &mut budget);
     }
     let name = p.name.clone();
-    let readme = format!("{} — a RustGIS project package.\nOpen it with RustGIS (Project › Open), or unzip it for {}.rgis.\n", name, name);
+    let readme = format!("{} — a KHGIS project package.\nOpen it with KHGIS (Project › Open), or unzip it for {}.rgis.\n", name, name);
     // The package as unzipped, the README with it, within what a zip and a project may hold.
     let limit = crate::project::max_bytes().min(rustgis_data::zip::MAX_TOTAL as u64);
     let room = limit.saturating_sub(readme.len() as u64);
@@ -727,7 +727,7 @@ fn package_map(s: &mut Session, mobile: bool, tol: f64) -> Result<Vec<u8>, Strin
     let (text, report) = crate::durable::output_owned(m, |m| serde_json::to_string(m).map_err(|e| e.to_string()))?;
     crate::durable::notify(s, &report);
     let kind = if mobile { "mobile map package" } else { "map package" };
-    let readme = format!("{} — a RustGIS {kind}.\nAdd it to a project with Data › Import.\n", name);
+    let readme = format!("{} — a KHGIS {kind}.\nAdd it to a project with Data › Import.\n", name);
     rustgis_data::zip::write(&[(format!("{}.rgismap", safe(&name)), text.into_bytes()), ("README.txt".into(), readme.into_bytes())])
 }
 
@@ -1272,7 +1272,7 @@ fn obj_text(s: &mut Session, p: &Value) -> Result<String, String> {
     let mut obj = String::new();
     let l = s.layer_id(p).ok().and_then(|id| s.map().layer(id));
     let name = l.map(|l| l.name.replace(char::is_whitespace, "_")).unwrap_or_default();
-    let _ = write!(obj, "# {name} exported by RustGIS\no {name}\n");
+    let _ = write!(obj, "# {name} exported by KHGIS\no {name}\n");
     let ids = |v: &[usize]| v.iter().map(|i| (i + 1).to_string()).collect::<Vec<_>>().join(" ");
     for item in &mesh.items {
         match item {
@@ -1395,7 +1395,7 @@ fn mesh_stl(mesh: &Mesh, max_triangles: usize) -> Result<(Vec<u8>, StlReport), S
     }
     let at = |n: usize| verts.get(n).copied();
     // Each triangle is written as it comes (50 bytes), and the count filled in at the end.
-    let mut out = b"RustGIS binary STL, metres, Z up".to_vec();
+    let mut out = b"KHGIS binary STL, metres, Z up".to_vec();
     out.resize(84, 0);
     let mut count = 0usize;
     let mut degenerate = 0;
@@ -1478,25 +1478,25 @@ fn normal(a: [f64; 3], b: [f64; 3], c: [f64; 3]) -> [f64; 3] {
 
 /// The kinds of item [`item_bytes`] writes: (kind, extension, label).
 pub const ITEMS: &[(&str, &str, &str)] = &[
-    ("map", "rgismap", "RustGIS map file"),
-    ("layer", "rgislyr", "RustGIS layer file"),
-    ("styles", "rgisstyle", "RustGIS styles"),
-    ("ramps", "rgisramp", "RustGIS colour ramps"),
-    ("template", "rgistemplate", "RustGIS project template"),
-    ("projectPackage", "rgispkg", "RustGIS project package"),
-    ("mapPackage", "rgismpk", "RustGIS map package"),
-    ("mobilePackage", "rgismpk", "RustGIS mobile map package"),
-    ("gpPackage", "rgisgpk", "RustGIS results package"),
-    ("task", "rgistask", "RustGIS task"),
-    ("bookmarks", "rgisbookmarks", "RustGIS bookmarks"),
+    ("map", "rgismap", "KHGIS map file"),
+    ("layer", "rgislyr", "KHGIS layer file"),
+    ("styles", "rgisstyle", "KHGIS styles"),
+    ("ramps", "rgisramp", "KHGIS colour ramps"),
+    ("template", "rgistemplate", "KHGIS project template"),
+    ("projectPackage", "rgispkg", "KHGIS project package"),
+    ("mapPackage", "rgismpk", "KHGIS map package"),
+    ("mobilePackage", "rgismpk", "KHGIS mobile map package"),
+    ("gpPackage", "rgisgpk", "KHGIS results package"),
+    ("task", "rgistask", "KHGIS task"),
+    ("bookmarks", "rgisbookmarks", "KHGIS bookmarks"),
     ("obj", "obj", "Wavefront OBJ"),
     ("stl", "stl", "STL 3D model"),
-    ("report", "rgisreport", "RustGIS report"),
-    ("reportTemplate", "rgisrpttemplate", "RustGIS report template"),
-    ("presentation", "rgispres", "RustGIS presentation"),
-    ("notebook", "rgisnb", "RustGIS notebook"),
+    ("report", "rgisreport", "KHGIS report"),
+    ("reportTemplate", "rgisrpttemplate", "KHGIS report template"),
+    ("presentation", "rgispres", "KHGIS presentation"),
+    ("notebook", "rgisnb", "KHGIS notebook"),
     ("jupyter", "ipynb", "Jupyter notebook"),
-    ("dlPackage", "rgisdlpk", "RustGIS deep learning package"),
+    ("dlPackage", "rgisdlpk", "KHGIS deep learning package"),
     ("hostedImagery", "zip", "Web map tiles"),
     ("webMap", "html", "Web map"),
     ("webLayer", "zip", "Web layer"),
@@ -1650,7 +1650,7 @@ pub(crate) fn inline_text(p: &Value) -> Result<Option<String>, String> {
         if bytes.starts_with(b"PK") {
             return package_text(&bytes).map(Some);
         }
-        return String::from_utf8(bytes).map(Some).map_err(|_| "not a RustGIS file".to_string());
+        return String::from_utf8(bytes).map(Some).map_err(|_| "not a KHGIS file".to_string());
     }
     match ps(p, "text") {
         Some(t) if t.len() as u64 <= max_file() => Ok(Some(t.to_string())),

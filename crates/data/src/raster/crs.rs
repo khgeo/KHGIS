@@ -206,7 +206,7 @@ pub(crate) fn proj_key_refused(key: &str, val: &str) -> bool {
 
 impl Crs {
     /// A file's own coordinate system: checked (its PROJ definition must parse, or be a
-    /// projection RustGIS computes: a sinusoidal one, or an equidistant cylindrical one on an
+    /// projection KHGIS computes: a sinusoidal one, or an equidistant cylindrical one on an
     /// ellipsoid) and added to the run's table, once per definition.
     pub fn custom(def: CustomCrs) -> Result<Crs, String> {
         Crs::register(def, false)
@@ -1039,7 +1039,7 @@ mod tests {
         assert_eq!(esri_codes().count(), defs.len());
         // South America Albers Equal Area Conic, which opened the issue.
         assert!(esri_proj4(102033).is_some_and(|d| d.contains("+proj=aea") && d.contains("+lon_0=-60")));
-        // Left out: World Miller (RustGIS's sphere is kilometres from PROJ's), a lunar system, a
+        // Left out: World Miller (KHGIS's sphere is kilometres from PROJ's), a lunar system, a
         // Hammer–Aitoff PROJ can't write as a string, and codes that don't exist.
         for code in [54003, 103877, 54044, 0, 4326, u32::MAX] {
             assert_eq!(esri_proj4(code), None, "ESRI:{code}");

@@ -1,7 +1,7 @@
 //! Process plugins (desktop and command line): a program on the user's computer, not sandboxed,
 //! that speaks the plugin ABI over its standard input and output, one JSON object per line.
 //!
-//! For each command or tool call RustGIS starts the program in the plugin's folder and writes
+//! For each command or tool call KHGIS starts the program in the plugin's folder and writes
 //! the request (the same object a WebAssembly module gets) as one line. The program answers with
 //! lines of its own:
 //!
@@ -9,7 +9,7 @@
 //!   `{"ok": value}` or `{"error": "text"}`.
 //! - `{"log": "text"}`: a log line.
 //! - `{"progress": "text"}`: what it's doing now, shown while a tool runs and not kept.
-//! - `{"ok": value}` or `{"error": "text"}`: the result. RustGIS then closes the program's input
+//! - `{"ok": value}` or `{"error": "text"}`: the result. KHGIS then closes the program's input
 //!   and waits briefly for it to exit before stopping it.
 //!
 //! Other output lines are logged and skipped (libraries print), and so is what it writes to its
@@ -104,7 +104,7 @@ pub(crate) enum Line {
 }
 
 /// Reads the program's output lines on a thread, so waiting for one can time out. A few lines
-/// at most wait to be handled: a program printing faster than RustGIS reads is made to wait
+/// at most wait to be handled: a program printing faster than KHGIS reads is made to wait
 /// rather than filling memory.
 fn lines(out: impl Read + Send + 'static, wake: Option<crate::session::Wake>) -> Receiver<Line> {
     let (tx, rx) = sync_channel(2);
@@ -230,7 +230,7 @@ pub(crate) fn exited(child: &mut Child) -> bool {
 
 /// Ends a program kept running: gives it `grace` to exit, stops what it left running, then stops
 /// it if it's still running and reaps it. Returns its exit status when it exited by itself (and
-/// RustGIS reaped it), and whether it had to be stopped.
+/// KHGIS reaped it), and whether it had to be stopped.
 ///
 /// On Unix what it left running is its process group, stopped before the program is reaped so
 /// the group's id can't belong to anything else yet. On Windows a process tree can't be found
@@ -288,7 +288,7 @@ fn kill_tree(child: &Child) {
 }
 
 /// The program's input: lines written on a thread, so a program that doesn't read can't block
-/// RustGIS (the timeout still applies). Dropping it closes the input.
+/// KHGIS (the timeout still applies). Dropping it closes the input.
 pub(crate) struct Writer {
     tx: Sender<Vec<u8>>,
     /// Lines sent and not yet written: how far behind the program is in reading.

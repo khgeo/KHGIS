@@ -78,7 +78,7 @@ pub fn read_project(text: &str, report: &mut Report) -> Result<Project, String> 
             }
         }
     }
-    // GeoLibre's map controller treats the last record as topmost. RustGIS stores
+    // GeoLibre's map controller treats the last record as topmost. KHGIS stores
     // the top layer first. beforeId anchors to a native MapLibre style-layer id,
     // not necessarily another GeoLibre layer; there is no matching anchor here.
     for layer in &layers {
@@ -94,7 +94,7 @@ pub fn read_project(text: &str, report: &mut Report) -> Result<Project, String> 
     }
     let renderer = string(&v, "primaryRenderer");
     if !renderer.is_empty() && renderer != "maplibre" {
-        report.approximated("", format!("{renderer} renderer; supported layers drawn on the RustGIS map"));
+        report.approximated("", format!("{renderer} renderer; supported layers drawn on the KHGIS map"));
     }
     if array(&v, "bookmarks").len() > MAX_ITEMS {
         report.skipped("", "bookmarks past the first 1000");
@@ -145,7 +145,7 @@ pub fn boolean(v: &Value, key: &str, default: bool) -> bool {
 pub fn array<'a>(v: &'a Value, key: &str) -> &'a [Value] {
     v.get(key).and_then(Value::as_array).map(Vec::as_slice).unwrap_or_default()
 }
-/// MapLibre uses a 512-pixel world at zoom zero; RustGIS uses metres per logical pixel.
+/// MapLibre uses a 512-pixel world at zoom zero; KHGIS uses metres per logical pixel.
 pub fn resolution(zoom: f64) -> f64 {
     (std::f64::consts::TAU * rustgis_geom::MERCATOR_R / (512.0 * 2f64.powf(zoom.clamp(0.0, 24.0))))
         .clamp(crate::camera::MIN_RES, crate::camera::MAX_RES)

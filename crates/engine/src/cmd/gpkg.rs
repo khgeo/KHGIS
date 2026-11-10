@@ -99,7 +99,7 @@ fn add_layer(s: &mut Session, p: &Value) -> CmdResult {
         if editable.skipped > 0 {
             s.notify(
                 format!(
-                    "{name}: {} rows with a geometry RustGIS can't read weren't loaded; saving leaves them as they are",
+                    "{name}: {} rows with a geometry KHGIS can't read weren't loaded; saving leaves them as they are",
                     editable.skipped
                 ),
                 false,

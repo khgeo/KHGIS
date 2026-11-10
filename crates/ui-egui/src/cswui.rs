@@ -1,5 +1,5 @@
 //! Add From Service › Catalogue (CSW): a catalogue searched by words and, optionally, the map's
-//! area; its records listed with their titles, abstracts and the links RustGIS can follow — a
+//! area; its records listed with their titles, abstracts and the links KHGIS can follow — a
 //! service (connected to in the same dialog) or a file (downloaded as From URL… does). Requests go
 //! off the frame; `catalog.search` reads the answers.
 
@@ -151,7 +151,7 @@ pub fn form(app: &mut RustGisApp, ui: &mut egui::Ui, kinds: impl FnOnce(&mut Rus
 }
 
 /// The records found: each with its abstract (on hover), a Zoom to its bounds and a button per
-/// link RustGIS can follow.
+/// link KHGIS can follow.
 fn records(app: &mut RustGisApp, ui: &mut egui::Ui) {
     let list = crate::sourcespane::connections_snapshot(app);
     let st = &app.ui.csw;

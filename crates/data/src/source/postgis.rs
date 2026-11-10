@@ -1,7 +1,7 @@
 //! PostGIS: the geometry (and geography) tables of a PostgreSQL database, read live in place
 //! (desktop only).
 //!
-//! RustGIS talks to the server itself (the pure-Rust `postgres` client, TLS through rustls), so
+//! KHGIS talks to the server itself (the pure-Rust `postgres` client, TLS through rustls), so
 //! nothing else needs installing. Extent queries use the column's GiST index (`&&`); the server
 //! converts geometry to longitude/latitude (`ST_Transform`, with the server's own PROJ, so every
 //! coordinate system in its `spatial_ref_sys` works) and curves to lines. A capped read returns an
@@ -481,7 +481,7 @@ fn config(dsn: &str) -> Result<(postgres::Config, Tls)> {
         config.connect_timeout(CONNECT_TIMEOUT);
     }
     if config.get_application_name().is_none() {
-        config.application_name("RustGIS");
+        config.application_name("KHGIS");
     }
     let mode = sslmode.or_else(|| env("PGSSLMODE").map(|m| m.to_ascii_lowercase()));
     let tls = match mode.as_deref() {
@@ -704,7 +704,7 @@ pub struct PostgisSource {
     /// The expression of each column read: the id, the geometry (as WKB, longitude/latitude),
     /// then the fields.
     select: Vec<String>,
-    /// Converts a request's extent to the table's coordinates, when RustGIS knows the coordinate
+    /// Converts a request's extent to the table's coordinates, when KHGIS knows the coordinate
     /// system itself; else the server does.
     reproject: Option<Reproject>,
 }
@@ -715,7 +715,7 @@ impl std::fmt::Debug for PostgisSource {
     }
 }
 
-/// How a column of a PostgreSQL type is read: cast to a type RustGIS has, or as text. `None`
+/// How a column of a PostgreSQL type is read: cast to a type KHGIS has, or as text. `None`
 /// leaves it out (other geometry, rasters, binary).
 fn field_cast(ty: &str) -> Option<(FieldType, &'static str)> {
     match ty {
@@ -823,7 +823,7 @@ impl PostgisSource {
         let family = family.or(table.declared_family());
         let reproject = match srid {
             0 | 4326 => Some(Reproject::from_crs(Crs::LonLat, &mut Vec::new())),
-            // A coordinate system RustGIS can't convert itself is left to the server.
+            // A coordinate system KHGIS can't convert itself is left to the server.
             s => u32::try_from(s).ok().and_then(Crs::from_epsg).map(|c| Reproject::from_crs(c, &mut Vec::new())).filter(|r| !r.is_lonlat()),
         };
         let mut src = PostgisSource {
@@ -873,7 +873,7 @@ impl PostgisSource {
         match zm {
             Some(true) => src.info.drop_zm(None),
             Some(false) => {}
-            None => src.info.notes.push("couldn't tell whether it has Z or M values, which RustGIS doesn't keep".into()),
+            None => src.info.notes.push("couldn't tell whether it has Z or M values, which KHGIS doesn't keep".into()),
         }
         Ok(src)
     }
@@ -938,7 +938,7 @@ impl PostgisSource {
     }
 
     /// A row read as a feature: the id, the geometry (WKB) and the fields, in the order of
-    /// `select`. `None` without an id or a geometry RustGIS reads.
+    /// `select`. `None` without an id or a geometry KHGIS reads.
     fn feature(&self, r: &postgres::Row) -> Option<Feature> {
         let id = r.try_get::<_, Option<i64>>(0).ok().flatten()?;
         let geometry = r.try_get::<_, Option<Vec<u8>>>(1).ok().flatten().and_then(|b| wkb::decode(&b))?;
@@ -1153,7 +1153,7 @@ impl PostgisSource {
         let kind = t.kind.to_ascii_uppercase();
         let has_m = kind.ends_with('M') && !kind.ends_with("ZM") && dims == 3;
         let base = kind.trim_end_matches(['Z', 'M']);
-        // RustGIS holds lines and polygons as multi-part: one part goes in a single-type column as
+        // KHGIS holds lines and polygons as multi-part: one part goes in a single-type column as
         // that type, more fail there as the server says. A column of any type keeps what it holds.
         if base.starts_with("MULTI") {
             e = format!("ST_Multi({e})");

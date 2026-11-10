@@ -446,7 +446,7 @@ pub fn script_font_url(script: ScriptFont) -> Option<&'static str> {
     match script {
         ScriptFont::Cjk(region) => Some(cjk_font_url(region)),
         ScriptFont::Arabic => Some("https://assets.rustgis.app/fonts/Vazirmatn-Regular.ttf"),
-        // No verified Bengali asset is hosted by RustGIS; don't guess a URL.
+        // No verified Bengali asset is hosted by KHGIS; don't guess a URL.
         // Khmer is bundled: nothing to download.
         ScriptFont::Bengali | ScriptFont::Lao | ScriptFont::Khmer => None,
     }

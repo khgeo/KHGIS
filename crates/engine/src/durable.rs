@@ -44,7 +44,7 @@ impl Report {
         for (n, text) in [
             (
                 self.addresses,
-                "layer address(es) were saved without their keys, tokens, passwords or URL fragments; after RustGIS closes, add those layers again to restore missing values",
+                "layer address(es) were saved without their keys, tokens, passwords or URL fragments; after KHGIS closes, add those layers again to restore missing values",
             ),
             (self.videos, "video address(es) were written without their keys, tokens, passwords or URL fragments"),
             (self.steps, "executable step(s) were written without credentials or URL fragments; supply missing values again before replay"),
@@ -334,7 +334,7 @@ impl<'a> Prepare<'a> {
         }
     }
 
-    /// Cleans only addresses in text RustGIS generated, without claiming opaque text detection.
+    /// Cleans only addresses in text KHGIS generated, without claiming opaque text detection.
     pub(crate) fn generated(&mut self, leaf: Leaf, source: &str) {
         let clean = generated_text(source);
         if clean != source {

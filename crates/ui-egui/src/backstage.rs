@@ -180,13 +180,13 @@ fn card(ui: &mut Ui, t: &Tokens, title: &str, sub: &str, icon: &str) -> bool {
 }
 
 fn about(ui: &mut Ui, t: &Tokens) {
-    ui.label(egui::RichText::new(tl!("About RustGIS")).font(semibold(24.0)));
+    ui.label(egui::RichText::new(tl!("About KHGIS")).font(semibold(24.0)));
     ui.add_space(8.0);
     ui.label(crate::i18n::fmt("Version {version}", &[("version", env!("CARGO_PKG_VERSION"))]));
     ui.add_space(8.0);
     crate::i18n::paragraph(
         ui,
-        "RustGIS is a free and open-source GIS written in pure Rust. It runs on the desktop and in the browser, and every action is a command you can also run from the command line.",
+        "KHGIS is a free and open-source GIS written in pure Rust. It runs on the desktop and in the browser, and every action is a command you can also run from the command line.",
         regular(12.5),
         t.text,
     );
@@ -195,7 +195,7 @@ fn about(ui: &mut Ui, t: &Tokens) {
     ui.add_space(8.0);
     crate::i18n::paragraph(
         ui,
-        "Sample data © Natural Earth (public domain). RustGIS is licensed under Apache-2.0.",
+        "Sample data © Natural Earth (public domain). KHGIS is licensed under Apache-2.0.",
         regular(12.5),
         t.text_dim,
     );

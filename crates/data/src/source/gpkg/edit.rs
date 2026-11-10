@@ -477,11 +477,11 @@ impl EditTable {
         if self.z == 1 || self.m == 1 || has_zm {
             let message = match row {
                 Some((k, _)) => format!(
-                    "row {}: its geometry has Z or M values, which RustGIS doesn't keep, so its geometry can't be saved (its attributes can)",
+                    "row {}: its geometry has Z or M values, which KHGIS doesn't keep, so its geometry can't be saved (its attributes can)",
                     k.cast_signed()
                 ),
                 None => format!(
-                    "{} needs Z or M values, which RustGIS doesn't keep, so new features with a geometry can't be saved",
+                    "{} needs Z or M values, which KHGIS doesn't keep, so new features with a geometry can't be saved",
                     self.table()
                 ),
             };
@@ -514,7 +514,7 @@ impl EditTable {
                 )));
             }
             // The model has no collection, curve or surface variant to preserve these types.
-            _ => return Err(DataError::Format(format!("{}'s {} geometry can't be written by RustGIS", self.table(), self.geometry_type))),
+            _ => return Err(DataError::Format(format!("{}'s {} geometry can't be written by KHGIS", self.table(), self.geometry_type))),
         };
         let srs = i32::try_from(self.srs_id)
             .map_err(|_| DataError::Format(format!("{}: srs_id {} doesn't fit a GeoPackage geometry header", self.table(), self.srs_id)))?;

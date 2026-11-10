@@ -1,4 +1,4 @@
-//! L6: the RustGIS desktop front end, built around a ribbon (Home, Data, Style, Labeling, Edit,
+//! L6: the KHGIS desktop front end, built around a ribbon (Home, Data, Style, Labeling, Edit,
 //! Analyze, View, Publish), the Layers and Browser panes, a Tools pane, the map view, the
 //! attribute table and the status bar.
 //!
@@ -117,7 +117,7 @@ mod workspacepanes;
 mod zarrui;
 
 
-/// The product name shown in the window: KHGIS, built on RustGIS.
+/// The product name shown in the window: KHGIS, built on KHGIS.
 pub const APP_NAME: &str = "KHGIS";
 
 use rustgis_engine::cmd::service_added::Removal;
@@ -238,7 +238,7 @@ pub struct Start {
     pub after_crash: bool,
 }
 
-/// What RustGIS opens with: Settings › Start-up › Start With (#377).
+/// What KHGIS opens with: Settings › Start-up › Start With (#377).
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub enum StartWith {
     /// The World Atlas sample.
@@ -296,7 +296,7 @@ impl StartWith {
                 let path =
                     v.get("path").and_then(Value::as_str).map(str::trim).filter(|p| !p.is_empty()).ok_or("project's path is required")?;
                 if !rustgis_engine::project::is_project_file(path) {
-                    return Err(format!("{path} isn't a RustGIS project file"));
+                    return Err(format!("{path} isn't a KHGIS project file"));
                 }
                 let full = std::path::absolute(path).map_err(|e| format!("{path}: {e}"))?;
                 if !full.is_file() {
@@ -356,7 +356,7 @@ pub struct Services {
     /// it (the desktop) or the browser can't read it (a page not served over HTTPS).
     pub read_clipboard: Option<Box<dyn Fn(Slot<Result<String, String>>)>>,
     /// Signs in to an ArcGIS portal (its address and an OAuth client id, either blank for ArcGIS
-    /// Online and RustGIS's own app) in a pop-up window, putting who signed in, or why not, in the
+    /// Online and KHGIS's own app) in a pop-up window, putting who signed in, or why not, in the
     /// slot (the browser; the desktop runs `arcgis.signIn`).
     pub arcgis_sign_in: Option<Box<dyn Fn(String, String, Slot<Result<String, String>>)>>,
 }
@@ -672,7 +672,7 @@ pub struct UiState {
     /// Worldview preference for the built-in countries and world outline: `auto`, `default` or
     /// `china`.
     pub worldview: String,
-    /// Start-up preference: what RustGIS opens with.
+    /// Start-up preference: what KHGIS opens with.
     pub start_with: StartWith,
     /// Whether a file holding several layers asks which to add (#934), or adds them all.
     pub ask_layers: bool,
@@ -913,7 +913,9 @@ impl Default for UiState {
             interface_scale: 1.0,
             measurement_imperial: false,
             dark_follows_system: true,
-            language: i18n::AUTO.into(),
+            // KHGIS starts in Khmer. Settings › Language switches it (including back to
+            // `auto`, which follows the system or browser); the choice is remembered.
+            language: "km".into(),
             worldview: i18n::AUTO.into(),
             start_with: StartWith::Sample,
             ask_layers: true,
@@ -1064,7 +1066,7 @@ pub struct RustGisApp {
     pub docs: docpanes::DocState,
     /// The AI Assistant's conversation and settings.
     pub assistant: assistantpane::AssistantState,
-    /// "Let your Agents Control RustGIS" (desktop).
+    /// "Let your Agents Control KHGIS" (desktop).
     #[cfg(not(target_arch = "wasm32"))]
     pub connect: connectui::ConnectState,
     fonts_frames: u32,
@@ -1417,7 +1419,7 @@ impl RustGisApp {
         self.ui.measurement_imperial =
             self.services.load_pref.as_ref().and_then(|load| load("measurement_units")).as_deref() == Some("imperial");
         // The pointer's coordinate format; a missing one reads as decimal degrees. One this
-        // version doesn't know (a newer RustGIS may have saved it) is said and read as decimal
+        // version doesn't know (a newer KHGIS may have saved it) is said and read as decimal
         // degrees too. It stays saved until the user picks a format (`ui.coordinateFormat`).
         if let Some(code) = self.services.load_pref.as_ref().and_then(|load| load(coordreadout::PREF)) {
             match CoordReadout::from_code(&code) {
@@ -1692,7 +1694,7 @@ impl RustGisApp {
             return r;
         }
         if lower.ends_with(".rgislayout") {
-            let text = std::str::from_utf8(bytes).map_err(|_| "not a RustGIS layout".to_string())?;
+            let text = std::str::from_utf8(bytes).map_err(|_| "not a KHGIS layout".to_string())?;
             return self.run("layout.import", json!({"text": text}));
         }
         // A layout picture needs the layout still open.
@@ -1727,7 +1729,7 @@ impl RustGisApp {
             return self.run("layer.addDataBytes", p);
         }
         let Ok(text) = std::str::from_utf8(bytes) else {
-            let e = crate::i18n::fmt("{name} is not a text file: RustGIS opens GeoJSON, CSV, GeoTIFF and .rgis here", &[("name", name)]);
+            let e = crate::i18n::fmt("{name} is not a text file: KHGIS opens GeoJSON, CSV, GeoTIFF and .rgis here", &[("name", name)]);
             self.session.notify(e.clone(), true);
             return Err(e);
         };
@@ -1837,7 +1839,7 @@ impl RustGisApp {
         requested
     }
 
-    /// The RustGIS logo as a texture (rasterised once from `rustgis_render::logo`).
+    /// The KHGIS logo as a texture (rasterised once from `rustgis_render::logo`).
     pub fn logo(&mut self, ctx: &egui::Context) -> Option<egui::TextureId> {
         if self.logo.is_none()
             && let Some(pm) = rustgis_engine::render::logo::pixmap(256)
@@ -2091,7 +2093,7 @@ impl RustGisApp {
                 if overrides.after_crash && (self.ui.last_project.is_some() || self.ui.start_with != StartWith::Last) =>
             {
                 let text = i18n::fmt(
-                    "RustGIS didn't close properly last time, so it started with the World Atlas instead of your start-up project. Open the project from the Project menu when you're ready.",
+                    "KHGIS didn't close properly last time, so it started with the World Atlas instead of your start-up project. Open the project from the Project menu when you're ready.",
                     &[],
                 );
                 self.session.notify(text, true);
@@ -2141,7 +2143,7 @@ impl RustGisApp {
     fn open_start_project(&mut self, path: &str) -> bool {
         // A preference edited by hand can name anything: only a project file is opened.
         if !rustgis_engine::project::is_project_file(path) {
-            let text = i18n::fmt("The start-up project {path} isn't a RustGIS project file.", &[("path", path)]);
+            let text = i18n::fmt("The start-up project {path} isn't a KHGIS project file.", &[("path", path)]);
             self.session.notify(text, true);
             return false;
         }
@@ -3396,7 +3398,7 @@ impl RustGisApp {
                     self.ui.backstage = false;
                 } else if let Some(path) = dialogs::pick_open(
                     &["rgis", "rgisx", "rgispkg", "qgs", "qgz", "geolibre", "json"],
-                    tl!("Projects and JSON data (RustGIS, QGIS, GeoLibre)"),
+                    tl!("Projects and JSON data (KHGIS, QGIS, GeoLibre)"),
                 ) {
                     // A QGIS project opens as a new map of this one.
                     let lower = path.to_ascii_lowercase();
@@ -3437,7 +3439,7 @@ impl RustGisApp {
             }
             "ui.saveAs" => {
                 let name = format!("{}.rgis", self.session.project.name);
-                if let Some(path) = dialogs::pick_save(&name, &["rgis"], tl!("RustGIS project")) {
+                if let Some(path) = dialogs::pick_save(&name, &["rgis"], tl!("KHGIS project")) {
                     return self.run("project.saveAs", json!({"path": path}));
                 }
             }
@@ -3482,7 +3484,7 @@ impl RustGisApp {
                 if let Some(open) = &self.services.open_async {
                     self.ui.pending_open = Some("report.existingTemplate");
                     open("item");
-                } else if let Some(path) = dialogs::pick_open(&["rgislayout"], tl!("RustGIS layout")) {
+                } else if let Some(path) = dialogs::pick_open(&["rgislayout"], tl!("KHGIS layout")) {
                     return self.run("report.existingTemplate", json!({"path": path}));
                 }
             }
@@ -3509,7 +3511,7 @@ impl RustGisApp {
                 if self.services.download.is_some() {
                     let text = serde_json::to_string_pretty(&l).map_err(|e| e.to_string())?;
                     self.download(&format!("{}.rgislayout", l.name), text.into_bytes());
-                } else if let Some(path) = dialogs::pick_save(&format!("{}.rgislayout", l.name), &["rgislayout"], tl!("RustGIS layout")) {
+                } else if let Some(path) = dialogs::pick_save(&format!("{}.rgislayout", l.name), &["rgislayout"], tl!("KHGIS layout")) {
                     return self.run("layout.save", json!({"layout": li, "path": path}));
                 }
             }
@@ -3520,7 +3522,7 @@ impl RustGisApp {
                     self.ui.pending_picture = None;
                     self.ui.pending_open = None;
                     open("layout");
-                } else if let Some(path) = dialogs::pick_open(&["rgislayout"], tl!("RustGIS layout")) {
+                } else if let Some(path) = dialogs::pick_open(&["rgislayout"], tl!("KHGIS layout")) {
                     return self.run("layout.import", json!({"path": path}));
                 }
             }
@@ -3558,21 +3560,21 @@ impl RustGisApp {
             "ui.openItem" => {
                 let kind = p.get("kind").and_then(Value::as_str).ok_or("kind is required")?;
                 let (cmd, exts, label): (&str, &[&str], &str) = match kind {
-                    "map" => ("map.import", &["rgismap", "rgismpk", "rgis", "rgisx", "rgispkg"], "RustGIS maps and projects"),
-                    "layer" => ("layer.addLayerFile", &["rgislyr"], "RustGIS layer file"),
-                    "styles" => ("style.add", &["rgisstyle"], "RustGIS styles"),
-                    "ramps" => ("ramp.add", &["rgisramp", "xml", "qml", "txt", "clr", "cpt"], "Colour ramps (RustGIS, QGIS, GDAL, GMT)"),
-                    "importStyles" => ("style.import", &["rgislyr", "rgismap", "rgis", "rgisx"], "RustGIS layers, maps and projects"),
+                    "map" => ("map.import", &["rgismap", "rgismpk", "rgis", "rgisx", "rgispkg"], "KHGIS maps and projects"),
+                    "layer" => ("layer.addLayerFile", &["rgislyr"], "KHGIS layer file"),
+                    "styles" => ("style.add", &["rgisstyle"], "KHGIS styles"),
+                    "ramps" => ("ramp.add", &["rgisramp", "xml", "qml", "txt", "clr", "cpt"], "Colour ramps (KHGIS, QGIS, GDAL, GMT)"),
+                    "importStyles" => ("style.import", &["rgislyr", "rgismap", "rgis", "rgisx"], "KHGIS layers, maps and projects"),
                     "geolibreProject" => ("project.importGeolibre", &["geolibre", "json"], "GeoLibre project"),
                     "qgisProject" => ("project.importQgis", &["qgs", "qgz"], "QGIS project"),
                     "qgisStyle" => ("style.importQgis", &["qml"], "QGIS layer style"),
-                    "template" => ("project.fromTemplate", &["rgistemplate"], "RustGIS project template"),
-                    "task" => ("task.import", &["rgistask"], "RustGIS task"),
-                    "bookmarks" => ("bookmark.import", &["rgisbookmarks"], "RustGIS bookmarks"),
-                    "report" => ("report.open", &["rgisreport", "rgisrpttemplate"], "RustGIS report or report template"),
-                    "presentation" => ("presentation.import", &["rgispres"], "RustGIS presentation"),
-                    "notebook" => ("notebook.open", &["rgisnb", "ipynb"], "RustGIS or Jupyter notebook"),
-                    "dlPackage" => ("dl.import", &["rgisdlpk"], "RustGIS deep learning package"),
+                    "template" => ("project.fromTemplate", &["rgistemplate"], "KHGIS project template"),
+                    "task" => ("task.import", &["rgistask"], "KHGIS task"),
+                    "bookmarks" => ("bookmark.import", &["rgisbookmarks"], "KHGIS bookmarks"),
+                    "report" => ("report.open", &["rgisreport", "rgisrpttemplate"], "KHGIS report or report template"),
+                    "presentation" => ("presentation.import", &["rgispres"], "KHGIS presentation"),
+                    "notebook" => ("notebook.open", &["rgisnb", "ipynb"], "KHGIS or Jupyter notebook"),
+                    "dlPackage" => ("dl.import", &["rgisdlpk"], "KHGIS deep learning package"),
                     k => return Err(format!("unknown item '{k}'")),
                 };
                 if let Some(open) = &self.services.open_async {
@@ -4315,7 +4317,7 @@ impl RustGisApp {
         let text = if package {
             rustgis_engine::cmd::items::package_text(bytes)?
         } else {
-            std::str::from_utf8(bytes).map_err(|_| "not a RustGIS project".to_string())?.to_string()
+            std::str::from_utf8(bytes).map_err(|_| "not a KHGIS project".to_string())?.to_string()
         };
         let mut p = json!({"text": text, "package": package});
         if let Some(f) = file.filter(|_| !package) {
@@ -5416,7 +5418,7 @@ impl RustGisApp {
         if let Some(url) = self.ui.open_url.take() {
             ctx.open_url(egui::OpenUrl::new_tab(url));
         }
-        let title = format!("{}{} - RustGIS", self.session.project.name, if self.session.dirty() { " •" } else { "" });
+        let title = format!("{}{} - KHGIS", self.session.project.name, if self.session.dirty() { " •" } else { "" });
         if title != self.sent_title {
             ctx.send_viewport_cmd(egui::ViewportCommand::Title(title.clone()));
             self.sent_title = title;

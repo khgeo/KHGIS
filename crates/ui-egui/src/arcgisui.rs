@@ -87,7 +87,7 @@ fn fields(app: &mut RustGisApp, ui: &mut egui::Ui) {
     };
     ui.label(
         egui::RichText::new(crate::i18n::fmt(
-            "For ArcGIS Online, the client ID is RustGIS's own app. For an ArcGIS Enterprise portal, register an OAuth app on it (Content › New item › Developer credentials) whose redirect URL is {redirect}, and give its client ID.",
+            "For ArcGIS Online, the client ID is KHGIS's own app. For an ArcGIS Enterprise portal, register an OAuth app on it (Content › New item › Developer credentials) whose redirect URL is {redirect}, and give its client ID.",
             &[("redirect", &redirect)],
         ))
         .weak(),
@@ -105,7 +105,7 @@ fn fields(app: &mut RustGisApp, ui: &mut egui::Ui) {
     });
 }
 
-/// Shows RustGIS's own client id for an ArcGIS Online portal (blank, or an organization's
+/// Shows KHGIS's own client id for an ArcGIS Online portal (blank, or an organization's
 /// address) when none is given, and takes it away for an Enterprise portal, which registers its own.
 /// A client id the user types is kept.
 fn prefill(s: &mut State) {

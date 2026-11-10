@@ -1,7 +1,7 @@
-//! QGIS expressions as RustGIS ones. The part of QGIS's expression language a filter mostly is
+//! QGIS expressions as KHGIS ones. The part of QGIS's expression language a filter mostly is
 //! (fields compared with values, `LIKE`, `IS NULL`, `IN`, joined by `AND`, `OR` and `NOT`) is
-//! written out as RustGIS SQL, as it always was; the rest (functions, arithmetic, `CASE`,
-//! variables) is kept as it is for RustGIS's expression language
+//! written out as KHGIS SQL, as it always was; the rest (functions, arithmetic, `CASE`,
+//! variables) is kept as it is for KHGIS's expression language
 //! ([`rustgis_data::query`]), which reads much of QGIS's. Either is checked against a layer's
 //! fields where it is used, and what doesn't read there is noted.
 
@@ -18,7 +18,7 @@ enum Token {
     Word(String),
 }
 
-/// `expr` as a RustGIS expression: written out as a RustGIS SQL clause when it is one, else as
+/// `expr` as a KHGIS expression: written out as a KHGIS SQL clause when it is one, else as
 /// it is. `None` only when it is empty or too long to read.
 pub fn to_sql(expr: &str) -> Option<String> {
     let expr = expr.trim();
@@ -41,7 +41,7 @@ pub fn reads_measure(expr: &str) -> bool {
 }
 
 /// A QGIS expression with its map scale (`@map_scale`, `$scale`, QGIS's at 96 dpi) read as
-/// RustGIS's ([`super::QGIS_SCALE`] of it), so `@map_scale < 50000` picks the same zoom in both;
+/// KHGIS's ([`super::QGIS_SCALE`] of it), so `@map_scale < 50000` picks the same zoom in both;
 /// text within quotes is left as it is.
 pub(super) fn rustgis_scales(expr: &str) -> String {
     map_vars(expr, |c, name| {
@@ -75,7 +75,7 @@ fn map_vars(expr: &str, f: impl Fn(char, &str) -> Option<String>) -> String {
                 let end =
                     (i + 1..=chars.len()).find(|j| !chars.get(*j).is_some_and(|d| d.is_alphanumeric() || *d == '_')).unwrap_or(chars.len());
                 let name: String = chars.get(i + 1..end).unwrap_or_default().iter().collect();
-                // (Right after a word too: `WHEN@map_scale` reads the scale, in QGIS and in RustGIS,
+                // (Right after a word too: `WHEN@map_scale` reads the scale, in QGIS and in KHGIS,
                 // whose names hold neither `@` nor `$`.)
                 match f(c, &name) {
                     Some(with) => out.push_str(&with),
@@ -95,7 +95,7 @@ fn map_vars(expr: &str, f: impl Fn(char, &str) -> Option<String>) -> String {
     out
 }
 
-/// `expr` as a RustGIS SQL clause, or `None` when it uses more of QGIS's language than that has.
+/// `expr` as a KHGIS SQL clause, or `None` when it uses more of QGIS's language than that has.
 fn clause(expr: &str) -> Option<String> {
     let tokens = tokenize(expr)?;
     let mut out = Vec::with_capacity(tokens.len());
@@ -134,7 +134,7 @@ pub(super) fn equality(expr: &str) -> Option<(String, Vec<String>)> {
 /// Words of the expression language beyond a clause's: a bare one is never a field.
 const EXPRESSION_WORDS: [&str; 6] = ["CASE", "WHEN", "THEN", "ELSE", "END", "BETWEEN"];
 
-/// The words RustGIS's SQL has (`ILIKE` is its `LIKE`, which ignores case).
+/// The words KHGIS's SQL has (`ILIKE` is its `LIKE`, which ignores case).
 fn keyword(w: &str) -> Option<&'static str> {
     Some(match w.to_ascii_uppercase().as_str() {
         "AND" => "AND",
@@ -201,7 +201,7 @@ fn tokenize(s: &str) -> Option<Vec<Token>> {
                 }
                 let n: String = chars.get(start..i).unwrap_or_default().iter().collect();
                 let v = n.parse::<f64>().ok()?;
-                // An exponent is written out (0.001 for 1e-3): RustGIS SQL reads plain decimals.
+                // An exponent is written out (0.001 for 1e-3): KHGIS SQL reads plain decimals.
                 out.push(Token::Word(if n.contains(['e', 'E']) && v.is_finite() { format!("{v}") } else { n }));
             }
             c if c.is_alphabetic() || c == '_' => {
@@ -213,7 +213,7 @@ fn tokenize(s: &str) -> Option<Vec<Token>> {
                 // A word followed by a bracket is a function call.
                 let next = chars.get(i..).unwrap_or_default().iter().find(|c| !c.is_whitespace());
                 match keyword(&w) {
-                    // TRUE and FALSE are values, bare as RustGIS SQL has them, not fields.
+                    // TRUE and FALSE are values, bare as KHGIS SQL has them, not fields.
                     _ if w.eq_ignore_ascii_case("true") || w.eq_ignore_ascii_case("false") => out.push(Token::Word(w.to_lowercase())),
                     Some(k) => out.push(Token::Word(k.into())),
                     // The expression language's own words: more than a clause, kept as written.
@@ -265,7 +265,7 @@ mod tests {
             Some(r#""pop" >= 1000 AND ( "name" LIKE 'z%' OR "kind" IN ( 'a' , 'b''s' ) ) AND "note" IS NOT NULL"#)
         );
         assert_eq!(to_sql("a <> -2.5").as_deref(), Some(r#""a" <> -2.5"#));
-        // Exponents written out, and TRUE and FALSE as values, as RustGIS SQL reads them.
+        // Exponents written out, and TRUE and FALSE as values, as KHGIS SQL reads them.
         assert_eq!(to_sql("d < 2.5E-4 OR d > -1e+2").as_deref(), Some(r#""d" < 0.00025 OR "d" > -100"#));
         assert_eq!(to_sql("flag = TRUE AND gone = false").as_deref(), Some(r#""flag" = true AND "gone" = false"#));
         // The rest is kept as it is, for the expression language to read where it is used.
@@ -284,7 +284,7 @@ mod tests {
             assert_eq!(to_sql(&format!("  {kept} ")).as_deref(), Some(kept), "{kept}");
         }
         assert_eq!(to_sql("  "), None);
-        // QGIS's map scale read as RustGIS's, outside quotes only.
+        // QGIS's map scale read as KHGIS's, outside quotes only.
         let k = super::super::QGIS_SCALE;
         assert_eq!(to_sql("@map_scale < 5000").as_deref(), Some(format!("(@map_scale / {k}) < 5000").as_str()));
         assert_eq!(

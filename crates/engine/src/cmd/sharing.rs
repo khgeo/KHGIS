@@ -171,14 +171,14 @@ pub fn commands() -> Vec<C> {
         C::new("locator.find", "Find Place", "Home › Inspect", find).roles(&[]).effects(crate::policy::Effects::NONE.with(crate::policy::Effect::Files)).params(r#"{"locator"?: shared item name or *.rgisloc path (default: the last locator), "text": search text, "limit"?: 1..100, "zoom"?: bool (go to the best match)}"#),
         C::new("model.import", "Import Model", "Analyze › Geoprocessing", |s, p| {
             let text = super::items::read_text(p)?;
-            let v: Value = serde_json::from_str(&text).map_err(|e| format!("not a RustGIS web tool: {e}"))?;
+            let v: Value = serde_json::from_str(&text).map_err(|e| format!("not a KHGIS web tool: {e}"))?;
             crate::model::check_file(&v)?;
             let name = v["name"].as_str().unwrap_or("Tool").chars().take(200).collect::<String>();
             // A model file (`*.model.json`) holds a graph; a web tool its steps.
             let imported = if let Some(graph) = v.get("graph") {
                 s.run("model.new", &json!({"name": name, "graph": graph, "imported": true}))?
             } else {
-                let steps = v.get("steps").cloned().ok_or("not a RustGIS model or web tool (no graph or steps)")?;
+                let steps = v.get("steps").cloned().ok_or("not a KHGIS model or web tool (no graph or steps)")?;
                 s.run("model.new", &json!({"name": name, "steps": steps, "imported": true}))?
             };
             if v.get("name").map_or(Some("Tool"), Value::as_str) != imported.get("model").and_then(Value::as_str) {
@@ -240,7 +240,7 @@ pub fn share_bytes(s: &mut Session, kind: &str, p: &Value) -> Result<(String, Ve
                             .map(move |(k, v)| json!({"step": i + 1, "tool": st.tool, "name": k, "default": v}))
                     })
                     .collect();
-                let tool = json!({"format": "RustGIS web tool", "version": crate::model::WEB_TOOL_VERSION, "name": m.name, "steps": m.steps, "parameters": params});
+                let tool = json!({"format": "KHGIS web tool", "version": crate::model::WEB_TOOL_VERSION, "name": m.name, "steps": m.steps, "parameters": params});
                 serde_json::to_vec_pretty(&tool).map_err(|e| e.to_string())
             })?;
             crate::durable::notify(s, &report);
@@ -887,7 +887,7 @@ fn find(s: &mut Session, p: &Value) -> CmdResult {
     let text = ps(p, "text").map(str::trim).filter(|t| !t.is_empty()).ok_or("text is required")?.to_lowercase();
     let path = locator_path(s, p)?;
     let body = super::items::read_text(&json!({"path": path}))?;
-    let loc: Locator = serde_json::from_str(&body).map_err(|e| format!("not a RustGIS locator: {e}"))?;
+    let loc: Locator = serde_json::from_str(&body).map_err(|e| format!("not a KHGIS locator: {e}"))?;
     let limit = p.get("limit").and_then(Value::as_u64).unwrap_or(10).clamp(1, 100) as usize;
     // Exact, then prefix, then word prefix, then anywhere.
     let mut hits: Vec<(u8, &(String, f64, f64))> = loc
@@ -1211,7 +1211,7 @@ fn gltf(m: &Map, view: (f64, f64)) -> Result<SceneBytes, String> {
     nodes.push(node);
     let n = nodes.len();
     let doc = json!({
-        "asset": {"version": "2.0", "generator": "RustGIS"},
+        "asset": {"version": "2.0", "generator": "KHGIS"},
         "scene": 0,
         "scenes": [{"name": m.name, "nodes": (0..n).collect::<Vec<_>>()}],
         "nodes": nodes,

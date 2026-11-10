@@ -319,7 +319,7 @@ pub(crate) fn horizontal_epsg(code: u32) -> u32 {
     }
 }
 
-/// The system a name stands for, by its horizontal part, if RustGIS knows it.
+/// The system a name stands for, by its horizontal part, if KHGIS knows it.
 pub(crate) fn known_system(system: &str) -> Option<Crs> {
     crate::ogc::warp::epsg_of(system).and_then(|c| Crs::from_epsg(horizontal_epsg(c)))
 }
@@ -345,7 +345,7 @@ pub(crate) fn coordinate_system(
                 Some((system, None)) => {
                     let system: String = system.chars().take(80).collect();
                     notes.push(format!(
-                        "the file names a coordinate system RustGIS doesn't know ({system}), and is read in {}, the coordinate system given",
+                        "the file names a coordinate system KHGIS doesn't know ({system}), and is read in {}, the coordinate system given",
                         crs.label()
                     ));
                 }
@@ -355,7 +355,7 @@ pub(crate) fn coordinate_system(
         }
         (None, Some(system)) => known_system(system).ok_or_else(|| {
             let system: String = system.chars().take(80).collect();
-            DataError::Format(format!("{file_name}: it names a coordinate system RustGIS doesn't know ({system}); give one with the crs parameter of layer.addData (from the command line, Python or the AI Assistant)"))
+            DataError::Format(format!("{file_name}: it names a coordinate system KHGIS doesn't know ({system}); give one with the crs parameter of layer.addData (from the command line, Python or the AI Assistant)"))
         })?,
         (None, None) if within(180.0, 90.0) => {
             notes.push("the file names no coordinate system: its coordinates are read as longitude/latitude".into());
@@ -371,7 +371,7 @@ pub(crate) fn coordinate_system(
         return Err(DataError::Format(format!("{file_name}: {} is a geocentric coordinate system, which isn't a map's", crs.label())));
     }
     if crs == Crs::LonLat && !within(180.5, 90.5) {
-        notes.push("coordinates are not longitude/latitude; RustGIS reads them as WGS 84 and they may draw out of place".into());
+        notes.push("coordinates are not longitude/latitude; KHGIS reads them as WGS 84 and they may draw out of place".into());
     }
     if let Some(unit) = crs.height_unit_not_metre() {
         notes.push(format!(

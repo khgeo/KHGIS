@@ -141,7 +141,7 @@ fn model_import_refuses_unsupported_files_without_changing_session() {
             let error = s.run("model.import", &params).unwrap_err();
             assert!(error.contains(message), "{error}");
             if message == "unsupported version" || message.starts_with("node ") || message.contains("unsupported fields") {
-                assert!(error.contains("Update RustGIS"), "{error}");
+                assert!(error.contains("Update KHGIS"), "{error}");
             }
             assert_eq!(serde_json::to_value(&s.project).unwrap(), before);
             assert_eq!((s.undo_depth(), s.undo_label(), s.redo_label()), history);

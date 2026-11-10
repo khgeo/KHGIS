@@ -25,7 +25,7 @@ pub(crate) fn load(app: &mut RustGisApp) {
         // The default, as the notice says, whatever an earlier start in this process set.
         let _ = threads::set_max(None);
         let text = crate::i18n::fmt(
-            "The saved thread setting “{value}” isn't a number from 1 to 1024; RustGIS uses the default.",
+            "The saved thread setting “{value}” isn't a number from 1 to 1024; KHGIS uses the default.",
             &[("value", saved)],
         );
         app.session.notify(text, true);

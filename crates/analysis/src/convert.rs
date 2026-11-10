@@ -1,4 +1,4 @@
-//! Conversions between RustGIS geometry and `geo` types, in the analysis plane
+//! Conversions between KHGIS geometry and `geo` types, in the analysis plane
 //! ([`rustgis_geom::lonlat_to_plane`]): Web Mercator meters within ±85.05°, carried on to the poles
 //! beyond, so polar geometry isn't clamped onto 85.05° (#1033).
 

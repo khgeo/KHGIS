@@ -1,4 +1,4 @@
-//! A Model Context Protocol server: RustGIS for any MCP client (Claude Code, Claude Desktop,
+//! A Model Context Protocol server: KHGIS for any MCP client (Claude Code, Claude Desktop,
 //! Cursor, VS Code…). The client's model drives a session through the assistant's tools
 //! ([`crate::tools`]), sees the map as an image and reads the built-in documentation
 //! ([`crate::docs`]).
@@ -33,17 +33,17 @@ pub const MAX_SNAPSHOT_WAIT: f64 = 30.0;
 const SNAPSHOT_WAIT: f64 = 5.0;
 
 /// What the model is told about the server when it connects.
-const INSTRUCTIONS: &str = "RustGIS is a desktop GIS. This server holds one RustGIS project in memory and acts on it.\n\
+const INSTRUCTIONS: &str = "KHGIS is a desktop GIS. This server holds one KHGIS project in memory and acts on it.\n\
 - list_layers shows the map. view_map shows it as an image: look after changing it. snapshot adds the view's extent and scale, and can save the image.\n\
 - Every action is a command: search_commands finds one, run_command runs it (navigation, layers, symbology, labels, selection, editing, layouts, export…). run runs several commands at once, as one undo step.\n\
 - Geoprocessing: search_tools, then describe_tool for its parameters, then run_tool; its output is a new layer, or a standalone table.\n\
 - read_features reads attribute rows of a layer or a standalone table, with a where clause.\n\
-- search_docs and read_doc look things up in the RustGIS documentation.\n\
+- search_docs and read_doc look things up in the KHGIS documentation.\n\
 Open data with the layer.addData command ({\"path\": …}) and save with project.saveAs ({\"path\": \"*.rgis\"}); \
 file and network access works only when the server was started with --yes.";
 
 /// Added to [`INSTRUCTIONS`] on the desktop app's relay, where the session is the user's own.
-const LIVE: &str = "\nThis is the project the user has open in RustGIS, and they watch the map change as you work.\n\
+const LIVE: &str = "\nThis is the project the user has open in KHGIS, and they watch the map change as you work.\n\
 - Call list_layers before acting on a project you haven't seen; name layers in your commands rather than relying on the one the user has selected.\n\
 - Call view_map after any visual change and check it before you say it worked.\n\
 - Each command is a step in the user's own undo history; don't undo what you didn't do.\n\
@@ -243,7 +243,7 @@ impl Server {
     fn snapshot(&self, s: &mut Session, a: &Value, scope: &Scope) -> Result<Value, String> {
         let note = match a.get("mode").and_then(Value::as_str) {
             Some("screen") if self.users_project => Some(
-                "the map isn't on screen in RustGIS (a layout or the catalog is shown, or the window is hidden), so it was drawn offscreen",
+                "the map isn't on screen in KHGIS (a layout or the catalog is shown, or the window is hidden), so it was drawn offscreen",
             ),
             Some("screen") => {
                 Some("screen capture works only through the desktop app's MCP relay (rustgis-cli mcp --attach); drawn offscreen")
@@ -307,7 +307,7 @@ fn initialize(params: &Value, instructions: &str) -> Value {
     json!({
         "protocolVersion": version,
         "capabilities": {"tools": {"listChanged": false}, "resources": {"listChanged": false}, "prompts": {"listChanged": false}},
-        "serverInfo": {"name": "rustgis", "title": "RustGIS", "version": env!("CARGO_PKG_VERSION")},
+        "serverInfo": {"name": "rustgis", "title": "KHGIS", "version": env!("CARGO_PKG_VERSION")},
         "instructions": instructions,
     })
 }
@@ -325,10 +325,10 @@ fn tool_list() -> Vec<Value> {
         .into_iter()
         .map(|d| {
             let description = match d.name {
-                "run_command" => "Run a RustGIS command by id with JSON parameters (see search_commands for ids and parameters). Each run is one undo step (edit.undo undoes it). Commands that read or write files or use the network run only when the server was started with --yes.".to_string(),
+                "run_command" => "Run a KHGIS command by id with JSON parameters (see search_commands for ids and parameters). Each run is one undo step (edit.undo undoes it). Commands that read or write files or use the network run only when the server was started with --yes.".to_string(),
                 "read_doc" => {
                     let pages: Vec<&str> = docs::PAGES.iter().map(|p| p.path).collect();
-                    format!("Read a RustGIS documentation page or section as Markdown. Use next_offset to continue budgeted results. Pages: {}.", pages.join(", "))
+                    format!("Read a KHGIS documentation page or section as Markdown. Use next_offset to continue budgeted results. Pages: {}.", pages.join(", "))
                 }
                 _ => d.description.to_string(),
             };
@@ -337,7 +337,7 @@ fn tool_list() -> Vec<Value> {
         .collect();
     out.push(json!({
         "name": "run",
-        "description": "Run several RustGIS commands in one call, as one undo step: a script with one `command-id {json}` per line (# starts a comment), e.g. `map.basemap {\"name\": \"ocean\"}`. A failing line stops the script, nothing it did to the project is kept (a file an earlier line wrote stays written), and the error names the line. Returns {success, result (the last command's), lines, layersAdded, notices, error, duration_s}. Each line follows the same rules as run_command.",
+        "description": "Run several KHGIS commands in one call, as one undo step: a script with one `command-id {json}` per line (# starts a comment), e.g. `map.basemap {\"name\": \"ocean\"}`. A failing line stops the script, nothing it did to the project is kept (a file an earlier line wrote stays written), and the error names the line. Returns {success, result (the last command's), lines, layersAdded, notices, error, duration_s}. Each line follows the same rules as run_command.",
         "inputSchema": {
             "type": "object",
             "properties": {"script": {"type": "string", "description": "One command per line: id {json}"}},
@@ -347,7 +347,7 @@ fn tool_list() -> Vec<Value> {
     }));
     out.push(json!({
         "name": "snapshot",
-        "description": "The map as a PNG image with JSON metadata (mode, size, lon/lat extent, centre, scale, projection, render_settled). mode \"screen\" is exactly what the user sees in the RustGIS window, after waiting up to wait_s for drawing and tiles to finish (desktop app relay only); \"render\" draws the same layers, view and styling offscreen at max_width, which works while the window is hidden; \"auto\" (default) captures the screen when the map is on it. save_path also writes the PNG to a file (needs --yes).",
+        "description": "The map as a PNG image with JSON metadata (mode, size, lon/lat extent, centre, scale, projection, render_settled). mode \"screen\" is exactly what the user sees in the KHGIS window, after waiting up to wait_s for drawing and tiles to finish (desktop app relay only); \"render\" draws the same layers, view and styling offscreen at max_width, which works while the window is hidden; \"auto\" (default) captures the screen when the map is on it. save_path also writes the PNG to a file (needs --yes).",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -389,7 +389,7 @@ fn resource_list() -> Vec<Value> {
                 "uri": format!("rustgis://docs/{}", p.path),
                 "name": p.path,
                 "title": p.title(),
-                "description": format!("RustGIS documentation: {} ({})", p.title(), p.url()),
+                "description": format!("KHGIS documentation: {} ({})", p.title(), p.url()),
                 "mimeType": "text/markdown",
             })
         })

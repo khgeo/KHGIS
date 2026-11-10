@@ -166,7 +166,7 @@ fn discover(s: &mut Session, p: &Value, left: bool) -> Result<Discovery, String>
         // A service group takes every layer read, not those listed: it can't take part of this.
         found.incomplete = true;
         found.service.notes.push(format!(
-            "each listed layer repeats its document's address, {long} bytes long here, and RustGIS lists at most {} MiB of them (at least one layer)",
+            "each listed layer repeats its document's address, {long} bytes long here, and KHGIS lists at most {} MiB of them (at least one layer)",
             MAX_LISTED_ADDRESS_BYTES >> 20
         ));
     }
@@ -281,7 +281,7 @@ fn fetch_capabilities(url: &str, caps: &str) -> Result<Service, String> {
     rustgis_data::ogc::parse(caps, &bytes).map_err(|e| format!("{url}: {e}"))
 }
 
-/// Leaves out the layers whose addresses a document on the web may not send RustGIS to: the
+/// Leaves out the layers whose addresses a document on the web may not send KHGIS to: the
 /// capabilities are hostile input, and their endpoints and links must not reach into the local
 /// network (unless the service itself is there) or a forbidden address.
 fn vet(mut svc: Service, caps: &str) -> Service {
@@ -296,7 +296,7 @@ fn vet(mut svc: Service, caps: &str) -> Service {
     });
     let dropped = before - svc.layers.len();
     if dropped > 0 {
-        svc.notes.push(format!("{dropped} layers point to addresses RustGIS won't fetch for a service on the web and are left out"));
+        svc.notes.push(format!("{dropped} layers point to addresses KHGIS won't fetch for a service on the web and are left out"));
     }
     svc
 }
@@ -405,7 +405,7 @@ pub(crate) fn download_layer(s: &mut Session, name: &str, url: &str, max: usize,
             let budget = if describing { left.min(DESCRIPTION_MAX) } else { left };
             let page = cache::download_blocking_within(pages.next_url(), budget, wait)?;
             if page.len() > left {
-                return Err("the pages are larger than RustGIS downloads".into());
+                return Err("the pages are larger than KHGIS downloads".into());
             }
             // The description isn't the features: it leaves them the whole budget.
             if !describing {
@@ -822,7 +822,7 @@ fn add_discovered(s: &mut Session, p: &Value, url: &str, want: &str, found: &Dis
     let slider = match (&layer.time, asked) {
         (Some(t), Some(a)) if a.eq_ignore_ascii_case("slider") => Some(t.slider().ok_or_else(|| match t.changes() {
             _ if t.values.is_empty() && t.cut > 0 => format!(
-                "{}: its {} times are left out, past the {} RustGIS keeps for one document's layers, so there is nothing for the time slider to step through",
+                "{}: its {} times are left out, past the {} KHGIS keeps for one document's layers, so there is nothing for the time slider to step through",
                 layer.title,
                 t.cut,
                 rustgis_data::ogc::MAX_DOCUMENT_TIME_VALUES
@@ -855,7 +855,7 @@ fn add_discovered(s: &mut Session, p: &Value, url: &str, want: &str, found: &Dis
     if let Some(t) = layer.time.as_ref().filter(|t| t.cut > 0) {
         s.notify(
             format!(
-                "{}: {} of its times are left out: RustGIS keeps at most {} for a layer and {} for one document's layers",
+                "{}: {} of its times are left out: KHGIS keeps at most {} for a layer and {} for one document's layers",
                 layer.title,
                 t.cut,
                 rustgis_data::ogc::MAX_TIME_VALUES,
@@ -1264,7 +1264,7 @@ pub(crate) fn coverage_check(name: &str, bytes: &[u8]) -> Result<(), String> {
 }
 
 /// `catalog.search`: a page of a catalogue's (CSW) records matching words and an area, with the
-/// links RustGIS can follow (those pointing where a document on the web may not send it left out).
+/// links KHGIS can follow (those pointing where a document on the web may not send it left out).
 pub(super) fn catalog_search(s: &mut Session, p: &Value) -> CmdResult {
     let bound = crate::service_logins::request_params(s, p)?;
     let p = bound.as_ref();
@@ -1295,7 +1295,7 @@ pub(super) fn catalog_search(s: &mut Session, p: &Value) -> CmdResult {
     let mut out = json!({"matched": page.matched, "count": records.len(), "next": page.next, "records": records, "request": request});
     if dropped > 0 {
         out["notes"] =
-            json!([format!("{dropped} links point to addresses RustGIS won't fetch for a catalogue on the web and are left out")]);
+            json!([format!("{dropped} links point to addresses KHGIS won't fetch for a catalogue on the web and are left out")]);
     }
     Ok(out)
 }

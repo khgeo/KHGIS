@@ -537,7 +537,7 @@ pub fn report_file(s: &Session, i: usize, template: bool) -> Result<Vec<u8>, Str
 
 fn open(s: &mut Session, p: &Value) -> CmdResult {
     let text = super::items::read_text(p)?;
-    let mut r: Report = serde_json::from_str(&text).map_err(|e| format!("not a RustGIS report: {e}"))?;
+    let mut r: Report = serde_json::from_str(&text).map_err(|e| format!("not a KHGIS report: {e}"))?;
     r.clamp();
     import_layer(s, p, &mut r)?;
     // Drop what the layer lacks, so the report still draws.
@@ -1047,7 +1047,7 @@ fn open_inputs(input: &super::InputContext<'_>, p: &Value) -> Result<super::Inpu
     let Some(text) = super::items::inline_text(p)? else {
         return Ok(super::Inputs::unresolved());
     };
-    let mut report: Report = serde_json::from_str(&text).map_err(|e| format!("not a RustGIS report: {e}"))?;
+    let mut report: Report = serde_json::from_str(&text).map_err(|e| format!("not a KHGIS report: {e}"))?;
     report.clamp();
     import_layer(input, p, &mut report)?;
     Ok(super::Inputs::layers(find_layer_map(input, &report.layer)))

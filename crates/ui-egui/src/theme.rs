@@ -8,7 +8,7 @@ use egui::{Color32, CornerRadius, FontData, FontDefinitions, FontFamily, FontId,
 
 use crate::i18n;
 
-/// RustGIS brand colour (the Project tab and the logo) and its lighter tint.
+/// KHGIS brand colour (the Project tab and the logo) and its lighter tint.
 pub const BRAND: Color32 = Color32::from_rgb(0x08, 0x91, 0xB2);
 pub const BRAND_DARK: Color32 = Color32::from_rgb(0x0E, 0x74, 0x90);
 /// Contextual tab group colour (Feature Layer, Labeling, Data).

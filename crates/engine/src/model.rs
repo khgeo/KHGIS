@@ -70,7 +70,7 @@ pub fn port_kind(k: ParamKind) -> Option<(PortKind, bool)> {
     }
 }
 
-/// A tool node's tool, if RustGIS has it.
+/// A tool node's tool, if KHGIS has it.
 pub fn tool_of(node: &ModelNode) -> Option<&'static ToolSpec> {
     node.tool.as_deref().and_then(|id| rustgis_analysis::resolve_published(id).map(|r| r.spec()))
 }
@@ -824,22 +824,22 @@ struct ImportItem<T> {
 /// Missing versions are legacy files. The stricter field checks apply only to file import.
 pub(crate) fn check_file(v: &Value) -> Result<(), String> {
     let graph = v.get("graph");
-    // A model by its schema, a web tool by its format, even when a newer RustGIS changed what it
+    // A model by its schema, a web tool by its format, even when a newer KHGIS changed what it
     // holds: told to update.
     let model = graph.is_some() || v.get("$schema").and_then(Value::as_str) == Some(SCHEMA);
-    let tool = v.get("steps").is_some() || v.get("format").and_then(Value::as_str) == Some("RustGIS web tool");
-    // Some other file (GeoJSON, a project) is said to be one, not told to update RustGIS.
+    let tool = v.get("steps").is_some() || v.get("format").and_then(Value::as_str) == Some("KHGIS web tool");
+    // Some other file (GeoJSON, a project) is said to be one, not told to update KHGIS.
     if !model && !tool {
-        return Err("not a RustGIS model or web tool (no graph or steps)".into());
+        return Err("not a KHGIS model or web tool (no graph or steps)".into());
     }
     if let Some(version) = v.get("version") {
         let supported = if model { version.as_str() == Some(FILE_VERSION) } else { version.as_u64() == Some(WEB_TOOL_VERSION) };
         if !supported {
-            return Err("this model or web tool has an unsupported version. Update RustGIS to import it.".into());
+            return Err("this model or web tool has an unsupported version. Update KHGIS to import it.".into());
         }
     }
     if graph.is_none() && v.get("steps").is_none() {
-        return Err("not a RustGIS model or web tool (no graph or steps)".into());
+        return Err("not a KHGIS model or web tool (no graph or steps)".into());
     }
     if graph.is_some() && v.get("steps").is_some() {
         return Err("a model file cannot contain both a graph and steps. Choose one representation before importing it.".into());
@@ -847,7 +847,7 @@ pub(crate) fn check_file(v: &Value) -> Result<(), String> {
     let fields: &[&str] =
         if graph.is_some() { &["$schema", "version", "name", "graph"] } else { &["format", "version", "name", "steps", "parameters"] };
     if v.as_object().is_some_and(|file| file.keys().any(|key| !fields.contains(&key.as_str()))) {
-        return Err("model file has unsupported fields. Update RustGIS to import this model.".into());
+        return Err("model file has unsupported fields. Update KHGIS to import this model.".into());
     }
     if let Some(graph) = graph {
         let nodes = graph.get("nodes").and_then(Value::as_array).ok_or("a model graph needs \"nodes\"")?;
@@ -855,13 +855,13 @@ pub(crate) fn check_file(v: &Value) -> Result<(), String> {
             return Err(format!("a model can have at most {MAX_NODES} nodes"));
         }
         if graph.as_object().is_some_and(|g| g.keys().any(|k| !matches!(k.as_str(), "nodes" | "edges"))) {
-            return Err("model graph has unsupported fields. Update RustGIS to import this model.".into());
+            return Err("model graph has unsupported fields. Update KHGIS to import this model.".into());
         }
         for (index, node) in nodes.iter().enumerate() {
             let node = ImportItem::<ModelNode>::deserialize(node)
-                .map_err(|_| format!("model node {} is unsupported or malformed. Update RustGIS to import this model.", index + 1))?;
+                .map_err(|_| format!("model node {} is unsupported or malformed. Update KHGIS to import this model.", index + 1))?;
             if !node.extra.is_empty() {
-                return Err(format!("model node {} has unsupported fields. Update RustGIS to import this model.", index + 1));
+                return Err(format!("model node {} has unsupported fields. Update KHGIS to import this model.", index + 1));
             }
             if node.known.id.trim() != node.known.id || node.known.id.chars().nth(MAX_NODE_ID).is_some() {
                 return Err(format!(
@@ -891,7 +891,7 @@ pub(crate) fn check_file(v: &Value) -> Result<(), String> {
         for (index, edge) in edges.iter().enumerate() {
             let edge = ImportItem::<ModelEdge>::deserialize(edge).map_err(|_| format!("model connection {} is malformed", index + 1))?;
             if !edge.extra.is_empty() {
-                return Err(format!("model connection {} has unsupported fields. Update RustGIS to import this model.", index + 1));
+                return Err(format!("model connection {} has unsupported fields. Update KHGIS to import this model.", index + 1));
             }
         }
         let normalized = graph_from_json(graph)?;
@@ -909,7 +909,7 @@ pub(crate) fn check_file(v: &Value) -> Result<(), String> {
             let to_port = by_id.get(edge.to.as_str()).and_then(|n| input_ports(n).into_iter().find(|p| p.id == edge.to_port));
             if !from_known || to_port.is_none() {
                 return Err(format!(
-                    "model connection {} refers to an unsupported port. Update RustGIS or fix the connection before importing this model.",
+                    "model connection {} refers to an unsupported port. Update KHGIS or fix the connection before importing this model.",
                     index + 1
                 ));
             }
@@ -948,9 +948,9 @@ pub(crate) fn check_file(v: &Value) -> Result<(), String> {
         }
         for (index, step) in steps.iter().enumerate() {
             let step = ImportItem::<ModelStep>::deserialize(step)
-                .map_err(|_| format!("model step {} is unsupported or malformed. Update RustGIS to import this model.", index + 1))?;
+                .map_err(|_| format!("model step {} is unsupported or malformed. Update KHGIS to import this model.", index + 1))?;
             if !step.extra.is_empty() {
-                return Err(format!("model step {} has unsupported fields. Update RustGIS to import this model.", index + 1));
+                return Err(format!("model step {} has unsupported fields. Update KHGIS to import this model.", index + 1));
             }
             if !step.known.params.is_null() && !step.known.params.is_object() {
                 return Err(format!("model step {} needs an object for its parameters", index + 1));

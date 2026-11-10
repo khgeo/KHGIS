@@ -288,7 +288,7 @@ fn equidistant_cylindrical_epsg_4087() {
     near(Some(at), 0.0, 45.0, 1e-7);
 }
 
-/// A method RustGIS still can't project keeps its notice: the coordinates are read as they are,
+/// A method KHGIS still can't project keeps its notice: the coordinates are read as they are,
 /// and the read says why. The same file in a method it reads says nothing.
 #[test]
 fn an_unsupported_method_still_says_so() {

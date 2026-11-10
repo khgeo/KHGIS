@@ -1,5 +1,5 @@
 //! Coordinate systems from WKT, the text of a `.prj` file next to a Shapefile or a grid, and to
-//! WKT for the files RustGIS writes ([`to_wkt`]).
+//! WKT for the files KHGIS writes ([`to_wkt`]).
 //!
 //! WKT1 (OGC and Esri) is read directly. WKT2 (`PROJCRS`, `GEOGCRS`, as PROJ 6 and later write
 //! it) is first rewritten as the WKT1 it corresponds to, its units folded into degrees and the
@@ -882,7 +882,7 @@ fn custom(p: &Node, method: &str) -> Result<Crs, String> {
             format!("+proj=cea +lat_ts={ts} {at}")
         }
         "MOLLWEIDE" => format!("+proj=moll {at}"),
-        // Sinusoidal is computed by RustGIS (`rustgis_geom::Sinusoidal`), Robinson by proj4rs
+        // Sinusoidal is computed by KHGIS (`rustgis_geom::Sinusoidal`), Robinson by proj4rs
         // from Robinson's table, on a sphere of the semi-major axis as in PROJ.
         "SINUSOIDAL" => format!("+proj=sinu {at}"),
         "ROBINSON" => format!("+proj=robin {at}"),
@@ -1189,7 +1189,7 @@ pub fn to_wkt(crs: Crs) -> Option<String> {
     let ellps = text("ellps").or(datum.map(|d| d.2));
     let known = ellps.and_then(|e| ELLIPSOIDS.iter().find(|r| r.0.eq_ignore_ascii_case(e)));
     let ellps_name = known.map_or("unnamed", |r| r.1);
-    // proj4rs computes `eqc` on a sphere of the semi-major axis and gives that sphere, but RustGIS
+    // proj4rs computes `eqc` on a sphere of the semi-major axis and gives that sphere, but KHGIS
     // computes it on the datum's ellipsoid (`crs::ellipsoidal_eqc`), the one written here.
     let (a, b) = match text("proj") {
         Some("eqc") => super::crs::eqc_geographic(&def).ok()?.ellipse_parameters(),
@@ -1612,7 +1612,7 @@ mod tests {
     #[test]
     fn esri_cassini_name() {
         // ArcGIS writes Cassini-Soldner as plain `Cassini` in a `.prj`: Berlin's Soldner grid
-        // (EPSG:3068) under that name and a name RustGIS doesn't know reads as the EPSG system.
+        // (EPSG:3068) under that name and a name KHGIS doesn't know reads as the EPSG system.
         let epsg = Crs::from_epsg(3068).unwrap();
         let wkt = to_wkt(epsg).unwrap().replace(",AUTHORITY[\"EPSG\",\"3068\"]", "");
         let start = wkt.find('"').unwrap() + 1;
@@ -1925,7 +1925,7 @@ mod tests {
     /// it, and from its parameters to within a metre of PROJ when it doesn't.
     #[test]
     fn wkt2_corpus() {
-        // Projections RustGIS builds no PROJ definition for: read by their EPSG code only, as in
+        // Projections KHGIS builds no PROJ definition for: read by their EPSG code only, as in
         // WKT1.
         let by_code_only = ["EPSG:5514"];
         let rows = corpus();

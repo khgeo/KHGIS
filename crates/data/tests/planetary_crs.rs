@@ -22,7 +22,7 @@ const MARS_WEST: &str = r#"GEOGCRS["Mars (2015) / Ographic",DATUM["Mars (2015)",
 /// Mars equirectangular, central meridian 0 (IAU_2015:49910), as GDAL writes it to a `.prj`.
 const MARS_EQC: &str = r#"PROJCS["Mars_2015_-_Sphere_Ocentric_Equirectangular_clon0",GEOGCS["GCS_Mars_2015_-_Sphere_Ocentric",DATUM["D_Mars_2015_-_Sphere",SPHEROID["Mars_2015_-_Sphere",3396190.0,0.0]],PRIMEM["Reference_Meridian",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Equidistant_Cylindrical"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",0.0],PARAMETER["Standard_Parallel_1",0.0],UNIT["Meter",1.0]]"#;
 
-/// A projection of Mars RustGIS doesn't read (Bonne, which no IAU code uses): its metres can't
+/// A projection of Mars KHGIS doesn't read (Bonne, which no IAU code uses): its metres can't
 /// be converted.
 const MARS_BONNE: &str = r#"PROJCS["Mars_Bonne",GEOGCS["GCS_Mars_2015_-_Sphere_Ocentric",DATUM["D_Mars_2015_-_Sphere",SPHEROID["Mars_2015_-_Sphere",3396190.0,0.0]],PRIMEM["Reference_Meridian",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Bonne"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",0.0],PARAMETER["Standard_Parallel_1",30.0],UNIT["Meter",1.0]]"#;
 
@@ -389,7 +389,7 @@ fn geopackage_iau_systems_are_read_said_or_refused() {
         // A definition gives the layer its system, not WGS 84's name.
         assert_eq!(ds.crs.is_some_and(Crs::is_planetary), name != "code", "{name}");
     }
-    // Mars metres: a projection its definition gives, and RustGIS reads, is unprojected on the
+    // Mars metres: a projection its definition gives, and KHGIS reads, is unprojected on the
     // body's sphere, with the notice, on the desktop and in the browser, whatever the code says.
     let mem =
         |path: &Path| source::gpkg_mem::GpkgMemSource::open_shared(source::Shared(std::sync::Arc::new(std::fs::read(path).unwrap())), None);
@@ -407,7 +407,7 @@ fn geopackage_iau_systems_are_read_said_or_refused() {
         assert_eq!(planetary_notes(&mem(&path).unwrap().info().notes).len(), 1, "{name}");
     }
     // Refused, as they would be in the wrong place: a projection its definition gives that
-    // RustGIS doesn't read, and one only its IAU code says.
+    // KHGIS doesn't read, and one only its IAU code says.
     let bonne = [(1_000_000.0, 2_000_000.0), (-500_000.0, 10.0)];
     for (name, native, srs, why) in [
         ("bonne", bonne, ("NONE", 1, MARS_BONNE), "Bonne"),
@@ -756,7 +756,7 @@ fn a_mars_projection_in_a_geotiff_is_said_or_refused() {
     // On the Earth, such a citation changes nothing.
     let earth = cited_on(6_378_137.0, 3073, "Ographic test grid|").unwrap();
     assert!(!earth.crs.is_planetary() && earth.lost.is_empty(), "{:?}", earth.lost);
-    // A transformation RustGIS doesn't read (26, the New Zealand Map Grid's): refused on Mars, even
+    // A transformation KHGIS doesn't read (26, the New Zealand Map Grid's): refused on Mars, even
     // where the numbers look like degrees, as they are metres.
     let mut unread = eqc.clone();
     let at = unread.chunks(4).position(|k| k[0] == 3075).unwrap() * 4 + 3;
@@ -787,7 +787,7 @@ fn an_ascii_grid_with_a_mars_prj_is_said_or_refused() {
     assert!(!earth.lost.iter().any(|l| l.contains(".prj")), "{:?}", earth.lost);
 }
 
-/// An Earth `.prj` next to an ASCII grid that RustGIS can't read leaves the grid in
+/// An Earth `.prj` next to an ASCII grid that KHGIS can't read leaves the grid in
 /// longitude/latitude, and says so, as a Shapefile's does; one it reads, or none, says nothing.
 #[test]
 fn an_ascii_grid_whose_earth_prj_is_not_read_says_so() {
@@ -893,7 +893,7 @@ fn exports_say_what_they_write_instead_of_another_body_s_system() {
 
 #[test]
 fn an_epsg_code_that_is_not_converted_leaves_another_body_s_definition_to_say() {
-    // An EPSG organization with a code RustGIS doesn't convert would otherwise be read as
+    // An EPSG organization with a code KHGIS doesn't convert would otherwise be read as
     // longitude/latitude with only "unknown coordinate system": its definition still says the body.
     const UNKNOWN: i32 = 104_971;
     assert!(Crs::from_epsg(UNKNOWN as u32).is_none());

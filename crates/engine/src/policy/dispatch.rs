@@ -315,7 +315,7 @@ impl Session {
             }
             if generated(&plan.root) {
                 return Err(format!(
-                    "{}; RustGIS can't show its operations before reading it; import it yourself",
+                    "{}; KHGIS can't show its operations before reading it; import it yourself",
                     if plan.root.id() == "project.importQgis" {
                         "it adds the files and web addresses a QGIS project names"
                     } else {

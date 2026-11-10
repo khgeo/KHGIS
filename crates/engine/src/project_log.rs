@@ -591,7 +591,7 @@ impl LogEntry {
 /// The session's log (#797): one entry for each command run in the session, from any front end
 /// and in whatever project was open, oldest first. It sits outside the project and its undo
 /// history: undoing a command doesn't take its entry back, and saving, sharing or packaging a
-/// project carries none of it. It lasts until RustGIS closes, or until it is cleared.
+/// project carries none of it. It lasts until KHGIS closes, or until it is cleared.
 #[derive(Debug, Default)]
 pub struct SessionLog {
     /// Logging turned off (`project.logCommands`); on by default.

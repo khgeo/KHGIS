@@ -56,7 +56,7 @@ fn dataset(p: &Value) -> Result<&'static emb::EmbeddingDataset, String> {
     let id = ps(p, "dataset").map(str::trim).ok_or("dataset is required (alphaearth, earth-index or tessera)")?;
     let d = emb::dataset(id).ok_or_else(|| format!("unknown dataset '{id}' (embeddings.datasets lists them)"))?;
     if !d.search {
-        return Err(format!("{} is listed for its links only: RustGIS doesn't read it", d.name));
+        return Err(format!("{} is listed for its links only: KHGIS doesn't read it", d.name));
     }
     Ok(d)
 }

@@ -516,7 +516,7 @@ pub struct Emptied {
 
 /// Removes every Shapefile index not in use, in the cache folder and its fallback, and says what
 /// it freed, what stayed and which folder it couldn't empty (#1259). Indexes an open layer or
-/// another RustGIS instance is reading keep their leases, so they stay. A folder that doesn't
+/// another KHGIS instance is reading keep their leases, so they stay. A folder that doesn't
 /// exist is skipped; one that can't be emptied doesn't stop the other.
 pub fn empty_index_cache() -> Emptied {
     // A process with a folder of its own (a test suite) never empties the shared fallback.

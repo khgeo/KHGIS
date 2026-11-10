@@ -868,7 +868,7 @@ fn anthropic_format() {
     assert!(req.headers.iter().any(|(k, v)| k == "x-api-key" && v == "k"));
     assert!(req.headers.iter().any(|(k, _)| k == "anthropic-version"));
     let b = body(&req);
-    assert!(b["system"].as_str().is_some_and(|t| t.contains("RustGIS")));
+    assert!(b["system"].as_str().is_some_and(|t| t.contains("KHGIS")));
     assert_eq!(b["fallbacks"], "default");
     assert!(b["tools"][0]["input_schema"].is_object());
     let reply = json!({"content": [
@@ -1991,14 +1991,14 @@ fn chatgpt_authorization_page() {
     };
     let params = |url: &str| chatgpt::query_params(url.split_once('?').map_or("", |(_, q)| q));
     let get = |p: &[(String, String)], k: &str| p.iter().find(|(n, _)| n == k).map(|(_, v)| v.clone());
-    // A first sign-in registers RustGIS, without hints.
+    // A first sign-in registers KHGIS, without hints.
     let url = chatgpt::authorize_url(&a);
     assert!(url.starts_with("https://auth.openai.com/api/accounts/authorize?"));
     let p = params(&url);
     for (k, v) in [
         ("response_type", "code"),
         ("client_id", "dynamic_agent_client"),
-        ("agent_name_hint", "RustGIS"),
+        ("agent_name_hint", "KHGIS"),
         ("ext_agent_host_id", "urn:uuid:00000000-0000-4000-8000-000000000000"),
         ("redirect_uri", "http://127.0.0.1:1455/auth/callback"),
         ("scope", "openid profile email offline_access resource.invoke chatgpt.tokens.use.direct"),
@@ -2916,7 +2916,7 @@ fn a_retried_summary_is_still_a_summary() {
 #[test]
 fn every_note_template_is_listed_for_translation() {
     // Each template written in the source is in NOTE_TEMPLATES (which the interface's catalogs
-    // are checked against); "{text}" carries text RustGIS doesn't write itself.
+    // are checked against); "{text}" carries text KHGIS doesn't write itself.
     for source in [include_str!("agent.rs"), include_str!("provider.rs"), include_str!("compact.rs")] {
         for start in ["Note::new(", "Note::with("] {
             for piece in source.split(start).skip(1) {
@@ -3436,7 +3436,7 @@ fn acp_sessions_run_a_task_ask_permission_and_report() {
     let init: Value = serde_json::from_str(&init).unwrap();
     assert_eq!((init["method"].as_str(), init["params"]["protocolVersion"].as_u64()), (Some("initialize"), Some(1)));
     assert_eq!(init["params"]["clientCapabilities"], json!({"fs": {"readTextFile": false, "writeTextFile": false}, "terminal": false}));
-    // initialize → session/new, with RustGIS's MCP server.
+    // initialize → session/new, with KHGIS's MCP server.
     let (out, ev) = s.line(r#"{"jsonrpc":"2.0","id":0,"result":{"protocolVersion":1,"agentCapabilities":{},"authMethods":[]}}"#);
     assert!(ev.is_empty());
     let new: Value = serde_json::from_str(&out[0]).unwrap();
@@ -3773,7 +3773,7 @@ fn a_subagents_declined_approval_returns_to_the_main_assistant() {
     assert!(!a.busy());
 }
 
-/// What a skill names that RustGIS doesn't have: commands, the parameters of its JSON examples,
+/// What a skill names that KHGIS doesn't have: commands, the parameters of its JSON examples,
 /// documentation pages and sections, tools and parameter values.
 fn skill_problems(s: &Session, skill: &crate::skills::Skill) -> Vec<String> {
     let mut known: Vec<String> = tools::defs().iter().map(|d| d.name.to_string()).collect();
