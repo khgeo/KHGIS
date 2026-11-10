@@ -1,7 +1,7 @@
 # Builds the KHGIS browser app (WebAssembly) and publishes it to this repository's gh-pages
 # branch, which GitHub Pages serves at https://khgeo.github.io/KHGIS/
 #
-# The app lands at the site root; the landing page in site/ is published at /about/.
+# The app lands at the site root; the landing page in landing/ is published at /about/.
 # No secrets are needed: the built-in GITHUB_TOKEN can push to this repository.
 #
 # Adapted from upstream's web-deploy.yml, which publishes web.rustgis.app to a separate
@@ -63,7 +63,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist/web/about
-          cp site/index.html site/NotoSansKhmer-Regular.ttf site/NotoSansKhmer-OFL.txt dist/web/about/
+          cp landing/index.html landing/NotoSansKhmer-Regular.ttf landing/NotoSansKhmer-OFL.txt dist/web/about/
 
       - name: Prepare the site for GitHub Pages
         working-directory: dist/web
