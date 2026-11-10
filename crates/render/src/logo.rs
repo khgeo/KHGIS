@@ -1,6 +1,6 @@
 //! The KHGIS logo, drawn in code (no image files): a graticule globe lettered KH inside a ring
-//! that carries the emblem's wording, ticked outside at the cardinal points, on a deep teal
-//! rounded square. The same artwork appears on the web page and the browser tab.
+//! that carries the emblem's wording, ticked outside at the cardinal points, on a
+//! white rounded square. The same artwork appears on the web page and the browser tab.
 
 use tiny_skia::{FillRule, Paint, PathBuilder, Pixmap, Stroke, Transform};
 
@@ -310,15 +310,15 @@ pub fn pixmap(size: u32) -> Option<Pixmap> {
         pb.close();
         pb.finish()?
     };
-    pm.fill_path(&tile, &deep, FillRule::Winding, t, None);
+    pm.fill_path(&tile, &solid(0xFF, 0xFF, 0xFF, 255), FillRule::Winding, t, None);
 
     // The ring, its lettering, and the ticks outside it.
-    let rim = solid(0x9F, 0xD8, 0xDF, 190);
+    let rim = solid(0x0E, 0x3F, 0x44, 235);
     let hairline = Stroke { width: 4.0, ..Stroke::default() };
     pm.stroke_path(&ellipse(RING_OUT, RING_OUT)?, &rim, &hairline, t, None);
     pm.stroke_path(&ellipse(RING_IN, RING_IN)?, &rim, &hairline, t, None);
     if let Some(path) = ring_text() {
-        pm.fill_path(&path, &solid(0x9F, 0xD8, 0xDF, 240), FillRule::Winding, t, None);
+        pm.fill_path(&path, &deep, FillRule::Winding, t, None);
     }
     let tick = Stroke { width: 5.0, ..Stroke::default() };
     for (dx, dy) in [(0.0f32, -1.0f32), (0.0, 1.0), (-1.0, 0.0), (1.0, 0.0)] {
@@ -326,7 +326,7 @@ pub fn pixmap(size: u32) -> Option<Pixmap> {
             pm.stroke_path(&path, &rim, &tick, t, None);
         }
     }
-    let faint = solid(0x9F, 0xD8, 0xDF, 120);
+    let faint = solid(0x0E, 0x3F, 0x44, 130);
     let small = Stroke { width: 2.5, ..Stroke::default() };
     let d = std::f32::consts::FRAC_1_SQRT_2;
     for (sx, sy) in [(-1.0f32, -1.0f32), (1.0, -1.0), (-1.0, 1.0), (1.0, 1.0)] {
@@ -339,8 +339,8 @@ pub fn pixmap(size: u32) -> Option<Pixmap> {
     }
 
     // The globe and its graticule.
-    pm.fill_path(&ellipse(R, R)?, &solid(0x10, 0x56, 0x5C, 255), FillRule::Winding, t, None);
-    let grid = solid(0x9F, 0xD8, 0xDF, 225);
+    pm.fill_path(&ellipse(R, R)?, &deep, FillRule::Winding, t, None);
+    let grid = solid(0xCD, 0xE9, 0xED, 225);
     let thin = Stroke { width: 5.5, ..Stroke::default() };
     for dy in [-87.0f32, -45.0, 0.0, 45.0, 87.0] {
         let half = (R * R - dy * dy).max(0.0).sqrt();

@@ -8,6 +8,9 @@
     <clipPath id="globeClip"><circle cx="128" cy="128" r="70"/></clipPath>
   </defs>
 
+  <!-- White ground, as on the app logo and the window icon. -->
+  <rect x="2" y="2" width="252" height="252" rx="52" fill="#FFFFFF"/>
+
   <!-- The ring. -->
   <g fill="none" stroke="#0E3F44" stroke-width="2">
     <circle cx="128" cy="128" r="112"/>
@@ -24,7 +27,7 @@
 
   <!-- Globe. -->
   <circle cx="128" cy="128" r="70" fill="#0E3F44"/>
-  <g clip-path="url(#globeClip)" fill="none" stroke="#9FD8DF" stroke-width="1.5" opacity=".75">
+  <g clip-path="url(#globeClip)" fill="none" stroke="#CDE9ED" stroke-width="1.5" opacity=".85">
     <path d="M58 104h140M58 128h140M58 152h140M66 82h124M66 174h124"/>
     <ellipse cx="128" cy="128" rx="24" ry="70"/>
     <ellipse cx="128" cy="128" rx="48" ry="70"/>

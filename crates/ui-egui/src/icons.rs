@@ -891,7 +891,7 @@ pub fn paint(painter: &Painter, r: Rect, name: &str, ink: Color32, accent: Color
         // Cambodia's outline, drawn from the bundled national boundary: the Cambodia Data pane.
         // Cambodia's outline, drawn from the bundled national boundary: the Cambodia Data pane.
         "cambodia" => {
-            let fill = p.tint(210);
+            let fill = Color32::WHITE;
             let mut mesh = egui::Mesh::default();
             for (x, y) in CAMBODIA {
                 mesh.colored_vertex(p.pt(x, y), fill);
