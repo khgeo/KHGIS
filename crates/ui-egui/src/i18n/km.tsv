@@ -1253,3 +1253,4 @@ List Cambodia Areas	បញ្ជីតំបន់កម្ពុជា
 Run KHGIS Workflow	ដំណើរការលំហូរការងារ KHGIS
 Welcome to {app}	សូមស្វាគមន៍មកកាន់ {app}
 Provinces, districts, imagery	ខេត្ត ស្រុក រូបភាពផ្កាយរណប
+Elevation needs the desktop app: the Copernicus server does not allow web pages to read its files.	រយៈកម្ពស់ត្រូវការកម្មវិធីលើកុំព្យូទ័រ៖ ម៉ាស៊ីនមេ Copernicus មិនអនុញ្ញាតឱ្យទំព័របណ្ដាញអានឯកសាររបស់វាទេ។

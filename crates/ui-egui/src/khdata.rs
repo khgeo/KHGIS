@@ -178,11 +178,22 @@ pub fn load(app: &mut RustGisApp) -> Result<(), String> {
     st.queue = (0..THEMES.len()).filter(|i| st.themes.get(*i).copied().unwrap_or(false)).collect();
     st.area = Some((area_name.clone(), b));
     if st.dem {
-        for url in dem_tiles(b) {
-            let name = if khmer() { "រយៈកម្ពស់ (Copernicus 30 ម)".to_string() } else { "Elevation (Copernicus 30 m)".to_string() };
-            match app.run("layer.addUrl", json!({"url": url, "name": name})) {
-                Ok(_) => app.ui.khdata.log.push((true, name)),
-                Err(e) => app.ui.khdata.log.push((false, e)),
+        // AWS serves the Copernicus tiles without the header a browser needs before it will let
+        // a page read another site's files, so in the browser every tile fails once the download
+        // starts: `layer.addUrl` returns at once and the layers would sit there empty. Say so
+        // instead of adding them. The desktop app is not subject to that rule and reads them.
+        if cfg!(target_arch = "wasm32") {
+            app.ui.khdata.log.push((
+                false,
+                tl!("Elevation needs the desktop app: the Copernicus server does not allow web pages to read its files.").to_string(),
+            ));
+        } else {
+            for url in dem_tiles(b) {
+                let name = if khmer() { "រយៈកម្ពស់ (Copernicus 30 ម)".to_string() } else { "Elevation (Copernicus 30 m)".to_string() };
+                match app.run("layer.addUrl", json!({"url": url, "name": name})) {
+                    Ok(_) => app.ui.khdata.log.push((true, name)),
+                    Err(e) => app.ui.khdata.log.push((false, e)),
+                }
             }
         }
     }
