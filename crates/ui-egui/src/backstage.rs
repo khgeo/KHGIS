@@ -99,14 +99,22 @@ fn start(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
         let (r, _) = ui.allocate_exact_size(vec2(44.0, 44.0), Sense::hover());
         app.paint_logo(ui, r);
         ui.add_space(6.0);
-        ui.label(egui::RichText::new(tl!("Welcome to RustGIS")).font(semibold(26.0)));
+        ui.label(egui::RichText::new(crate::i18n::fmt("Welcome to {app}", &[("app", crate::APP_NAME)])).font(semibold(26.0)).color(t.accent_text));
     });
-    ui.label(egui::RichText::new(tl!("Create a new project or start from the World Atlas sample.")).color(t.text_dim));
+    ui.label(egui::RichText::new(tl!("GIS and remote sensing for Cambodia, in Khmer and English.")).color(t.text_dim));
     ui.add_space(24.0);
     ui.label(egui::RichText::new(tl!("New Project")).font(semibold(15.0)));
     ui.add_space(8.0);
     ui.horizontal(|ui| {
         ui.spacing_mut().item_spacing = vec2(18.0, 0.0);
+        if card(ui, t, "Cambodia", "Provinces, districts, imagery", "logo") {
+            let khmer = crate::i18n::current().code() == "km";
+            let _ = app.run_by_user("project.cambodia", json!({"khmer": khmer}));
+            if !crate::saveprompt::waiting(app) {
+                app.ui.backstage = false;
+                app.map.invalidate();
+            }
+        }
         if card(ui, t, "Map", "A blank map with a basemap", "new_map") {
             let _ = app.run_by_user("project.new", Value::Null);
             if !crate::saveprompt::waiting(app) {

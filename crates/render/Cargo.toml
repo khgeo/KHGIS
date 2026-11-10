@@ -16,6 +16,9 @@ tiny-skia = { workspace = true }
 bytemuck = { workspace = true }
 lyon = { workspace = true }
 ab_glyph = { workspace = true }
+# Shapes Khmer (subscript consonants, vowel reordering) in exports and layouts; the same
+# version egui uses.
+harfrust = "0.12"
 unicode-segmentation = { workspace = true }
 epaint_default_fonts = { workspace = true }
 log = { workspace = true }

@@ -1,0 +1,1256 @@
+# km interface catalog: English<TAB>translation (Khmer). Untranslated strings show in English.
+(expression)	(កន្សោម)
+(filtered)	(បានត្រង)
+0° crosses the line square	0° កាត់បន្ទាត់កែង
+A .geolibre project as a map	គម្រោង .geolibre ជាផែនទី
+A blank map with a basemap	ផែនទីទទេជាមួយផែនទីមូលដ្ឋាន
+A ChatGPT plan or app usage limit was reached. Review Weekly usage before trying again.	បានដល់ដែនកំណត់ការប្រើគម្រោង ឬកម្មវិធី ChatGPT។ សូមពិនិត្យការប្រើប្រាស់ប្រចាំសប្ដាហ៍ មុនព្យាយាមម្ដងទៀត។
+A globe scene.	ទិដ្ឋភាពលើពិភពលោកជាផែនដីមូល។
+A line for the Script pane	បន្ទាត់សម្រាប់ផ្ទាំងស្គ្រីប
+A2 landscape sheet	ក្រដាស A2 ផ្ដេក
+A2 portrait sheet	ក្រដាស A2 បញ្ឈរ
+A3 landscape sheet	ក្រដាស A3 ផ្ដេក
+A3 portrait sheet	ក្រដាស A3 បញ្ឈរ
+A4 landscape sheet	ក្រដាស A4 ផ្ដេក
+A4 portrait sheet	ក្រដាស A4 បញ្ឈរ
+About	អំពី
+About plugins	អំពីកម្មវិធីបន្ថែម
+About RustGIS	អំពី RustGIS
+About RustGIS.	អំពី RustGIS។
+Add	បន្ថែម
+Add\nData	បន្ថែម\nទិន្នន័យ
+Add ({n})	បន្ថែម ({n})
+Add a circle.	បន្ថែមរង្វង់។
+Add a field.	បន្ថែមវាល។
+Add a file path	បន្ថែមផ្លូវឯកសារ
+Add an ellipse.	បន្ថែមរាងពងក្រពើ។
+Add and Open	បន្ថែម និងបើក
+Add Data From URL…	បន្ថែមទិន្នន័យពី URL…
+Add Data options	ជម្រើសបន្ថែមទិន្នន័យ
+Add Data…	បន្ថែមទិន្នន័យ…
+Add Delimited Text…	បន្ថែមអត្ថបទមានសញ្ញាបំបែក…
+Add field	បន្ថែមវាល
+Add Fill	បន្ថែមការបំពេញ
+Add Folder…	បន្ថែមថត…
+Add folder…	បន្ថែមថត…
+Add From Service…	បន្ថែមពីសេវាកម្ម…
+Add Mark	បន្ថែមសញ្ញា
+Add Plugin Folder…	បន្ថែមថតកម្មវិធីបន្ថែម…
+Add sample countries	បន្ថែមប្រទេសគំរូ
+Add skill…	បន្ថែមជំនាញ…
+Add Stroke	បន្ថែមខ្សែ
+Add Style File…	បន្ថែមឯកសាររចនាប័ទ្ម…
+Add this MCP server to your agent:	បន្ថែមម៉ាស៊ីនមេ MCP នេះទៅភ្នាក់ងាររបស់អ្នក៖
+Add Tile Layer…	បន្ថែមស្រទាប់ក្រឡា…
+Add to Favourites	បន្ថែមទៅចំណូលចិត្ត
+Add With Options…	បន្ថែមជាមួយជម្រើស…
+Add Zarr Variable…	បន្ថែមអថេរ Zarr…
+Add {n}	បន្ថែម {n}
+Added {name}	បានបន្ថែម {name}
+Added: {names}	បានបន្ថែម៖ {names}
+Additional surrounds.	ធាតុជុំវិញផែនទីបន្ថែម។
+Administrative Boundaries	ព្រំដែនរដ្ឋបាល
+After	ក្រោយ
+Agent threads	ខ្សែសន្ទនាភ្នាក់ងារ
+Agents on this computer that connect (Claude Code, Codex, Cursor and others) work on the map open here, with RustGIS's tools: they can open and save files and use the web. Scripts and plugin management stay off.	ភ្នាក់ងារនៅលើកុំព្យូទ័រនេះដែលតភ្ជាប់ (Claude Code, Codex, Cursor និងផ្សេងៗ) ធ្វើការលើផែនទីដែលបើកនៅទីនេះ ដោយប្រើឧបករណ៍របស់ RustGIS៖ ពួកវាអាចបើក និងរក្សាទុកឯកសារ និងប្រើវេប។ ស្គ្រីប និងការគ្រប់គ្រងកម្មវិធីបន្ថែមនៅតែបិទ។
+Agents then run commands, change files and use the web on this computer without asking you.	បន្ទាប់មក ភ្នាក់ងារដំណើរការពាក្យបញ្ជា កែឯកសារ និងប្រើវេបនៅលើកុំព្យូទ័រនេះ ដោយមិនសួរអ្នក។
+Aggregation	ការប្រមូលផ្ដុំ
+AI	AI
+AI\nAssistant	ជំនួយការ\nAI
+AI Assistant	ជំនួយការ AI
+Alignment	ការតម្រឹម
+All	ទាំងអស់
+All categories	ប្រភេទទាំងអស់
+All classes	ថ្នាក់ទាំងអស់
+All files	ឯកសារទាំងអស់
+Allow ChatGPT plan use when signing in. If your workspace doesn't permit it, ask its admin or choose an API key provider.	សូមអនុញ្ញាតការប្រើគម្រោង ChatGPT ពេលចូលគណនី។ ប្រសិនបើកន្លែងធ្វើការរបស់អ្នកមិនអនុញ្ញាត សូមសួរអ្នកគ្រប់គ្រង ឬជ្រើសអ្នកផ្ដល់ API key។
+Allow Feature Selection	អនុញ្ញាតការជ្រើសធាតុ
+Altitude	រយៈកម្ពស់
+Always allow	អនុញ្ញាតជានិច្ច
+An agent on this computer asks to:	ភ្នាក់ងារនៅលើកុំព្យូទ័រនេះស្នើសុំ៖
+Analysis	ការវិភាគ
+Analyze	វិភាគ
+Analyze › AI	វិភាគ › AI
+Analyze › Workflows	វិភាគ › លំហូរការងារ
+Angle	មុំ
+Animation	ចលនា
+Apply	អនុវត្ត
+Apply to the selected layer	អនុវត្តលើស្រទាប់ដែលបានជ្រើស
+Approve agents' actions without asking	យល់ព្រមសកម្មភាពភ្នាក់ងារដោយមិនសួរ
+ArcGIS Portal…	ArcGIS Portal…
+Archive	បណ្ណសារ
+Archiving	ការរក្សាបណ្ណសារ
+Area	ផ្ទៃក្រឡា
+Arrow	ព្រួញ
+At both ends	នៅចុងទាំងពីរ
+At inner vertices	នៅចំណុចកំពូលខាងក្នុង
+At intervals	តាមចន្លោះ
+At the end	នៅចុងបញ្ចប់
+At the start	នៅដើម
+At vertices	នៅចំណុចកំពូល
+Attachments	ឯកសារភ្ជាប់
+Attribute\nTable	តារាង\nលក្ខណៈ
+Attribute Rules	ច្បាប់លក្ខណៈ
+Attribute Table	តារាងលក្ខណៈ
+Attributes	លក្ខណៈ
+Attribution	ប្រភពឯកសារយោង
+Auto	ស្វ័យប្រវត្តិ
+Auto Cache	ឃ្លាំងសម្ងាត់ស្វ័យប្រវត្តិ
+Autofill Fields	បំពេញវាលស្វ័យប្រវត្តិ
+Automatic	ស្វ័យប្រវត្តិ
+Automatic (system language)	ស្វ័យប្រវត្តិ (ភាសាប្រព័ន្ធ)
+Autosave	រក្សាទុកស្វ័យប្រវត្តិ
+Azimuth	ទិសអាស៊ីមុត
+Back to the map	ត្រឡប់ទៅផែនទី
+Back to tools	ត្រឡប់ទៅឧបករណ៍
+Backdrop	ផ្ទៃខាងក្រោយ
+Background	ផ្ទៃខាងក្រោយ
+Band	ប៉ុង
+Band Combination	បន្សំប៉ុង
+Band {n}	ប៉ុង {n}
+Bands	ប៉ុង
+Banner	បដា
+Bar	របារ
+Bar Chart	គំនូសតាងរបារ
+Basemap	ផែនទីមូលដ្ឋាន
+Basemaps	ផែនទីមូលដ្ឋាន
+Bearing	ទិស
+Before	មុន
+Bind To Time Slider	ភ្ជាប់ទៅអូសពេលវេលា
+Blank	ទទេ
+Blank Letter page	ទំព័រ Letter ទទេ
+Blank Map	ផែនទីទទេ
+Blend: {mode}	លាយ៖ {mode}
+Block Feature Selection	រារាំងការជ្រើសធាតុ
+Blue	ខៀវ
+Bold	ដិត
+Bold label text.	អក្សរស្លាកដិត។
+Bookmarks	ចំណាំ
+Bookmarks Pane	ផ្ទាំងចំណាំ
+Boundaries…	ព្រំដែន…
+Bounding\nGeometry	ធរណីមាត្រ\nព័ទ្ធជុំវិញ
+Brightness	ពន្លឺ
+Browse	រុករក
+Browse it in the Browser	រុករកវាក្នុងអ្នករុករក
+Browse Plugins	រុករកកម្មវិធីបន្ថែម
+Browse this folder below	រុករកថតនេះខាងក្រោម
+Browser	អ្នករុករក
+Browser\nPane	ផ្ទាំង\nរុករក
+Browser View	ទិដ្ឋភាពរុករក
+Buffer	តំបន់ជុំវិញ
+Buffer {distance}	តំបន់ជុំវិញ {distance}
+Buffer {distance} Here	តំបន់ជុំវិញ {distance} នៅទីនេះ
+Build	បង្កើត
+Built in	មានស្រាប់
+By\nAttributes	តាម\nលក្ខណៈ
+By\nLocation	តាម\nទីតាំង
+By Coordinates…	តាមកូអរដោនេ…
+By Expression	តាមកន្សោម
+by {author}	ដោយ {author}
+By {field}	តាម {field}
+Calculate	គណនា
+Calculate\nGeometry	គណនា\nធរណីមាត្រ
+Calculate field	គណនាវាល
+Calculate field values.	គណនាតម្លៃវាល។
+Camera	កាមេរ៉ា
+Camera Effect	បែបផែនកាមេរ៉ា
+Can't read this folder	មិនអាចអានថតនេះ
+Cancel	បោះបង់
+Cap	ចុងបន្ទាត់
+Capture To Clipboard	ថតទុកក្នុងក្ដារតម្បៀតខ្ទាស់
+Cast Shadow	បញ្ចាំងស្រមោល
+Category	ប្រភេទ
+Celestial Bodies	រូបកាយសេឡេស្ទាល
+Celestial Body	រូបកាយសេឡេស្ទាល
+Celestial body: {body}	រូបកាយសេឡេស្ទាល៖ {body}
+Cell size	ទំហំក្រឡា
+Center Map Here	ដាក់ផែនទីកណ្ដាលនៅទីនេះ
+Chain raster functions.	ភ្ជាប់មុខងាររ៉ាស្ទ័រជាខ្សែ។
+Change Detection	ការរកឃើញបម្រែបម្រួល
+Change the map's coordinate system	ប្ដូរប្រព័ន្ធកូអរដោនេរបស់ផែនទី
+Change the project (add layers, edit features, change symbology)	កែគម្រោង (បន្ថែមស្រទាប់ កែធាតុ ប្ដូរនិមិត្តសញ្ញា)
+Character	តួអក្សរ
+Chart Frame	ស៊ុមគំនូសតាង
+ChatGPT plan use is unavailable for this account or workspace.	ការប្រើគម្រោង ChatGPT មិនមានសម្រាប់គណនី ឬកន្លែងធ្វើការនេះទេ។
+ChatGPT sign-in failed. Check the connection and local settings, then try again.	ការចូល ChatGPT បរាជ័យ។ សូមពិនិត្យការតភ្ជាប់ និងការកំណត់មូលដ្ឋាន រួចព្យាយាមម្ដងទៀត។
+ChatGPT usage is temporarily unavailable. Keep your sign-in and try again later.	ការប្រើ ChatGPT មិនអាចប្រើបានបណ្ដោះអាសន្ន។ សូមរក្សាការចូលគណនី ហើយព្យាយាមម្ដងទៀតនៅពេលក្រោយ។
+Check for\nUpdates	ពិនិត្យ\nបច្ចុប្បន្នភាព
+Check for Updates…	ពិនិត្យបច្ចុប្បន្នភាព…
+Check the integration's client, permissions, workspace policy and route configuration.	សូមពិនិត្យ client នៃការភ្ជាប់ ការអនុញ្ញាត គោលការណ៍កន្លែងធ្វើការ និងការកំណត់ផ្លូវ។
+China	ចិន
+Choose a field	ជ្រើសវាល
+Choose an account	ជ្រើសគណនី
+Choose Connection…	ជ្រើសការតភ្ជាប់…
+Choose Layers	ជ្រើសស្រទាប់
+Choose Project…	ជ្រើសគម្រោង…
+Choose S3 connection…	ជ្រើសការតភ្ជាប់ S3…
+Circle	រង្វង់
+Cities	ទីក្រុង
+Class	ថ្នាក់
+Class color	ពណ៌ថ្នាក់
+Class {n} up to	ថ្នាក់ {n} រហូតដល់
+Classes	ថ្នាក់
+Classic	បុរាណ
+Classification\nTools	ឧបករណ៍\nចំណាត់ថ្នាក់
+Classification\nWizard	អ្នកជំនួយ\nចំណាត់ថ្នាក់
+Classify	ចាត់ថ្នាក់
+Clear	សម្អាត
+Clear\nLimits	សម្អាត\nដែនកំណត់
+Clear Filters	សម្អាតតម្រង
+Clear Guides	សម្អាតបន្ទាត់ណែនាំ
+Clear History	សម្អាតប្រវត្តិ
+Clear Limits	សម្អាតដែនកំណត់
+Clear mask	សម្អាតរបាំង
+Clear search	សម្អាតការស្វែងរក
+Clear Selection	សម្អាតការជ្រើសរើស
+Clear selection	សម្អាតការជ្រើសរើស
+Clear the filter to reorder	សម្អាតតម្រង ដើម្បីរៀបលំដាប់ឡើងវិញ
+Clear the selection.	សម្អាតការជ្រើសរើស។
+Clear Visibility Range	សម្អាតជួរមើលឃើញ
+Clip	កាត់
+Clip To Map View	កាត់តាមទិដ្ឋភាពផែនទី
+Clip To Polygon	កាត់តាមពហុកោណ
+Clipboard	ក្ដារតម្បៀតខ្ទាស់
+Close	បិទ
+Close (Esc)	បិទ (Esc)
+Close All	បិទទាំងអស់
+Close all panes	បិទផ្ទាំងទាំងអស់
+Close Others	បិទផ្សេងទៀត
+Close table	បិទតារាង
+Close {name}	បិទ {name}
+Closest	ជិតបំផុត
+Color	ពណ៌
+Color Ramps	ជម្រាលពណ៌
+Color scheme	គម្រោងពណ៌
+Color Vision	ការមើលឃើញពណ៌
+Colorbar	របារពណ៌
+Command\nSearch	ស្វែងរក\nពាក្យបញ្ជា
+Command Search	ស្វែងរកពាក្យបញ្ជា
+Common scales	មាត្រដ្ឋានទូទៅ
+Compare	ប្រៀបធៀប
+Completed	បានបញ្ចប់
+Confirm uninstall	បញ្ជាក់ការលុបចេញ
+Connections	ការតភ្ជាប់
+Connections you add are listed here	ការតភ្ជាប់ដែលអ្នកបន្ថែមត្រូវបានរាយនៅទីនេះ
+Constant	ថេរ
+Constant height	កម្ពស់ថេរ
+Constant…	ថេរ…
+Contingent Values	តម្លៃអាស្រ័យ
+Contrast	កម្រិតពណ៌ផ្ទុយ
+Convert	បំប្លែង
+Convert To Annotation	បំប្លែងជាចំណារពន្យល់
+Convert…	បំប្លែង…
+Coordinate	កូអរដោនេ
+Coordinate system	ប្រព័ន្ធកូអរដោនេ
+Coordinate System…	ប្រព័ន្ធកូអរដោនេ…
+Copy	ចម្លង
+Copy / Cut / Paste features	ចម្លង / កាត់ / បិទភ្ជាប់ធាតុ
+Copy Address	ចម្លងអាសយដ្ឋាន
+Copy All	ចម្លងទាំងអស់
+Copy as CLI Command	ចម្លងជាពាក្យបញ្ជា CLI
+Copy as Command	ចម្លងជាពាក្យបញ្ជា
+Copy As GeoJSON	ចម្លងជា GeoJSON
+Copy as Python	ចម្លងជា Python
+Copy coordinates to the clipboard	ចម្លងកូអរដោនេទៅក្ដារតម្បៀតខ្ទាស់
+Copy Group	ចម្លងក្រុម
+Copy Layer	ចម្លងស្រទាប់
+Copy Path	ចម្លងផ្លូវឯកសារ
+Copy sign-in link	ចម្លងតំណចូលគណនី
+Corrections	ការកែតម្រូវ
+Couldn't load the plugin registry: {error}	មិនអាចផ្ទុកបញ្ជីកម្មវិធីបន្ថែម៖ {error}
+Counterclockwise	ច្រាសទ្រនិចនាឡិកា
+Countries, cities, rivers and lakes	ប្រទេស ទីក្រុង ទន្លេ និងបឹង
+Create	បង្កើត
+Create Hosted\nImagery	បង្កើតរូបភាព\nលើម៉ាស៊ីនមេ
+Create Thumbnail	បង្កើតរូបតូច
+Current date	កាលបរិច្ឆេទបច្ចុប្បន្ន
+Current Project	គម្រោងបច្ចុប្បន្ន
+Current scale ({scale})	មាត្រដ្ឋានបច្ចុប្បន្ន ({scale})
+Current time	ម៉ោងបច្ចុប្បន្ន
+Curve	ខ្សែកោង
+Customize	ប្ដូរតាមបំណង
+Customize keyboard shortcuts.	ប្ដូរផ្លូវកាត់ក្ដារចុចតាមបំណង។
+Cut	កាត់
+Cut Polygon	កាត់ពហុកោណ
+Dash	ដាច់ៗ
+Dash-dot	ដាច់-ចុច
+Dashed	ដាច់ៗ
+Data	ទិន្នន័យ
+Data\nSources	ប្រភព\nទិន្នន័យ
+Data Cubes	គូបទិន្នន័យ
+Data Cubes…	គូបទិន្នន័យ…
+Data Design	ការរចនាទិន្នន័យ
+Data Source	ប្រភពទិន្នន័យ
+Data Sources	ប្រភពទិន្នន័យ
+Data you add is listed here	ទិន្នន័យដែលអ្នកបន្ថែមត្រូវបានរាយនៅទីនេះ
+Database…	មូលដ្ឋានទិន្នន័យ…
+decimal degrees	ដឺក្រេទសភាគ
+Deep Learning	ការរៀនស៊ីជម្រៅ
+Deep Learning\nTools	ឧបករណ៍\nរៀនស៊ីជម្រៅ
+Default	លំនាំដើម
+Define Projection…	កំណត់ចំណោល…
+Definition\nQuery	សំណួរ\nកំណត់
+Definition Query	សំណួរកំណត់
+Definition query	សំណួរកំណត់
+Definition Query…	សំណួរកំណត់…
+degrees, minutes and seconds	ដឺក្រេ នាទី និងវិនាទី
+Delete	លុប
+Delete Element	លុបធាតុ
+Delete selected rows	លុបជួរដែលបានជ្រើស
+Delimited Text…	អត្ថបទមានសញ្ញាបំបែក…
+Desktop and command line only	សម្រាប់កុំព្យូទ័រ និងបន្ទាត់ពាក្យបញ្ជាតែប៉ុណ្ណោះ
+Details	ព័ត៌មានលម្អិត
+Details…	ព័ត៌មានលម្អិត…
+Deviations	គម្លាត
+Diagnostic\nMonitor	ម៉ូនីទ័រ\nវិនិច្ឆ័យ
+Diagnostic Monitor	ម៉ូនីទ័រវិនិច្ឆ័យ
+Diagnostics	ការវិនិច្ឆ័យ
+Diagram	ដ្យាក្រាម
+Directions	ទិសដៅ
+Directions From Here	ទិសដៅពីទីនេះ
+Directions To Here	ទិសដៅមកទីនេះ
+Discard GeoPackage Edits…	បោះបង់ការកែ GeoPackage…
+Discard PostGIS Edits…	បោះបង់ការកែ PostGIS…
+Display	ការបង្ហាញ
+Display Filters	តម្រងបង្ហាញ
+Display Filters ({n})	តម្រងបង្ហាញ ({n})
+Dissolve	រំលាយ
+Distance	ចម្ងាយ
+Domains	ដែន
+Don't Save	កុំរក្សាទុក
+Dotted	ចុចៗ
+Double-click	ចុចពីរដង
+Double-click to add	ចុចពីរដងដើម្បីបន្ថែម
+Download\nMap	ទាញយក\nផែនទី
+Download it again and load it.	ទាញយកវាម្ដងទៀត ហើយផ្ទុកវា។
+Download the GeoLibre runner	ទាញយកកម្មវិធីដំណើរការ GeoLibre
+Downloading…	កំពុងទាញយក…
+Downloading… {mb} MB	កំពុងទាញយក… {mb} MB
+Drag / middle-drag	អូស / អូសកណ្ដាល
+Draw	គូរ
+Draw as: {how}	គូរជា៖ {how}
+Draw strokes in levels	គូរខ្សែតាមកម្រិត
+Drawing	គំនូរ
+Drawing Effects	បែបផែនគំនូរ
+Drawing Order	លំដាប់គូរ
+Drop this field	ដកវាលនេះចេញ
+Duplicate	ចម្លងស្ទួន
+Dynamic\nText	អត្ថបទ\nថាមវន្ត
+Dynamic Picture	រូបភាពថាមវន្ត
+e.g. 0, 255, -9999	ឧ. 0, 255, -9999
+East	កើត
+Edges	គែម
+Edit	កែសម្រួល
+Edit\nVertices	កែ\nចំណុចកំពូល
+Edit GeoPackage Table…	កែតារាង GeoPackage…
+Edit Text…	កែអត្ថបទ…
+Edit Vertices	កែចំណុចកំពូល
+Edit › Features	កែសម្រួល › ធាតុ
+Editing	ការកែសម្រួល
+Editing settings.	ការកំណត់ការកែសម្រួល។
+Editor\nTools	ឧបករណ៍\nកែសម្រួល
+Editorial	វិចារណកថា
+Edits the project	កែគម្រោង
+Edit…	កែ…
+Effects	បែបផែន
+Elevation	រយៈកម្ពស់
+Ellipse	រាងពងក្រពើ
+Empty	ទទេ
+Enable Lighting	បើកពន្លឺ
+Enabled	បានបើក
+Enhancement	ការធ្វើឲ្យប្រសើរ
+Environments	បរិស្ថាន
+Erase	លុបចេញ
+Error Inspector (validate)	អ្នកត្រួតពិនិត្យកំហុស (ផ្ទៀងផ្ទាត់)
+Every editing tool.	ឧបករណ៍កែសម្រួលទាំងអស់។
+Every {n} min	រៀងរាល់ {n} នាទី
+Existing Template	គំរូដែលមានស្រាប់
+Explode	បំបែកជាផ្នែក
+Export	នាំចេញ
+Export\nFeatures	នាំចេញ\nធាតុ
+Export\nLayout	នាំចេញ\nប្លង់
+Export\nMap	នាំចេញ\nផែនទី
+Export\nRaster	នាំចេញ\nរ៉ាស្ទ័រ
+Export Bookmarks…	នាំចេញចំណាំ…
+Export Features (tool)	នាំចេញធាតុ (ឧបករណ៍)
+Export Features…	នាំចេញធាតុ…
+Export Keyboard Shortcuts…	នាំចេញផ្លូវកាត់ក្ដារចុច…
+Export Map	នាំចេញផែនទី
+Export Map…	នាំចេញផែនទី…
+Export Presentation…	នាំចេញបទបង្ហាញ…
+Export Raster…	នាំចេញរ៉ាស្ទ័រ…
+Export Report…	នាំចេញរបាយការណ៍…
+Export the layer.	នាំចេញស្រទាប់។
+Export To 3D	នាំចេញជា 3D
+Expression	កន្សោម
+Extent	វិសាលភាព
+Extent Indicator	សូចនាករវិសាលភាព
+Extrusion	ការលើកកម្ពស់
+Face Culling	ការលាក់ផ្ទៃ
+Faces	ផ្ទៃ
+Factor	កត្តា
+Failed	បរាជ័យ
+Farthest	ឆ្ងាយបំផុត
+Favourites	ចំណូលចិត្ត
+Feature	ធាតុ
+Feature\nAnalysis	វិភាគ\nធាតុ
+Feature\nTo Point	ធាតុ\nទៅជាចំណុច
+Feature Cache	ឃ្លាំងធាតុ
+Feature ID	លេខសម្គាល់ធាតុ
+Feature Layer	ស្រទាប់ធាតុ
+Features	ធាតុ
+Fetch map tiles, data and web services from addresses it chooses	ទាញយកក្រឡាផែនទី ទិន្នន័យ និងសេវាវេប ពីអាសយដ្ឋានដែលវាជ្រើស
+Field	វាល
+Fields	វាល
+Fields of the World	វាលស្រែនៃពិភពលោក
+File bridge only	តែស្ពានឯកសារប៉ុណ្ណោះ
+File name	ឈ្មោះឯកសារ
+file path	ផ្លូវឯកសារ
+Fill	បំពេញ
+Film grain	គ្រាប់ខ្សែភាពយន្ត
+Filter layers	ត្រងស្រទាប់
+Filter rows…	ត្រងជួរ…
+Find Tools	ស្វែងរកឧបករណ៍
+Finished: {tool}	បានបញ្ចប់៖ {tool}
+First-Person	ទស្សនៈផ្ទាល់ខ្លួន
+First-Person Navigation	ការរុករកទស្សនៈផ្ទាល់ខ្លួន
+Fixed	ថេរ
+Flip Line	ត្រឡប់ទិសបន្ទាត់
+Fog	អ័ព្ទ
+Folder Connections	ការតភ្ជាប់ថត
+folder connections need the desktop app	ការតភ្ជាប់ថតត្រូវការកម្មវិធីកុំព្យូទ័រ
+Folders	ថត
+Follow the System	តាមប្រព័ន្ធ
+Font	ពុម្ពអក្សរ
+Forget Saved Keys	បំភ្លេចសោដែលបានរក្សាទុក
+Forget Saved Password	បំភ្លេចពាក្យសម្ងាត់ដែលបានរក្សាទុក
+Format	ទម្រង់
+Found: {names}. An agent works on this map through RustGIS's tools and with its own (web, scripts, files) in a folder of its own, kept in Documents › RustGIS › Agent work. It asks you before each action.	បានរកឃើញ៖ {names}។ ភ្នាក់ងារធ្វើការលើផែនទីនេះតាមរយៈឧបករណ៍របស់ RustGIS និងឧបករណ៍ផ្ទាល់ខ្លួន (វេប ស្គ្រីប ឯកសារ) ក្នុងថតផ្ទាល់ខ្លួន ដែលរក្សាទុកក្នុង Documents › RustGIS › Agent work។ វាសួរអ្នកមុនសកម្មភាពនីមួយៗ។
+France	បារាំង
+Freehand	គូរដោយដៃ
+From	ពី
+From Service…	ពីសេវាកម្ម…
+From symbol	ពីនិមិត្តសញ្ញា
+From URL…	ពី URL…
+Full Extent	វិសាលភាពពេញ
+Full size	ទំហំពេញ
+Function	មុខងារ
+Function Editor	កម្មវិធីកែមុខងារ
+Gamma	ហ្គាម៉ា
+Geocode Addresses…	កំណត់ទីតាំងអាសយដ្ឋាន…
+Geodata Service	សេវាទិន្នន័យភូមិសាស្ត្រ
+GeoLibre Project…	គម្រោង GeoLibre…
+Geometry	ធរណីមាត្រ
+Geoprocessing	ដំណើរការភូមិសាស្ត្រ
+Geoprocessing history.	ប្រវត្តិដំណើរការភូមិសាស្ត្រ។
+Georeference	ចងកូអរដោនេ
+Global	សកល
+Globe	ផែនដីមូល
+Go to {coordinate}	ទៅកាន់ {coordinate}
+GPU\nRendering	ការគូរ\nដោយ GPU
+Graduated Colors	ពណ៌តាមកម្រិត
+Graphics	ក្រាហ្វិក
+Graphics and Text	ក្រាហ្វិក និងអត្ថបទ
+Graphics Layer	ស្រទាប់ក្រាហ្វិក
+Graticule	ក្រឡាចត្រង្គរយៈទទឹង-បណ្ដោយ
+Green	បៃតង
+Grid	ក្រឡាចត្រង្គ
+Ground\nTo Grid	ដី\nទៅក្រឡា
+Group	ក្រុម
+Halo	រង្វង់ព័ទ្ធអក្សរ
+Hash marks	សញ្ញាគូស
+Haze	អ័ព្ទស្រាល
+Height	កម្ពស់
+Help	ជំនួយ
+Help › Help	ជំនួយ › ជំនួយ
+Hexagons	ឆកោណ
+Hidden columns: {n}	ជួរឈរលាក់៖ {n}
+Hide Column	លាក់ជួរឈរ
+Hide Group	លាក់ក្រុម
+Hide Layers	លាក់ស្រទាប់
+Hide legend	លាក់តារាងសម្គាល់
+Hide legend and source layers	លាក់តារាងសម្គាល់ និងស្រទាប់ប្រភព
+Hide source layers	លាក់ស្រទាប់ប្រភព
+Hide values (no data)	លាក់តម្លៃ (គ្មានទិន្នន័យ)
+Hide values inside a range	លាក់តម្លៃក្នុងជួរ
+Hide values outside a range	លាក់តម្លៃក្រៅជួរ
+History	ប្រវត្តិ
+Home	ទំព័រដើម
+Home › Add	ទំព័រដើម › បន្ថែម
+Home › Add › Add Data	ទំព័រដើម › បន្ថែម › បន្ថែមទិន្នន័យ
+Home › Add › Web Data	ទំព័រដើម › បន្ថែម › ទិន្នន័យវេប
+Home › Inspect › Measure	ទំព័រដើម › ត្រួតពិនិត្យ › វាស់
+Home › Navigate	ទំព័រដើម › រុករក
+Home › Navigate › Bookmarks	ទំព័រដើម › រុករក › ចំណាំ
+Homepage	គេហទំព័រ
+Identify	កំណត់អត្តសញ្ញាណ
+Idle	ទំនេរ
+IDW\nInterpolation	ការប៉ាន់ស្មាន\nIDW
+Illumination	ការបំភ្លឺ
+Image Analysis	ការវិភាគរូបភាព
+Image Classification	ចំណាត់ថ្នាក់រូបភាព
+Imagery	រូបភាពផ្កាយរណប
+Imagery Sharing	ការចែករំលែករូបភាព
+Imagery Tools	ឧបករណ៍រូបភាព
+Image…	រូបភាព…
+Imperial	ខ្នាតអង់គ្លេស
+Import	នាំចូល
+Import Bookmarks…	នាំចូលចំណាំ…
+Import Keyboard Shortcuts…	នាំចូលផ្លូវកាត់ក្ដារចុច…
+Import Layout…	នាំចូលប្លង់…
+Import Presentation	នាំចូលបទបង្ហាញ
+Import QGIS Style…	នាំចូលរចនាប័ទ្ម QGIS…
+Import Report	នាំចូលរបាយការណ៍
+Import Shapefile with Projection…	នាំចូល Shapefile ជាមួយចំណោល…
+Import Styles From…	នាំចូលរចនាប័ទ្មពី…
+Import Task…	នាំចូលកិច្ចការ…
+Import Thumbnail	នាំចូលរូបតូច
+In Beyond	ក្នុងហួស
+In memory	ក្នុងអង្គចងចាំ
+In place	នៅនឹងកន្លែង
+In project	ក្នុងគម្រោង
+In RustGIS, it can:	ក្នុងកម្មវិធីនេះ វាអាច៖
+In the middle	នៅកណ្ដាល
+Indent	ចូលបន្ទាត់
+Indices	សន្ទស្សន៍
+Infographics	ព័ត៌មានក្រាហ្វិក
+Information	ព័ត៌មាន
+Insert	បញ្ចូល
+Inspect	ត្រួតពិនិត្យ
+Install	ដំឡើង
+Install a plugin	ដំឡើងកម្មវិធីបន្ថែម
+Install from a file	ដំឡើងពីឯកសារ
+Install From File	ដំឡើងពីឯកសារ
+Install From File…	ដំឡើងពីឯកសារ…
+Install Whitebox and GeoLibre tools	ដំឡើងឧបករណ៍ Whitebox និង GeoLibre
+Install {name} {version}?	ដំឡើង {name} {version}?
+Installed	បានដំឡើង
+Installed plugins are kept in {folder}	កម្មវិធីបន្ថែមដែលបានដំឡើងត្រូវបានរក្សាទុកក្នុង {folder}
+Installing it downloads Python {version} and the packages it needs from the internet.	ការដំឡើងវានឹងទាញយក Python {version} និងកញ្ចប់ដែលវាត្រូវការពីអ៊ីនធឺណិត។
+Interface font: {font}	ពុម្ពអក្សរផ្ទាំងកម្មវិធី៖ {font}
+Interface Scale	ទំហំផ្ទាំងកម្មវិធី
+Intersect	ប្រសព្វ
+Interval	ចន្លោះ
+Invalid: {error}	មិនត្រឹមត្រូវ៖ {error}
+Invert Color Ramp	បញ្ច្រាសជម្រាលពណ៌
+Invert color scheme	បញ្ច្រាសគម្រោងពណ៌
+Invert the selection.	បញ្ច្រាសការជ្រើសរើស។
+It has no code: nothing in it runs.	វាគ្មានកូដទេ៖ គ្មានអ្វីនៅក្នុងវាដំណើរការឡើយ។
+It runs: {program}	វាដំណើរការ៖ {program}
+Item Pop-ups	ផ្ទាំងលេចព័ត៌មាន
+Jobs	ការងារ
+Join	ភ្ជាប់
+Keep Tool	រក្សាឧបករណ៍
+Keyboard\nShortcuts	ផ្លូវកាត់\nក្ដារចុច
+Keyboard Shortcuts	ផ្លូវកាត់ក្ដារចុច
+Keyboard shortcuts.	ផ្លូវកាត់ក្ដារចុច។
+Kilometers	គីឡូម៉ែត្រ
+Kind	ប្រភេទ
+Label	ស្លាក
+Label Class	ថ្នាក់ស្លាក
+Label Placement	ការដាក់ស្លាក
+Label Range	ជួរស្លាក
+Labeling	ការដាក់ស្លាក
+Labeling Pane	ផ្ទាំងដាក់ស្លាក
+Labeling Properties…	លក្ខណសម្បត្តិស្លាក…
+Labels	ស្លាក
+Landscape	ផ្ដេក
+Language	ភាសា
+Lasso	ខ្សែរង្វិល
+Lasso (draw)	ខ្សែរង្វិល (គូរ)
+Last map render time	ពេលគូរផែនទីចុងក្រោយ
+Last Project	គម្រោងចុងក្រោយ
+Layer	ស្រទាប់
+Layer\nTemplates	គំរូ\nស្រទាប់
+Layer Blend	ការលាយស្រទាប់
+Layer File	ឯកសារស្រទាប់
+Layer From\nSelection	ស្រទាប់ពី\nការជ្រើសរើស
+Layer Templates	គំរូស្រទាប់
+Layers	ស្រទាប់
+Layout	ប្លង់
+Layout\nFile	ឯកសារ\nប្លង់
+Layout File…	ឯកសារប្លង់…
+Layout name	ឈ្មោះប្លង់
+Layouts	ប្លង់
+Learn	រៀន
+Learning\nResources	ធនធាន\nសិក្សា
+Legend	តារាងសម្គាល់
+Length	ប្រវែង
+Let the assistant hand tasks to agents on this computer	អនុញ្ញាតឲ្យជំនួយការប្រគល់កិច្ចការទៅភ្នាក់ងារនៅលើកុំព្យូទ័រនេះ
+Let your Agents Control RustGIS	អនុញ្ញាតឲ្យភ្នាក់ងាររបស់អ្នកគ្រប់គ្រង RustGIS
+Level	កម្រិត
+Library	បណ្ណាល័យ
+Light and Shadow	ពន្លឺ និងស្រមោល
+Lighting	ពន្លឺ
+Line	បន្ទាត់
+Line color	ពណ៌បន្ទាត់
+Line Of Sight From Here	ខ្សែមើលឃើញពីទីនេះ
+Line width	ទទឹងបន្ទាត់
+Lines	បន្ទាត់
+Link	តំណ
+Link Cursors	ភ្ជាប់ទស្សន៍ទ្រនិច
+Link Views	ភ្ជាប់ទិដ្ឋភាព
+List by data source	រៀបតាមប្រភពទិន្នន័យ
+List by drawing order	រៀបតាមលំដាប់គូរ
+List by selection	រៀបតាមការជ្រើសរើស
+Lit	មានពន្លឺ
+Load All Features	ផ្ទុកធាតុទាំងអស់
+Load Whitebox and GeoLibre tools	ផ្ទុកឧបករណ៍ Whitebox និង GeoLibre
+Loaded {id}.	បានផ្ទុក {id}។
+Loaded {name} from its folder.	បានផ្ទុក {name} ពីថតរបស់វា។
+Loading the GeoLibre tools…	កំពុងផ្ទុកឧបករណ៍ GeoLibre…
+Loads map tiles from the web	ផ្ទុកក្រឡាផែនទីពីវេប
+Local	មូលដ្ឋាន
+Locate	កំណត់ទីតាំង
+Locate the GeoLibre runner	ស្វែងរកកម្មវិធីដំណើរការ GeoLibre
+Locate…	ស្វែងរក…
+Location	ទីតាំង
+Locator	អ្នកកំណត់ទីតាំង
+Lock	ចាក់សោ
+Log In to {name}…	ចូលទៅ {name}…
+Log In…	ចូល…
+Log Out	ចាកចេញ
+Long dash	ដាច់វែង
+Lower Priority	បន្ថយអាទិភាព
+Magnifier	កែវពង្រីក
+Major Lakes	បឹងធំៗ
+Major Rivers	ទន្លេធំៗ
+Manage Bookmarks	គ្រប់គ្រងចំណាំ
+Manage Edits	គ្រប់គ្រងការកែ
+Map	ផែនទី
+Map\nFrame	ស៊ុម\nផែនទី
+Map File	ឯកសារផែនទី
+Map Frames	ស៊ុមផែនទី
+Map Labeling	ការដាក់ស្លាកផែនទី
+Map name	ឈ្មោះផែនទី
+Map scale	មាត្រដ្ឋានផែនទី
+Map Series	ស៊េរីផែនទី
+Map Surrounds	ធាតុជុំវិញផែនទី
+Map Thumbnail	រូបតូចផែនទី
+Map View	ទិដ្ឋភាពផែនទី
+Mapping	ការធ្វើផែនទី
+Maps	ផែនទី
+Maps move together.	ផែនទីផ្លាស់ទីជាមួយគ្នា។
+Mark {n}	សញ្ញា {n}
+Markers	សញ្ញាចំណាំ
+Marks	សញ្ញា
+Marks for	សញ្ញាសម្រាប់
+Masking	ការបិទបាំង
+Max	អតិបរមា
+Max %	អតិបរមា %
+MCP relay · {n} attached	MCP relay · ភ្ជាប់ {n}
+Mean	មធ្យម
+Measure	វាស់
+Measure Area	វាស់ផ្ទៃក្រឡា
+Measure Distance	វាស់ចម្ងាយ
+Measurement units	ឯកតារង្វាស់
+Measurements so far.	ការវាស់រហូតមកដល់ពេលនេះ។
+Mensuration	ការវាស់វែង
+Merge	បញ្ចូលគ្នា
+Meters	ម៉ែត្រ
+Method	វិធីសាស្ត្រ
+Metric	ខ្នាតម៉ែត្រ
+Miles	ម៉ាយល៍
+Min	អប្បបរមា
+Min %	អប្បបរមា %
+Min must be less than Max	អប្បបរមាត្រូវតូចជាងអតិបរមា
+Mobile Map	ផែនទីទូរស័ព្ទ
+Model	ម៉ូដែល
+Model\nBuilder	អ្នកបង្កើត\nម៉ូដែល
+ModelBuilder	អ្នកបង្កើតម៉ូដែល
+Models	ម៉ូដែល
+Modify	កែប្រែ
+Modular	ម៉ូឌុល
+More	ច្រើនទៀត
+More basemaps:	ផែនទីមូលដ្ឋានច្រើនទៀត៖
+Mouse wheel	កង់កណ្ដុរ
+Move Down	ផ្លាស់ចុះក្រោម
+Move down	ផ្លាស់ចុះក្រោម
+Move Label	ផ្លាស់ស្លាក
+Move Left	ផ្លាស់ទៅឆ្វេង
+Move Right	ផ្លាស់ទៅស្ដាំ
+Move To Bottom	ផ្លាស់ទៅក្រោមបំផុត
+Move To Top	ផ្លាស់ទៅលើបំផុត
+Move To {group}	ផ្លាស់ទៅ {group}
+Move Up	ផ្លាស់ឡើងលើ
+Move up	ផ្លាស់ឡើងលើ
+Move, Rotate, Scale…	ផ្លាស់ទី បង្វិល ប្ដូរទំហំ…
+Name	ឈ្មោះ
+Navigate	រុករក
+Navigation	ការរុករក
+Navigator	អ្នករុករក
+Neatline	បន្ទាត់ស៊ុម
+Needs two or more numeric fields.	ត្រូវការវាលលេខពីរ ឬច្រើនជាងនេះ។
+Network Analysis	ការវិភាគបណ្ដាញ
+New	ថ្មី
+New\nLayout	ប្លង់\nថ្មី
+New\nMap	ផែនទី\nថ្មី
+New\nNotebook	សៀវភៅកត់ត្រា\nថ្មី
+New\nPresentation	បទបង្ហាញ\nថ្មី
+New\nReport	របាយការណ៍\nថ្មី
+New\nWorkspace	កន្លែងធ្វើការ\nថ្មី
+New Bookmark…	ចំណាំថ្មី…
+New Connection	ការតភ្ជាប់ថ្មី
+New Connection ▾	ការតភ្ជាប់ថ្មី ▾
+New Group	ក្រុមថ្មី
+New Layout	ប្លង់ថ្មី
+New Project	គម្រោងថ្មី
+New project	គម្រោងថ្មី
+New Relationship…	ទំនាក់ទំនងថ្មី…
+Next	បន្ទាប់
+Next Coordinate Format	ទម្រង់កូអរដោនេបន្ទាប់
+Next Page	ទំព័របន្ទាប់
+No	ទេ
+No bookmarks yet	មិនទាន់មានចំណាំ
+No Fill	គ្មានការបំពេញ
+No layers match	គ្មានស្រទាប់ត្រូវគ្នា
+No mask	គ្មានរបាំង
+No models are available for this account.	គ្មានម៉ូដែលសម្រាប់គណនីនេះទេ។
+No offline areas	គ្មានតំបន់ក្រៅបណ្ដាញ
+No other reports	គ្មានរបាយការណ៍ផ្សេង
+No place found	រកមិនឃើញទីកន្លែង
+No plugin panel is open.	គ្មានផ្ទាំងកម្មវិធីបន្ថែមបើកទេ។
+No plugins match.	គ្មានកម្មវិធីបន្ថែមត្រូវគ្នា។
+No project opened or saved yet	មិនទាន់មានគម្រោងបានបើក ឬរក្សាទុកនៅឡើយ
+No relationships yet	មិនទាន់មានទំនាក់ទំនង
+No standalone tables	គ្មានតារាងឯករាជ្យ
+No styles yet	មិនទាន់មានរចនាប័ទ្ម
+No {format} here	គ្មាន {format} នៅទីនេះ
+NoData	គ្មានទិន្នន័យ
+None	គ្មាន
+North	ជើង
+North\nArrow	ព្រួញ\nទិសខាងជើង
+Not loaded	មិនបានផ្ទុក
+Not sandboxed	មិនស្ថិតក្នុងប្រអប់សុវត្ថិភាព
+Not saved yet	មិនទាន់រក្សាទុក
+Not Selectable	មិនអាចជ្រើសបាន
+Notebook	សៀវភៅកត់ត្រា
+Notebook Pane	ផ្ទាំងសៀវភៅកត់ត្រា
+Nothing found	រកមិនឃើញអ្វីទេ
+Nothing matches.	គ្មានអ្វីត្រូវគ្នា។
+Now	ឥឡូវ
+Off	បិទ
+Offline	ក្រៅបណ្ដាញ
+Offset	គម្លាត
+Offset down	គម្លាតចុះក្រោម
+Offset right	គម្លាតទៅស្ដាំ
+Opacity	ភាពស្រអាប់
+Open	បើក
+Open a .rgis project	បើកគម្រោង .rgis
+Open browser again	បើកកម្មវិធីរុករកម្ដងទៀត
+Open folder	បើកថត
+Open In Geoprocessing…	បើកក្នុងដំណើរការភូមិសាស្ត្រ…
+Open in Tool	បើកក្នុងឧបករណ៍
+Open project	បើកគម្រោង
+Open the task's steps	បើកជំហាននៃកិច្ចការ
+Open…	បើក…
+Options	ជម្រើស
+Or	ឬ
+Or run, for Claude Code or Codex:	ឬដំណើរការ សម្រាប់ Claude Code ឬ Codex៖
+Ortho Mapping	ការធ្វើផែនទីអ័រតូ
+Out Beyond	ក្រៅហួស
+Outdent	ថយបន្ទាត់
+Outline	គែមព័ទ្ធ
+Outline color	ពណ៌គែម
+Outline width	ទទឹងគែម
+Output	លទ្ធផល
+overlay	ស្រទាប់ត្រួត
+Package	កញ្ចប់
+Page	ទំព័រ
+Page\nSize	ទំហំ\nទំព័រ
+Page number	លេខទំព័រ
+Pan	រំកិល
+Pan (Explore) · any tool	រំកិល (រុករក) · ឧបករណ៍ណាមួយ
+Pan/Zoom\nMap	រំកិល/ពង្រីក\nផែនទី
+Pane Sets	សំណុំផ្ទាំង
+Panel	ផ្ទាំង
+Parent folder	ថតមេ
+Paste	បិទភ្ជាប់
+Paste Group	បិទភ្ជាប់ក្រុម
+Paste Groups	បិទភ្ជាប់ក្រុម
+Paste Layer	បិទភ្ជាប់ស្រទាប់
+Paste Layers	បិទភ្ជាប់ស្រទាប់
+Pause	ផ្អាក
+Performance	ដំណើរការ
+Pick a single layer.	ជ្រើសស្រទាប់តែមួយ។
+Picture	រូបភាព
+Pie	ចំណិត
+Pie Chart	គំនូសតាងចំណិត
+Pitch	ការផ្អៀង
+Pixel Editor	កម្មវិធីកែភីកសែល
+Pixel type	ប្រភេទភីកសែល
+Place	ទីកន្លែង
+Placement	ការដាក់
+Places	ទីកន្លែង
+Planar	ផ្ទៃរាបស្មើ
+Planar Navigation	ការរុករកលើផ្ទៃរាបស្មើ
+Play	ចាក់
+Play the animation.	ចាក់ចលនា។
+Plugin	កម្មវិធីបន្ថែម
+Plugin\nManager	អ្នកគ្រប់គ្រង\nកម្មវិធីបន្ថែម
+Plugin folder	ថតកម្មវិធីបន្ថែម
+Plugin Manager	អ្នកគ្រប់គ្រងកម្មវិធីបន្ថែម
+Plugin Manager…	អ្នកគ្រប់គ្រងកម្មវិធីបន្ថែម…
+Plugin registry	បញ្ជីកម្មវិធីបន្ថែម
+Plugins	កម្មវិធីបន្ថែម
+Point	ចំណុច
+Points	ចំណុច
+Polygon	ពហុកោណ
+Polygon (draw)	ពហុកោណ (គូរ)
+Polygon layer	ស្រទាប់ពហុកោណ
+Polygons	ពហុកោណ
+Populated Places	ទីតាំងមានប្រជាជន
+Portal	វិបផតថល
+Portrait	បញ្ឈរ
+Poster	ផ្ទាំងរូបភាព
+Postprocessing	ដំណើរការក្រោយ
+Prepare	រៀបចំ
+Preparing its Python environment…	កំពុងរៀបចំបរិស្ថាន Python…
+Presentation	បទបង្ហាញ
+Presentation Pane	ផ្ទាំងបទបង្ហាញ
+Previous	មុន
+Previous Page	ទំព័រមុន
+Primary\nSymbology	និមិត្តសញ្ញា\nចម្បង
+Primary symbology	និមិត្តសញ្ញាចម្បង
+Print	បោះពុម្ព
+Print\nLayout	បោះពុម្ព\nប្លង់
+Print Map	បោះពុម្ពផែនទី
+Print the layout.	បោះពុម្ពប្លង់។
+Process	ដំណើរការ
+Profile	ទម្រង់កាត់
+Project	គម្រោង
+Project\nPackage	កញ្ចប់\nគម្រោង
+Project Template	គំរូគម្រោង
+Projection	ចំណោល
+Properties	លក្ខណសម្បត្តិ
+Proportional Symbols	និមិត្តសញ្ញាតាមសមាមាត្រ
+Publication Layout	ប្លង់បោះពុម្ពផ្សាយ
+Publish	បោះពុម្ពផ្សាយ
+Publish › Output	បោះពុម្ពផ្សាយ › លទ្ធផល
+Python environment failed: {error}	បរិស្ថាន Python បរាជ័យ៖ {error}
+Python environment not prepared	បរិស្ថាន Python មិនទាន់រៀបចំ
+Python environment ready	បរិស្ថាន Python រួចរាល់
+Python script	ស្គ្រីប Python
+QGIS Project…	គម្រោង QGIS…
+Quick\nAccess	ការចូល\nរហ័ស
+Quick actions	សកម្មភាពរហ័ស
+Quick Analysis	ការវិភាគរហ័ស
+Rain	ភ្លៀង
+Raise Priority	បង្កើនអាទិភាព
+Range	ជួរ
+Raster	រ៉ាស្ទ័រ
+Raster\nAnalysis	វិភាគ\nរ៉ាស្ទ័រ
+Raster\nInformation	ព័ត៌មាន\nរ៉ាស្ទ័រ
+Raster Data	ទិន្នន័យរ៉ាស្ទ័រ
+Raster Effects	បែបផែនរ៉ាស្ទ័រ
+Raster Functions	មុខងាររ៉ាស្ទ័រ
+Raster Layer	ស្រទាប់រ៉ាស្ទ័រ
+Raster layer	ស្រទាប់រ៉ាស្ទ័រ
+Read	អាន
+Read and write files on this computer	អាន និងសរសេរឯកសារនៅលើកុំព្យូទ័រនេះ
+Read the map's layers and features	អានស្រទាប់ និងធាតុរបស់ផែនទី
+Reading in place…	កំពុងអាននៅនឹងកន្លែង…
+Reading the file's layers…	កំពុងអានស្រទាប់របស់ឯកសារ…
+Reads and writes files	អាន និងសរសេរឯកសារ
+Reads the map	អានផែនទី
+Reality Mapping	ការធ្វើផែនទីពិត
+Recent	ថ្មីៗ
+Record Task	កត់ត្រាកិច្ចការ
+Rectangle	ចតុកោណកែង
+Red	ក្រហម
+Redo	ធ្វើវិញ
+Redo {action}	ធ្វើវិញ {action}
+Reference scale	មាត្រដ្ឋានយោង
+Refresh	ផ្ទុកឡើងវិញ
+Refresh every connection's lists	ផ្ទុកបញ្ជីនៃការតភ្ជាប់ទាំងអស់ឡើងវិញ
+Related\nData	ទិន្នន័យ\nពាក់ព័ន្ធ
+Related Report	របាយការណ៍ពាក់ព័ន្ធ
+Relationship	ទំនាក់ទំនង
+Reload	ផ្ទុកឡើងវិញ
+Reload Themes	ផ្ទុកស្បែកឡើងវិញ
+Remove	ដកចេញ
+Remove All	ដកចេញទាំងអស់
+Remove from Favourites	ដកចេញពីចំណូលចិត្ត
+Remove From Group	ដកចេញពីក្រុម
+Remove {name}	ដក {name} ចេញ
+Removed {id}.	បានដក {id}។
+Rename…	ប្ដូរឈ្មោះ…
+Rendering	ការគូរ
+Repair\nSource	ជួសជុល\nប្រភព
+Repair Data Source…	ជួសជុលប្រភពទិន្នន័យ…
+Report	របាយការណ៍
+Report Pane	ផ្ទាំងរបាយការណ៍
+Report Section	ផ្នែករបាយការណ៍
+Resample	គំរូឡើងវិញ
+Resampling	ការគំរូឡើងវិញ
+Reset	កំណត់ឡើងវិញ
+Reset Default	កំណត់លំនាំដើមឡើងវិញ
+Reset Effects	កំណត់បែបផែនឡើងវិញ
+Reset Interface Scale	កំណត់ទំហំផ្ទាំងឡើងវិញ
+Reset Moved	កំណត់ការផ្លាស់ទីឡើងវិញ
+Reshape	កែរាង
+Results	លទ្ធផល
+Retry	ព្យាយាមម្ដងទៀត
+Review messages and failed network requests	ពិនិត្យសារ និងសំណើបណ្ដាញដែលបរាជ័យ
+Ribbon	ខ្សែបូ
+Rotate 90°	បង្វិល 90°
+Rotation	ការបង្វិល
+Rulers	បន្ទាត់វាស់
+Run	ដំណើរការ
+Run All Steps	ដំណើរការជំហានទាំងអស់
+Run {name}	ដំណើរការ {name}
+Running…	កំពុងដំណើរការ…
+RustGIS didn't close properly last time, so it started with the World Atlas instead of your start-up project. Open the project from the Project menu when you're ready.	RustGIS មិនបានបិទត្រឹមត្រូវកាលពីលើកមុន ដូច្នេះវាបានចាប់ផ្ដើមជាមួយអាត្លាសពិភពលោក ជំនួសគម្រោងចាប់ផ្ដើមរបស់អ្នក។ សូមបើកគម្រោងពីម៉ឺនុយគម្រោង នៅពេលអ្នករួចរាល់។
+RustGIS plugin	កម្មវិធីបន្ថែម RustGIS
+RustGIS project	គម្រោង RustGIS
+Satellite Embeddings…	Embeddings ផ្កាយរណប…
+Saturation	កម្រិតពណ៌ឆ្អែត
+Save	រក្សាទុក
+Save As	រក្សាទុកជា
+Save as Default	រក្សាទុកជាលំនាំដើម
+Save as Python Script…	រក្សាទុកជាស្គ្រីប Python…
+Save as {name}	រក្សាទុកជា {name}
+Save changes to {name}?	រក្សាទុកការផ្លាស់ប្ដូរទៅ {name}?
+Save Layout File	រក្សាទុកឯកសារប្លង់
+Save project	រក្សាទុកគម្រោង
+Save to GeoPackage…	រក្សាទុកទៅ GeoPackage…
+Save to PostGIS…	រក្សាទុកទៅ PostGIS…
+Saved keys	សោដែលបានរក្សាទុក
+Saved keys unavailable	សោដែលបានរក្សាទុកមិនអាចប្រើបាន
+Saved password	ពាក្យសម្ងាត់ដែលបានរក្សាទុក
+Saved View	ទិដ្ឋភាពដែលបានរក្សាទុក
+Saved {path}	បានរក្សាទុក {path}
+Scale\nBar	របារ\nមាត្រដ្ឋាន
+Scale ×2	ទំហំ ×2
+Scale ×½	ទំហំ ×½
+Scaled by sum	ប្ដូរទំហំតាមផលបូក
+Scene	ទិដ្ឋភាព
+Script	ស្គ្រីប
+Search	ស្វែងរក
+Search layers, places, lat/lon…	ស្វែងរកស្រទាប់ ទីកន្លែង រយៈទទឹង/បណ្ដោយ…
+Search Open Data	ស្វែងរកទិន្នន័យបើកចំហ
+Search Open Data…	ស្វែងរកទិន្នន័យបើកចំហ…
+Search places for “{query}”	ស្វែងរកទីកន្លែងសម្រាប់ “{query}”
+Search plugins	ស្វែងរកកម្មវិធីបន្ថែម
+Search results © OpenStreetMap contributors	លទ្ធផលស្វែងរក © អ្នករួមចំណែក OpenStreetMap
+Search the map	ស្វែងរកលើផែនទី
+Searching places…	កំពុងស្វែងរកទីកន្លែង…
+Select	ជ្រើសរើស
+Select a field	ជ្រើសវាល
+Select All	ជ្រើសទាំងអស់
+Select By\nAttributes	ជ្រើសតាម\nលក្ខណៈ
+Select By\nLocation	ជ្រើសតាម\nទីតាំង
+Select every feature.	ជ្រើសធាតុទាំងអស់។
+Select None	មិនជ្រើសអ្វីទាំងអស់
+Select options	ជម្រើសនៃការជ្រើសរើស
+Select rows with a SQL expression.	ជ្រើសជួរដោយកន្សោម SQL។
+Selectable	អាចជ្រើសបាន
+Selected	បានជ្រើស
+Selected Features: {n}	ធាតុដែលបានជ្រើស៖ {n}
+Selected only	តែដែលបានជ្រើស
+Selection	ការជ្រើសរើស
+Sentinel-2 Explorer…	កម្មវិធីរុករក Sentinel-2…
+Sepia	ពណ៌ត្នោតចាស់
+Set Filter	កំណត់តម្រង
+Settings	ការកំណត់
+Settings › Customize	ការកំណត់ › ប្ដូរតាមបំណង
+Settings › Customize › Keyboard Shortcuts	ការកំណត់ › ប្ដូរតាមបំណង › ផ្លូវកាត់ក្ដារចុច
+Settings › Theme	ការកំណត់ › ស្បែក
+Several places	ទីកន្លែងច្រើន
+Shaded	មានស្រមោល
+Shape	រាង
+Shapes	រាង
+Share	ចែករំលែក
+Share As	ចែករំលែកជា
+Shared	ចែករំលែក
+Shared Items	ធាតុចែករំលែក
+Shared Vertices	ចំណុចកំពូលរួម
+Shift+drag	Shift+អូស
+Shortcuts	ផ្លូវកាត់
+Show All Columns	បង្ហាញជួរឈរទាំងអស់
+Show all values	បង្ហាញតម្លៃទាំងអស់
+Show Group	បង្ហាញក្រុម
+Show Layers	បង្ហាញស្រទាប់
+Show legend	បង្ហាញតារាងសម្គាល់
+Show legend and source layers	បង្ហាញតារាងសម្គាល់ និងស្រទាប់ប្រភព
+Show Map	បង្ហាញផែនទី
+Show or hide	បង្ហាញ ឬលាក់
+Show or hide the group's layers	បង្ហាញ ឬលាក់ស្រទាប់របស់ក្រុម
+Show source layers	បង្ហាញស្រទាប់ប្រភព
+Side by Side	ចំហៀងគ្នា
+Sign in to choose a model.	ចូលគណនី ដើម្បីជ្រើសម៉ូដែល។
+Sign-in cancelled.	ការចូលគណនីត្រូវបានបោះបង់។
+Sign-in timed out. Start again and allow the browser to reach this computer's loopback address.	ការចូលគណនីអស់ពេល។ សូមចាប់ផ្ដើមម្ដងទៀត ហើយអនុញ្ញាតឲ្យកម្មវិធីរុករកចូលដល់អាសយដ្ឋាន loopback របស់កុំព្យូទ័រនេះ។
+Simplify	សម្រួល
+Single image	រូបភាពតែមួយ
+Single Symbol	និមិត្តសញ្ញាតែមួយ
+Size	ទំហំ
+Skill (SKILL.md or .zip)	ជំនាញ (SKILL.md ឬ .zip)
+Skills	ជំនាញ
+Skills for the AI Assistant: {names}	ជំនាញសម្រាប់ជំនួយការ AI៖ {names}
+Small scales	មាត្រដ្ឋានតូច
+Snap	ស្អិតភ្ជាប់
+Snapping	ការស្អិតភ្ជាប់
+Snow	ព្រិល
+Solid	ជាប់
+Source	ប្រភព
+Source coordinate system	ប្រព័ន្ធកូអរដោនេប្រភព
+South	ត្បូង
+Spectral Analysis	ការវិភាគវិសាលគម
+Spectral indices	សន្ទស្សន៍វិសាលគម
+Speed Display	បង្ហាញល្បឿន
+Split the widest class	បំបែកថ្នាក់ធំបំផុត
+SQL	SQL
+SQL Pane	ផ្ទាំង SQL
+Squares	ការ៉េ
+STAC Search	ស្វែងរក STAC
+STAC Search…	ស្វែងរក STAC…
+Stack another marker on top	ដាក់សញ្ញាមួយទៀតពីលើ
+Stack another stroke on top	ដាក់ខ្សែមួយទៀតពីលើ
+Standalone Tables	តារាងឯករាជ្យ
+Stars	ផ្កាយ
+Start	ចាប់ផ្ដើម
+Start angle	មុំចាប់ផ្ដើម
+Start With	ចាប់ផ្ដើមជាមួយ
+Start-up	ការចាប់ផ្ដើម
+Statistics	ស្ថិតិ
+Status	ស្ថានភាព
+Std. Dev.	គម្លាតស្តង់ដារ
+Step back	ថយក្រោយមួយជំហាន
+Step forward	ទៅមុខមួយជំហាន
+STL 3D Model…	ម៉ូដែល 3D STL…
+Stop MCP relay	បញ្ឈប់ MCP relay
+Stop Recording	បញ្ឈប់ការកត់ត្រា
+Stretch	ការពង្រីកពណ៌
+Stretch\nType	ប្រភេទ\nការពង្រីកពណ៌
+Stretch type	ប្រភេទការពង្រីកពណ៌
+Stroke {n}	ខ្សែ {n}
+Strokes	ខ្សែ
+Strokes for	ខ្សែសម្រាប់
+Style	រចនាប័ទ្ម
+Style Items	ធាតុរចនាប័ទ្ម
+Style › Drawing	រចនាប័ទ្ម › គំនូរ
+Styles	រចនាប័ទ្ម
+Subreport	របាយការណ៍រង
+Subtypes	ប្រភេទរង
+Suitability Modeler	អ្នកធ្វើម៉ូដែលភាពសមស្រប
+Summarize\nWithin	សង្ខេប\nក្នុង
+Summary\nStatistics	ស្ថិតិ\nសង្ខេប
+Supplemental Page	ទំព័របន្ថែម
+Supplemental Page After	ទំព័របន្ថែមខាងក្រោយ
+Surface	ផ្ទៃ
+Surface: {layer}	ផ្ទៃ៖ {layer}
+Swipe	អូសប្រៀបធៀប
+Switch	ប្ដូរ
+Switch selection	ប្ដូរការជ្រើសរើស
+Symbol	និមិត្តសញ្ញា
+Symbology	និមិត្តសញ្ញា
+Symbology Pane	ផ្ទាំងនិមិត្តសញ្ញា
+Symbology Pane…	ផ្ទាំងនិមិត្តសញ្ញា…
+Sync	ធ្វើសមកាលកម្ម
+Table	តារាង
+Table Frame	ស៊ុមតារាង
+Tables	តារាង
+Take this bound out	ដកព្រំនេះចេញ
+Task	កិច្ចការ
+Task Item	ធាតុកិច្ចការ
+Tasks	កិច្ចការ
+Templates	គំរូ
+Terrain	ដីភ្នំ
+Test	សាកល្បង
+Text	អត្ថបទ
+Text Symbol	និមិត្តសញ្ញាអត្ថបទ
+The assistant follows a skill's instructions when it uses it. Whatever they say, its commands that need your approval still ask.	ជំនួយការធ្វើតាមការណែនាំរបស់ជំនាញនៅពេលប្រើវា។ ទោះជាការណែនាំនិយាយយ៉ាងណាក៏ដោយ ពាក្យបញ្ជាដែលត្រូវការការយល់ព្រមពីអ្នក នៅតែសួរអ្នក។
+The layer's strokes	ខ្សែរបស់ស្រទាប់
+The reply stopped before completion; no actions were run.	ចម្លើយបានឈប់មុនពេលបញ្ចប់ គ្មានសកម្មភាពណាត្រូវបានដំណើរការទេ។
+The saved sign-in changed. Select your account again.	ការចូលគណនីដែលបានរក្សាទុកបានផ្លាស់ប្ដូរ។ សូមជ្រើសគណនីរបស់អ្នកម្ដងទៀត។
+The sign-in expired or was revoked. Sign in again.	ការចូលគណនីបានផុតកំណត់ ឬត្រូវបានដកហូត។ សូមចូលម្ដងទៀត។
+The start-up project {path} didn't open: {error}	គម្រោងចាប់ផ្ដើម {path} មិនអាចបើកបាន៖ {error}
+The start-up project {path} isn't a RustGIS project file.	គម្រោងចាប់ផ្ដើម {path} មិនមែនជាឯកសារគម្រោង RustGIS ទេ។
+Theme	ស្បែក
+Third-party licences	អាជ្ញាប័ណ្ណភាគីទីបី
+this build can't download plugins	កំណែនេះមិនអាចទាញយកកម្មវិធីបន្ថែមបានទេ
+This map has no layers yet.	ផែនទីនេះមិនទាន់មានស្រទាប់ទេ។
+This plugin can:	កម្មវិធីបន្ថែមនេះអាច៖
+This request uses an unsupported capability. Check the parameter and change the request.	សំណើនេះប្រើសមត្ថភាពដែលមិនគាំទ្រ។ សូមពិនិត្យប៉ារ៉ាម៉ែត្រ ហើយកែសំណើ។
+Thumbnail	រូបតូច
+Tile layer has changed; search again	ស្រទាប់ក្រឡាបានផ្លាស់ប្ដូរ សូមស្វែងរកម្ដងទៀត
+Tile Layer Properties	លក្ខណសម្បត្តិស្រទាប់ក្រឡា
+Tiles	ក្រឡា
+Tiles of {size} px	ក្រឡា {size} px
+Tilt-shift	ផ្អៀង-រំកិល
+Time	ពេលវេលា
+Time\nSeries	ស៊េរី\nពេលវេលា
+Time\nSlider	អូស\nពេលវេលា
+Time Series	ស៊េរីពេលវេលា
+Tint by elevation	លាបពណ៌តាមរយៈកម្ពស់
+Title	ចំណងជើង
+To	ទៅ
+Toggle Dark Mode	បិទ/បើករបៀបងងឹត
+Toggle GPU Rendering	បិទ/បើកការគូរដោយ GPU
+Toggle Imperial Measurements	បិទ/បើករង្វាស់ខ្នាតអង់គ្លេស
+Toolboxes	ប្រអប់ឧបករណ៍
+Tools	ឧបករណ៍
+Tools\nPane	ផ្ទាំង\nឧបករណ៍
+Tools Pane	ផ្ទាំងឧបករណ៍
+Tools you run appear here.	ឧបករណ៍ដែលអ្នកដំណើរការនឹងបង្ហាញនៅទីនេះ។
+Topology	ទូប៉ូឡូស៊ី
+Topology Options…	ជម្រើសទូប៉ូឡូស៊ី…
+Trace	តាមដាន
+Train And Classify	បណ្ដុះបណ្ដាល និងចាត់ថ្នាក់
+Training polygons	ពហុកោណបណ្ដុះបណ្ដាល
+Transparency	ភាពថ្លា
+Trend Analysis	ការវិភាគនិន្នាការ
+Trying again…	កំពុងព្យាយាមម្ដងទៀត…
+Turn Labels Off	បិទស្លាក
+Turn Off	បិទ
+Turned further, clockwise	បង្វិលបន្ថែម តាមទ្រនិចនាឡិកា
+Type	ប្រភេទ
+Type numbers separated by commas	វាយលេខបំបែកដោយក្បៀស
+Unavailable: {reason}	មិនអាចប្រើបាន៖ {reason}
+Unbind From Time Slider	ផ្ដាច់ពីអូសពេលវេលា
+Undo	មិនធ្វើវិញ
+Undo {action}	មិនធ្វើវិញ {action}
+Ungroup	បំបែកក្រុម
+Uninstall	លុបចេញ
+Uninstalled {id}.	បានលុប {id}។
+Unique Values	តម្លៃមិនដូចគ្នា
+United States	សហរដ្ឋអាមេរិក
+Unsupervised classes (k-means)	ថ្នាក់មិនមានការត្រួតពិនិត្យ (k-means)
+Untitled	គ្មានចំណងជើង
+Update	ធ្វើបច្ចុប្បន្នភាព
+Update to {version}	ធ្វើបច្ចុប្បន្នភាពទៅ {version}
+Use	ប្រើ
+Use a Single Stroke	ប្រើខ្សែតែមួយ
+Use Current View	ប្រើទិដ្ឋភាពបច្ចុប្បន្ន
+Use each feature's line color	ប្រើពណ៌បន្ទាត់របស់ធាតុនីមួយៗ
+Use each feature's line width	ប្រើទទឹងបន្ទាត់របស់ធាតុនីមួយៗ
+Use the Layer's Strokes	ប្រើខ្សែរបស់ស្រទាប់
+Version {version}	កំណែ {version}
+Video…	វីដេអូ…
+View	ទិដ្ឋភាព
+View Clipping	កាត់ទិដ្ឋភាព
+View In Google Earth	មើលក្នុង Google Earth
+View In Google Maps	មើលក្នុង Google Maps
+View Unplaced	មើលស្លាកមិនបានដាក់
+View › Windows	ទិដ្ឋភាព › ផ្ទាំងបង្អួច
+Viewshed from a point	តំបន់មើលឃើញពីចំណុចមួយ
+Viewshed {radius}	តំបន់មើលឃើញ {radius}
+Viewshed {radius} Here	តំបន់មើលឃើញ {radius} នៅទីនេះ
+Vignette	ស្រមោលជ្រុង
+Visibility Analysis	ការវិភាគការមើលឃើញ
+Visibility Range	ជួរមើលឃើញ
+Visible	មើលឃើញ
+Visual Effect	បែបផែនរូបភាព
+Volume	មាឌ
+Waiting for your answer	កំពុងរង់ចាំចម្លើយរបស់អ្នក
+Want more basemaps?	ចង់បានផែនទីមូលដ្ឋានច្រើនទៀតទេ?
+Weather	អាកាសធាតុ
+Web\nData	ទិន្នន័យ\nវេប
+Web\nMap	ផែនទី\nវេប
+Web Basemaps	ផែនទីមូលដ្ឋានវេប
+Web Data	ទិន្នន័យវេប
+Web Layer	ស្រទាប់វេប
+Web Link Chart	គំនូសតំណវេប
+Web Mercator	Web Mercator
+Web Scene	ទិដ្ឋភាពវេប
+Web Style	រចនាប័ទ្មវេប
+Web Tile Layers	ស្រទាប់ក្រឡាវេប
+Web Tool	ឧបករណ៍វេប
+Website	គេហទំព័រ
+Weekly usage	ការប្រើប្រាស់ប្រចាំសប្ដាហ៍
+Weights	ទម្ងន់
+Welcome to RustGIS	សូមស្វាគមន៍មកកាន់ KHGIS
+West	លិច
+What RustGIS opens with: the World Atlas sample, a blank map, a project you choose, or the last project opened or saved.	អ្វីដែល RustGIS បើកនៅពេលចាប់ផ្ដើម៖ គំរូអាត្លាសពិភពលោក ផែនទីទទេ គម្រោងដែលអ្នកជ្រើស ឬគម្រោងចុងក្រោយដែលបានបើក ឬរក្សាទុក។
+Whitebox and GeoLibre tools	ឧបករណ៍ Whitebox និង GeoLibre
+Width	ទទឹង
+Windows	ផ្ទាំងបង្អួច
+Wireframe	គ្រោងខ្សែ
+With the field	ជាមួយវាល
+With the line	ជាមួយបន្ទាត់
+Withdrawn	បានដកចេញ
+Workflow	លំហូរការងារ
+Workflow Manager	អ្នកគ្រប់គ្រងលំហូរការងារ
+Workflows	លំហូរការងារ
+Workspace	កន្លែងធ្វើការ
+World	ពិភពលោក
+World Atlas	អាត្លាសពិភពលោក
+World Countries	ប្រទេសលើពិភពលោក
+Worldview	ទស្សនៈពិភពលោក
+Write a plugin	សរសេរកម្មវិធីបន្ថែម
+XY Table To Point…	តារាង XY ទៅជាចំណុច…
+Your skills are kept in the skills folder of the app's settings folder. Shared skills (~/.agents/skills) are off until you turn them on.	ជំនាញរបស់អ្នកត្រូវបានរក្សាទុកក្នុងថត skills នៃថតការកំណត់របស់កម្មវិធី។ ជំនាញចែករំលែក (~/.agents/skills) ត្រូវបានបិទ រហូតដល់អ្នកបើកវា។
+Yours	របស់អ្នក
+Z factor	កត្តា Z
+Zonal Statistics	ស្ថិតិតាមតំបន់
+Zoom about the pointer	ពង្រីកជុំវិញទ្រនិចកណ្ដុរ
+Zoom Box	ពង្រីកតាមប្រអប់
+Zoom In	ពង្រីក
+Zoom In Here	ពង្រីកនៅទីនេះ
+Zoom in · finish a sketch	ពង្រីក · បញ្ចប់គំនូរព្រាង
+Zoom Out	បង្រួម
+Zoom To	ពង្រីកទៅ
+Zoom To\nLayer	ពង្រីកទៅ\nស្រទាប់
+Zoom to a box (Explore)	ពង្រីកតាមប្រអប់ (រុករក)
+Zoom To Layer	ពង្រីកទៅស្រទាប់
+Zoom To Layers	ពង្រីកទៅស្រទាប់
+Zoom to selection	ពង្រីកទៅការជ្រើសរើស
+{agent} was stopped by you.	{agent} ត្រូវបានអ្នកបញ្ឈប់។
+{name} is larger than {mb} MB	{name} ធំជាង {mb} MB
+{name} runs as a program on your computer: it needs the desktop app or rustgis-cli.	{name} ដំណើរការជាកម្មវិធីនៅលើកុំព្យូទ័ររបស់អ្នក៖ វាត្រូវការកម្មវិធីកុំព្យូទ័រ ឬ rustgis-cli។
+{shown} of {total} plugins	{shown} ក្នុងចំណោម {total} កម្មវិធីបន្ថែម
+{total} plugins	{total} កម្មវិធីបន្ថែម
+＋ Add field	＋ បន្ថែមវាល
+About {app}	អំពី {app}
+Built on RustGIS (Apache License 2.0)	បង្កើតលើ RustGIS (អាជ្ញាប័ណ្ណ Apache 2.0)
+Messages	សារ
+Rivers	ទន្លេ
+Lakes	បឹង
+Countries	ប្រទេស
+Cambodia	កម្ពុជា
+Provinces and districts on satellite imagery	ខេត្ត និងស្រុក លើរូបភាពផ្កាយរណប
+GIS and remote sensing for Cambodia, in Khmer and English.	ប្រព័ន្ធព័ត៌មានភូមិសាស្ត្រ និងទូរសម្បទាសម្រាប់កម្ពុជា ជាភាសាខ្មែរ និងអង់គ្លេស។
+Center Here	ដាក់កណ្ដាល
+Buffer 1 km	តំបន់ជុំវិញ 1 គ.ម
+Copy Coordinates	ចម្លងកូអរដោនេ
+Zoom Out Here	បង្រួមនៅទីនេះ
+More…	ច្រើនទៀត…
+Copied {text}	បានចម្លង {text}
+X-ray: {layer}	កាំរស្មី X៖ {layer}
+FLYING	កំពុងហោះ
+Toggle HUD	បិទ/បើក HUD
+Toggle Radial Menu	បិទ/បើកម៉ឺនុយរង្វង់
+Toggle X-ray Lens	បិទ/បើកកែវកាំរស្មី X
+Cambodia Data	ទិន្នន័យកម្ពុជា
+Cambodia\nData	ទិន្នន័យ\nកម្ពុជា
+Choose a province or district and load its boundaries, roads, water, schools, health facilities, villages and elevation.	ជ្រើសខេត្ត ឬស្រុក ហើយផ្ទុកព្រំដែន ផ្លូវ ទឹក សាលារៀន មណ្ឌលសុខភាព ភូមិ និងរយៈកម្ពស់។
+Choose an area and KHGIS loads its data: boundaries, roads, water, schools, health facilities, villages and elevation.	ជ្រើសតំបន់ ហើយ KHGIS នឹងផ្ទុកទិន្នន័យរបស់វា៖ ព្រំដែន ផ្លូវ ទឹក សាលារៀន មណ្ឌលសុខភាព ភូមិ និងរយៈកម្ពស់។
+Choose…	ជ្រើស…
+Province	ខេត្ត
+District	ស្រុក
+Whole province	ទូទាំងខេត្ត
+Data to load	ទិន្នន័យដែលត្រូវផ្ទុក
+Elevation (Copernicus 30 m)	រយៈកម្ពស់ (Copernicus 30 ម)
+Load Data	ផ្ទុកទិន្នន័យ
+Downloading… {n} left	កំពុងទាញយក… នៅសល់ {n}
+{theme}: {n} features	{theme}៖ ធាតុ {n}
+Choose a province first.	សូមជ្រើសខេត្តជាមុនសិន។
+Sources: boundaries from geoBoundaries and features from OpenStreetMap (© OpenStreetMap contributors, ODbL); elevation from Copernicus GLO-30 (© ESA).	ប្រភព៖ ព្រំដែនពី geoBoundaries និងធាតុពី OpenStreetMap (© អ្នករួមចំណែក OpenStreetMap, ODbL) រយៈកម្ពស់ពី Copernicus GLO-30 (© ESA)។
+One-click workflows	លំហូរការងារចុចតែម្ដង
+Province profile: load data, then make the map	ទម្រង់ខេត្ត៖ ផ្ទុកទិន្នន័យ រួចធ្វើផែនទី
+Flood exposure	ហានិភ័យទឹកជំនន់
+Villages near rivers and water	ភូមិជិតទន្លេ និងប្រភពទឹក
+School access	លទ្ធភាពទៅសាលារៀន
+Villages far from any school	ភូមិឆ្ងាយពីសាលារៀន
+Health access	លទ្ធភាពទៅមណ្ឌលសុខភាព
+Villages far from any health facility	ភូមិឆ្ងាយពីមណ្ឌលសុខភាព
+Schools per district	សាលារៀនតាមស្រុក
+Auto Map Layout	ប្លង់ផែនទីស្វ័យប្រវត្តិ
+An A4 map of the view: title, legend, scale bar, north arrow, inset and sources	ផែនទី A4 នៃទិដ្ឋភាព៖ ចំណងជើង តារាងសម្គាល់ របារមាត្រដ្ឋាន ព្រួញទិសខាងជើង ផែនទីតូច និងប្រភព
+Map layout made: Publish › Export to save it as PDF.	បានធ្វើប្លង់ផែនទី៖ បោះពុម្ពផ្សាយ › នាំចេញ ដើម្បីរក្សាទុកជា PDF។
+Load Cambodia Area Data	ផ្ទុកទិន្នន័យតំបន់កម្ពុជា
+List Cambodia Areas	បញ្ជីតំបន់កម្ពុជា
+Run KHGIS Workflow	ដំណើរការលំហូរការងារ KHGIS
+Welcome to {app}	សូមស្វាគមន៍មកកាន់ {app}
+Provinces, districts, imagery	ខេត្ត ស្រុក រូបភាពផ្កាយរណប

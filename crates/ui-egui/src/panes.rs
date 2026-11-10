@@ -218,7 +218,8 @@ fn right_pane(app: &mut RustGisApp, ui: &mut Ui, right: RightPane, t: &Tokens) {
 
 /// The Web Data services shown in the Web Data pane, by the `ui.dialog` name that opens them, and
 /// their titles.
-const WEB_DATA: [(&str, &str); 16] = [
+const WEB_DATA: [(&str, &str); 17] = [
+    ("cambodia", "Cambodia Data"),
     ("opendata", "Search Open Data"),
     ("stac", "STAC Search"),
     ("dataCubes", "Data Cubes"),
@@ -257,6 +258,7 @@ fn web_data(app: &mut RustGisApp, ui: &mut Ui) {
     match app.ui.web_data {
         "stac" => crate::stacui::dialog(app, ui),
         "dataCubes" => crate::cubesui::pane(app, ui),
+        "cambodia" => crate::khdata::pane(app, ui),
         "osm" => crate::portalsui::osm(app, ui),
         "boundaries" => crate::portalsui::boundaries(app, ui),
         "overture" => crate::catalogsui::overture(app, ui),
@@ -3517,7 +3519,7 @@ fn geoprocessing(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
         if q.is_empty() {
             // Browsing: one collapsible toolbox per top-level group, like the GeoLibre ones
             // (open: there are only a few built-in tools).
-            ui.label(egui::RichText::new(tl!("RustGIS")).size(11.0).color(t.text_dim));
+            ui.label(egui::RichText::new(crate::APP_NAME).size(11.0).color(t.text_dim));
             let mut tops: Vec<&str> = builtin.iter().map(|t| t.toolbox.split(" › ").next().unwrap_or(t.toolbox)).collect();
             tops.sort();
             tops.dedup();

@@ -309,6 +309,20 @@ pub enum ScriptFont {
     /// Lao letters, drawn after the interface face (which keeps drawing Latin words). Vowel and
     /// tone marks are placed by the face's default offsets; there is no mark positioning.
     Lao,
+    /// Khmer: Noto Sans Khmer, bundled in the program (SIL Open Font License) so the web app needs
+    /// no download. egui shapes it with HarfRust, which places subscript consonants (coeng) and
+    /// reorders pre-base vowels. The face has Latin letters too.
+    Khmer,
+}
+
+/// The bundled Khmer face (Noto Sans Khmer Regular, SIL Open Font License 1.1).
+pub const KHMER_FONT: &[u8] = include_bytes!("../fonts/NotoSansKhmer-Regular.ttf");
+
+/// Whether a face draws Khmer letters (ka, the coeng sign, the vowel sign e and the khan).
+fn covers_khmer(bytes: &[u8], index: u32) -> bool {
+    use ab_glyph::Font;
+    ab_glyph::FontRef::try_from_slice_and_index(bytes, index)
+        .is_ok_and(|f| ['\u{1780}', '\u{17D2}', '\u{17C1}', '\u{17D4}'].iter().all(|c| f.glyph_id(*c).0 != 0))
 }
 
 const BENGALI_CANDIDATES: &[&str] = &[
@@ -392,6 +406,11 @@ pub fn script_font(script: ScriptFont) -> Option<&'static (Vec<u8>, u32)> {
             static FOUND: OnceLock<Option<(Vec<u8>, u32)>> = OnceLock::new();
             FOUND.get_or_init(|| LAO_CANDIDATES.iter().find_map(|p| read(p).filter(|b| covers_lao(b, 0)).map(|b| (b, 0)))).as_ref()
         }
+        // Bundled, so it is there on the web too.
+        ScriptFont::Khmer => {
+            static FOUND: OnceLock<Option<(Vec<u8>, u32)>> = OnceLock::new();
+            FOUND.get_or_init(|| covers_khmer(KHMER_FONT, 0).then(|| (KHMER_FONT.to_vec(), 0))).as_ref()
+        }
     }
 }
 
@@ -428,7 +447,8 @@ pub fn script_font_url(script: ScriptFont) -> Option<&'static str> {
         ScriptFont::Cjk(region) => Some(cjk_font_url(region)),
         ScriptFont::Arabic => Some("https://assets.rustgis.app/fonts/Vazirmatn-Regular.ttf"),
         // No verified Bengali asset is hosted by RustGIS; don't guess a URL.
-        ScriptFont::Bengali | ScriptFont::Lao => None,
+        // Khmer is bundled: nothing to download.
+        ScriptFont::Bengali | ScriptFont::Lao | ScriptFont::Khmer => None,
     }
 }
 
@@ -446,6 +466,14 @@ mod tests {
         assert!(!super::covers_lao(epaint_default_fonts::UBUNTU_LIGHT, 0));
         assert!(!super::covers_lao(b"not a font", 0));
         assert_eq!(super::script_font_url(super::ScriptFont::Lao), None);
+    }
+
+    #[test]
+    fn the_bundled_khmer_face_draws_khmer() {
+        assert!(super::covers_khmer(super::KHMER_FONT, 0));
+        assert!(!super::covers_khmer(epaint_default_fonts::UBUNTU_LIGHT, 0));
+        assert!(super::script_font(super::ScriptFont::Khmer).is_some());
+        assert_eq!(super::script_font_url(super::ScriptFont::Khmer), None);
     }
 
     /// A variable Noto Serif (one file for every weight, its italic beside it) is found in a

@@ -2476,6 +2476,7 @@ pub fn gpu_may_turn(map: &Map, view: &View) -> bool {
             && l.mask.is_none()
             && l.blend == rustgis_map::effects::Blend::Normal
             && map.swipe.is_none_or(|(id, _)| id != l.id)
+            && map.xray.is_none_or(|(id, _)| id != l.id)
             && l.aggregation.is_none()
             && !l.graphics
             && !l.has_strokes()
@@ -2764,6 +2765,7 @@ fn stands_up(map: &Map, layer: &rustgis_map::Layer) -> bool {
         && layer.mask.is_none()
         && layer.blend == rustgis_map::effects::Blend::Normal
         && map.swipe.is_none_or(|(id, _)| id != layer.id)
+        && map.xray.is_none_or(|(id, _)| id != layer.id)
         // Marks and turned markers stay on the ground, drawn as the flat map draws them.
         && !layer.has_strokes()
         && layer.marker_rotation.is_none()
@@ -4626,13 +4628,15 @@ fn layer_masks(
     key: &str,
     scale: f64,
 ) -> Option<Vec<(u32, tiny_skia::Mask)>> {
+    let xray = map.xray;
     let wanted: Vec<(u32, Option<String>, Option<f64>)> = map
         .layers
         .iter()
         .filter(|l| map.draws_at(l, scale))
         .filter_map(|l| {
             let swipe = map.swipe.filter(|(id, _)| *id == l.id).map(|(_, x)| x.clamp(0.0, 1.0));
-            (l.mask.is_some() || swipe.is_some()).then(|| (l.id, l.mask.clone(), swipe))
+            let lensed = xray.is_some_and(|(id, _)| id == l.id);
+            (l.mask.is_some() || swipe.is_some() || lensed).then(|| (l.id, l.mask.clone(), swipe))
         })
         .collect();
     let mut out = Vec::new();
@@ -4694,6 +4698,17 @@ fn layer_masks(
             && let Some(r) = tiny_skia::Rect::from_xywh(0.0, 0.0, (w as f64 * x) as f32, h as f32)
         {
             m.intersect_path(&PathBuilder::from_rect(r), FillRule::Winding, false, Transform::identity());
+        }
+        // The X-ray lens: everywhere but the circle.
+        if let Some((_, [cx, cy, r])) = xray.filter(|(lid, _)| *lid == id) {
+            let mut pb = PathBuilder::new();
+            if let Some(full) = tiny_skia::Rect::from_xywh(0.0, 0.0, w as f32, h as f32) {
+                pb.push_rect(full);
+            }
+            pb.push_circle((cx * w as f64) as f32, (cy * h as f64) as f32, (r * w as f64).max(1.0) as f32);
+            if let Some(path) = pb.finish() {
+                m.intersect_path(&path, FillRule::EvenOdd, true, Transform::identity());
+            }
         }
         out.push((id, m));
     }

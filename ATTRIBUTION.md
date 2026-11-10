@@ -88,4 +88,6 @@ Ubuntu Light face that ships inside `epaint_default_fonts` (Ubuntu Font Licence 
 interface language in a script those faces lack, the web app downloads one from
 [rustgis-assets](https://github.com/opengeos/rustgis-assets/tree/main/fonts), where each font's
 licence is kept beside it: Noto Sans SC, JP or KR for Chinese, Japanese or Korean, and Vazirmatn
-for Arabic script (both SIL Open Font License 1.1).
+for Arabic script (both SIL Open Font License 1.1). Khmer uses Noto Sans Khmer Regular, bundled in
+`crates/render/fonts/` so it needs no download ([notofonts/khmer](https://github.com/notofonts/khmer),
+SIL Open Font License 1.1; licence in `third-party/NotoSansKhmer-OFL.txt`).

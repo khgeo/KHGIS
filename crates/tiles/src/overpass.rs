@@ -11,6 +11,10 @@ pub const OVERPASS: &str = "https://overpass-api.de/api/interpreter";
 /// The largest area asked for, in square degrees (about 50 × 50 km at mid latitudes): the public
 /// servers are shared, and a larger area is better read from an extract.
 pub const MAX_AREA: f64 = 0.25;
+/// The largest area for a narrow query (tag filters only, each with a value, such as
+/// `amenity=school`): a province's schools or main roads, which are few. KHGIS asks this for a
+/// whole Cambodian province.
+pub const MAX_AREA_NARROW: f64 = 4.0;
 /// How many elements an answer holds at most (`out geom N`).
 pub const MAX_ELEMENTS: usize = 50_000;
 /// The server's time limit, in seconds (under the downloads' own).
@@ -54,11 +58,6 @@ impl Query {
             return Err("the box is [west, south, east, north] in longitude/latitude".into());
         }
         let area = (e - w) * (n - s);
-        if area > MAX_AREA {
-            return Err(format!(
-                "the area is too large for Overpass ({area:.2} square degrees; at most {MAX_AREA}, about 50 × 50 km): zoom in, or use an extract (.osm.pbf)"
-            ));
-        }
         let preset = preset.map(str::trim).filter(|p| !p.is_empty()).map(|p| p.to_ascii_lowercase());
         if let Some(p) = &preset
             && !PRESETS.iter().any(|(id, _, _)| id == p)
@@ -84,6 +83,13 @@ impl Query {
         }
         if preset.is_none() && tags.is_empty() {
             return Err("give a preset or tag filters (such as amenity=cafe)".into());
+        }
+        let narrow = preset.is_none() && tags.iter().all(|(_, v)| v.is_some());
+        let limit = if narrow { MAX_AREA_NARROW } else { MAX_AREA };
+        if area > limit {
+            return Err(format!(
+                "the area is too large for Overpass ({area:.2} square degrees; at most {limit}): zoom in, or use an extract (.osm.pbf)"
+            ));
         }
         Ok(Query { bbox, preset, tags })
     }
@@ -449,6 +455,10 @@ mod tests {
         let q = Query::new([0.0, 0.0, 0.1, 0.1], None, Some("name=a\"](\\")).unwrap();
         assert!(q.ql().contains("(nwr[\"name\"=\"a\\\"](\\\\\"];)"), "{}", q.ql());
         assert!(Query::new([0.0, 0.0, 1.0, 1.0], Some("roads"), None).unwrap_err().contains("too large"));
+        // A narrow query (each filter with a value) may cover a province.
+        assert!(Query::new([104.0, 12.0, 105.5, 13.2], None, Some("amenity=school, amenity=college")).is_ok());
+        assert!(Query::new([104.0, 12.0, 105.5, 13.2], None, Some("amenity")).unwrap_err().contains("too large"));
+        assert!(Query::new([100.0, 10.0, 105.0, 15.0], None, Some("amenity=school")).unwrap_err().contains("too large"));
         assert!(Query::new([0.0, 0.0, 0.1, 0.1], None, None).is_err());
         assert!(Query::new([0.0, 0.0, 0.1, 0.1], Some("everything"), None).is_err());
         assert!(Query::new([1.0, 0.0, 0.0, 0.1], Some("roads"), None).is_err());

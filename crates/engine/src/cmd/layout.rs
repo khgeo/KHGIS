@@ -937,7 +937,7 @@ fn publication(s: &mut Session, p: &Value) -> CmdResult {
         texts_of(p, "reference")?.unwrap_or_else(|| vec!["Projection: {projection}".into(), "Datum: {datum} · Graticule: {grid}".into()]);
     // An empty author leaves the line out; none given, the default.
     let author = match texts_of(p, "author")? {
-        None => Some("Made with RustGIS · {date}".to_string()),
+        None => Some("Made with KHGIS · {date}".to_string()),
         Some(t) => Some(t.join(" ")).filter(|t| !t.trim().is_empty()),
     };
     let headings = texts_of(p, "headings")?.unwrap_or_default();

@@ -210,7 +210,47 @@ fn glyph(c: char, f: &'static FontRef<'static>, sans: Option<&'static FontRef<'s
 /// every character of `text`, invisible characters aside.
 pub fn covers(text: &str, bold: bool) -> bool {
     let Some(f) = font(bold) else { return true };
-    text.chars().all(|c| invisible(c) || glyph(c, f, None).is_some())
+    text.chars().all(|c| invisible(c) || glyph(c, f, None).is_some() || (is_khmer(c) && khmer_face().is_some()))
+}
+
+/// Khmer letters, signs and symbols.
+fn is_khmer(c: char) -> bool {
+    matches!(c, '\u{1780}'..='\u{17FF}' | '\u{19E0}'..='\u{19FF}')
+}
+
+/// The bundled Khmer face, for drawing.
+fn khmer_face() -> Option<&'static FontRef<'static>> {
+    static FACE: OnceLock<Option<FontRef<'static>>> = OnceLock::new();
+    FACE.get_or_init(|| FontRef::try_from_slice(crate::fonts::KHMER_FONT).ok()).as_ref()
+}
+
+/// A run of Khmer shaped with HarfRust (its GSUB forms the subscript consonants and reorders the
+/// vowels; GPOS places marks across): each glyph with its pen position from 0 (horizontal
+/// placement only) and the character its cluster starts with, and the run's advance.
+fn shape_khmer(run: &str, px: f32) -> Option<(Vec<(GlyphId, f32, char)>, f32)> {
+    static DATA: OnceLock<Option<(harfrust::FontRef<'static>, harfrust::ShaperData)>> = OnceLock::new();
+    let (hf, data) = DATA
+        .get_or_init(|| {
+            let f = harfrust::FontRef::new(crate::fonts::KHMER_FONT).ok()?;
+            let d = harfrust::ShaperData::new(&f);
+            Some((f, d))
+        })
+        .as_ref()?;
+    let face = khmer_face()?;
+    let k = face.as_scaled(em(face, px)).h_scale_factor();
+    let shaper = data.shaper(hf).build();
+    let mut buf = harfrust::UnicodeBuffer::new();
+    buf.push_str(run);
+    buf.guess_segment_properties();
+    let out = shaper.shape(buf, harfrust::ShapeOptions::new());
+    let mut x = 0.0;
+    let mut glyphs = Vec::with_capacity(out.len());
+    for (info, pos) in out.glyph_infos().iter().zip(out.glyph_positions()) {
+        let ch = run.get(info.cluster as usize..).and_then(|s| s.chars().next()).unwrap_or(' ');
+        glyphs.push((GlyphId(info.glyph_id as u16), x + pos.x_offset as f32 * k, ch));
+        x += pos.x_advance as f32 * k;
+    }
+    Some((glyphs, x))
 }
 
 /// Lays out `text` at `px` pixels in `face` (with `sans` for the characters it lacks, as
@@ -225,7 +265,28 @@ fn shape(
     let mut out = Vec::new();
     let mut x = 0.0;
     let mut prev: Option<(&'static FontRef<'static>, GlyphId)> = None;
-    for ch in text.chars().take(500) {
+    let chars: Vec<char> = text.chars().take(500).collect();
+    let mut i = 0;
+    while i < chars.len() {
+        let ch = chars[i];
+        // A Khmer run (with the joiners inside it) is shaped as a whole in the Khmer face.
+        if is_khmer(ch)
+            && let Some(kf) = khmer_face()
+        {
+            let mut j = i;
+            while j < chars.len() && (is_khmer(chars[j]) || matches!(chars[j], '\u{200B}'..='\u{200D}')) {
+                j += 1;
+            }
+            let run: String = chars[i..j].iter().collect();
+            if let Some((glyphs, adv)) = shape_khmer(&run, px) {
+                out.extend(glyphs.into_iter().map(|(id, gx, c)| (kf, id, x + gx, c)));
+                x += adv;
+                prev = None;
+                i = j;
+                continue;
+            }
+        }
+        i += 1;
         let Some((f, id)) = glyph(ch, face, sans) else { continue };
         let sf = f.as_scaled(em(f, px));
         if let Some((pf, pid)) = prev
@@ -1429,5 +1490,22 @@ mod coverage_tests {
             let (glyphs, _) = super::shape(&c.to_string(), 24.0, &serif.0, super::sans_beside(&serif.0, Face::default()));
             assert!(glyphs.len() == 1 && std::ptr::eq(glyphs[0].0, sans), "{c:?} left out");
         }
+    }
+}
+
+#[cfg(test)]
+mod khmer_tests {
+    #[test]
+    fn khmer_is_shaped_into_fewer_glyphs_than_letters() {
+        let f = super::font(false).expect("a label font");
+        // ស្រុក: the coeng and ro form one subscript glyph, so fewer glyphs than characters.
+        let text = "ស្រុក";
+        let (glyphs, width) = super::shape(text, 24.0, f, None);
+        assert!(!glyphs.is_empty() && width > 0.0);
+        assert!(glyphs.len() < text.chars().count(), "{} glyphs for {} letters", glyphs.len(), text.chars().count());
+        // Mixed text keeps its Latin letters.
+        let (mixed, _) = super::shape("KHGIS ខេត្ត", 24.0, f, None);
+        assert!(mixed.iter().any(|g| g.3 == 'K'));
+        assert!(super::covers("ខេត្តកណ្ដាល", false));
     }
 }

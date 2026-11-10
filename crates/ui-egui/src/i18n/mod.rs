@@ -46,6 +46,8 @@ pub enum Script {
     Bengali,
     /// Lao: a face discovered on the desktop where available, after the interface font.
     Lao,
+    /// Khmer: the bundled Noto Sans Khmer, after the interface font.
+    Khmer,
 }
 
 /// Which CJK face reads best for a language (the glyph shapes differ by region).
@@ -85,7 +87,7 @@ macro_rules! lang {
 }
 
 /// The registry. English first: it is the source language and the fallback.
-pub static LANGUAGES: [LangInfo; 21] = [
+pub static LANGUAGES: [LangInfo; 22] = [
     LangInfo {
         code: "en",
         name: "English",
@@ -113,6 +115,7 @@ pub static LANGUAGES: [LangInfo; 21] = [
     lang!("ko", "한국어", "Korean", Script::Cjk(CjkFont::Korean), "ko.tsv"),
     lang!("ka", "ქართული", "Georgian", Script::Alphabetic, "ka.tsv"),
     lang!("lo", "ພາສາລາວ", "Lao", Script::Lao, "lo.tsv"),
+    lang!("km", "ខ្មែរ", "Khmer", Script::Khmer, "km.tsv"),
     lang!("bn", "বাংলা", "Bengali", Script::Bengali, "bn.tsv"),
     lang!("el", "Ελληνικά", "Greek", Script::Alphabetic, "el.tsv"),
 ];

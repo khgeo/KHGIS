@@ -139,3 +139,70 @@ pub fn world_project() -> Project {
     map.camera = cam(10.0, 18.0, 26_000.0);
     p
 }
+
+/// Cambodia's provinces (25, English and Khmer names) and districts (197, with their province),
+/// from geoBoundaries (© OpenStreetMap contributors, ODbL 1.0), simplified. Bundled so KHGIS
+/// opens on Cambodia, and picks a province, without a network.
+pub const CAMBODIA_PROVINCES: &str = include_str!("../data/cambodia_adm1.geojson");
+pub const CAMBODIA_DISTRICTS: &str = include_str!("../data/cambodia_adm2.geojson");
+
+/// "Cambodia": KHGIS's home map. Satellite imagery under glowing province outlines labelled in
+/// Khmer and English, districts drawn faintly, with a bookmark per region.
+pub fn cambodia_project(khmer: bool) -> Project {
+    let mut p = Project::new(if khmer { "កម្ពុជា" } else { "Cambodia" });
+    let map = p.map_mut();
+    map.name = if khmer { "កម្ពុជា".into() } else { "Cambodia".into() };
+    map.basemap = rustgis_map::Basemap::Midnight;
+    let mut imagery = rustgis_map::tiles::TileLayer::new(
+        "Satellite (Esri World Imagery)",
+        rustgis_map::tiles::TileKind::Raster,
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    );
+    imagery.attribution = "Esri, Maxar, Earthstar Geographics, and the GIS User Community".into();
+    imagery.max_zoom = 19;
+    imagery.id = "esri-imagery".into();
+    map.tiles.push(imagery);
+
+    let mut add = |name: &str, text: &str| read_geojson(text, name).ok().map(|(ds, _)| map.add_dataset(ds));
+    let districts = add(if khmer { "ស្រុក/ខណ្ឌ" } else { "Districts" }, CAMBODIA_DISTRICTS);
+    let provinces = add(if khmer { "ខេត្ត/រាជធានី" } else { "Provinces" }, CAMBODIA_PROVINCES);
+    let cyan = Rgba::rgb(0x22, 0xD3, 0xEE);
+    if let Some(l) = districts.and_then(|id| map.layer_mut(id)) {
+        l.renderer = Renderer::Single(Symbol { fill: Rgba::new(0, 0, 0, 0), stroke: Rgba::new(0xCF, 0xFA, 0xFE, 90), stroke_width: 0.5, size: 0.0, marker: Marker::Circle });
+    }
+    if let Some(l) = provinces.and_then(|id| map.layer_mut(id)) {
+        l.renderer = Renderer::Single(Symbol { fill: Rgba::new(0x22, 0xD3, 0xEE, 18), stroke: cyan, stroke_width: 1.6, size: 0.0, marker: Marker::Circle });
+        l.labels.enabled = true;
+        l.labels.default.field = if khmer { "name_km".into() } else { "name".into() };
+        l.labels.default.size = 10.0;
+        l.labels.default.bold = true;
+        l.labels.default.color = Rgba::rgb(0xE6, 0xFB, 0xFF);
+        l.labels.default.halo = true;
+        l.labels.default.halo_color = Some(Rgba::new(0x05, 0x0B, 0x1A, 220));
+    }
+    map.bookmarks = vec![
+        Bookmark::new(if khmer { "កម្ពុជា" } else { "Cambodia" }, cam(104.95, 12.55, 820.0)),
+        Bookmark::new(if khmer { "ភ្នំពេញ" } else { "Phnom Penh" }, cam(104.92, 11.56, 18.0)),
+        Bookmark::new(if khmer { "សៀមរាប និងអង្គរ" } else { "Siem Reap & Angkor" }, cam(103.86, 13.41, 25.0)),
+        Bookmark::new(if khmer { "បឹងទន្លេសាប" } else { "Tonle Sap" }, cam(104.1, 12.85, 160.0)),
+        Bookmark::new(if khmer { "ឆ្នេរសមុទ្រ" } else { "Coast" }, cam(103.7, 10.8, 160.0)),
+        Bookmark::new(if khmer { "ភូមិភាគឦសាន" } else { "Northeast" }, cam(107.0, 13.6, 220.0)),
+    ];
+    map.camera = cam(104.95, 12.55, 820.0);
+    p
+}
+
+#[cfg(test)]
+mod cambodia_tests {
+    #[test]
+    fn the_cambodia_project_has_provinces_districts_and_imagery() {
+        for khmer in [false, true] {
+            let p = super::cambodia_project(khmer);
+            let m = &p.maps[0];
+            assert_eq!(m.layers.len(), 2);
+            assert_eq!(m.tiles.len(), 1);
+            let provinces = m.layers.iter().find(|l| l.labels.enabled).unwrap();
+            assert_eq!(provinces.dataset.features.len(), 25);
+        }
+    }
+}

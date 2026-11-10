@@ -13,6 +13,7 @@ pub fn commands() -> Vec<C> {
         // that manage `dirty` and the history themselves.
         C::new("project.new", "New Project", "Project", new).roles(&[]).effects(crate::policy::Effects::NONE.with(crate::policy::Effect::Replaces)).key("Mod+N").view().params(r#"{"name"?: string}"#),
         C::new("project.sample", "World Atlas Sample", "Project", sample).roles(&[]).effects(crate::policy::Effects::NONE.with(crate::policy::Effect::Replaces)).view(),
+        C::new("project.cambodia", "Cambodia", "Project", cambodia).roles(&[]).effects(crate::policy::Effects::NONE.with(crate::policy::Effect::Replaces)).view().params(r#"{"khmer"?: bool (names and layer titles in Khmer)}"#),
         C::new("project.open", "Open Project", "Project", open).roles(&[]).effects(crate::policy::Effects::NONE.with(crate::policy::Effect::Replaces).with(crate::policy::Effect::Files)).key("Mod+O").view().params(r#"{"path": string}"#),
         C::new("project.openText", "Open Project (from text)", "Project", open_text).roles(&[crate::ParamRole { key: "text", role: crate::Role::Document(crate::Document::Project) }]).effects(crate::policy::Effects::NONE.with(crate::policy::Effect::Replaces).with(crate::policy::Effect::Network)).view().params(r#"{"text": project JSON, "fileName"?: string, "package"?: "true for package contents: never restore saved layer secrets"}"#),
         C::new("project.save", "Save Project", "Project", save).inputs(save_inputs).roles(&[]).effects(crate::policy::Effects::NONE.with(crate::policy::Effect::Files)).key("Mod+S").view().params(r#"{"path"?: string}"#),
@@ -234,6 +235,16 @@ fn new(s: &mut Session, p: &Value) -> CmdResult {
 fn sample(s: &mut Session, _: &Value) -> CmdResult {
     reset(s, crate::sample::world_project());
     s.active_layer = s.map().layer_by_name("Countries").map(|l| l.id);
+    s.path = None;
+    Ok(Value::Null)
+}
+
+/// `project.cambodia`: KHGIS's home map of Cambodia (provinces, districts, satellite imagery).
+fn cambodia(s: &mut Session, p: &Value) -> CmdResult {
+    let khmer = p.get("khmer").and_then(Value::as_bool).unwrap_or(false);
+    reset(s, crate::sample::cambodia_project(khmer));
+    let provinces = s.map().layers.iter().find(|l| l.labels.enabled).map(|l| l.id);
+    s.active_layer = provinces;
     s.path = None;
     Ok(Value::Null)
 }

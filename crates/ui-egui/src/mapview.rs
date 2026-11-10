@@ -606,6 +606,8 @@ pub fn show(app: &mut RustGisApp, ui: &mut Ui) {
     // A text selected on the map opens the Format pane (#516).
     crate::graphicformat::follow(app, ui.ctx());
     animate(app, ui);
+    crate::radial::escape(app, ui);
+    crate::hud::fly(app, ui);
     // Side by side: the other map on the right, following this one when views are linked.
     if let Some(other) = split_map(app).filter(|i| *i != app.session.project.active_map) {
         let full = ui.available_rect_before_wrap();
@@ -750,6 +752,8 @@ fn split_view(app: &mut RustGisApp, ui: &mut Ui, other: usize, rect: Rect, t: &T
 fn main_view(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
     let t = *t;
     let rect = ui.available_rect_before_wrap();
+    crate::hud::note_rect(app, rect);
+    crate::xray::update(app, ui, rect);
     let resp = ui.allocate_rect(rect, Sense::click_and_drag());
     let (w, h) = (rect.width() as f64, rect.height() as f64);
     if w < 4.0 || h < 4.0 {
@@ -2850,14 +2854,18 @@ fn interact(app: &mut RustGisApp, ui: &mut Ui, resp: &egui::Response, rect: Rect
     {
         ui.ctx().set_cursor_icon(icon);
     }
-    if resp.secondary_clicked() {
+    // KHGIS: right-click opens the radial menu (Shift + right-click, the classic one).
+    if crate::radial::press(app, ui, rect) {
+        app.map.menu_lonlat = None;
+    } else if resp.secondary_clicked() && !app.ws.radial.is_open() {
         app.map.menu_lonlat = app.map.pointer_lonlat;
         app.map.menu_text = resp.interact_pointer_pos().and_then(|p| text_graphic_at(app, ui.ctx(), rect, p));
     }
     // No menu off the Earth (a globe's corners): there is no place for it to act on.
-    if let Some(c) = app.map.menu_lonlat {
+    if let Some(c) = app.map.menu_lonlat.filter(|_| !app.ws.radial.is_open()) {
         resp.context_menu(|ui| crate::mapmenu::show(app, ui, c));
     }
+    crate::radial::show(app, ui, &Tokens::get(ui.ctx()));
     if hover.is_some() && (matches!(tool, Tool::Measure | Tool::MeasureArea) || tool.draws_edit()) && !app.map.sketch.is_empty() {
         ui.ctx().request_repaint();
     }
@@ -3297,6 +3305,8 @@ fn overlays(app: &mut RustGisApp, ui: &mut Ui, p: &egui::Painter, rect: Rect, t:
         }
     }
     north_arrow(p, rect, t, bearing, pitch);
+    crate::xray::paint(app, p, rect, t);
+    crate::hud::paint(app, p, rect, t);
     // Attribution.
     let att = attribution(app.session.map(), &app.map.attribution);
     if !att.is_empty() {

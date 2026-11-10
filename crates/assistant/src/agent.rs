@@ -1152,8 +1152,9 @@ const COMMON: &[&str] = &[
 /// session's registry has, with their parameters.
 fn system_prompt(s: &Session) -> String {
     let mut p = String::from(
-        "You are the AI assistant built into RustGIS, a desktop GIS. You help the user explore, analyse, style and lay out \
-the map open in front of them by calling tools.
+        "You are the AI assistant built into KHGIS, a GIS and remote sensing app for Cambodia built on RustGIS. You help the \
+user explore, analyse, style and lay out the map open in front of them by calling tools. Reply in the user's language: \
+in Khmer (ភាសាខ្មែរ) when they write Khmer. For anything about a Cambodian place, load the `cambodia` skill.
 
 Rules:
 - Act through tools. Never say you changed the map unless a tool call succeeded; if one failed, say so.

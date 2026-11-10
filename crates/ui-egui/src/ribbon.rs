@@ -513,6 +513,17 @@ fn home_tab(app: &mut RustGisApp, ui: &mut Ui) {
             app.ui.left == Some(crate::LeftPane::Sources),
             false,
         );
+        big(
+            ui,
+            app,
+            "logo",
+            "Cambodia\nData",
+            "Choose a province or district and load its boundaries, roads, water, schools, health facilities, villages and elevation.",
+            "ui.dialog",
+            json!({"name": "cambodia"}),
+            app.ui.web_data == "cambodia" && app.ui.right == Some(crate::RightPane::WebData),
+            false,
+        );
         big_menu(ui, app, "web_data", "Web\nData", "Add data from public web services and catalogs.", web_data_menu);
     });
     group(ui, "Selection", |ui| {
@@ -3654,7 +3665,7 @@ fn start_project_menu(app: &mut RustGisApp, ui: &mut Ui) {
         if name.chars().count() > 24 { format!("{}…", name.chars().take(23).collect::<String>()) } else { name }
     };
     let current = match &with {
-        StartWith::Sample => tl!("World Atlas").to_string(),
+        StartWith::Sample => tl!("Cambodia").to_string(),
         StartWith::Blank => tl!("Blank Map").to_string(),
         StartWith::Last => tl!("Last Project").to_string(),
         StartWith::File(p) => short_name(p),
@@ -3667,7 +3678,7 @@ fn start_project_menu(app: &mut RustGisApp, ui: &mut Ui) {
         "What RustGIS opens with: the World Atlas sample or a blank map."
     };
     big_menu(ui, app, "map", &label, tip, move |ui, app| {
-        for (w, name) in [(StartWith::Sample, tl!("World Atlas")), (StartWith::Blank, tl!("Blank Map"))] {
+        for (w, name) in [(StartWith::Sample, tl!("Cambodia")), (StartWith::Blank, tl!("Blank Map"))] {
             if ui.add(egui::Button::selectable(with == w, name)).clicked() {
                 let _ = app.run("ui.startup", json!({"project": w.json()}));
                 ui.close();

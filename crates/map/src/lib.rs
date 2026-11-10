@@ -1278,6 +1278,11 @@ pub struct Map {
     /// A layer shown only left of a divider (0–1 across the view): the swipe comparison.
     #[serde(default)]
     pub swipe: Option<(u32, f64)>,
+    /// KHGIS's X-ray lens: a layer hidden inside a circle (centre x, y and radius as fractions of
+    /// the view's width and height, radius of its width), so what lies beneath shows through.
+    /// Live only, never saved.
+    #[serde(skip)]
+    pub xray: Option<(u32, [f64; 3])>,
     /// Effects, colour vision, drawing mode, clipping and navigation aids.
     #[serde(default)]
     pub view: view::ViewSettings,
@@ -1400,6 +1405,7 @@ impl Map {
             label_lock_line_anchors: Default::default(),
             editing: design::MapEditing::default(),
             swipe: None,
+            xray: None,
             view: view::ViewSettings::default(),
             thumbnail: None,
             animation: Vec::new(),
@@ -2755,6 +2761,7 @@ impl Map {
             label_lock_line_anchors: _,
             editing: _,
             swipe: _,
+            xray: _,
             view,
             thumbnail: _,
             animation: _,

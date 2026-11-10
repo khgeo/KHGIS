@@ -10,6 +10,12 @@ use crate::theme::{Tokens, regular, semibold};
 /// State of these panes.
 #[derive(Default)]
 pub struct WorkspaceState {
+    /// KHGIS's heads-up display and fly-to.
+    pub hud: crate::hud::HudState,
+    /// The radial right-click menu.
+    pub radial: crate::radial::RadialState,
+    /// The X-ray lens.
+    pub xray: crate::xray::XrayState,
     pub task: String,
     pub task_step: usize,
     /// The steps recorded so far while Record Task is on.

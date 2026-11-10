@@ -10,6 +10,10 @@
 pub mod i18n;
 #[cfg(not(target_arch = "wasm32"))]
 mod agentthreads;
+mod hud;
+mod radial;
+mod xray;
+mod khdata;
 mod analysispane;
 mod approvalcard;
 mod arcgisui;
@@ -111,6 +115,10 @@ mod webdataui;
 mod widgets;
 mod workspacepanes;
 mod zarrui;
+
+
+/// The product name shown in the window: KHGIS, built on RustGIS.
+pub const APP_NAME: &str = "KHGIS";
 
 use rustgis_engine::cmd::service_added::Removal;
 use rustgis_engine::render::rustgis_tiles::failure::Failure;
@@ -795,6 +803,8 @@ pub struct UiState {
     pub connection_tree: connectiontree::State,
     /// OpenStreetMap and Boundaries: their choices and the request under way.
     pub portals: portalsui::State,
+    /// KHGIS's Cambodia Data pane.
+    pub khdata: khdata::State,
     /// Overture Maps and Source Cooperative: choices, results and the request under way.
     pub catalogs: catalogsui::State,
     /// Search Open Data: the portal, the search under way and the datasets found.
@@ -958,6 +968,7 @@ impl Default for UiState {
             s3_chooser: Default::default(),
             connection_tree: Default::default(),
             portals: Default::default(),
+            khdata: Default::default(),
             catalogs: Default::default(),
             opendata: Default::default(),
             embeddings: Default::default(),
@@ -1518,6 +1529,7 @@ impl RustGisApp {
             i18n::Script::Arabic => Some(ScriptFont::Arabic),
             i18n::Script::Bengali => Some(ScriptFont::Bengali),
             i18n::Script::Lao => Some(ScriptFont::Lao),
+            i18n::Script::Khmer => Some(ScriptFont::Khmer),
             i18n::Script::Alphabetic => None,
         }
     }
@@ -2065,7 +2077,15 @@ impl RustGisApp {
                 self.run("project.new", Value::Null)?;
                 false
             }
-            (Some(false), _) | (None, StartWith::Sample) => false,
+            (Some(false), _) => false,
+            // KHGIS starts on its Cambodia home map, in Khmer when the interface is.
+            (None, StartWith::Sample) => {
+                let khmer = self.chosen_lang().code() == "km";
+                self.run("project.cambodia", serde_json::json!({"khmer": khmer}))?;
+                self.session.mark_saved();
+                self.ui.backstage = false;
+                false
+            }
             // Only when there is a project to skip: Last Project with none yet starts the sample anyway.
             (None, StartWith::Last | StartWith::File(_))
                 if overrides.after_crash && (self.ui.last_project.is_some() || self.ui.start_with != StartWith::Last) =>
@@ -3107,6 +3127,24 @@ impl RustGisApp {
                         .notify(i18n::fmt("Copied {path}", &[("path", v.get("text").and_then(Value::as_str).unwrap_or(""))]), false);
                 }
                 return Ok(v);
+            }
+            "ui.radialMenu" => {
+                let r = &mut self.ws.radial;
+                r.disabled = !p.get("on").and_then(Value::as_bool).unwrap_or(r.disabled);
+            }
+            "ui.xray" => {
+                let x = &mut self.ws.xray;
+                x.sticky = p.get("on").and_then(Value::as_bool).unwrap_or(!x.sticky);
+                if let Some(r) = p.get("radius").and_then(Value::as_f64) {
+                    x.radius = (r as f32).clamp(30.0, 600.0);
+                }
+            }
+            "ui.hud" => {
+                let hud = &mut self.ws.hud;
+                hud.enabled = p.get("on").and_then(Value::as_bool).unwrap_or(!hud.enabled);
+                if let Some(f) = p.get("fly").and_then(Value::as_bool) {
+                    hud.fly_enabled = f;
+                }
             }
             "ui.backstage" => self.ui.backstage = p.get("open").and_then(Value::as_bool).unwrap_or(!self.ui.backstage),
             "ui.tab" => {
@@ -5115,6 +5153,7 @@ impl RustGisApp {
         connectionui::poll(self, ctx);
         connectiontree::poll(self, ctx);
         portalsui::poll(self, ctx);
+        khdata::poll(self, ctx);
         catalogsui::poll(self, ctx);
         opendataui::poll(self, ctx);
         embeddingsui::poll(self, ctx);
@@ -5143,7 +5182,7 @@ impl RustGisApp {
             let region = [CjkRegion::SimplifiedChinese, CjkRegion::Japanese, CjkRegion::Korean]
                 .map(ScriptFont::Cjk)
                 .into_iter()
-                .chain([ScriptFont::Arabic, ScriptFont::Bengali, ScriptFont::Lao])
+                .chain([ScriptFont::Arabic, ScriptFont::Bengali, ScriptFont::Lao, ScriptFont::Khmer])
                 .find(|r| script_font_url(*r) == Some(url.as_str()));
             if bytes.is_empty() || !valid_font(&bytes, 0) {
                 // A failed download: say so; picking the language again retries.
