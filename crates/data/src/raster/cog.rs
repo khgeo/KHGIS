@@ -41,7 +41,9 @@ pub struct Sparse {
 }
 
 /// What a container of a file's parts ([`Sparse::container`]) starts with.
-const CONTAINER_MAGIC: &[u8; 16] = b"KHGIS parts 1\n";
+// Format magic, written into files and matched when reading them: it must keep its original
+// bytes (and its 16-byte length) so parts files written before the KHGIS rename still open.
+const CONTAINER_MAGIC: &[u8; 16] = b"RustGIS parts 1\n";
 /// The most parts a container may hold.
 const MAX_PARTS: u64 = 1 << 20;
 
