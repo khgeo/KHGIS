@@ -1,0 +1,31 @@
+{
+  "id": "./",
+  "name": "KHGIS",
+  "short_name": "KHGIS",
+  "description": "A desktop GIS for Cambodia, in Khmer and English: Cambodian boundaries, OpenStreetMap data and one-click workflows.",
+  "lang": "km",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#e4e8ee",
+  "theme_color": "#0E3F44",
+  "categories": [
+    "education",
+    "productivity",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "khgis-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "khgis-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="KHGIS">
+  <title>KHGIS</title>
+  <defs>
+    <!-- Ring text baselines. The band runs from r=84 to r=112, so its centre is r=98. The top
+         line's letters grow outward from its baseline and the bottom line's grow inward, so each
+         baseline sits half a cap height on its own side of the centre. -->
+    <path id="arcTop" d="M 128,128 m -93.3,0 a 93.3,93.3 0 0 1 186.6,0" fill="none"/>
+    <path id="arcBottom" d="M 128,128 m -102.7,0 a 102.7,102.7 0 0 0 205.4,0" fill="none"/>
+    <clipPath id="globeClip"><circle cx="128" cy="128" r="70"/></clipPath>
+  </defs>
+
+  <!-- White ground, as on the app logo and the window icon. -->
+  <rect x="2" y="2" width="252" height="252" rx="52" fill="#FFFFFF"/>
+
+  <!-- The ring. -->
+  <g fill="none" stroke="#0E3F44" stroke-width="2">
+    <circle cx="128" cy="128" r="112"/>
+    <circle cx="128" cy="128" r="84"/>
+  </g>
+
+  <!-- Ticks, outside the ring: each starts on r=112 and runs outward. -->
+  <g stroke="#0E3F44" stroke-width="2.5">
+    <path d="M128 16v-14M128 240v14M16 128h-14M240 128h14"/>
+  </g>
+  <g stroke="#0E3F44" stroke-width="1.4" opacity=".5">
+    <path d="M48.8 48.8l-7-7M207.2 48.8l7-7M48.8 207.2l-7 7M207.2 207.2l7 7"/>
+  </g>
+
+  <!-- Globe. -->
+  <circle cx="128" cy="128" r="70" fill="#0E3F44"/>
+  <g clip-path="url(#globeClip)" fill="none" stroke="#CDE9ED" stroke-width="1.5" opacity=".85">
+    <path d="M58 104h140M58 128h140M58 152h140M66 82h124M66 174h124"/>
+    <ellipse cx="128" cy="128" rx="24" ry="70"/>
+    <ellipse cx="128" cy="128" rx="48" ry="70"/>
+    <path d="M128 58v140"/>
+  </g>
+  <circle cx="128" cy="128" r="70" fill="none" stroke="#0E3F44" stroke-width="3"/>
+
+  <!-- KH. -->
+  <text x="128" y="129" text-anchor="middle" dominant-baseline="central"
+        font-family="Inter, Helvetica, Arial, sans-serif" font-size="58" font-weight="700"
+        fill="#FFFFFF" stroke="#0E3F44" stroke-width="8" paint-order="stroke"
+        letter-spacing="2">KH</text>
+
+  <!-- Ring text. -->
+  <g font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="600"
+     fill="#0E3F44" letter-spacing="2.2">
+    <text><textPath href="#arcTop" startOffset="50%" text-anchor="middle">GEOGRAPHIC INFORMATION SYSTEM</textPath></text>
+    <text><textPath href="#arcBottom" startOffset="50%" text-anchor="middle">KINGDOM OF CAMBODIA</textPath></text>
+  </g>
+</svg>
