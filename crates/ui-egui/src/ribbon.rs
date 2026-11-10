@@ -516,7 +516,7 @@ fn home_tab(app: &mut RustGisApp, ui: &mut Ui) {
         big(
             ui,
             app,
-            "logo",
+            "cambodia",
             "Cambodia\nData",
             "Choose a province or district and load its boundaries, roads, water, schools, health facilities, villages and elevation.",
             "ui.dialog",

@@ -225,6 +225,22 @@ fn maneuver(p: &P, kind: &str) {
 }
 
 /// Paints icon `name` into `r`. `ink` draws outlines, `accent` the colour parts.
+/// Cambodia's national outline, simplified from the bundled ADM1 boundaries to the 24-unit
+/// icon grid. `CAMBODIA_TRIS` indexes it: the shape is concave, so it is filled as triangles.
+const CAMBODIA: [(f32, f32); 33] = [
+    (7.6, 19.7), (7.2, 20.6), (6.4, 20.2), (7.0, 18.8), (6.3, 17.6), (5.8, 18.7), (4.6, 18.8), (4.7, 17.0),
+    (2.9, 13.5), (3.3, 12.5), (2.1, 11.4), (1.5, 7.9), (2.6, 7.7), (4.4, 4.9), (6.4, 4.3), (11.3, 4.3),
+    (16.5, 6.4), (16.1, 4.6), (18.2, 3.7), (19.9, 4.8), (22.2, 3.3), (21.4, 5.6), (22.5, 8.1), (22.2, 12.8),
+    (17.7, 14.3), (17.8, 15.6), (16.2, 15.1), (15.3, 15.8), (16.8, 19.2), (15.2, 18.2), (12.5, 18.5),
+    (12.5, 19.4), (10.1, 20.7)
+];
+const CAMBODIA_TRIS: [[u8; 3]; 31] = [
+    [0, 1, 2], [0, 2, 3], [32, 0, 3], [32, 3, 4], [4, 5, 6], [4, 6, 7], [4, 7, 8], [32, 4, 8], [32, 8, 9],
+    [9, 10, 11], [32, 9, 11], [32, 11, 12], [32, 12, 13], [32, 13, 14], [32, 14, 15], [32, 15, 16], [16, 17, 18],
+    [32, 16, 18], [32, 18, 19], [32, 19, 20], [32, 20, 21], [32, 21, 22], [22, 23, 24], [24, 25, 26],
+    [22, 24, 26], [22, 26, 27], [32, 22, 27], [27, 28, 29], [27, 29, 30], [32, 27, 30], [30, 31, 32]
+];
+
 pub fn paint(painter: &Painter, r: Rect, name: &str, ink: Color32, accent: Color32) {
     let p = P { p: painter, r, ink, acc: accent };
     let green = Color32::from_rgb(0x16, 0x9A, 0x5A);
@@ -845,18 +861,36 @@ pub fn paint(painter: &Painter, r: Rect, name: &str, ink: Color32, accent: Color
         "up" => p.line(&[(6.0, 15.0), (12.0, 9.0), (18.0, 15.0)], 1.8, ink),
         "down" => p.line(&[(6.0, 9.0), (12.0, 15.0), (18.0, 9.0)], 1.8, ink),
         "logo" => {
-            // A small version of the KHGIS logo: three stacked layers on a navy square.
-            p.fill(&[(2.5, 2.5), (21.5, 2.5), (21.5, 21.5), (2.5, 21.5)], Color32::from_rgb(0x0B, 0x1A, 0x33));
-            let navy = Color32::from_rgb(0x0B, 0x1A, 0x33);
-            for (i, c) in [Color32::from_rgb(0x0E, 0x60, 0x80), Color32::from_rgb(0x08, 0x91, 0xB2), Color32::from_rgb(0x22, 0xD3, 0xEE)]
-                .into_iter()
-                .enumerate()
-            {
-                let cy = 15.5 - i as f32 * 2.9;
-                let d = |w: f32, h: f32| [(12.0, cy - h), (12.0 + w, cy), (12.0, cy + h), (12.0 - w, cy)];
-                p.fill(&d(7.9, 4.3), navy);
-                p.fill(&d(7.4, 3.9), c);
+            // The KHGIS mark: a graticule globe on deep teal, matching the app icon.
+            let deep = Color32::from_rgb(0x0E, 0x3F, 0x44);
+            let sea = Color32::from_rgb(0x10, 0x56, 0x5C);
+            let grid = Color32::from_rgb(0x9F, 0xD8, 0xDF);
+            p.rect(1.5, 1.5, 21.0, 21.0, Some(deep), None, 5.0);
+            p.circle(12.0, 12.0, 8.6, Some(sea), None);
+            for dy in [-4.6_f32, 0.0, 4.6] {
+                let half = (8.6_f32 * 8.6 - dy * dy).max(0.0).sqrt();
+                p.line(&[(12.0 - half, 12.0 + dy), (12.0 + half, 12.0 + dy)], 0.9, grid);
             }
+            for rx in [3.2_f32, 8.6] {
+                let arc: Vec<(f32, f32)> = (0..=24)
+                    .map(|i| {
+                        let a = (-90.0 + 180.0 * i as f32 / 24.0).to_radians();
+                        (12.0 + rx * a.cos(), 12.0 + 8.6 * a.sin())
+                    })
+                    .collect();
+                let mirror: Vec<(f32, f32)> = arc.iter().map(|(x, y)| (24.0 - x, *y)).collect();
+                p.line(&arc, 0.9, grid);
+                p.line(&mirror, 0.9, grid);
+            }
+        }
+        // Cambodia's outline, drawn from the bundled national boundary: the Cambodia Data pane.
+        "cambodia" => {
+            let fill = p.tint(210);
+            for t in CAMBODIA_TRIS {
+                let v = |n: u8| CAMBODIA[n as usize];
+                p.fill(&[v(t[0]), v(t[1]), v(t[2])], fill);
+            }
+            p.closed(&CAMBODIA, 1.2, ink);
         }
         "point_layer" => p.circle(12.0, 12.0, 5.0, Some(accent), Some((1.2, ink))),
         "line_layer" => p.line(&[(3.0, 17.0), (9.0, 8.0), (15.0, 15.0), (21.0, 6.0)], 2.2, accent),
@@ -1308,6 +1342,7 @@ pub const ALL: &[&str] = &[
     "up",
     "down",
     "logo",
+    "cambodia",
     "point_layer",
     "line_layer",
     "polygon_layer",
