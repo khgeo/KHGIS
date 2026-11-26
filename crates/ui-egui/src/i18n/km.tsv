@@ -1422,3 +1422,52 @@ Zoom Last	ពង្រីកមុន
 Zoom Next	ពង្រីកបន្ទាប់
 Zoom to Layer	ពង្រីកទៅស្រទាប់
 Zoom to Selection	ពង្រីកទៅការជ្រើសរើស
+Drag to move this panel: onto other tabs, above or below a panel, or to the window's left or right edge	អូសដើម្បីផ្លាស់ទីផ្ទាំងនេះ៖ ទៅលើផ្ទាំងផ្សេង ខាងលើ ឬខាងក្រោមផ្ទាំងមួយ ឬទៅគែមឆ្វេង ឬស្ដាំនៃបង្អួច
+Move to the Left Dock	ផ្លាស់ទីទៅចតខាងឆ្វេង
+Move to the Right Dock	ផ្លាស់ទីទៅចតខាងស្ដាំ
+Separate From the Tabs	បំបែកចេញពីផ្ទាំង
+Tab With the Panel Above	ដាក់ជាផ្ទាំងជាមួយផ្ទាំងខាងលើ
+Back to Map	ត្រឡប់ទៅផែនទី
+Print Layout	ប្លង់បោះពុម្ព
+Add Item	បន្ថែមធាតុ
+Atlas	អាត្លាស
+Add Map	បន្ថែមផែនទី
+Add Legend	បន្ថែមតារាងសម្គាល់
+Add Scale Bar	បន្ថែមរបារមាត្រដ្ឋាន
+Add North Arrow	បន្ថែមព្រួញទិសខាងជើង
+Add Label	បន្ថែមស្លាក
+Add Attribute Table	បន្ថែមតារាងគុណលក្ខណៈ
+Add Chart	បន្ថែមគំនូសតាង
+Add Colorbar	បន្ថែមរបារពណ៌
+Add Rectangle	បន្ថែមចតុកោណកែង
+Add Ellipse	បន្ថែមរាងពងក្រពើ
+Add Arrow	បន្ថែមព្រួញ
+Add Picture…	បន្ថែមរូបភាព…
+Add Map Grid	បន្ថែមក្រឡាចត្រង្គផែនទី
+Add Neatline	បន្ថែមស៊ុម
+Export as Image or PDF…	នាំចេញជារូបភាព ឬ PDF…
+Export as Image or PDF	នាំចេញជារូបភាព ឬ PDF
+Print…	បោះពុម្ព…
+Save Layout File…	រក្សាទុកឯកសារប្លង់…
+Close Layout (Back to Map)	បិទប្លង់ (ត្រឡប់ទៅផែនទី)
+Close the layout and show the map	បិទប្លង់ ហើយបង្ហាញផែនទី
+Duplicate Item	ចម្លងធាតុ
+Delete Item	លុបធាតុ
+Raise to Top	លើកទៅខាងលើបំផុត
+Raise	លើកឡើង
+Lower	បន្ទាប
+Lower to Bottom	បន្ទាបទៅខាងក្រោមបំផុត
+Pan and Zoom the Map in Frames	អូស និងពង្រីកផែនទីក្នុងស៊ុម
+Snap to Guides and Items	ភ្ជាប់ទៅបន្ទាត់ណែនាំ និងធាតុ
+Item Properties	លក្ខណៈសម្បត្តិធាតុ
+Generate an Atlas From Layer	បង្កើតអាត្លាសពីស្រទាប់
+Previous Feature	ធាតុមុន
+Next Feature	ធាតុបន្ទាប់
+Turn Atlas Off	បិទអាត្លាស
+No vector layers	គ្មានស្រទាប់វ៉ិចទ័រ
+Select and Move Items	ជ្រើស និងផ្លាស់ទីធាតុ
+Drag in a map frame to pan its map, wheel to zoom it	អូសក្នុងស៊ុមផែនទីដើម្បីអូសផែនទី កង់កណ្ដុរដើម្បីពង្រីក
+Click an item to select it, drag to move it; its properties are on the right	ចុចធាតុដើម្បីជ្រើស អូសដើម្បីផ្លាស់ទី លក្ខណៈសម្បត្តិរបស់វានៅខាងស្ដាំ
+Categorized	តាមប្រភេទ
+Graduated	តាមកម្រិត
+Pick a layer	ជ្រើសស្រទាប់

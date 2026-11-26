@@ -11,14 +11,17 @@ installed QGIS plugin that adds Processing algorithms — on KHGIS's layers.
 |---|---|
 | Project, Edit, View, Layer, Settings, Plugins, Vector, Raster, Web, Processing, Help menus | the same menus, plus **Cambodia** (load a province or district, one-click workflows, A4 map) |
 | Project, Map Navigation, Attributes, Digitizing, Data Source Manager and Plugins toolbars | the same toolbars; **View › Toolbars** shows or hides each |
-| Browser and Layers panels | docked together on the left; drag the bar between them to resize |
+| Browser and Layers panels | docked on the left; drag the bar between panels to resize |
+| Dock panels: drag a panel's title to tab it with another, stack it, or move it to the other side | the same: drag a panel's tab onto another panel's tabs or middle to tab them, onto its top or bottom edge to stack, or to the window's left or right edge; right-click a tab to move it without dragging. KHGIS remembers the arrangement |
 | Processing Toolbox | the Tools pane on the right (**Processing › Toolbox**) |
 | Locator bar | **Command Search** (Ctrl+K), top right |
-| Layer Styling panel | **Layer › Layer Styling** |
+| Layer Styling panel | **Layer › Layer Styling**: the layer at the top, Symbology / Labels / Information down the left, the renderer (Single Symbol, Categorized, Graduated, Proportional Symbols) in a list |
+| Print Layout window | opening a layout swaps in the layout's own menus (Layout, Edit, View, Add Item, Atlas) and toolbar, and shows only Item Properties; **← Back to Map** returns |
 
 Every menu entry and toolbar button runs a KHGIS command, so nothing is lost from the ribbon.
-While a print layout is open the ribbon shows its layout tools below the toolbars, and
-**View › Toolbars › Ribbon** shows the ribbon at any time.
+**View › Toolbars › Ribbon** shows the ribbon below the toolbars at any time.
+
+The **ខ្មែរ | EN** switch at the top right changes the interface language in one click.
 
 **Settings › Interface** switches between the QGIS layout and the ribbon; KHGIS remembers the
 choice. **Settings › Options…** has the rest of the settings (theme, interface scale, language,

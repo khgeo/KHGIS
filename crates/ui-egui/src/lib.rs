@@ -70,6 +70,8 @@ mod pluginpanel;
 mod pluginstart;
 mod pluginsui;
 mod portalsui;
+mod qgisdock;
+mod qgislayout;
 mod qgisui;
 #[cfg(not(target_arch = "wasm32"))]
 mod readjob;

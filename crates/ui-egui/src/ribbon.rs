@@ -2930,7 +2930,7 @@ fn share_groups(app: &mut RustGisApp, ui: &mut Ui) {
 }
 
 /// The selected layout element if it's a map frame, else the layout's first frame.
-fn layout_frame(app: &RustGisApp) -> Option<u32> {
+pub(crate) fn layout_frame(app: &RustGisApp) -> Option<u32> {
     let l = app.session.active_layout.and_then(|i| app.session.project.layouts.get(i))?;
     app.layout
         .selected

@@ -45,21 +45,32 @@ pub struct State {
     pub browser: bool,
     /// The Layers dock shows.
     pub layers: bool,
-    /// The Browser's share of the left docks' height, when both show.
-    pub split: f32,
+    /// Where each panel is docked, and how panels are tabbed and stacked.
+    pub docks: crate::qgisdock::Docks,
     /// Toolbars hidden in View › Toolbars, by id.
     pub hidden: Vec<String>,
     /// The ribbon shows below the toolbars (View › Toolbars › Ribbon).
     pub ribbon: bool,
     /// Settings › Options… is open.
     pub options: bool,
+    /// The Layer Styling panel's page: 0 Symbology, 1 Labels, 2 Information.
+    pub styling_page: u8,
     /// Plugins › QGIS Plugins & Tools.
     pub bridge: Bridge,
 }
 
 impl Default for State {
     fn default() -> Self {
-        State { browser: true, layers: true, split: 0.42, hidden: Vec::new(), ribbon: false, options: false, bridge: Bridge::default() }
+        State {
+            browser: true,
+            layers: true,
+            docks: Default::default(),
+            hidden: Vec::new(),
+            ribbon: false,
+            options: false,
+            styling_page: 0,
+            bridge: Bridge::default(),
+        }
     }
 }
 
@@ -159,9 +170,15 @@ pub fn top(app: &mut RustGisApp, ui: &mut Ui) {
     if app.ui.titlebar.is_some() {
         crate::chrome::header(app, ui);
     }
-    menu_bar(app, ui);
-    toolbars(app, ui);
-    if app.ui.qgis.ribbon || app.session.active_layout.is_some() {
+    // A print layout open: its own menus and toolbars, as QGIS's Layout window has them.
+    if app.session.active_layout.is_some() {
+        crate::qgislayout::menu_bar(app, ui);
+        crate::qgislayout::toolbars(app, ui);
+    } else {
+        menu_bar(app, ui);
+        toolbars(app, ui);
+    }
+    if app.ui.qgis.ribbon {
         crate::ribbon::show(app, ui);
     }
 }
@@ -201,7 +218,13 @@ fn menu_bar(app: &mut RustGisApp, ui: &mut Ui) {
             if resp.on_hover_text(tl!("Command Search")).clicked() {
                 app.ui.command_search = Some(String::new());
             }
-            let left = Rect::from_min_max(full.min, pos2(r.min.x - 8.0, full.max.y));
+            // The language switch, beside it: ខ្មែរ | EN.
+            let sw = 96.0;
+            let lr = Rect::from_min_max(pos2(r.min.x - 10.0 - sw, full.center().y - 11.0), pos2(r.min.x - 10.0, full.center().y + 11.0));
+            if full.width() > 520.0 {
+                lang_switch(app, ui, lr, &t);
+            }
+            let left = Rect::from_min_max(full.min, pos2(if full.width() > 520.0 { lr.min.x } else { r.min.x } - 8.0, full.max.y));
             let mut menus = ui.new_child(egui::UiBuilder::new().max_rect(left).layout(egui::Layout::left_to_right(egui::Align::Center)));
             menus.set_clip_rect(left);
             if app.ui.titlebar.is_none() {
@@ -225,6 +248,33 @@ fn menu_bar(app: &mut RustGisApp, ui: &mut Ui) {
             });
             ui.advance_cursor_after_rect(full);
         });
+}
+
+/// The ខ្មែរ | EN switch: the interface language in one click.
+fn lang_switch(app: &mut RustGisApp, ui: &mut Ui, r: Rect, t: &Tokens) {
+    let current = crate::i18n::current().code();
+    ui.painter().rect_filled(r, CornerRadius::same(11), t.input);
+    ui.painter().rect_stroke(r, CornerRadius::same(11), Stroke::new(1.0, t.border), egui::StrokeKind::Inside);
+    let half = r.width() / 2.0;
+    for (i, (code, label, tip)) in [("km", "ខ្មែរ", "ប្ដូរទៅភាសាខ្មែរ"), ("en", "EN", "Switch to English")].into_iter().enumerate()
+    {
+        let part = Rect::from_min_size(pos2(r.min.x + half * i as f32, r.min.y), vec2(half, r.height())).shrink(2.0);
+        let resp = ui.interact(part, egui::Id::unique(("qgis_lang", code)), Sense::click());
+        resp.widget_info(|| egui::WidgetInfo::selected(egui::Role::Button, true, current == code, label));
+        let on = current == code;
+        if on {
+            ui.painter().rect_filled(part, CornerRadius::same(9), t.accent);
+        } else if resp.hovered() {
+            ui.painter().rect_filled(part, CornerRadius::same(9), t.hover);
+        }
+        let font = if code == "km" { regular(12.5) } else { semibold(11.5) };
+        // Khmer letters need the Khmer font, which loads after the first frames.
+        let label = if code == "km" && !ui.fonts_mut(|f| f.has_glyphs(&font, label)) { "KH" } else { label };
+        ui.painter().text(part.center(), egui::Align2::CENTER_CENTER, label, font, if on { t.on_accent } else { t.text_dim });
+        if resp.on_hover_text(tip).clicked() && !on {
+            let _ = app.run_by_user("ui.language", json!({"code": code}));
+        }
+    }
 }
 
 /// A menu row that sets the map tool, checked while it is the tool.
@@ -767,105 +817,88 @@ fn toolbars(app: &mut RustGisApp, ui: &mut Ui) {
         });
 }
 
-/// A dock's title bar: its name and a ✕ that closes it. True when the ✕ was clicked.
-fn dock_title(ui: &mut Ui, title: &str, t: &Tokens) -> bool {
-    let (r, head) = ui.allocate_exact_size(vec2(ui.available_width(), 24.0), Sense::hover());
-    let name = tl!(title).to_string();
-    head.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Label, true, &name));
-    ui.painter().rect_filled(r, 0.0, t.pane_header);
-    ui.painter().line_segment([r.left_bottom(), r.right_bottom()], Stroke::new(1.0, t.border));
-    ui.painter().text(pos2(r.min.x + 8.0, r.center().y), egui::Align2::LEFT_CENTER, tl!(title), semibold(12.0), t.text);
-    let close = Rect::from_center_size(pos2(r.max.x - 13.0, r.center().y), vec2(18.0, 18.0));
-    let resp = ui.interact(close, egui::Id::unique(("qgis_dock_close", title)), Sense::click());
-    if resp.hovered() {
-        ui.painter().rect_filled(close, CornerRadius::same(3), t.hover);
-    }
-    icons::paint(ui.painter(), close.shrink(4.0), "close", t.text_dim, t.accent);
-    resp.on_hover_text(tl!("Close")).clicked()
+/// The docks on both sides of the map (see `qgisdock`): the rects of the left and right areas.
+pub fn docks(app: &mut RustGisApp, ui: &mut Ui, frame: egui::Frame, t: &Tokens) -> [Option<Rect>; 2] {
+    crate::qgisdock::show(app, ui, frame, t)
 }
 
-/// The left docks: the Browser above the Layers, with a splitter between them, or the Data
-/// Source Manager alone. Returns the rect drawn, if any.
-pub fn left_docks(app: &mut RustGisApp, ui: &mut Ui, frame: egui::Frame, t: &Tokens) -> Option<Rect> {
-    use crate::LeftPane;
-    // Commands and other panes open a left pane by setting it: here that's a dock to show.
-    match app.ui.left {
-        Some(LeftPane::Contents) => {
-            app.ui.qgis.layers = true;
-            app.ui.left = None;
-        }
-        Some(LeftPane::Catalog) => {
-            app.ui.qgis.browser = true;
-            app.ui.left = None;
-        }
-        _ => {}
-    }
-    let sources = app.ui.left == Some(LeftPane::Sources);
-    let (browser, layers) = (app.ui.qgis.browser, app.ui.qgis.layers);
-    if !sources && !browser && !layers {
-        return None;
-    }
-    let pane =
-        egui::Panel::left("qgis_left_docks").resizable(true).default_size(280.0).size_range(200.0..=520.0).frame(frame).show(ui, |ui| {
-            if sources {
-                if dock_title(ui, "Data Source Manager", t) {
-                    app.ui.left = None;
+/// The Layer Styling panel, as QGIS has it: the layer at the top, a strip of pages down the
+/// left (Symbology, Labels, Information) and the page beside it.
+pub fn layer_styling(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
+    // The layer, picked from the map's layers.
+    use rustgis_engine::data::GeometryType;
+    let layers: Vec<(u32, String, &'static str)> = app
+        .session
+        .map()
+        .layers
+        .iter()
+        .map(|l| {
+            let icon = if l.is_raster() {
+                "raster_layer"
+            } else {
+                match l.geometry_type() {
+                    GeometryType::Point => "point_layer",
+                    GeometryType::Polyline => "line_layer",
+                    _ => "polygon_layer",
                 }
-                crate::searchbox::show(app, ui, t);
-                let rect = ui.available_rect_before_wrap();
-                let mut body = ui.new_child(egui::UiBuilder::new().max_rect(rect).layout(*ui.layout()));
-                crate::sourcespane::show(app, &mut body, t);
-                ui.advance_cursor_after_rect(rect);
-                return;
-            }
-            crate::searchbox::show(app, ui, t);
-            let all = ui.available_rect_before_wrap();
-            let title_h = 24.0;
-            let split_h = 5.0;
-            let browser_h =
-                if browser && layers { ((all.height() - split_h) * app.ui.qgis.split).max(title_h + 40.0) } else { all.height() };
-            let mut y = all.min.y;
-            if browser {
-                let rect = Rect::from_min_size(pos2(all.min.x, y), vec2(all.width(), if layers { browser_h } else { all.height() }));
-                let mut dock = ui.new_child(
-                    egui::UiBuilder::new().max_rect(rect).layout(egui::Layout::top_down(egui::Align::Min)).id_salt("qgis_browser"),
-                );
-                dock.set_clip_rect(rect);
-                if dock_title(&mut dock, "Browser", t) {
-                    app.ui.qgis.browser = false;
+            };
+            (l.id, l.name.clone(), icon)
+        })
+        .collect();
+    let active = app.session.active_layer.and_then(|id| layers.iter().find(|l| l.0 == id)).cloned();
+    egui::Frame::NONE.inner_margin(egui::Margin { left: 8, right: 8, top: 6, bottom: 6 }).show(ui, |ui| {
+        ui.horizontal(|ui| {
+            let icon = active.as_ref().map_or("contents", |l| l.2);
+            let (r, _) = ui.allocate_exact_size(vec2(20.0, 20.0), Sense::hover());
+            icons::paint(ui.painter(), r, icon, t.icon, t.accent);
+            let shown = active.as_ref().map_or_else(|| tl!("Pick a layer").to_string(), |l| l.1.clone());
+            egui::ComboBox::from_id_salt("qgis_styling_layer").width(ui.available_width() - 4.0).selected_text(shown).show_ui(ui, |ui| {
+                for (id, name, _) in &layers {
+                    if ui.selectable_label(Some(*id) == active.as_ref().map(|l| l.0), name).clicked() {
+                        let _ = app.run_by_user("layer.select", json!({"layer": name}));
+                    }
                 }
-                let body_rect = dock.available_rect_before_wrap();
-                let mut body = dock.new_child(egui::UiBuilder::new().max_rect(body_rect).layout(*dock.layout()));
-                crate::panes::catalog_in(app, &mut body, t);
-                y = rect.max.y;
-            }
-            if browser && layers {
-                let sr = Rect::from_min_size(pos2(all.min.x, y), vec2(all.width(), split_h));
-                let resp =
-                    ui.interact(sr, egui::Id::unique("qgis_dock_split"), Sense::drag()).on_hover_cursor(egui::CursorIcon::ResizeVertical);
-                ui.painter().rect_filled(sr, 0.0, if resp.hovered() || resp.dragged() { t.border_strong } else { t.border });
-                if resp.dragged() && all.height() > 120.0 {
-                    let f = app.ui.qgis.split + resp.drag_delta().y / all.height();
-                    app.ui.qgis.split = f.clamp(0.15, 0.85);
-                }
-                y = sr.max.y;
-            }
-            if layers {
-                let rect = Rect::from_min_max(pos2(all.min.x, y), all.max);
-                let mut dock = ui.new_child(
-                    egui::UiBuilder::new().max_rect(rect).layout(egui::Layout::top_down(egui::Align::Min)).id_salt("qgis_layers"),
-                );
-                dock.set_clip_rect(rect);
-                if dock_title(&mut dock, "Layers", t) {
-                    app.ui.qgis.layers = false;
-                }
-                let body_rect = dock.available_rect_before_wrap();
-                let mut body = dock.new_child(egui::UiBuilder::new().max_rect(body_rect).layout(*dock.layout()));
-                crate::panes::contents_in(app, &mut body, t);
-            }
-            ui.advance_cursor_after_rect(all);
+            });
         });
-    Some(pane.response.rect)
+    });
+    let sep_y = ui.cursor().min.y;
+    ui.painter().line_segment([pos2(ui.max_rect().min.x, sep_y), pos2(ui.max_rect().max.x, sep_y)], Stroke::new(1.0, t.border));
+    let rest = ui.available_rect_before_wrap();
+    // The page strip.
+    let strip = Rect::from_min_size(rest.min, vec2(36.0, rest.height()));
+    ui.painter().rect_filled(strip, 0.0, t.pane_header);
+    ui.painter().line_segment([strip.right_top(), strip.right_bottom()], Stroke::new(1.0, t.border));
+    for (i, (icon, tip)) in [("symbology", "Symbology"), ("label", "Labels"), ("about", "Information")].into_iter().enumerate() {
+        let r = Rect::from_min_size(pos2(strip.min.x + 3.0, strip.min.y + 4.0 + 34.0 * i as f32), vec2(30.0, 30.0));
+        let resp = ui.interact(r, egui::Id::unique(("qgis_styling_page", i)), Sense::click());
+        let on = app.ui.qgis.styling_page as usize == i;
+        resp.widget_info(|| egui::WidgetInfo::selected(egui::Role::Tab, true, on, tl!(tip)));
+        if on {
+            ui.painter().rect_filled(r, CornerRadius::same(4), t.checked);
+            ui.painter().rect_stroke(r, CornerRadius::same(4), Stroke::new(1.0, t.accent), egui::StrokeKind::Inside);
+        } else if resp.hovered() {
+            ui.painter().rect_filled(r, CornerRadius::same(4), t.hover);
+        }
+        icons::paint(ui.painter(), r.shrink(5.0), icon, t.icon, t.accent);
+        if resp.on_hover_text(tl!(tip)).clicked() {
+            app.ui.qgis.styling_page = i as u8;
+        }
+    }
+    // The page.
+    let body = Rect::from_min_max(pos2(strip.max.x + 1.0, rest.min.y), rest.max);
+    let mut page = ui.new_child(egui::UiBuilder::new().max_rect(body).layout(egui::Layout::top_down(egui::Align::Min)));
+    page.set_clip_rect(body.intersect(ui.clip_rect()));
+    egui::ScrollArea::vertical().id_salt(("qgis_styling_scroll", app.ui.qgis.styling_page)).auto_shrink([false, false]).show(
+        &mut page,
+        |ui| {
+            egui::Frame::NONE.inner_margin(egui::Margin::symmetric(10, 8)).show(ui, |ui| match app.ui.qgis.styling_page {
+                1 => crate::labelpane::show(app, ui, t),
+                2 => crate::panes::details_in(app, ui, t),
+                _ => crate::panes::symbology_in(app, ui, t),
+            });
+        },
+    );
+    ui.advance_cursor_after_rect(rest);
 }
 
 /// The windows the layout opens: Settings › Options… and Plugins › QGIS Plugins & Tools.
