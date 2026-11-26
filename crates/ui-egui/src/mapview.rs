@@ -2817,7 +2817,8 @@ fn interact(app: &mut RustGisApp, ui: &mut Ui, resp: &egui::Response, rect: Rect
             }
             Tool::EditVertices => crate::vertexedit::click(app, rect, p, c, shift),
             Tool::CreatePoint => {
-                let _ = app.run("edit.addFeature", with_template(app, json!({"geometry": {"type": "Point", "coordinates": [c.x, c.y]}})));
+                let p = with_template(app, json!({"geometry": {"type": "Point", "coordinates": [c.x, c.y]}}));
+                crate::featureform::add(app, p, vec![c], false);
             }
             Tool::Graphic("point") => finish_graphic(app, "point", vec![c]),
             // Placed, selected and open in the Format pane, as a layout's text (#516).
@@ -2852,6 +2853,15 @@ fn interact(app: &mut RustGisApp, ui: &mut Ui, resp: &egui::Response, rect: Rect
     {
         ui.ctx().set_cursor_icon(icon);
     }
+    // As in QGIS, a right-click or Enter finishes the line or polygon being drawn (no menu then).
+    if matches!(tool, Tool::CreateLine | Tool::CreatePolygon)
+        && !app.map.sketch.is_empty()
+        && ((resp.hovered() && ui.input(|i| i.pointer.button_pressed(egui::PointerButton::Secondary)))
+            || (!ui.ctx().egui_wants_keyboard_input() && ui.input(|i| i.key_pressed(egui::Key::Enter))))
+    {
+        finish_sketch(app);
+        return;
+    }
     // KHGIS: right-click opens the radial menu (Shift + right-click, the classic one).
     if crate::radial::press(app, ui, rect) {
         app.map.menu_lonlat = None;
@@ -2878,7 +2888,8 @@ fn finish_sketch(app: &mut RustGisApp) {
         Tool::Measure | Tool::MeasureArea => app.map.sketch_done = true,
         Tool::CreateLine if pts.len() >= 2 => {
             let coords: Vec<[f64; 2]> = pts.iter().map(|c| [c.x, c.y]).collect();
-            let _ = app.run("edit.addFeature", with_template(app, json!({"geometry": {"type": "LineString", "coordinates": coords}})));
+            let p = with_template(app, json!({"geometry": {"type": "LineString", "coordinates": coords}}));
+            crate::featureform::add(app, p, pts, false);
             app.map.cancel_sketch();
         }
         Tool::CreatePolygon if pts.len() >= 3 => {
@@ -2886,7 +2897,8 @@ fn finish_sketch(app: &mut RustGisApp) {
             if let Some(f) = coords.first().copied() {
                 coords.push(f);
             }
-            let _ = app.run("edit.addFeature", with_template(app, json!({"geometry": {"type": "Polygon", "coordinates": [coords]}})));
+            let p = with_template(app, json!({"geometry": {"type": "Polygon", "coordinates": [coords]}}));
+            crate::featureform::add(app, p, pts, true);
             app.map.cancel_sketch();
         }
         Tool::CutPolygon | Tool::Reshape if pts.len() >= 2 => {
@@ -3166,6 +3178,8 @@ fn overlays(app: &mut RustGisApp, ui: &mut Ui, p: &egui::Painter, rect: Rect, t:
         }
         previewed = true;
     }
+    // A feature drawn, waiting in the Feature Attributes form.
+    crate::featureform::draw(app, p, rect);
     // Sketch.
     if !app.map.sketch.is_empty() && !previewed {
         let mut pts: Vec<Coord> = app.map.sketch.clone();
@@ -3247,8 +3261,8 @@ fn overlays(app: &mut RustGisApp, ui: &mut Ui, p: &egui::Painter, rect: Rect, t:
         Tool::Measure => Some("Click to add points · double-click to finish · Esc to stop"),
         Tool::MeasureArea => Some("Click the corners of the area · double-click to finish"),
         Tool::CreatePoint => Some("Click the map to add a point"),
-        Tool::CreateLine => Some("Click to add vertices · double-click to finish the line"),
-        Tool::CreatePolygon => Some("Click to add vertices · double-click to close the polygon"),
+        Tool::CreateLine => Some("Click to add vertices · double-click, right-click or Enter to finish the line"),
+        Tool::CreatePolygon => Some("Click to add vertices · double-click, right-click or Enter to close the polygon"),
         Tool::CutPolygon => Some("Draw a line across the selected polygons · double-click to cut them"),
         Tool::Reshape => Some("Draw a line across the selected feature's edge · double-click to reshape it"),
         Tool::Select => Some("Click or drag a box · Shift adds · Ctrl removes"),

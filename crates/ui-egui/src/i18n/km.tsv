@@ -1741,3 +1741,19 @@ Flood mapping with Sentinel-1 (before / after)	ការគូសផែនទី
 Unsupervised clustering (K-means)	ការចាត់ក្រុមដោយគ្មានការត្រួតពិនិត្យ (K-means)
 Surface-water occurrence 1984–2021 (JRC)	ការកើតមានទឹកលើផ្ទៃ ១៩៨៤–២០២១ (JRC)
 Vegetation & soil indices pack (EVI, SAVI, NDMI, NDBI, BSI)	កញ្ចប់សន្ទស្សន៍រុក្ខជាតិ និងដី (EVI, SAVI, NDMI, NDBI, BSI)
+{layer} — Feature Attributes	{layer} — លក្ខណៈរបស់ធាតុ
+Values already in this field	តម្លៃដែលមានរួចហើយក្នុងវាលនេះ
+Remember the last values	ចងចាំតម្លៃចុងក្រោយ
+OK	យល់ព្រម
+NULL (whole number)	NULL (ចំនួនគត់)
+NULL (number)	NULL (ចំនួន)
+{field} takes a whole number	{field} ត្រូវការចំនួនគត់
+{field} takes a number	{field} ត្រូវការចំនួន
+Suppress Attribute Form After Feature Creation	មិនបង្ហាញទម្រង់លក្ខណៈក្រោយពេលបង្កើតធាតុ
+Off: drawing a feature opens a form to type its attributes (the class of a training area…)	បិទ៖ ការគូរធាតុនឹងបើកទម្រង់សម្រាប់វាយលក្ខណៈរបស់វា (ថ្នាក់នៃតំបន់បណ្តុះបណ្តាល…)
+Reset Toolbar Positions	កំណត់ទីតាំងរបារឧបករណ៍ឡើងវិញ
+{name}: drag to move it	{name}៖ អូសដើម្បីផ្លាស់ទី
+A one-band image (an index, a class map) shows with a colour ramp: change it in Layer Styling.	រូបភាពមួយប៊ែន (សន្ទស្សន៍ ផែនទីថ្នាក់) បង្ហាញដោយគម្រោងពណ៌៖ ផ្លាស់ប្តូរវានៅក្នុងការរចនាស្រទាប់។
+Click to add vertices · double-click, right-click or Enter to finish the line	ចុចដើម្បីបន្ថែមចំណុចកំពូល · ចុចពីរដង ចុចខាងស្តាំ ឬ Enter ដើម្បីបញ្ចប់បន្ទាត់
+Click to add vertices · double-click, right-click or Enter to close the polygon	ចុចដើម្បីបន្ថែមចំណុចកំពូល · ចុចពីរដង ចុចខាងស្តាំ ឬ Enter ដើម្បីបិទពហុកោណ
+Then draw a polygon round each training area: when it's closed, type its class in the form	បន្ទាប់មកគូរពហុកោណជុំវិញតំបន់បណ្តុះបណ្តាលនីមួយៗ៖ ពេលបិទរួច វាយថ្នាក់របស់វានៅក្នុងទម្រង់

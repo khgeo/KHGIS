@@ -65,6 +65,13 @@ pub struct State {
     /// The project (`Session::opened`) whose maps were opened with editing off, as QGIS opens
     /// layers read-only until Toggle Editing.
     pub editing_off_for: Option<u64>,
+    /// The toolbars' rows, as arranged by dragging (ids); their widths as last drawn; the one
+    /// being dragged.
+    pub rows: Vec<Vec<String>>,
+    pub toolbar_widths: std::collections::HashMap<String, f32>,
+    pub dragging: Option<String>,
+    /// The Feature Attributes form (see `featureform`).
+    pub form: crate::featureform::State,
 }
 
 impl Default for State {
@@ -81,6 +88,10 @@ impl Default for State {
             staged: None,
             bridge: Bridge::default(),
             editing_off_for: None,
+            rows: Vec::new(),
+            toolbar_widths: Default::default(),
+            dragging: None,
+            form: Default::default(),
         }
     }
 }
@@ -114,6 +125,7 @@ pub fn load(app: &mut RustGisApp) {
     if let Some(h) = load("qgis_toolbars_hidden") {
         app.ui.qgis.hidden = h.split(',').map(str::trim).filter(|s| !s.is_empty()).map(String::from).collect();
     }
+    app.ui.qgis.rows = rows_from_pref(&load("qgis_toolbar_rows").unwrap_or_default());
     if let Some(p) = load(PYTHON_PREF).filter(|p| !p.is_empty()) {
         app.ui.qgis.bridge.python = p.clone();
         #[cfg(not(target_arch = "wasm32"))]
@@ -139,6 +151,7 @@ pub fn load(app: &mut RustGisApp) {
         app.ui.open_right(RightPane::Symbology);
     }
     app.ui.qgis.live = load("qgis_style_live").as_deref() != Some("off");
+    crate::featureform::load(app);
 }
 
 /// `ui.interface {"style": "qgis" | "ribbon"}`: switches the layout (no style: the other one).
@@ -533,6 +546,14 @@ fn settings_menu(app: &mut RustGisApp, ui: &mut Ui) {
         check_item(ui, app, !dark, "Light", "ui.theme", json!({"dark": false}));
         check_item(ui, app, dark, "Dark", "ui.theme", json!({"dark": true}));
     });
+    let suppress = app.ui.qgis.form.suppress;
+    if menu_row(ui, if suppress { "single" } else { "" }, tl!("Suppress Attribute Form After Feature Creation"), "", true)
+        .on_hover_text(tl!("Off: drawing a feature opens a form to type its attributes (the class of a training area…)"))
+        .clicked()
+    {
+        crate::featureform::set_suppress(app, !suppress);
+        ui.close();
+    }
     menu_item(ui, app, "command", "Keyboard Shortcuts…", "ui.customizeShortcuts", Value::Null);
     ui.separator();
     menu_item(ui, app, "settings", "Options…", "ui.qgisOptions", Value::Null);
@@ -756,116 +777,344 @@ fn editing_off_at_open(app: &mut RustGisApp) {
     }
 }
 
-/// A toolbar's start: a grip, as QGIS draws one.
-fn grip(ui: &mut Ui, t: &Tokens) {
-    let (r, _) = ui.allocate_exact_size(vec2(8.0, 22.0), Sense::hover());
+/// A toolbar's buttons.
+fn contents(ui: &mut Ui, app: &mut RustGisApp, id: &str) {
+    match id {
+        "project" => {
+        button(ui, app, "new", "New Project", "project.new", Value::Null, false);
+        button(ui, app, "open", "Open Project", "ui.open", Value::Null, false);
+        button(ui, app, "save", "Save Project", "ui.save", Value::Null, false);
+        button(ui, app, "save_as", "Save Project As…", "ui.saveAs", Value::Null, false);
+        button(ui, app, "new_layout", "New Print Layout", "layout.new", json!({"template": "blank"}), false);
+        button(ui, app, "print", "Export Map to PDF", "ui.printMap", Value::Null, false);
+        }
+        "navigation" => {
+        tool_button(ui, app, "explore", "Pan Map (click a feature to identify it)", Tool::Explore);
+        tool_button(ui, app, "zoom_box", "Zoom In (drag a box)", Tool::ZoomIn);
+        button(ui, app, "zoom_in", "Zoom In", "map.zoomIn", Value::Null, false);
+        button(ui, app, "zoom_out", "Zoom Out", "map.zoomOut", Value::Null, false);
+        button(ui, app, "zoom_full", "Zoom Full", "map.zoomFull", Value::Null, false);
+        button(ui, app, "zoom_sel", "Zoom to Selection", "select.zoomTo", Value::Null, false);
+        button(ui, app, "zoom_world", "Zoom to Layer", "layer.zoomTo", Value::Null, false);
+        button(ui, app, "prev_extent", "Zoom Last", "map.prevExtent", Value::Null, false);
+        button(ui, app, "next_extent", "Zoom Next", "map.nextExtent", Value::Null, false);
+        button(ui, app, "bookmark_new", "New Spatial Bookmark…", "ui.dialog", json!({"name": "bookmark"}), false);
+        let b = app.ui.right == Some(RightPane::Bookmarks);
+        button(ui, app, "bookmark", "Show Spatial Bookmarks", "ui.pane.bookmarks", Value::Null, b);
+        }
+        "attributes" => {
+        tool_button(ui, app, "select", "Select Features by Area or Single Click", Tool::Select);
+        tool_button(ui, app, "select_loc", "Select Features by Polygon", Tool::SelectPolygon);
+        button(ui, app, "clear_sel", "Deselect Features from All Layers", "select.clear", Value::Null, false);
+        button(ui, app, "table", "Open Attribute Table", "table.open", Value::Null, false);
+        button(ui, app, "calculate", "Open Field Calculator", "ui.dialog", json!({"name": "calculateField"}), false);
+        tool_button(ui, app, "measure", "Measure Line", Tool::Measure);
+        tool_button(ui, app, "measure_area", "Measure Area", Tool::MeasureArea);
+        let s = app.ui.right == Some(RightPane::Symbology);
+        button(ui, app, "symbology", "Layer Styling", "ui.pane.symbology", Value::Null, s);
+        let l = app.ui.right == Some(RightPane::Labeling);
+        button(ui, app, "label", "Labels", "ui.pane.labeling", Value::Null, l);
+        }
+        "digitizing" => {
+        let editing = app.session.map().editing.settings.enabled;
+        button(ui, app, "edit", "Toggle Editing", "edit.enable", Value::Null, editing);
+        tool_button(ui, app, "point_tool", "Add Point Feature", Tool::CreatePoint);
+        tool_button(ui, app, "line_tool", "Add Line Feature", Tool::CreateLine);
+        tool_button(ui, app, "polygon_tool", "Add Polygon Feature", Tool::CreatePolygon);
+        tool_button(ui, app, "vertices", "Vertex Tool", Tool::EditVertices);
+        button(ui, app, "delete", "Delete Selected", "edit.delete", Value::Null, false);
+        button(ui, app, "cut", "Cut Features", "ui.cut", Value::Null, false);
+        button(ui, app, "copy", "Copy Features", "ui.copy", Value::Null, false);
+        button(ui, app, "paste", "Paste Features", "edit.paste", Value::Null, false);
+        button(ui, app, "undo", "Undo", "edit.undo", Value::Null, false);
+        button(ui, app, "redo", "Redo", "edit.redo", Value::Null, false);
+        }
+        "data" => {
+        let s = app.ui.left == Some(crate::LeftPane::Sources);
+        button(ui, app, "add_data", "Open Data Source Manager", "ui.pane.sources", Value::Null, s);
+        button(ui, app, "point_layer", "Add Vector or Raster Layer", "ui.addData", Value::Null, false);
+        button(ui, app, "table", "Add Delimited Text Layer", "ui.addDelimited", Value::Null, false);
+        button(ui, app, "web_map", "Add WMS/WMTS, WFS or ArcGIS Layer", "ui.addService", Value::Null, false);
+        button(ui, app, "basemap", "Add XYZ Tile Layer", "ui.dialog", json!({"name": "addTiles"}), false);
+        button(ui, app, "cambodia", "Add Cambodia Data", "ui.dialog", json!({"name": "cambodia"}), false);
+        let lab = app.ui.right == Some(RightPane::RsLab);
+        button(ui, app, "rgb", "LEE RS Lab", "ui.pane.rslab", Value::Null, lab);
+        button(ui, app, "relief", "Open in Cambodia 3D", "ui.cambodia3d", json!({}), false);
+        }
+        "plugins" => {
+        let tb = app.ui.right == Some(RightPane::Geoprocessing);
+        button(ui, app, "toolbox", "Processing Toolbox", "ui.pane.geoprocessing", Value::Null, tb);
+        button(ui, app, "modelbuilder", "Graphical Modeler", "ui.modelBuilder", Value::Null, app.mb.shown());
+        let py = app.ui.right == Some(RightPane::Script);
+        button(ui, app, "python", "Python Console (Scripts)", "ui.pane.script", Value::Null, py);
+        button(ui, app, "plugin", "Manage and Install Plugins", "ui.plugins", json!({"open": true}), false);
+        let q = app.ui.qgis.bridge.open;
+        button(ui, app, "geoprocessing", "QGIS Plugins & Tools", "ui.qgisBridge", Value::Null, q);
+        let ai = app.ui.right == Some(RightPane::Assistant);
+        button(ui, app, "command", "AI Assistant", "ui.pane.assistant", Value::Null, ai);
+        }
+        _ => {}
+    }
+}
+
+/// The toolbars' rows, as the user arranged them: every toolbar once, in rows (none empty).
+fn arranged(rows: &[Vec<String>]) -> Vec<Vec<String>> {
+    let mut seen: Vec<String> = Vec::new();
+    let mut out: Vec<Vec<String>> = Vec::new();
+    for row in rows {
+        let mut r: Vec<String> = Vec::new();
+        for id in row {
+            if TOOLBARS.iter().any(|(t, _)| t == id) && !seen.contains(id) {
+                seen.push(id.clone());
+                r.push(id.clone());
+            }
+        }
+        if !r.is_empty() {
+            out.push(r);
+        }
+    }
+    let missing: Vec<String> = TOOLBARS.iter().filter(|(t, _)| !seen.iter().any(|x| x == t)).map(|(t, _)| t.to_string()).collect();
+    if !missing.is_empty() {
+        match out.last_mut() {
+            Some(last) => last.extend(missing),
+            None => out.push(missing),
+        }
+    }
+    out
+}
+
+/// The rows as a preference: toolbars by `,`, rows by `;`.
+fn rows_pref(rows: &[Vec<String>]) -> String {
+    rows.iter().map(|r| r.join(",")).collect::<Vec<_>>().join(";")
+}
+
+fn rows_from_pref(text: &str) -> Vec<Vec<String>> {
+    let rows: Vec<Vec<String>> = text.split(';').map(|r| r.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect()).collect();
+    arranged(&rows)
+}
+
+/// Moves a toolbar: into row `row` before its `at`-th toolbar (both counted with the toolbar
+/// still where it was), or into a row of its own put at `row` when `own_row`.
+fn move_toolbar(rows: &mut Vec<Vec<String>>, id: &str, row: usize, at: usize, own_row: bool) {
+    let (mut row, mut at) = (row, at);
+    if let Some((r, i)) = rows.iter().enumerate().find_map(|(r, v)| v.iter().position(|x| x == id).map(|i| (r, i))) {
+        if !own_row && r == row && i < at {
+            at -= 1;
+        }
+        if let Some(v) = rows.get_mut(r) {
+            v.remove(i);
+        }
+        if rows.get(r).is_some_and(Vec::is_empty) {
+            rows.remove(r);
+            if r < row {
+                row -= 1;
+            } else if r == row && !own_row {
+                // Its own row, now gone: back where it was, a row of its own again.
+                rows.insert(r.min(rows.len()), vec![id.to_string()]);
+                return;
+            }
+        }
+    }
+    if own_row || row >= rows.len() {
+        rows.insert(row.min(rows.len()), vec![id.to_string()]);
+    } else if let Some(v) = rows.get_mut(row) {
+        v.insert(at.min(v.len()), id.to_string());
+    }
+}
+
+/// The toolbars' menu (right-click on them): each one shown or hidden, and their places reset.
+fn toolbars_menu(app: &mut RustGisApp, ui: &mut Ui) {
+    for (id, name) in TOOLBARS {
+        let mut on = !app.ui.qgis.hidden.iter().any(|h| h == id);
+        if ui.checkbox(&mut on, tl!(*name)).clicked() {
+            let _ = toggle_toolbar(app, &json!({"id": id}));
+        }
+    }
+    ui.separator();
+    if ui.button(tl!("Reset Toolbar Positions")).clicked() {
+        app.ui.qgis.rows = arranged(&[]);
+        save_pref(app, "qgis_toolbar_rows", "");
+        ui.close();
+    }
+}
+
+fn save_pref(app: &RustGisApp, key: &str, value: &str) {
+    if let Some(s) = &app.services.save_pref {
+        s(key, value);
+    }
+}
+
+/// A toolbar's start: a grip, as QGIS draws one, to drag the toolbar by.
+fn grip(ui: &mut Ui, id: &str, t: &Tokens) -> egui::Response {
+    let (r, resp) = ui.allocate_exact_size(vec2(10.0, 24.0), Sense::click_and_drag());
+    let colour = if resp.hovered() || resp.dragged() { t.accent } else { t.border_strong };
     for i in 0..4 {
-        let y = r.min.y + 4.0 + i as f32 * 4.5;
-        ui.painter().circle_filled(pos2(r.center().x, y), 1.0, t.border_strong);
+        let y = r.min.y + 5.0 + i as f32 * 4.5;
+        ui.painter().circle_filled(pos2(r.center().x - 1.5, y), 1.0, colour);
+        ui.painter().circle_filled(pos2(r.center().x + 1.5, y), 1.0, colour);
     }
+    let name = TOOLBARS.iter().find(|(x, _)| *x == id).map_or("", |(_, n)| n);
+    let tip = crate::i18n::fmt("{name}: drag to move it", &[("name", tl!(name))]);
+    resp.on_hover_cursor(egui::CursorIcon::Grab).on_hover_text(tip)
 }
 
-fn toolbar(ui: &mut Ui, app: &mut RustGisApp, id: &str, add: impl FnOnce(&mut Ui, &mut RustGisApp)) {
-    if app.ui.qgis.hidden.iter().any(|h| h == id) {
-        return;
-    }
+/// One toolbar: its grip and buttons, wrapping onto more lines only when it's wider than the room
+/// left. The toolbar's rect and its grip's answer.
+fn toolbar(ui: &mut Ui, app: &mut RustGisApp, id: &str, room: f32) -> (Rect, egui::Response) {
     let t = Tokens::get(ui.ctx());
-    ui.horizontal(|ui| {
-        ui.spacing_mut().item_spacing = vec2(1.0, 0.0);
-        grip(ui, &t);
-        add(ui, app);
+    let layout = egui::Layout::left_to_right(egui::Align::Center).with_main_wrap(true);
+    let inner = ui.allocate_ui_with_layout(vec2(room.max(60.0), 24.0), layout, |ui| {
+        ui.spacing_mut().item_spacing = vec2(1.0, 2.0);
+        let g = grip(ui, id, &t);
+        contents(ui, app, id);
         ui.add_space(6.0);
+        g
     });
+    (inner.response.rect, inner.inner)
 }
 
+/// The toolbars, as QGIS has them: in rows, each moved by dragging its grip (onto another row,
+/// between two toolbars, or above or below the others for a row of its own). A row too long for
+/// the window goes on over more lines, so no button is hidden. Right-click shows or hides them.
 fn toolbars(app: &mut RustGisApp, ui: &mut Ui) {
     let t = Tokens::get(ui.ctx());
     if TOOLBARS.iter().all(|(id, _)| app.ui.qgis.hidden.iter().any(|h| h == id)) {
         return;
     }
+    if app.ui.qgis.rows.is_empty() {
+        app.ui.qgis.rows = arranged(&[]);
+    }
     egui::Panel::top("qgis_toolbars")
         .show_separator_line(false)
         .frame(egui::Frame::NONE.fill(t.ribbon).inner_margin(egui::Margin { left: 4, right: 4, top: 2, bottom: 2 }))
         .show(ui, |ui| {
-            let r = ui.max_rect();
-            ui.painter().line_segment([pos2(r.min.x - 4.0, r.max.y + 2.0), pos2(r.max.x + 4.0, r.max.y + 2.0)], Stroke::new(1.0, t.border));
-            ui.horizontal_wrapped(|ui| {
-                ui.spacing_mut().item_spacing = vec2(2.0, 2.0);
-                toolbar(ui, app, "project", |ui, app| {
-                    button(ui, app, "new", "New Project", "project.new", Value::Null, false);
-                    button(ui, app, "open", "Open Project", "ui.open", Value::Null, false);
-                    button(ui, app, "save", "Save Project", "ui.save", Value::Null, false);
-                    button(ui, app, "save_as", "Save Project As…", "ui.saveAs", Value::Null, false);
-                    button(ui, app, "new_layout", "New Print Layout", "layout.new", json!({"template": "blank"}), false);
-                    button(ui, app, "print", "Export Map to PDF", "ui.printMap", Value::Null, false);
-                });
-                toolbar(ui, app, "navigation", |ui, app| {
-                    tool_button(ui, app, "explore", "Pan Map (click a feature to identify it)", Tool::Explore);
-                    tool_button(ui, app, "zoom_box", "Zoom In (drag a box)", Tool::ZoomIn);
-                    button(ui, app, "zoom_in", "Zoom In", "map.zoomIn", Value::Null, false);
-                    button(ui, app, "zoom_out", "Zoom Out", "map.zoomOut", Value::Null, false);
-                    button(ui, app, "zoom_full", "Zoom Full", "map.zoomFull", Value::Null, false);
-                    button(ui, app, "zoom_sel", "Zoom to Selection", "select.zoomTo", Value::Null, false);
-                    button(ui, app, "zoom_world", "Zoom to Layer", "layer.zoomTo", Value::Null, false);
-                    button(ui, app, "prev_extent", "Zoom Last", "map.prevExtent", Value::Null, false);
-                    button(ui, app, "next_extent", "Zoom Next", "map.nextExtent", Value::Null, false);
-                    button(ui, app, "bookmark_new", "New Spatial Bookmark…", "ui.dialog", json!({"name": "bookmark"}), false);
-                    let b = app.ui.right == Some(RightPane::Bookmarks);
-                    button(ui, app, "bookmark", "Show Spatial Bookmarks", "ui.pane.bookmarks", Value::Null, b);
-                });
-                toolbar(ui, app, "attributes", |ui, app| {
-                    tool_button(ui, app, "select", "Select Features by Area or Single Click", Tool::Select);
-                    tool_button(ui, app, "select_loc", "Select Features by Polygon", Tool::SelectPolygon);
-                    button(ui, app, "clear_sel", "Deselect Features from All Layers", "select.clear", Value::Null, false);
-                    button(ui, app, "table", "Open Attribute Table", "table.open", Value::Null, false);
-                    button(ui, app, "calculate", "Open Field Calculator", "ui.dialog", json!({"name": "calculateField"}), false);
-                    tool_button(ui, app, "measure", "Measure Line", Tool::Measure);
-                    tool_button(ui, app, "measure_area", "Measure Area", Tool::MeasureArea);
-                    let s = app.ui.right == Some(RightPane::Symbology);
-                    button(ui, app, "symbology", "Layer Styling", "ui.pane.symbology", Value::Null, s);
-                    let l = app.ui.right == Some(RightPane::Labeling);
-                    button(ui, app, "label", "Labels", "ui.pane.labeling", Value::Null, l);
-                });
-                toolbar(ui, app, "digitizing", |ui, app| {
-                    let editing = app.session.map().editing.settings.enabled;
-                    button(ui, app, "edit", "Toggle Editing", "edit.enable", Value::Null, editing);
-                    tool_button(ui, app, "point_tool", "Add Point Feature", Tool::CreatePoint);
-                    tool_button(ui, app, "line_tool", "Add Line Feature", Tool::CreateLine);
-                    tool_button(ui, app, "polygon_tool", "Add Polygon Feature", Tool::CreatePolygon);
-                    tool_button(ui, app, "vertices", "Vertex Tool", Tool::EditVertices);
-                    button(ui, app, "delete", "Delete Selected", "edit.delete", Value::Null, false);
-                    button(ui, app, "cut", "Cut Features", "ui.cut", Value::Null, false);
-                    button(ui, app, "copy", "Copy Features", "ui.copy", Value::Null, false);
-                    button(ui, app, "paste", "Paste Features", "edit.paste", Value::Null, false);
-                    button(ui, app, "undo", "Undo", "edit.undo", Value::Null, false);
-                    button(ui, app, "redo", "Redo", "edit.redo", Value::Null, false);
-                });
-                toolbar(ui, app, "data", |ui, app| {
-                    let s = app.ui.left == Some(crate::LeftPane::Sources);
-                    button(ui, app, "add_data", "Open Data Source Manager", "ui.pane.sources", Value::Null, s);
-                    button(ui, app, "point_layer", "Add Vector or Raster Layer", "ui.addData", Value::Null, false);
-                    button(ui, app, "table", "Add Delimited Text Layer", "ui.addDelimited", Value::Null, false);
-                    button(ui, app, "web_map", "Add WMS/WMTS, WFS or ArcGIS Layer", "ui.addService", Value::Null, false);
-                    button(ui, app, "basemap", "Add XYZ Tile Layer", "ui.dialog", json!({"name": "addTiles"}), false);
-                    button(ui, app, "cambodia", "Add Cambodia Data", "ui.dialog", json!({"name": "cambodia"}), false);
-                    let lab = app.ui.right == Some(RightPane::RsLab);
-                    button(ui, app, "rgb", "LEE RS Lab", "ui.pane.rslab", Value::Null, lab);
-                    button(ui, app, "relief", "Open in Cambodia 3D", "ui.cambodia3d", json!({}), false);
-                });
-                toolbar(ui, app, "plugins", |ui, app| {
-                    let tb = app.ui.right == Some(RightPane::Geoprocessing);
-                    button(ui, app, "toolbox", "Processing Toolbox", "ui.pane.geoprocessing", Value::Null, tb);
-                    button(ui, app, "modelbuilder", "Graphical Modeler", "ui.modelBuilder", Value::Null, app.mb.shown());
-                    let py = app.ui.right == Some(RightPane::Script);
-                    button(ui, app, "python", "Python Console (Scripts)", "ui.pane.script", Value::Null, py);
-                    button(ui, app, "plugin", "Manage and Install Plugins", "ui.plugins", json!({"open": true}), false);
-                    let q = app.ui.qgis.bridge.open;
-                    button(ui, app, "geoprocessing", "QGIS Plugins & Tools", "ui.qgisBridge", Value::Null, q);
-                    let ai = app.ui.right == Some(RightPane::Assistant);
-                    button(ui, app, "command", "AI Assistant", "ui.pane.assistant", Value::Null, ai);
-                });
-            });
+            let full = ui.max_rect();
+            // Right-click between the toolbars: the toolbars' menu (the buttons answer their own).
+            ui.interact(full, ui.scope_id().with("toolbars_bg"), Sense::click()).context_menu(|ui| toolbars_menu(app, ui));
+            let room = ui.available_width();
+            let rows = app.ui.qgis.rows.clone();
+            // The lines drawn: (row, its toolbars and their rects).
+            let mut lines: Vec<(usize, Vec<(String, Rect)>)> = Vec::new();
+            let mut released = false;
+            ui.spacing_mut().item_spacing = vec2(2.0, 2.0);
+            for (ri, row) in rows.iter().enumerate() {
+                let shown: Vec<&String> = row.iter().filter(|id| !app.ui.qgis.hidden.contains(id)).collect();
+                let mut k = 0;
+                while k < shown.len() {
+                    // As many as fit on this line (their widths as last drawn), at least one.
+                    let mut used = 0.0;
+                    let mut end = k;
+                    while let Some(id) = shown.get(end) {
+                        let w = app.ui.qgis.toolbar_widths.get(id.as_str()).copied().unwrap_or(200.0);
+                        if end > k && used + w > room {
+                            break;
+                        }
+                        used += w + 2.0;
+                        end += 1;
+                    }
+                    let mut placed = Vec::new();
+                    ui.horizontal(|ui| {
+                        for id in shown.get(k..end).unwrap_or_default() {
+                            let left = room - (ui.cursor().min.x - full.min.x);
+                            let (r, g) = toolbar(ui, app, id, left);
+                            app.ui.qgis.toolbar_widths.insert(id.to_string(), r.width());
+                            if g.drag_started() {
+                                app.ui.qgis.dragging = Some(id.to_string());
+                            }
+                            released |= g.drag_stopped();
+                            g.context_menu(|ui| toolbars_menu(app, ui));
+                            placed.push((id.to_string(), r));
+                        }
+                    });
+                    lines.push((ri, placed));
+                    k = end;
+                }
+            }
+            let bottom = ui.min_rect().max.y + 2.0;
+            ui.painter().line_segment([pos2(full.min.x - 4.0, bottom), pos2(full.max.x + 4.0, bottom)], Stroke::new(1.0, t.border));
+            let Some(dragged) = app.ui.qgis.dragging.clone() else { return };
+            let Some(at) = ui.ctx().pointer_latest_pos() else { return };
+            let target = drop_target(&lines, at);
+            let painter = ui.ctx().layer_painter(egui::LayerId::new(egui::Order::Tooltip, ui.scope_id().with("toolbar_drag")));
+            // Where it goes: a bar between toolbars, or a line above or below the rows for a row of
+            // its own; the toolbar's name follows the pointer.
+            match &target {
+                Drop::Between { x, line, .. } => {
+                    let r = lines.get(*line).map_or(full, |l| line_rect(&l.1));
+                    painter.line_segment([pos2(*x, r.min.y), pos2(*x, r.max.y)], Stroke::new(3.0, t.accent));
+                }
+                Drop::OwnRow { y, .. } => {
+                    painter.line_segment([pos2(full.min.x, *y), pos2(full.max.x, *y)], Stroke::new(3.0, t.accent));
+                }
+            }
+            let name = TOOLBARS.iter().find(|(x, _)| *x == dragged).map_or("", |(_, n)| n);
+            let galley = painter.layout_no_wrap(tl!(name).to_string(), egui::FontId::proportional(12.0), t.text);
+            let tag = Rect::from_min_size(at + vec2(12.0, 10.0), galley.size() + vec2(12.0, 6.0));
+            painter.rect(tag, 4.0, t.pane, Stroke::new(1.0, t.accent), egui::StrokeKind::Inside);
+            painter.galley(tag.min + vec2(6.0, 3.0), galley, t.text);
+            ui.ctx().set_cursor_icon(egui::CursorIcon::Grabbing);
+            if released || !ui.ctx().input(|i| i.pointer.any_down()) {
+                app.ui.qgis.dragging = None;
+                // The lines as drawn become the rows (as QGIS keeps toolbars where they were put),
+                // so a drop lands where it shows; hidden toolbars keep a place in the last row.
+                let mut rows: Vec<Vec<String>> = lines.iter().map(|l| l.1.iter().map(|(id, _)| id.clone()).collect()).collect();
+                let hidden: Vec<String> = app.ui.qgis.rows.iter().flatten().filter(|id| app.ui.qgis.hidden.contains(id)).cloned().collect();
+                if let Some(last) = rows.last_mut() {
+                    last.extend(hidden);
+                }
+                let mut rows = arranged(&rows);
+                match target {
+                    Drop::Between { row, at, .. } => move_toolbar(&mut rows, &dragged, row, at, false),
+                    Drop::OwnRow { row, .. } => move_toolbar(&mut rows, &dragged, row, 0, true),
+                }
+                save_pref(app, "qgis_toolbar_rows", &rows_pref(&rows));
+                app.ui.qgis.rows = rows;
+            }
         });
+}
+
+/// Where a dragged toolbar would go, counted in the lines drawn.
+enum Drop {
+    /// Into `row`, before its `at`-th toolbar (the bar drawn at `x` on drawn line `line`).
+    Between { row: usize, at: usize, x: f32, line: usize },
+    /// A row of its own, put at `row` (the line drawn at `y`).
+    OwnRow { row: usize, y: f32 },
+}
+
+fn line_rect(placed: &[(String, Rect)]) -> Rect {
+    placed.iter().fold(Rect::NOTHING, |a, (_, r)| a.union(*r))
+}
+
+fn drop_target(lines: &[(usize, Vec<(String, Rect)>)], at: egui::Pos2) -> Drop {
+    if let Some(f) = lines.first().map(|l| line_rect(&l.1))
+        && at.y < f.min.y - 2.0
+    {
+        return Drop::OwnRow { row: 0, y: f.min.y };
+    }
+    if let Some(l) = lines.last().map(|l| line_rect(&l.1))
+        && at.y > l.max.y + 3.0
+    {
+        return Drop::OwnRow { row: lines.len(), y: l.max.y + 2.0 };
+    }
+    // The drawn line under the pointer (or nearest it).
+    let gap = |r: Rect| {
+        if at.y < r.min.y {
+            r.min.y - at.y
+        } else if at.y > r.max.y {
+            at.y - r.max.y
+        } else {
+            0.0
+        }
+    };
+    let li = lines.iter().enumerate().min_by(|a, b| gap(line_rect(&a.1.1)).total_cmp(&gap(line_rect(&b.1.1)))).map_or(0, |(i, _)| i);
+    let Some((_, placed)) = lines.get(li) else { return Drop::OwnRow { row: 0, y: at.y } };
+    // Its place on the line (the line drawn is the row it goes in): after those left of the pointer.
+    let k = placed.iter().filter(|(_, r)| r.center().x < at.x).count();
+    let x = match placed.get(k) {
+        Some((_, r)) => r.min.x - 1.0,
+        None => placed.last().map_or(at.x, |(_, r)| r.max.x + 1.0),
+    };
+    Drop::Between { row: li, at: k, x, line: li }
 }
 
 /// The docks on both sides of the map (see `qgisdock`): the rects of the left and right areas.
@@ -1094,6 +1343,7 @@ pub fn windows(app: &mut RustGisApp, ctx: &egui::Context) {
         app.ui.qgis.options &= open;
     }
     bridge_window(app, ctx);
+    crate::featureform::window(app, ctx);
 }
 
 /// Starts `work` on a thread of its own, its answer kept for the window (desktop only).
@@ -1316,5 +1566,36 @@ fn bridge_contents(app: &mut RustGisApp, ui: &mut Ui) {
         if ui.link(tl!("Browse plugins.qgis.org")).clicked() {
             app.ui.open_url = Some("https://plugins.qgis.org/plugins/?sort=-downloads".into());
         }
+    }
+}
+
+#[cfg(test)]
+mod toolbar_tests {
+    use super::*;
+
+    #[test]
+    fn toolbars_move_between_rows_and_onto_rows_of_their_own() {
+        let mut rows = arranged(&[]);
+        assert_eq!(rows_pref(&rows), "project,navigation,attributes,digitizing,data,plugins");
+        // Plugins onto a row of its own, below.
+        move_toolbar(&mut rows, "plugins", 1, 0, true);
+        assert_eq!(rows_pref(&rows), "project,navigation,attributes,digitizing,data;plugins");
+        // Digitizing beside it, before it.
+        move_toolbar(&mut rows, "digitizing", 1, 0, false);
+        assert_eq!(rows_pref(&rows), "project,navigation,attributes,data;digitizing,plugins");
+        // Project after navigation, in its own row (counted with it still there).
+        move_toolbar(&mut rows, "project", 0, 2, false);
+        assert_eq!(rows_pref(&rows), "navigation,project,attributes,data;digitizing,plugins");
+        // Onto a row of its own above the others.
+        move_toolbar(&mut rows, "data", 0, 0, true);
+        assert_eq!(rows_pref(&rows), "data;navigation,project,attributes;digitizing,plugins");
+        // A row emptied goes; a toolbar dropped back in its own row stays.
+        move_toolbar(&mut rows, "data", 0, 1, false);
+        assert_eq!(rows_pref(&rows), "data;navigation,project,attributes;digitizing,plugins");
+        move_toolbar(&mut rows, "data", 1, 0, false);
+        assert_eq!(rows_pref(&rows), "data,navigation,project,attributes;digitizing,plugins");
+        // Saved and read back; unknown and repeated ids dropped, missing ones added.
+        assert_eq!(rows_pref(&rows_from_pref(&rows_pref(&rows))), rows_pref(&rows));
+        assert_eq!(rows_pref(&rows_from_pref("data,bogus;data,project")), "data;project,navigation,attributes,digitizing,plugins");
     }
 }

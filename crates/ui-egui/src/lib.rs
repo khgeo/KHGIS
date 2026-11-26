@@ -74,6 +74,7 @@ mod qgisui;
 mod radial;
 #[cfg(not(target_arch = "wasm32"))]
 mod readjob;
+mod featureform;
 mod leelab;
 mod rslab;
 mod rstools;

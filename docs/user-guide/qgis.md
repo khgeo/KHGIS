@@ -10,12 +10,13 @@ installed QGIS plugin that adds Processing algorithms — on KHGIS's layers.
 | QGIS | KHGIS |
 |---|---|
 | Project, Edit, View, Layer, Settings, Plugins, Vector, Raster, Web, Processing, Help menus | the same menus, plus **Cambodia** (load a province or district, one-click workflows, A4 map) |
-| Project, Map Navigation, Attributes, Digitizing, Data Source Manager and Plugins toolbars | the same toolbars; **View › Toolbars** shows or hides each |
+| Project, Map Navigation, Attributes, Digitizing, Data Source Manager and Plugins toolbars | the same toolbars, moved as in QGIS: drag a toolbar by its grip (the dots at its start) between two others, onto another row, or above or below the rows for a row of its own. A row too long for the window goes on over another line, so no button is hidden. Right-click the toolbars (or **View › Toolbars**) to show or hide each, or **Reset Toolbar Positions**. KHGIS remembers where they are |
 | Browser and Layers panels | docked on the left; drag the bar between panels to resize |
 | Dock panels: drag a panel's title to tab it with another, stack it, or move it to the other side | the same: drag a panel's tab onto another panel's tabs or middle to tab them, onto its top or bottom edge to stack, or to the window's left or right edge; right-click a tab to move it without dragging. KHGIS remembers the arrangement |
 | Processing Toolbox | the Tools pane on the right (**Processing › Toolbox**) |
 | Locator bar | **Command Search** (Ctrl+K), top right |
 | Layer Styling panel | **Layer › Layer Styling**: the layer at the top, Symbology / Labels / Information down the left, the renderer (Single Symbol, Categorized, Graduated, Proportional Symbols) in a list |
+| Feature Attributes form after digitizing | the same: finishing a point, line or polygon (double-click, right-click or Enter) opens a form with a box for each field; **OK** adds the feature with its values (one step to undo), **Cancel** leaves it out. A text field's **▾** lists the values it already has (the classes of a training layer). **Remember the last values** fills the form with the last ones; **Settings › Suppress Attribute Form After Feature Creation** turns the form off |
 | Print Layout window | opening a layout swaps in the layout's own menus (Layout, Edit, View, Add Item, Atlas) and toolbar, and shows only Item Properties; **← Back to Map** returns |
 
 Every menu entry and toolbar button runs a KHGIS command, so nothing is lost from the ribbon.
@@ -96,8 +97,8 @@ plot (the density of two bands' values against each other).
 
 - Unsupervised: K-means or ISODATA (clusters split and merged between a fewest and most). Name
   the clusters in the class area table and **Save class names**.
-- Supervised, trained from polygons you draw (**Create training layer**, then Add Polygon
-  Feature, the class in the name field) or **from a land cover map** (WorldCover or Esri
+- Supervised, trained from polygons you draw (**Create training layer**, then Toggle Editing and
+  Add Polygon Feature; when the polygon is finished, type its class in the form's name box) or **from a land cover map** (WorldCover or Esri
   downloaded in 1 Data): Random Forest (with each band's importance), k-Nearest Neighbours,
   Maximum Likelihood, Mahalanobis Distance, Minimum Distance, Spectral Angle Mapper and
   Parallelepiped. The **magic wand** draws training polygons for you: type the class, turn it

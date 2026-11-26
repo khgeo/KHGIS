@@ -1189,7 +1189,10 @@ pub(crate) fn enhance_step(app: &mut RustGisApp, ui: &mut Ui) {
                 }
             });
         }
-        ui.horizontal(|ui| {
+        if count < 3 {
+            ui.label(egui::RichText::new(tl!("A one-band image (an index, a class map) shows with a colour ramp: change it in Layer Styling.")).weak());
+        }
+        ui.add_enabled_ui(count >= 3, |ui| ui.horizontal(|ui| {
             let n = count.max(1) as u32;
             let st = &mut app.ui.rslab;
             for (i, c) in ["R", "G", "B"].iter().enumerate() {
@@ -1200,7 +1203,7 @@ pub(crate) fn enhance_step(app: &mut RustGisApp, ui: &mut Ui) {
                 let rgb = app.ui.rslab.rgb;
                 now(app, "raster.bands", json!({"layer": image, "red": rgb[0], "green": rgb[1], "blue": rgb[2]}));
             }
-        });
+        }));
         heading(ui, "Contrast stretch");
         ui.horizontal_wrapped(|ui| {
             for (label, p) in [
@@ -1470,7 +1473,7 @@ pub(crate) fn classify_step(app: &mut RustGisApp, ui: &mut Ui) {
     } else {
         if ui
             .button(tl!("Create training layer (polygons)"))
-            .on_hover_text(tl!("Then draw polygons with Add Polygon Feature and type each one's class in its name field"))
+            .on_hover_text(tl!("Then draw a polygon round each training area: when it's closed, type its class in the form"))
             .clicked()
         {
             if app.session.map().layer_by_name("training").is_none() {
@@ -1479,6 +1482,9 @@ pub(crate) fn classify_step(app: &mut RustGisApp, ui: &mut Ui) {
             app.ui.rslab.training = "training".into();
             app.ui.rslab.class_field = "name".into();
             now(app, "edit.enable", json!({"on": true}));
+            // Ready to draw: the training layer active and Add Polygon Feature in hand.
+            let _ = app.run("layer.select", json!({"layer": "training"}));
+            let _ = app.run("tool.set", json!({"tool": "createPolygon"}));
         }
         let polys = vectors(app, true);
         if !polys.is_empty() {
