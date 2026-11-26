@@ -62,6 +62,9 @@ pub struct State {
     pub staged: Option<(u32, Box<rustgis_engine::map::Layer>)>,
     /// Plugins › QGIS Plugins & Tools.
     pub bridge: Bridge,
+    /// The project (`Session::opened`) whose maps were opened with editing off, as QGIS opens
+    /// layers read-only until Toggle Editing.
+    pub editing_off_for: Option<u64>,
 }
 
 impl Default for State {
@@ -77,6 +80,7 @@ impl Default for State {
             live: true,
             staged: None,
             bridge: Bridge::default(),
+            editing_off_for: None,
         }
     }
 }
@@ -292,7 +296,8 @@ fn lang_switch(app: &mut RustGisApp, ui: &mut Ui, r: Rect, t: &Tokens) {
 fn tool_item(ui: &mut Ui, app: &mut RustGisApp, icon: &str, label: &str, tool: Tool) {
     let on = app.session.tool == tool;
     let shortcut = crate::keymap::shortcut_text(ui.ctx(), app, "tool.set", &json!({"tool": tool.code()}));
-    let resp = menu_row(ui, icon, tl!(label), &shortcut, true);
+    let allowed = !tool.edits() || app.session.map().editing.settings.enabled;
+    let resp = menu_row(ui, icon, tl!(label), &shortcut, allowed);
     if on {
         let t = Tokens::get(ui.ctx());
         ui.painter().rect_stroke(
@@ -701,8 +706,14 @@ fn lang() -> &'static str {
 
 /// A toolbar button: the icon, checked or disabled as the command is, its name on hover.
 fn button(ui: &mut Ui, app: &mut RustGisApp, icon: &str, tip: &str, id: &str, params: Value, checked: bool) {
+    button_when(ui, app, icon, tip, id, params, checked, true);
+}
+
+/// [`button`], greyed out unless `allowed` too.
+#[allow(clippy::too_many_arguments)]
+fn button_when(ui: &mut Ui, app: &mut RustGisApp, icon: &str, tip: &str, id: &str, params: Value, checked: bool, allowed: bool) {
     let t = Tokens::get(ui.ctx());
-    let on = enabled(app, id);
+    let on = allowed && enabled(app, id);
     let (r, resp) = ui.allocate_exact_size(vec2(26.0, 26.0), Sense::click());
     let tip = tl!(tip).to_string();
     resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, on, &tip));
@@ -725,7 +736,24 @@ fn button(ui: &mut Ui, app: &mut RustGisApp, icon: &str, tip: &str, id: &str, pa
 
 fn tool_button(ui: &mut Ui, app: &mut RustGisApp, icon: &str, tip: &str, tool: Tool) {
     let on = app.session.tool == tool;
-    button(ui, app, icon, tip, "tool.set", json!({"tool": tool.code()}), on);
+    // Digitizing tools wait for Toggle Editing, as in QGIS.
+    let allowed = !tool.edits() || app.session.map().editing.settings.enabled;
+    button_when(ui, app, icon, tip, "tool.set", json!({"tool": tool.code()}), on, allowed);
+}
+
+/// A project just opened (or the first at start) opens with editing off, as QGIS's layers do:
+/// Toggle Editing turns it on. Not a change to the project, so it isn't marked as one.
+fn editing_off_at_open(app: &mut RustGisApp) {
+    if app.ui.qgis.editing_off_for == Some(app.session.opened) {
+        return;
+    }
+    app.ui.qgis.editing_off_for = Some(app.session.opened);
+    for m in &mut app.session.project.maps {
+        m.editing.settings.enabled = false;
+    }
+    if app.session.tool.edits() {
+        app.session.tool = Tool::default();
+    }
 }
 
 /// A toolbar's start: a grip, as QGIS draws one.
@@ -842,6 +870,7 @@ fn toolbars(app: &mut RustGisApp, ui: &mut Ui) {
 
 /// The docks on both sides of the map (see `qgisdock`): the rects of the left and right areas.
 pub fn docks(app: &mut RustGisApp, ui: &mut Ui, frame: egui::Frame, t: &Tokens) -> [Option<Rect>; 2] {
+    editing_off_at_open(app);
     crate::qgisdock::show(app, ui, frame, t)
 }
 

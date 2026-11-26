@@ -380,7 +380,7 @@ fn set_tool(s: &mut Session, p: &Value) -> CmdResult {
             return Err(format!("{} needs a {} layer", t.label(), t.label().trim_start_matches("Create ").to_lowercase()));
         }
     }
-    if matches!(t, Tool::EditVertices | Tool::CutPolygon | Tool::Reshape) && !s.map().editing.settings.enabled {
+    if t.edits() && !s.map().editing.settings.enabled {
         return Err("editing is turned off (Edit › Edit)".into());
     }
     s.tool = t;

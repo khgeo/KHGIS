@@ -8125,9 +8125,15 @@ fn data_design_rules_hold_on_every_edit() {
     // Edit status, and turning editing off.
     let st = s.run("edit.status", &Value::Null).unwrap();
     assert!(st["layers"].as_array().unwrap().iter().any(|l| l["layer"] == "Roads" && l["added"].as_u64().unwrap() >= 5));
+    // Off, a drawing tool in hand goes back to Explore, and none can be picked until it is on.
+    s.run("layer.select", &json!({"layer": "Roads"})).unwrap();
+    s.run("tool.set", &json!({"tool": "createLine"})).unwrap();
     s.run("edit.enable", &json!({"on": false})).unwrap();
+    assert_eq!(s.tool, crate::Tool::Explore);
+    assert!(s.run("tool.set", &json!({"tool": "createLine"})).is_err());
     assert!(s.run("edit.addFeature", &json!({"layer": "Roads", "geometry": line})).is_err());
     s.run("edit.enable", &json!({"on": true})).unwrap();
+    s.run("tool.set", &json!({"tool": "createLine"})).unwrap();
 }
 
 #[test]

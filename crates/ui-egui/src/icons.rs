@@ -398,9 +398,16 @@ pub fn paint(painter: &Painter, r: Rect, name: &str, ink: Color32, accent: Color
             }
         }
         "measure_area" => {
-            p.polygon_shape(&[(3.0, 18.0), (6.0, 5.0), (17.0, 3.0), (21.0, 14.0), (13.0, 21.0)], 70);
-            for (x, y) in [(3.0, 18.0), (6.0, 5.0), (17.0, 3.0), (21.0, 14.0), (13.0, 21.0)] {
-                p.rect(x - 1.5, y - 1.5, 3.0, 3.0, Some(Color32::WHITE), Some((1.0, ink)), 0.0);
+            // An area outlined over a ruler: unlike Add Polygon Feature (vertex handles), it
+            // reads as measuring, as Measure Line's ruler does.
+            let area = [(4.0, 13.0), (6.0, 3.5), (15.0, 2.0), (20.5, 8.0), (16.0, 13.0)];
+            p.fill(&area, amber.gamma_multiply(0.45));
+            p.closed(&area, 1.3, ink);
+            p.rect(2.0, 16.0, 20.0, 6.0, Some(amber), Some((1.1, ink)), 1.0);
+            for i in 0..7 {
+                let x = 4.5 + i as f32 * 2.6;
+                let l = if i % 2 == 0 { 2.8 } else { 1.8 };
+                p.line(&[(x, 16.0), (x, 16.0 + l)], 1.0, ink);
             }
         }
         "identify" | "about" => {
