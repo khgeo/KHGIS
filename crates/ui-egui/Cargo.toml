@@ -9,8 +9,10 @@ description = "RustGIS L6: the ribbon egui front end (ribbon, panes, map view); 
 workspace = true
 
 [dependencies]
-rustgis-engine = { workspace = true }
+rustgis-engine = { workspace = true, features = ["qgis"] }
 rustgis-assistant = { workspace = true }
+# Plugins › QGIS Plugins & Tools: connecting the user's QGIS.
+rustgis-qgis = { workspace = true }
 # egui's own faces (Hack, the theme's fallback for Georgian) and its emoji, which egui 0.37 no longer
 # bundles by default.
 egui = { workspace = true, features = ["monochrome_emoji_fonts"] }

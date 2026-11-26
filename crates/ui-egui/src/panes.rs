@@ -34,7 +34,9 @@ pub fn show(app: &mut RustGisApp, ui: &mut Ui) {
     let t = Tokens::get(ui.ctx());
     let frame = egui::Frame::NONE.fill(t.pane).inner_margin(egui::Margin::ZERO);
     app.ui.pane_rects = [None; 2];
-    if let Some(left) = app.ui.left {
+    if app.ui.qgis_layout {
+        app.ui.pane_rects[0] = crate::qgisui::left_docks(app, ui, frame, &t);
+    } else if let Some(left) = app.ui.left {
         let pane =
             egui::Panel::left("left_pane").resizable(true).default_size(270.0).size_range(200.0..=480.0).frame(frame).show(ui, |ui| {
                 left_header(app, ui, left, &t);
@@ -617,6 +619,16 @@ fn filter_query(text: &str) -> String {
 /// Whether a name passes the filter `q` (from [`filter_query`]): it contains it, ignoring case.
 fn filter_shows(q: &str, name: &str) -> bool {
     q.is_empty() || name.to_lowercase().contains(q)
+}
+
+/// The Layers pane's contents, for the QGIS layout's Layers dock.
+pub(crate) fn contents_in(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
+    contents(app, ui, t);
+}
+
+/// The Browser (catalog) pane's contents, for the QGIS layout's Browser dock.
+pub(crate) fn catalog_in(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
+    catalog(app, ui, t);
 }
 
 fn contents(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
@@ -2711,6 +2723,8 @@ pub struct GpForm {
     pub web_load: Option<crate::Slot<Result<String, String>>>,
     /// A tool running in the browser's GeoLibre runner: its run id, and where the result lands.
     pub web_run: Option<(u64, &'static str, crate::Slot<rustgis_engine::cmd::gp::ExternalOutput>)>,
+    /// A QGIS algorithm running on the web app's QGIS bridge service.
+    pub qgis_run: Option<(u64, &'static str, crate::Slot<rustgis_engine::cmd::gp::QgisOutput>)>,
     /// A plugin tool running on a thread of its own, so the window stays responsive.
     pub plugin_run: Option<PluginJob>,
     /// A built-in tool running on a thread of its own, likewise (the browser runs them at once).
@@ -2913,7 +2927,12 @@ pub fn poll_geolibre(app: &mut RustGisApp, ctx: &egui::Context) {
         let r = rustgis_engine::cmd::gp::external_complete(&mut app.session, id, out).and_then(|_| app.finish_gp(id));
         finished(app, tool, r);
     }
-    if app.gp.web_load.is_some() || app.gp.web_run.is_some() {
+    if let Some((id, tool, out)) = app.gp.qgis_run.as_ref().and_then(|(id, tool, slot)| take(slot).map(|o| (*id, *tool, o))) {
+        app.gp.qgis_run = None;
+        let r = rustgis_engine::cmd::gp::qgis_complete(&mut app.session, id, out).and_then(|_| app.finish_gp(id));
+        finished(app, tool, r);
+    }
+    if app.gp.web_load.is_some() || app.gp.web_run.is_some() || app.gp.qgis_run.is_some() {
         ctx.request_repaint_after(std::time::Duration::from_millis(100));
     }
 }
@@ -3390,7 +3409,7 @@ pub(crate) fn input_table<'a>(session: &'a Session, name: &str) -> Option<&'a ru
 fn geoprocessing(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
     let Some(spec) = app.gp.tool.and_then(rustgis_engine::analysis::tool) else {
         // Tool finder, under the tool running, if one is.
-        let running = app.gp.web_run.is_some() || app.gp.plugin_run.is_some();
+        let running = app.gp.web_run.is_some() || app.gp.qgis_run.is_some() || app.gp.plugin_run.is_some();
         #[cfg(not(target_arch = "wasm32"))]
         let running = running || app.gp.tool_run.is_some();
         if running {
@@ -3821,7 +3840,7 @@ fn geoprocessing(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
     ui.add_space(8.0);
     ui.with_layout(egui::Layout::right_to_left(egui::Align::Min), |ui| {
         // One browser run at a time, and one background run.
-        let idle = app.gp.web_run.is_none() && app.gp.plugin_run.is_none();
+        let idle = app.gp.web_run.is_none() && app.gp.qgis_run.is_none() && app.gp.plugin_run.is_none();
         #[cfg(not(target_arch = "wasm32"))]
         let idle = idle && app.gp.tool_run.is_none();
         if crate::widgets::primary_button(ui, tl!("Run"), idle, vec2(96.0, 30.0)).clicked() {
@@ -3869,7 +3888,21 @@ fn geoprocessing(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
                 }
             }
             let params = Value::Object(params);
-            if rustgis_engine::cmd::gp::is_geolibre_tool(spec) && app.services.geolibre_run.is_some() {
+            if rustgis_engine::cmd::gp::is_qgis_tool(spec) && app.services.qgis_run.is_some() {
+                // The web app's QGIS bridge service answers later: start it, and `poll_geolibre`
+                // finishes, as for the browser's GeoLibre runner.
+                match rustgis_engine::cmd::gp::qgis_start(&mut app.session, spec.id, &params) {
+                    Ok(run) => {
+                        let (id, slot) = (run.id, crate::Slot::default());
+                        if let Some(start) = &app.services.qgis_run {
+                            start(run, slot.clone());
+                        }
+                        app.gp.qgis_run = Some((id, spec.id, slot));
+                        app.gp.last = None;
+                    }
+                    Err(e) => app.gp.last = Some((false, vec![e])),
+                }
+            } else if rustgis_engine::cmd::gp::is_geolibre_tool(spec) && app.services.geolibre_run.is_some() {
                 // The browser's runner is asynchronous: start it, and `poll_geolibre` finishes.
                 match rustgis_engine::cmd::gp::external_start(&mut app.session, spec.id, &params) {
                     Ok(run) => {

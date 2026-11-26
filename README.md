@@ -41,6 +41,13 @@ A4 map — are single commands.
   | `districtSchools` | schools counted per district, as a choropleth |
 - **A4 maps in one step.** `khgis.autoLayout` produces a print-ready layout — title, legend,
   scale bar, north arrow, regional inset, data sources and date — in Khmer or English.
+- **A QGIS-style interface.** Menu bar, toolbars, Browser and Layers docks, Processing Toolbox
+  and status bar laid out as in QGIS (Settings › Interface switches to the ribbon), on the
+  desktop and in the browser.
+- **QGIS plugins and algorithms.** Connect your own QGIS (Plugins › QGIS Plugins & Tools) and
+  its Processing algorithms — QGIS's and every installed QGIS plugin's — run on KHGIS layers from
+  the Processing Toolbox and the Vector and Raster menus; the web app uses a QGIS bridge service
+  (`packaging/qgis-bridge`). See [QGIS layout and QGIS plugins](docs/user-guide/qgis.md).
 - **A Cambodia-aware assistant.** The bundled `cambodia` skill understands province names in
   Khmer, English and loose romanisations ("Kompong Cham", "Siemreap"), and replies in Khmer when
   you write in Khmer.

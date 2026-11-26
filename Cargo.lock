@@ -4803,6 +4803,7 @@ dependencies = [
  "rustgis-geom",
  "rustgis-map",
  "rustgis-plugins",
+ "rustgis-qgis",
  "rustgis-render",
  "rustls",
  "serde",
@@ -4892,6 +4893,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustgis-qgis"
+version = "0.6.0"
+dependencies = [
+ "log",
+ "rustgis-analysis",
+ "rustgis-data",
+ "serde_json",
+]
+
+[[package]]
 name = "rustgis-render"
 version = "0.6.0"
 dependencies = [
@@ -4955,6 +4966,7 @@ dependencies = [
  "rustgis-assistant",
  "rustgis-engine",
  "rustgis-plugins",
+ "rustgis-qgis",
  "rustix 1.1.6",
  "serde",
  "serde_json",
@@ -4969,12 +4981,14 @@ dependencies = [
 name = "rustgis-web"
 version = "0.6.0"
 dependencies = [
+ "base64 0.23.1",
  "eframe",
  "egui",
  "js-sys",
  "log",
  "rfd",
  "rustgis-engine",
+ "rustgis-qgis",
  "rustgis-ui-egui",
  "serde_json",
  "wasm-bindgen",

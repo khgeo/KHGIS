@@ -3464,7 +3464,7 @@ fn plugin_tab(app: &mut RustGisApp, ui: &mut Ui, plugin: &str) {
 }
 
 /// The Settings tab: theme, scale, customization, language, start-up and autosave.
-fn settings_tab(app: &mut RustGisApp, ui: &mut Ui) {
+pub(crate) fn settings_tab(app: &mut RustGisApp, ui: &mut Ui) {
     group(ui, "Theme", |ui| {
         theme_menu(app, ui);
         scale_menu(app, ui);

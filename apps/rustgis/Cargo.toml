@@ -11,7 +11,7 @@ description = "RustGIS desktop app"
 workspace = true
 
 [dependencies]
-rustgis-engine = { workspace = true, features = ["geolibre"] }
+rustgis-engine = { workspace = true, features = ["geolibre", "qgis"] }
 rustgis-ui-egui = { workspace = true }
 # The ChatGPT sign-in, given the keychain at start-up.
 rustgis-assistant = { workspace = true }

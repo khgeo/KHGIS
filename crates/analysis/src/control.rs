@@ -139,7 +139,7 @@ pub struct Cancelled;
 
 /// The error text the `From<Cancelled>` conversions carry. [`crate::run_with`] replaces it with
 /// its own "… was cancelled" message, which names the tool and how far it came.
-pub(crate) const CANCELLED: &str = "cancelled";
+pub const CANCELLED: &str = "cancelled";
 
 impl From<Cancelled> for String {
     fn from(_: Cancelled) -> String {
@@ -371,4 +371,21 @@ mod tests {
         advance(5);
         assert_eq!(c.progress(), Some((3, 3)), "never past the total");
     }
+}
+
+/// For an external runner (a program KHGIS waits on, such as QGIS): whether the run on this
+/// thread was asked to stop. It should stop the program and return [`CANCELLED`] when it was.
+pub fn stop_requested() -> bool {
+    cancelled()
+}
+
+/// For an external runner: says how far the run on this thread has come, as `done` of `total`
+/// (a percentage is `done` of 100).
+pub fn report_progress(done: u64, total: u64) {
+    CURRENT.with(|c| {
+        if let Some(c) = c.borrow().as_ref() {
+            c.total.store(total, Ordering::Relaxed);
+            c.done.store(done.min(total), Ordering::Relaxed);
+        }
+    });
 }

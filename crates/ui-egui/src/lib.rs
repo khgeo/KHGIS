@@ -70,6 +70,7 @@ mod pluginpanel;
 mod pluginstart;
 mod pluginsui;
 mod portalsui;
+mod qgisui;
 #[cfg(not(target_arch = "wasm32"))]
 mod readjob;
 
@@ -319,6 +320,13 @@ pub fn parse_extent(text: &str) -> Option<[f64; 4]> {
 /// supplies an asynchronous file picker (results arrive in `inbox`) and browser downloads.
 #[derive(Default)]
 pub struct Services {
+    /// The QGIS-style layout is the default (the apps); tests and embedders keep the ribbon
+    /// unless the user picked it.
+    pub qgis_layout_default: bool,
+    /// The web app: connects the QGIS bridge service at the address given, putting its answer
+    /// (the bridge's status, or an error) in the slot.
+    #[allow(clippy::type_complexity)]
+    pub qgis_connect: Option<Box<dyn Fn(String, std::sync::Arc<std::sync::Mutex<Option<Result<Value, String>>>>)>>,
     /// Opens a file picker for `"data"`, `"project"`, or `"shapefile"`; results land in `inbox`.
     /// Shapefile picks carry [`SHAPEFILE_PICK`] after sidecars are gathered into ZIPs.
     pub open_async: Option<Box<dyn Fn(&str)>>,
@@ -341,6 +349,8 @@ pub struct Services {
     /// …and runs one tool in its in-memory `/work` folder, putting the new files and printed
     /// lines in the slot. The desktop app runs tools through the `geolibre` program instead.
     pub geolibre_run: Option<Box<dyn Fn(rustgis_engine::cmd::gp::ExternalRun, Slot<rustgis_engine::cmd::gp::ExternalOutput>)>>,
+    /// Runs a QGIS algorithm on the web app's QGIS bridge service (the browser has no QGIS).
+    pub qgis_run: Option<Box<dyn Fn(rustgis_engine::cmd::gp::QgisRun, Slot<rustgis_engine::cmd::gp::QgisOutput>)>>,
     /// Downloads a URL into the slot (the browser's fetch; the desktop downloads on a thread).
     pub fetch: Option<Box<dyn Fn(&str, Slot<Result<Vec<u8>, String>>)>>,
     /// Makes an HTTP request (the AI assistant's calls to its model) and puts the response, of any
@@ -694,6 +704,10 @@ pub struct UiState {
     pub start_extent: Option<[f64; 4]>,
     /// The start extent, fitted again once the map view has its real size.
     pub start_view: Option<[f64; 4]>,
+    /// The QGIS-style layout (menu bar, toolbars, docks) is drawn instead of the ribbon.
+    pub qgis_layout: bool,
+    /// The QGIS-style layout's docks, toolbars and windows.
+    pub qgis: qgisui::State,
     /// The ribbon shows only its tabs; clicking a tab opens it until the next click elsewhere.
     pub ribbon_minimized: bool,
     /// A minimized ribbon temporarily opened from its tab strip.
@@ -925,6 +939,8 @@ impl Default for UiState {
             start_projection_input: String::new(),
             start_extent: None,
             start_view: None,
+            qgis_layout: false,
+            qgis: qgisui::State::default(),
             ribbon_minimized: false,
             ribbon_peek: false,
             command_search: None,
@@ -1443,6 +1459,7 @@ impl RustGisApp {
         self.take_saved_look();
         self.ui.hidden_tabs = ribbon::current_hidden_tabs(list(self.services.load_pref.as_ref().and_then(|load| load("hidden_tabs"))));
         self.ui.quick_access = list(self.services.load_pref.as_ref().and_then(|load| load("quick_access")));
+        qgisui::load(&mut self);
         // The browser's GeoLibre tools, loaded in an earlier visit: load them again (the runner
         // comes from the browser's cache).
         if self.services.load_pref.as_ref().and_then(|load| load("geolibre_web")).as_deref() == Some("on") {
@@ -2687,8 +2704,25 @@ impl RustGisApp {
         }
         let toggle_right = |ui: &mut UiState, pane: RightPane| ui.toggle_right(pane);
         match id {
+            // The QGIS layout docks the Layers and the Browser together: each shows or hides alone.
+            "ui.pane.contents" if self.ui.qgis_layout => {
+                self.ui.qgis.layers = !self.ui.qgis.layers || self.ui.left == Some(LeftPane::Sources);
+                if self.ui.left == Some(LeftPane::Sources) {
+                    self.ui.left = None;
+                }
+            }
+            "ui.pane.catalog" if self.ui.qgis_layout => {
+                self.ui.qgis.browser = !self.ui.qgis.browser || self.ui.left == Some(LeftPane::Sources);
+                if self.ui.left == Some(LeftPane::Sources) {
+                    self.ui.left = None;
+                }
+            }
             "ui.pane.contents" => self.ui.left = if self.ui.left == Some(LeftPane::Contents) { None } else { Some(LeftPane::Contents) },
             "ui.pane.catalog" => self.ui.left = if self.ui.left == Some(LeftPane::Catalog) { None } else { Some(LeftPane::Catalog) },
+            "ui.interface" => return qgisui::switch(self, p),
+            "ui.qgisToolbar" => return qgisui::toggle_toolbar(self, p),
+            "ui.qgisOptions" => self.ui.qgis.options = !self.ui.qgis.options,
+            "ui.qgisBridge" => self.ui.qgis.bridge.open = !self.ui.qgis.bridge.open,
             "ui.pane.sources" => self.ui.left = if self.ui.left == Some(LeftPane::Sources) { None } else { Some(LeftPane::Sources) },
             "ui.pane.geoprocessing" => toggle_right(&mut self.ui, RightPane::Geoprocessing),
             "ui.pane.symbology" => {
@@ -5370,8 +5404,12 @@ impl RustGisApp {
         if self.ui.backstage {
             backstage::show(self, ui);
         } else {
-            chrome::header(self, ui);
-            ribbon::show(self, ui);
+            if self.ui.qgis_layout {
+                qgisui::top(self, ui);
+            } else {
+                chrome::header(self, ui);
+                ribbon::show(self, ui);
+            }
             chrome::status_bar(self, ui);
             panes::show(self, ui);
             table::show(self, ui);
@@ -5391,6 +5429,7 @@ impl RustGisApp {
         autosave::offer(self, &ctx);
         saveprompt::show(self, &ctx);
         pluginsui::show(self, &ctx);
+        qgisui::windows(self, &ctx);
         update::show(self, &ctx);
         showme::tick(self, &ctx);
         chrome::command_search(self, &ctx);
