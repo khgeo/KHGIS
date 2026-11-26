@@ -4258,14 +4258,19 @@ fn symbology(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
         let shown = kinds.iter().find(|(c, l)| current(app, l, c)).map(|(c, _)| qgis_name(c)).unwrap_or("Single Symbol");
         ui.horizontal(|ui| {
             icons_for(ui, kinds.iter().find(|(c, l)| current(app, l, c)).map(|(c, _)| *c).unwrap_or("single"), t);
-            egui::ComboBox::from_id_salt("qgis_renderer").width(ui.available_width() - 8.0).selected_text(tl!(shown)).show_ui(ui, |ui| {
-                for (code, label) in &kinds {
-                    let sel = current(app, label, code);
-                    if ui.selectable_label(sel, tl!(qgis_name(code))).on_hover_text(tl!(*label)).clicked() && !sel {
-                        picked = Some(*code);
+            let combo = egui::ComboBox::from_id_salt("qgis_renderer").width(ui.available_width() - 8.0).selected_text(tl!(shown)).show_ui(
+                ui,
+                |ui| {
+                    for (code, label) in &kinds {
+                        let sel = current(app, label, code);
+                        if ui.selectable_label(sel, tl!(qgis_name(code))).on_hover_text(tl!(*label)).clicked() && !sel {
+                            picked = Some(*code);
+                        }
                     }
-                }
-            });
+                },
+            );
+            let name = tl!("Renderer").to_string();
+            combo.response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::ComboBox, true, &name));
         });
     } else {
         ui.horizontal_wrapped(|ui| {

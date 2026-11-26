@@ -1747,14 +1747,14 @@ impl RustGisApp {
             return self.run("layer.addDataBytes", p);
         }
         let Ok(text) = std::str::from_utf8(bytes) else {
-            let e = crate::i18n::fmt("{name} is not a text file: KHGIS opens GeoJSON, CSV, GeoTIFF and .rgis here", &[("name", name)]);
+            let e = crate::i18n::fmt("{name} is not a text file: KHGIS opens GeoJSON, CSV, GeoTIFF and .kgis here", &[("name", name)]);
             self.session.notify(e.clone(), true);
             return Err(e);
         };
         if rustgis_engine::project::is_project_file(name) {
             let r = self.run("project.openText", json!({"text": text, "fileName": name}));
             if r.is_ok() {
-                self.ui.web_file = Some(format!("{}.rgis", self.session.project.name));
+                self.ui.web_file = Some(format!("{}.{}", self.session.project.name, rustgis_engine::project::EXTENSION));
             }
             self.map.invalidate();
             r
@@ -1770,10 +1770,11 @@ impl RustGisApp {
     }
 
     /// Downloads the project as `file` (web), naming the project after it as Save As does
-    /// natively. A name without the `.rgis` extension gets it.
+    /// natively. A name without the `.kgis` extension gets it (a `.rgis` one is replaced).
     pub(crate) fn save_download(&mut self, file: &str) -> Result<(), String> {
         let file = file.trim();
-        let stem = if file.to_ascii_lowercase().ends_with(".rgis") { file.get(..file.len() - 5).unwrap_or(file) } else { file }.trim();
+        let lower = file.to_ascii_lowercase();
+        let stem = if lower.ends_with(".rgis") || lower.ends_with(".kgis") { file.get(..file.len() - 5).unwrap_or(file) } else { file }.trim();
         if stem.is_empty() || stem.contains(['/', '\\']) {
             return Err(tl!("type a file name").into());
         }
@@ -1791,7 +1792,7 @@ impl RustGisApp {
                 return Err(e.to_string());
             }
         };
-        let file = format!("{stem}.rgis");
+        let file = format!("{stem}.{}", rustgis_engine::project::EXTENSION);
         if let Err(e) = self.services.download.as_ref().ok_or(tl!("no download service"))?(&file, text.into_bytes()) {
             self.session.project.name = old;
             return Err(e);
@@ -2725,6 +2726,7 @@ impl RustGisApp {
             "ui.qgisToolbar" => return qgisui::toggle_toolbar(self, p),
             "ui.qgisOptions" => self.ui.qgis.options = !self.ui.qgis.options,
             "ui.qgisBridge" => self.ui.qgis.bridge.open = !self.ui.qgis.bridge.open,
+            "ui.saveGpkgQgis" => return qgisui::save_gpkg(self),
             "ui.pane.sources" => self.ui.left = if self.ui.left == Some(LeftPane::Sources) { None } else { Some(LeftPane::Sources) },
             "ui.pane.geoprocessing" => toggle_right(&mut self.ui, RightPane::Geoprocessing),
             "ui.pane.symbology" => {
@@ -3448,7 +3450,7 @@ impl RustGisApp {
             // The browser can't write a file in place: Save downloads the project again under the
             // file name it was saved or opened as, and Save As (or a first Save) asks for one.
             "ui.save" | "ui.saveAs" if self.services.download.is_some() => {
-                let name = format!("{}.rgis", self.session.project.name);
+                let name = format!("{}.{}", self.session.project.name, rustgis_engine::project::EXTENSION);
                 if id == "ui.save" && self.ui.web_file.as_deref() == Some(name.as_str()) {
                     // The keyboard caller discards the result, so the failure is shown here too.
                     if let Err(error) = self.save_download(&name) {
@@ -4353,7 +4355,7 @@ impl RustGisApp {
         }
         let r = self.run("project.openText", p);
         if r.is_ok() && !package {
-            self.ui.web_file = Some(format!("{}.rgis", self.session.project.name));
+            self.ui.web_file = Some(format!("{}.{}", self.session.project.name, rustgis_engine::project::EXTENSION));
         }
         self.map.invalidate();
         r
@@ -5417,7 +5419,10 @@ impl RustGisApp {
             table::show(self, ui);
             timebar::show(self, ui);
             egui::CentralPanel::default().frame(egui::Frame::NONE.fill(t.canvas)).show(ui, |ui| {
+                // Layer Styling with Live update off: the map keeps the last applied style.
+                qgisui::swap_staged(self);
                 mapview::show(self, ui);
+                qgisui::swap_staged(self);
             });
         }
         // Text typed into a layout element's field, or a text graphic's, the Format pane no

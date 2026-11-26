@@ -272,7 +272,11 @@ fn sync(app: &mut RustGisApp) {
         let shown = app.ui.qgis.docks.areas[side].iter().position(|g| g.tabs.iter().any(|t| is_open_any(app, *t)));
         let drop = match (p, shown) {
             (Panel::Browser, _) => Drop::Group(side, 0),
-            (Panel::Layers, _) => Drop::Group(side, app.ui.qgis.docks.areas[side].len()),
+            // The Layers join the Browser as a tab, in view, as the panels start.
+            (Panel::Layers, _) => match app.ui.qgis.docks.find(Panel::Browser) {
+                Some((s, g)) if s == side => Drop::Tab(side, g),
+                _ => Drop::Group(side, app.ui.qgis.docks.areas[side].len()),
+            },
             (_, Some(g)) => Drop::Tab(side, g),
             (_, None) => Drop::Group(side, app.ui.qgis.docks.areas[side].len()),
         };

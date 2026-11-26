@@ -687,6 +687,7 @@ pub(crate) const UI_COMMANDS: &[(&str, &str, &str)] = &[
     ("ui.interface", "Switch Between the QGIS Layout and the Ribbon", "Settings › Interface"),
     ("ui.qgisBridge", "QGIS Plugins & Tools…", "Plugins"),
     ("ui.qgisOptions", "Options…", "Settings"),
+    ("ui.saveGpkgQgis", "Save As GeoPackage for QGIS…", "Project"),
     ("ui.radialMenu", "Toggle Radial Menu", "View"),
     ("ui.xray", "Toggle X-ray Lens", "View"),
     ("ui.shortcuts.import", "Import Keyboard Shortcuts…", "Settings › Customize › Keyboard Shortcuts"),
