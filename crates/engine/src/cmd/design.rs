@@ -288,7 +288,12 @@ pub fn commands() -> Vec<C> {
         C::new("edit.enable", "Edit", "Edit › Manage Edits", |s, p| {
             let set = &mut s.map_mut().editing.settings;
             set.enabled = b(p, "on").unwrap_or(!set.enabled);
-            Ok(json!({"enabled": set.enabled}))
+            let on = set.enabled;
+            // Turned off, an editing tool in hand goes back to the default one: it couldn't edit.
+            if !on && s.tool.edits() {
+                s.tool = crate::Tool::default();
+            }
+            Ok(json!({"enabled": on}))
         }).roles(&[]).effects(crate::policy::Effects::NONE)
         .params(r#"{"on"?: bool}"#),
         C::new("edit.settings", "Editing Settings", "Edit › Manage Edits", |s, p| {

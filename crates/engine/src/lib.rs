@@ -477,6 +477,10 @@ impl Tool {
     pub fn creates(self) -> bool {
         matches!(self, Tool::CreatePoint | Tool::CreateLine | Tool::CreatePolygon)
     }
+    /// Whether the tool changes features, so needs editing turned on (Edit › Edit).
+    pub fn edits(self) -> bool {
+        self.creates() || matches!(self, Tool::EditVertices | Tool::CutPolygon | Tool::Reshape)
+    }
     /// Whether the tool draws a line or polygon that edits features: vertices snap, and can
     /// follow an edge with Trace.
     pub fn draws_edit(self) -> bool {
