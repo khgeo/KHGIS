@@ -140,15 +140,34 @@ pub fn world_project() -> Project {
     p
 }
 
-/// Cambodia's official administrative boundaries at full resolution, unsimplified: the country
-/// (ADM0), its 25 provinces (ADM1, English and Khmer names) and 197 districts (ADM2, with their
-/// province). Bundled so KHGIS opens on Cambodia, and picks a province, without a network.
+/// Cambodia's official administrative boundaries: the country (ADM0), its 25 provinces (ADM1),
+/// 209 districts (ADM2: municipalities, districts and khans) and 1,702 communes (ADM3: communes
+/// and sangkats), with English and Khmer names, their kind (ស្រុក, ក្រុង, ខណ្ឌ, ឃុំ, សង្កាត់),
+/// codes and the units they are in. Bundled so KHGIS opens on Cambodia, and picks an area, without
+/// a network. The 2024 provinces, districts and communes are simplified together (a shared border
+/// stays shared) to some 80 m for communes; the communes are kept compressed and read once,
+/// when first asked for ([`cambodia_communes`]).
 ///
 /// The source punches Tonle Sap out of the national outline; those interior rings are filled, so
 /// the country boundary covers the lake. The lake itself is a layer of its own.
 pub const CAMBODIA_COUNTRY: &str = include_str!("../data/cambodia_adm0.geojson");
 pub const CAMBODIA_PROVINCES: &str = include_str!("../data/cambodia_adm1.geojson");
 pub const CAMBODIA_DISTRICTS: &str = include_str!("../data/cambodia_adm2.geojson");
+/// The communes, zlib-compressed (5.6 MB of GeoJSON in 1.2 MB).
+const CAMBODIA_COMMUNES_ZLIB: &[u8] = include_bytes!("../data/cambodia_adm3.geojson.zz");
+
+/// Cambodia's 1,702 communes and sangkats as GeoJSON (see [`CAMBODIA_COUNTRY`]): unpacked the
+/// first time they are asked for, then kept. Empty if the bundle can't be unpacked (it always can:
+/// a test unpacks it).
+pub fn cambodia_communes() -> &'static str {
+    static TEXT: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+    TEXT.get_or_init(|| {
+        miniz_oxide::inflate::decompress_to_vec_zlib_with_limit(CAMBODIA_COMMUNES_ZLIB, 64 << 20)
+            .ok()
+            .and_then(|b| String::from_utf8(b).ok())
+            .unwrap_or_default()
+    })
+}
 /// Tonle Sap, which the administrative boundaries leave as a gap between provinces.
 pub const CAMBODIA_TONLESAP: &str = include_str!("../data/cambodia_tonlesap.geojson");
 

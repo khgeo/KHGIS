@@ -1443,12 +1443,14 @@ pub(crate) fn zonal_statistics_with_failures(
     Ok(accs.into_iter().map(|acc| acc.stats()).collect())
 }
 
-/// A tiny arithmetic expression over band values.
+/// A tiny arithmetic expression over band values: + - * / ^, comparisons (> < >= <= == !=, 1
+/// or 0), & and | (and, or of non-zero), and sqrt, abs, log, log10, exp, min, max.
 enum Expr {
     Num(f64),
     Band(usize),
     Neg(Box<Expr>),
     Bin(Box<Expr>, char, Box<Expr>),
+    Call(&'static str, Vec<Expr>),
 }
 
 impl Expr {
@@ -1458,11 +1460,37 @@ impl Expr {
             return Err("the expression is too long".into());
         }
         let mut pos = 0;
-        let e = Self::sum(&toks, &mut pos, bands, 0)?;
+        let e = Self::logic(&toks, &mut pos, bands, 0)?;
         if pos != toks.len() {
             return Err(format!("unexpected '{}' in the expression", toks.get(pos).copied().unwrap_or(' ')));
         }
         Ok(e)
+    }
+    fn logic(t: &[char], p: &mut usize, n: usize, depth: usize) -> Result<Expr, String> {
+        let mut e = Self::compare(t, p, n, depth)?;
+        while let Some(op) = t.get(*p).copied().filter(|c| matches!(c, '&' | '|')) {
+            *p += 1;
+            // `&&` and `||` read as `&` and `|`.
+            if t.get(*p) == Some(&op) {
+                *p += 1;
+            }
+            e = Expr::Bin(Box::new(e), op, Box::new(Self::compare(t, p, n, depth)?));
+        }
+        Ok(e)
+    }
+    fn compare(t: &[char], p: &mut usize, n: usize, depth: usize) -> Result<Expr, String> {
+        let e = Self::sum(t, p, n, depth)?;
+        let (op, len) = match (t.get(*p), t.get(*p + 1)) {
+            (Some('>'), Some('=')) => ('g', 2),
+            (Some('<'), Some('=')) => ('l', 2),
+            (Some('='), Some('=')) => ('=', 2),
+            (Some('!'), Some('=')) => ('!', 2),
+            (Some('>'), _) => ('>', 1),
+            (Some('<'), _) => ('<', 1),
+            _ => return Ok(e),
+        };
+        *p += len;
+        Ok(Expr::Bin(Box::new(e), op, Box::new(Self::sum(t, p, n, depth)?)))
     }
     fn sum(t: &[char], p: &mut usize, n: usize, depth: usize) -> Result<Expr, String> {
         let mut e = Self::product(t, p, n, depth)?;
@@ -1473,10 +1501,18 @@ impl Expr {
         Ok(e)
     }
     fn product(t: &[char], p: &mut usize, n: usize, depth: usize) -> Result<Expr, String> {
-        let mut e = Self::atom(t, p, n, depth)?;
+        let mut e = Self::power(t, p, n, depth)?;
         while let Some(op) = t.get(*p).copied().filter(|c| matches!(c, '*' | '/')) {
             *p += 1;
-            e = Expr::Bin(Box::new(e), op, Box::new(Self::atom(t, p, n, depth)?));
+            e = Expr::Bin(Box::new(e), op, Box::new(Self::power(t, p, n, depth)?));
+        }
+        Ok(e)
+    }
+    fn power(t: &[char], p: &mut usize, n: usize, depth: usize) -> Result<Expr, String> {
+        let e = Self::atom(t, p, n, depth)?;
+        if t.get(*p) == Some(&'^') {
+            *p += 1;
+            return Ok(Expr::Bin(Box::new(e), '^', Box::new(Self::power(t, p, n, depth + 1)?)));
         }
         Ok(e)
     }
@@ -1487,7 +1523,7 @@ impl Expr {
         match t.get(*p).copied() {
             Some('(') => {
                 *p += 1;
-                let e = Self::sum(t, p, n, depth + 1)?;
+                let e = Self::logic(t, p, n, depth + 1)?;
                 if t.get(*p) != Some(&')') {
                     return Err("a parenthesis isn't closed".into());
                 }
@@ -1497,6 +1533,40 @@ impl Expr {
             Some('-') => {
                 *p += 1;
                 Ok(Expr::Neg(Box::new(Self::atom(t, p, n, depth + 1)?)))
+            }
+            Some(c) if c.is_ascii_alphabetic() && !(matches!(c, 'b' | 'B') && t.get(*p + 1).is_some_and(char::is_ascii_digit)) => {
+                let start = *p;
+                while t.get(*p).is_some_and(|c| c.is_ascii_alphanumeric()) {
+                    *p += 1;
+                }
+                let name: String = t.get(start..*p).unwrap_or(&[]).iter().collect::<String>().to_ascii_lowercase();
+                let (f, arity) = match name.as_str() {
+                    "sqrt" => ("sqrt", 1),
+                    "abs" => ("abs", 1),
+                    "log" | "ln" => ("log", 1),
+                    "log10" => ("log10", 1),
+                    "exp" => ("exp", 1),
+                    "min" => ("min", 2),
+                    "max" => ("max", 2),
+                    _ => return Err(format!("unknown function '{name}': sqrt, abs, log, log10, exp, min, max")),
+                };
+                if t.get(*p) != Some(&'(') {
+                    return Err(format!("{name} takes its arguments in parentheses"));
+                }
+                *p += 1;
+                let mut args = vec![Self::logic(t, p, n, depth + 1)?];
+                while t.get(*p) == Some(&',') {
+                    *p += 1;
+                    args.push(Self::logic(t, p, n, depth + 1)?);
+                }
+                if t.get(*p) != Some(&')') {
+                    return Err("a parenthesis isn't closed".into());
+                }
+                *p += 1;
+                if args.len() != arity {
+                    return Err(format!("{name} takes {arity} argument(s)"));
+                }
+                Ok(Expr::Call(f, args))
             }
             Some('b' | 'B') => {
                 *p += 1;
@@ -1529,12 +1599,35 @@ impl Expr {
             Expr::Neg(e) => -e.eval(v),
             Expr::Bin(a, op, b) => {
                 let (a, b) = (a.eval(v), b.eval(v));
+                let truth = |x: bool| if x { 1.0 } else { 0.0 };
                 match op {
                     '+' => a + b,
                     '-' => a - b,
                     '*' => a * b,
+                    '^' => a.powf(b),
+                    '>' => truth(a > b),
+                    '<' => truth(a < b),
+                    'g' => truth(a >= b),
+                    'l' => truth(a <= b),
+                    '=' => truth(a == b),
+                    '!' => truth(a != b),
+                    '&' => truth(a != 0.0 && b != 0.0),
+                    '|' => truth(a != 0.0 || b != 0.0),
                     _ if b != 0.0 => a / b,
                     _ => f64::NAN,
+                }
+            }
+            Expr::Call(f, args) => {
+                let x = args.first().map_or(f64::NAN, |a| a.eval(v));
+                let y = args.get(1).map_or(f64::NAN, |a| a.eval(v));
+                match *f {
+                    "sqrt" => x.sqrt(),
+                    "abs" => x.abs(),
+                    "log" => x.ln(),
+                    "log10" => x.log10(),
+                    "exp" => x.exp(),
+                    "min" => x.min(y),
+                    _ => x.max(y),
                 }
             }
         }
@@ -1544,6 +1637,17 @@ impl Expr {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Band math takes comparisons, logic, powers and functions.
+    #[test]
+    fn band_math_compares_and_calls_functions() {
+        let e = |s: &str, v: &[f64]| Expr::parse(s, 2).unwrap().eval(v);
+        assert_eq!(e("b1 > 0.5 & b2 <= 2", &[0.6, 2.0]), 1.0);
+        assert_eq!(e("(b1 < 0.5) | (b2 != 2)", &[0.6, 2.0]), 0.0);
+        assert_eq!(e("sqrt(b2 ^ 2) + max(b1, 3) - abs(-1)", &[0.6, 2.0]), 4.0);
+        assert!((e("log10(100) * exp(0)", &[0.0, 0.0]) - 2.0).abs() < 1e-12);
+        assert!(Expr::parse("foo(b1)", 2).is_err() && Expr::parse("b3", 2).is_err() && Expr::parse("min(b1)", 2).is_err());
+    }
 
     /// A grid the machine can't hold is an error naming its size, not the end of the program
     /// (#1291); one it can is the size asked for.

@@ -35578,6 +35578,15 @@ fn remote_sensing_lab_commands_run_end_to_end() {
     let acc = s.run("raster.accuracy", &json!({"layer": "knn", "reference": "training", "classField": "class"})).unwrap();
     assert!(acc["overall"].as_f64().unwrap() > 0.9, "{acc}");
     assert_eq!(acc["matrix"].as_array().unwrap().len(), 2);
+    // The magic wand grows a training area from a click and adds it.
+    s.run("layer.template", &json!({"template": "polygons", "name": "wand"})).unwrap();
+    let wand = s.run("raster.magicWand", &json!({"layer": "img", "lon": 104.0155, "lat": 11.0105, "tolerance": 3, "addTo": "wand", "class": "field"})).unwrap();
+    assert!(wand["pixels"].as_u64().unwrap() >= 50, "{wand}");
+    assert_eq!(s.map().layer_by_name("wand").unwrap().dataset.features.len(), 1);
+    let polys = s.run("raster.toPolygons", &json!({"layer": "knn", "name": "knn_polys"})).unwrap();
+    assert!(polys["polygons"].as_u64().unwrap() >= 2, "{polys}");
+    let sel = s.run("raster.process", &json!({"layer": "img", "operation": "select", "bands": [2], "name": "nir_only"})).unwrap();
+    assert_eq!(sel["bands"], 1);
     s.run("raster.classNames", &json!({"layer": "iso", "names": {"1": "Water", "2": "Field"}})).unwrap();
     let areas = s.run("raster.classAreas", &json!({"layer": "iso"})).unwrap();
     assert_eq!(areas["classes"][0]["class"], "Water");

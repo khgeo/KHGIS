@@ -74,7 +74,9 @@ mod qgisui;
 mod radial;
 #[cfg(not(target_arch = "wasm32"))]
 mod readjob;
+mod leelab;
 mod rslab;
+mod rstools;
 mod xray;
 
 /// How a command asked for ended ([`readjob::run_then`] on the desktop; the browser runs it where
@@ -5214,6 +5216,8 @@ impl RustGisApp {
         portalsui::poll(self, ctx);
         khdata::poll(self, ctx);
         rslab::poll(self, ctx);
+        leelab::poll(self, ctx);
+        rstools::poll(self, ctx);
         catalogsui::poll(self, ctx);
         opendataui::poll(self, ctx);
         embeddingsui::poll(self, ctx);

@@ -51,12 +51,17 @@ A4 map — are single commands.
 - **LEE RS Lab, built in.** A remote sensing lab after the LEE RS Lab QGIS plugin, docked beside
   Layer Styling and in **Raster › LEE RS Lab**: a province, district, commune, the view or your
   own polygon; Sentinel-2, Landsat 4–9, Sentinel-1, Copernicus DEM, WorldCover, Esri land cover or
-  JRC water, clouds masked and median composites; band combinations, stretches, ten indices, band
+  JRC water, clouds masked, median composites and multi-season stacks; spectral profiles,
+  histograms and feature-space plots; band combinations, stretches, ten indices, band
   math, filters, PCA and a feature stack with GLCM texture; K-means, ISODATA and seven supervised
   classifiers (Random Forest, kNN, Maximum Likelihood, Mahalanobis, Minimum Distance, SAM,
-  Parallelepiped), trained from polygons or a land cover map; clean-up, accuracy assessment with
+  Parallelepiped), trained from polygons (drawn, or grown with the magic wand) or a land cover
+  map; clean-up, accuracy assessment with
   area-adjusted estimates; from → to change with a Sankey diagram; and an A4 map with a Khmer
-  title — in the browser too, no QGIS or login needed.
+  title and a PDF report; and **LEE scripts**, Earth-Engine-style Python
+  (`lee.ImageCollection("sentinel-2").filterDate(…).median()`, `Map.addLayer`…) run in the app
+  — in the browser too, no QGIS, Python or login needed. Cambodia's 2024 provinces, districts and
+  1,702 communes, in English and Khmer, are bundled.
 - **Cambodia 3D.** **View › Open in Cambodia 3D** opens the middle of the map in
   [Cambodia 3D](https://khgeo.github.io/cambodia-3d/): terrain, imagery, trees, houses and roads.
 - **A Cambodia-aware assistant.** The bundled `cambodia` skill understands province names in

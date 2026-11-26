@@ -62,8 +62,9 @@ another by itself.
 
 **1 Data**
 
-- **Study area**: a province, district or commune (communes from geoBoundaries, loaded when a
-  district is picked), the map view, or a polygon layer of your own. *Clip to the area's shape*
+- **Study area**: a province, district or commune (the 2024 boundaries are bundled: 25
+  provinces, 209 districts and 1,702 communes, named in English and Khmer, so no network is
+  needed to pick one), the map view, or a polygon layer of your own. *Clip to the area's shape*
   cuts the image to the boundary, not just its box.
 - **Datasets** (Microsoft Planetary Computer, no account): Sentinel-2 (10 m), Landsat 8–9 and
   Landsat 4–7 (30 m), Sentinel-1 radar VV/VH in dB, the Copernicus 30 m DEM (with slope), ESA
@@ -74,6 +75,10 @@ another by itself.
 - Each tile is downloaded clipped to the area, and the tiles merged into one image: six bands of
   surface reflectance (Blue, Green, Red, NIR, SWIR1, SWIR2) for optical imagery. A large area gets
   larger cells (at most 2,500 across), and the lab says so.
+- **Multi-season stack** (Sentinel-2 and Landsat): a median composite of each season of one year
+  (early dry Dec–Feb, late dry Mar–May, wet Jun–Oct) and its NDVI, all in one image with bands
+  named `dry1_NIR`, `wet_NDVI`…, ready to classify: rice, other crops and forest differ most
+  between seasons.
 
 **2 Enhance**: band combinations (natural colour, colour infrared, agriculture, urban,
 land/water, vegetation, or any R/G/B); stretches (min–max, percent clip, standard deviation,
@@ -83,6 +88,9 @@ Laplacian, emboss, minimum, maximum); principal components (with each one's expl
 variance); and a **feature stack** for classification: the image's bands plus NDVI, NDWI, NDBI,
 GLCM texture of the NIR band (contrast, homogeneity, entropy) and another layer (another date,
 radar or elevation).
+**Look at the image**: the **spectral profile tool** (click the map; each click adds that pixel's
+value in every band to a line chart, up to six), a histogram of any band and a **feature space**
+plot (the density of two bands' values against each other).
 
 **3 Classify**
 
@@ -92,8 +100,11 @@ radar or elevation).
   Feature, the class in the name field) or **from a land cover map** (WorldCover or Esri
   downloaded in 1 Data): Random Forest (with each band's importance), k-Nearest Neighbours,
   Maximum Likelihood, Mahalanobis Distance, Minimum Distance, Spectral Angle Mapper and
-  Parallelepiped. The training accuracy is shown (optimistic: the pixels taught it).
-- Clean-up: a majority filter and a minimum mapping unit (sieve).
+  Parallelepiped. The **magic wand** draws training polygons for you: type the class, turn it
+  on and click the map; the pixels around the click that are like it (within the similarity
+  tolerance, in standard deviations of each band) become one polygon of that class. The training accuracy is shown (optimistic: the pixels taught it).
+- Clean-up: a majority filter and a minimum mapping unit (sieve). **Class map to polygons** turns
+  each patch into a polygon with its class and hectares.
 - Accuracy: **Generate validation points** (stratified random, a number per class), fill in
   `ref_class` in the attribute table, then **Compute accuracy**: error matrix, overall accuracy,
   kappa, user's and producer's accuracy, and area-adjusted estimates with 95 % confidence
@@ -104,18 +115,51 @@ losses per class and the largest changes. Maps numbered differently (WorldCover 
 classification trained on it) are matched by class name. Image differencing (difference, ratio,
 percent) compares two images or indices.
 
-**5 Map**: the A4 layout with a title made from the area and the date (in Khmer, e.g.
-*ផែនទីការប្រើប្រាស់ដី និងគម្របដី ស្រុក/ខណ្ឌ … ខេត្ត… ឆ្នាំ២០២៥*), and Cambodia 3D.
+**5 LEE**: Earth-Engine-style scripts, as in LEE RS Lab, run here with no Python installed and
+no account. Ten examples (true colour and NDVI, water with MNDWI and Otsu, terrain, WorldCover
+statistics, land-cover change, burn severity dNBR, Sentinel-1 floods, K-means, surface water, an
+indices pack) load into the editor; **Run script** runs it. The study area of 1 Data is `aoi`.
+
+```python
+s2 = (lee.ImageCollection("sentinel-2").filterDate("2025-11-01", "2026-03-31")
+        .filterMetadata("eo:cloud_cover", "lt", 30).limit(6))
+img = s2.median()
+ndvi = img.normalizedDifference("nir", "red").rename("NDVI")
+Map.addLayer(ndvi, {"min": 0, "max": 0.9, "palette": "RdYlGn"}, "NDVI")
+print("mean NDVI:", ndvi.reduceRegion("mean"))
+```
+
+The language is the part of Python these scripts use: assignments (also `d[k] = v`), lists,
+dicts, `for` loops, `print`, `%` formatting, `round`, `len`, `min`, `max`, `sum`, `sorted`,
+`range`. Images: `lee.ImageCollection(name)` with `filterDate`, `filterBounds`,
+`filterMetadata("eo:cloud_cover", "lt", n)`, `limit`, `select`, `size`, `median`, `mean`,
+`mosaic`, `first`; `lee.Image.load("dem"|"worldcover"|"lulc-annual"|"surface-water", year)`;
+`lee.Image("a layer")`; and on images `normalizedDifference`, `expression` (band names in the
+formula), `select`, `rename`, `+ - * / **`, `add`, `subtract`, `multiply`, `divide`, `gt`, `lt`,
+`gte`, `lte`, `eq`, `neq`, `And`, `Or`, `Not`, `updateMask`, `clip`, `slope`, `aspect`,
+`hillshade`, `cluster(k=…)`, `otsu()`, `reduceRegion("mean"|"median"|"min"|"max"|"sum"|"count"|"stdDev")`,
+`classAreas()`, `bandNames()` and `grid.scale`. `Map.addLayer(image, vis, name)` takes `bands`,
+`min`, `max` and a `palette` name (ColorBrewer and matplotlib names, `_r` reversed);
+`Map.centerObject(aoi)`; `Chart.bars(dict, title)`; `lee.config(scale=30)` sets the cell size.
+Images are made only when needed (downloads and steps run in the background, then the script
+runs again from the top, with what it already made, printed or drew kept). Not yet: `lambda`,
+`map` over a collection, `if`, `def` and `import`.
+
+**6 Map**: the A4 layout with a title made from the area and the date (in Khmer, e.g.
+*ផែនទីការប្រើប្រាស់ដី និងគម្របដី ស្រុក/ខណ្ឌ … ខេត្ត… ឆ្នាំ២០២៥*), the **PDF report** (an A4
+page with the map, north arrow, scale bar and legend, the class areas as a table and a bar
+chart, the accuracy and the largest changes, and the data credits, then saved as PDF), and
+Cambodia 3D.
 
 Commands the lab uses, which scripts can use too: `raster.process` (`stack`, and `merge` with
 `maskBand`/`maskValues`/`maskBits`, `combine: "median"`, `nodata`, `scale`, `offset`,
 `decibels`), `raster.classify` (`method: "isodata"`), `raster.classifySupervised` (`method`,
 `trainingRaster`), `raster.filter`, `raster.pca`, `raster.texture`, `raster.sieve`,
 `raster.crossTab`, `raster.classAreas`, `raster.accuracy`, `raster.samplePoints` and
-`raster.classNames`.
+`raster.classNames`, `raster.magicWand {layer, lon, lat, tolerance, addTo, class}` and
+`raster.toPolygons`; band math also takes comparisons (`>`, `==`…, giving 1 or 0), `&`, `|`, `^`
+and `sqrt`, `abs`, `log`, `ln`, `log10`, `exp`, `min`, `max`.
 
-Still to come from the plugin: the magic wand for training areas, multi-season stacks, the PDF
-report, and the LEE (Earth-Engine-style) scripts.
 
 ## Cambodia 3D
 

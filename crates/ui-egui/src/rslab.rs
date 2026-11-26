@@ -27,13 +27,11 @@ use serde_json::{Value, json};
 
 use crate::{RustGisApp, Slot};
 
-type Answer = Slot<Result<Vec<u8>, String>>;
+pub(crate) type Answer = Slot<Result<Vec<u8>, String>>;
 
 /// The Planetary Computer's STAC search and data API.
 const STAC: &str = "https://planetarycomputer.microsoft.com/api/stac/v1/search";
 const DATA: &str = "https://planetarycomputer.microsoft.com/api/data/v1/item/bbox";
-/// geoBoundaries' Cambodian communes (simplified), fetched when a district's communes are wanted.
-const COMMUNES: &str = "https://www.geoboundaries.org/data/snapshots/1c423398df24ddf6e730b116567d2181c9782778d0459c3f3b76ca2f9f12b6bc/gbOpen/KHM/ADM3/geoBoundaries-KHM-ADM3_simplified.geojson";
 /// The longest side of an image downloaded, in cells: past it the cells are made larger.
 pub(crate) const MAX_SIDE: u32 = 2500;
 /// The most items downloaded for one image (tiles × dates).
@@ -92,7 +90,7 @@ impl Dataset {
         Dataset::EsriLandCover,
         Dataset::Water,
     ];
-    fn label(self) -> &'static str {
+    pub(crate) fn label(self) -> &'static str {
         match self {
             Dataset::Sentinel2 => "Sentinel-2 (10 m, 2017–)",
             Dataset::Landsat89 => "Landsat 8–9 (30 m, 2013–)",
@@ -140,20 +138,20 @@ impl Dataset {
             Dataset::Water => vec!["Water occurrence %"],
         }
     }
-    fn optical(self) -> bool {
+    pub(crate) fn optical(self) -> bool {
         matches!(self, Dataset::Sentinel2 | Dataset::Landsat89 | Dataset::Landsat47)
     }
     /// Searched by date (else every item over the area).
     fn dated(self) -> bool {
         self.optical() || self == Dataset::Sentinel1
     }
-    fn cell(self) -> f64 {
+    pub(crate) fn cell(self) -> f64 {
         match self {
             Dataset::Sentinel2 | Dataset::Sentinel1 | Dataset::WorldCover | Dataset::EsriLandCover => 10.0,
             _ => 30.0,
         }
     }
-    fn classes(self) -> &'static [(u32, &'static str)] {
+    pub(crate) fn classes(self) -> &'static [(u32, &'static str)] {
         match self {
             Dataset::WorldCover => WORLDCOVER,
             Dataset::EsriLandCover => ESRI_LULC,
@@ -168,7 +166,7 @@ impl Dataset {
             _ => Some(0.0),
         }
     }
-    fn short(self) -> &'static str {
+    pub(crate) fn short(self) -> &'static str {
         match self {
             Dataset::Sentinel2 => "S2",
             Dataset::Landsat89 => "L8-9",
@@ -196,7 +194,7 @@ pub struct Scene {
 
 /// One step of a run: a command, and the layer it makes (waited for before the next).
 #[derive(Clone, Debug)]
-struct Step {
+pub(crate) struct Step {
     command: String,
     params: Value,
     makes: Option<String>,
@@ -206,16 +204,16 @@ struct Step {
     keep: Option<&'static str>,
 }
 
-fn step(command: &str, params: Value) -> Step {
+pub(crate) fn step(command: &str, params: Value) -> Step {
     Step { command: command.into(), params, makes: None, background: false, keep: None }
 }
 
-fn makes(command: &str, params: Value, layer: &str) -> Step {
+pub(crate) fn makes(command: &str, params: Value, layer: &str) -> Step {
     Step { command: command.into(), params, makes: Some(layer.into()), background: true, keep: None }
 }
 
 /// Steps run one after another (see the module's doc).
-struct Chain {
+pub(crate) struct Chain {
     title: String,
     steps: std::collections::VecDeque<Step>,
     waiting: Option<(Step, u32)>,
@@ -234,8 +232,8 @@ pub struct State {
     pub commune: String,
     pub area_layer: String,
     pub clip: bool,
-    communes: Option<Vec<(String, Value)>>,
-    communes_fetch: Option<Answer>,
+    /// The district's communes: (English name, Khmer name, kind in Khmer, feature).
+    pub(crate) communes: Option<Vec<(String, String, String, Value)>>,
     pub dataset: Dataset,
     pub start: String,
     pub end: String,
@@ -244,11 +242,25 @@ pub struct State {
     pub mask: bool,
     pub composite: f64,
     pub slope: bool,
-    search: Option<(Answer, Dataset)>,
+    pub(crate) search: Option<(Answer, Dataset)>,
     pub scenes: Vec<Scene>,
     pub scenes_of: Dataset,
     pub picked: Option<usize>,
-    chain: Option<Chain>,
+    pub(crate) chain: Option<Chain>,
+    /// LEE scripts (tab 5).
+    pub lee: crate::leelab::Lee,
+    /// The magic wand's tolerance and the class it draws; the spectral profiles picked.
+    pub wand_tolerance: f64,
+    pub wand_class: String,
+    pub profiles: Vec<(String, Vec<(String, f64)>)>,
+    pub hist_band: usize,
+    pub fs_x: usize,
+    pub fs_y: usize,
+    /// Multi-season stack: the year and which seasons; the searches under way.
+    pub season_year: f64,
+    pub seasons: [bool; 3],
+    pub(crate) season_search: Vec<(usize, String, Answer)>,
+    pub(crate) season_found: Vec<(usize, Vec<Scene>)>,
     /// The image the later steps work on.
     pub image: String,
     pub rgb: [u32; 3],
@@ -296,7 +308,6 @@ impl Default for State {
             area_layer: String::new(),
             clip: true,
             communes: None,
-            communes_fetch: None,
             dataset: Dataset::Sentinel2,
             start: crate::stacui::days_ago(180),
             end: crate::stacui::days_ago(0),
@@ -310,6 +321,17 @@ impl Default for State {
             scenes_of: Dataset::Sentinel2,
             picked: None,
             chain: None,
+            lee: Default::default(),
+            wand_tolerance: 1.5,
+            wand_class: String::new(),
+            profiles: Vec::new(),
+            hist_band: 0,
+            fs_x: 2,
+            fs_y: 3,
+            season_year: 2025.0,
+            seasons: [true, true, true],
+            season_search: Vec::new(),
+            season_found: Vec::new(),
             image: String::new(),
             rgb: [3, 2, 1],
             expression: "(b4 - b3) / (b4 + b3)".into(),
@@ -465,55 +487,16 @@ pub(crate) fn cambodia3d_url(bbox: [f64; 4]) -> String {
     format!("https://khgeo.github.io/cambodia-3d/#aoi={:.5},{:.5},{:.5},{:.5}", cx - half_x, cy - half_y, cx + half_x, cy + half_y)
 }
 
-/// Whether a point is inside a GeoJSON (multi)polygon geometry (even–odd over all rings).
-fn inside(geometry: &Value, x: f64, y: f64) -> bool {
-    let polys: Vec<&Value> = match geometry["type"].as_str() {
-        Some("Polygon") => vec![&geometry["coordinates"]],
-        Some("MultiPolygon") => geometry["coordinates"].as_array().map(|a| a.iter().collect()).unwrap_or_default(),
-        _ => Vec::new(),
-    };
-    let mut hit = false;
-    for poly in polys {
-        for ring in poly.as_array().into_iter().flatten() {
-            let pts: Vec<(f64, f64)> =
-                ring.as_array().into_iter().flatten().filter_map(|p| Some((p.get(0)?.as_f64()?, p.get(1)?.as_f64()?))).collect();
-            for k in 0..pts.len() {
-                let (a, b) = (pts[k], pts[(k + 1) % pts.len()]);
-                if (a.1 > y) != (b.1 > y) && x < (b.0 - a.0) * (y - a.1) / (b.1 - a.1) + a.0 {
-                    hit = !hit;
-                }
-            }
-        }
-    }
-    hit
-}
-
-/// The communes of geoBoundaries' layer whose middle falls in `district`.
-fn communes_in(all: &Value, district: &Value) -> Vec<(String, Value)> {
-    let mut out: Vec<(String, Value)> = all["features"]
-        .as_array()
-        .into_iter()
-        .flatten()
-        .filter_map(|f| {
-            let b = crate::khdata::bbox(f)?;
-            let (x, y) = ((b[0] + b[2]) / 2.0, (b[1] + b[3]) / 2.0);
-            inside(&district["geometry"], x, y).then(|| (f["properties"]["shapeName"].as_str().unwrap_or("?").to_string(), f.clone()))
-        })
-        .collect();
-    out.sort_by(|a, b| a.0.cmp(&b.0));
-    out
-}
-
 /// The study area: its box, a short name (for layer names), its place name in the interface
 /// language (for titles), and its shape as a GeoJSON feature when it has one of its own.
-struct Area {
-    bbox: [f64; 4],
-    short: String,
-    place: String,
-    shape: Option<Value>,
+pub(crate) struct Area {
+    pub(crate) bbox: [f64; 4],
+    pub(crate) short: String,
+    pub(crate) place: String,
+    pub(crate) shape: Option<Value>,
 }
 
-fn area(app: &RustGisApp) -> Result<Area, String> {
+pub(crate) fn area(app: &RustGisApp) -> Result<Area, String> {
     let st = &app.ui.rslab;
     let km = crate::khdata::khmer();
     let need = || tl!("Choose a province (or the map view) first.").to_string();
@@ -552,21 +535,18 @@ fn area(app: &RustGisApp) -> Result<Area, String> {
             let district = (!st.district.is_empty())
                 .then(|| crate::khdata::districts(&st.province).into_iter().find(|d| d.0 == st.district))
                 .flatten();
+            let kind = |f: &Value, d: &str| f["properties"]["type_km"].as_str().filter(|k| !k.is_empty()).unwrap_or(d).to_string();
             let (name, feature, place) = match (commune, district) {
                 (Some(c), Some(d)) => {
                     let place = if km {
-                        format!("ឃុំ/សង្កាត់ {} ស្រុក/ខណ្ឌ {} {prov_place}", c.0, d.0)
+                        format!("{}{} {}{} {prov_place}", c.2, c.1, kind(&d.3, "ស្រុក"), d.1)
                     } else {
                         format!("{} commune, {} district, {}", c.0, d.0, prov.0)
                     };
-                    (c.0.clone(), c.1.clone(), place)
+                    (c.0.clone(), c.3.clone(), place)
                 }
                 (_, Some(d)) => {
-                    let place = if km {
-                        format!("ស្រុក/ខណ្ឌ {} {prov_place}", d.0)
-                    } else {
-                        format!("{} district, {}", d.0, prov.0)
-                    };
+                    let place = if km { format!("{}{} {prov_place}", kind(&d.3, "ស្រុក"), d.1) } else { format!("{} district, {}", d.0, prov.0) };
                     (d.0.clone(), d.3.clone(), place)
                 }
                 _ => (prov.0.clone(), prov.3.clone(), prov_place),
@@ -577,14 +557,14 @@ fn area(app: &RustGisApp) -> Result<Area, String> {
     }
 }
 
-fn fetch(url: &str) -> Answer {
+pub(crate) fn fetch(url: &str) -> Answer {
     let slot: Answer = Slot::default();
     let land = slot.clone();
     cache::download(url, Box::new(move |r| *land.lock().unwrap_or_else(|e| e.into_inner()) = Some(r)));
     slot
 }
 
-fn say(app: &mut RustGisApp, ok: bool, line: String) {
+pub(crate) fn say(app: &mut RustGisApp, ok: bool, line: String) {
     let log = &mut app.ui.rslab.log;
     log.push((ok, line));
     if log.len() > 10 {
@@ -592,16 +572,16 @@ fn say(app: &mut RustGisApp, ok: bool, line: String) {
     }
 }
 
-fn keep_result(app: &mut RustGisApp, key: &'static str, v: Value) {
+pub(crate) fn keep_result(app: &mut RustGisApp, key: &'static str, v: Value) {
     app.ui.rslab.results.retain(|r| r.0 != key);
     app.ui.rslab.results.push((key, v));
 }
 
-fn result<'a>(app: &'a RustGisApp, key: &str) -> Option<&'a Value> {
+pub(crate) fn result<'a>(app: &'a RustGisApp, key: &str) -> Option<&'a Value> {
     app.ui.rslab.results.iter().find(|r| r.0 == key).map(|r| &r.1)
 }
 
-fn start_chain(app: &mut RustGisApp, title: String, steps: Vec<Step>, finished: String) {
+pub(crate) fn start_chain(app: &mut RustGisApp, title: String, steps: Vec<Step>, finished: String) {
     if app.ui.rslab.chain.is_some() || crate::analysispane::background_job(app).is_some() {
         return say(app, false, tl!("Another step is still running: wait for it, or cancel it.").to_string());
     }
@@ -609,12 +589,12 @@ fn start_chain(app: &mut RustGisApp, title: String, steps: Vec<Step>, finished: 
     app.ui.rslab.chain = Some(Chain { title, steps: steps.into(), waiting: None, done: 0, total, finished });
 }
 
-fn layer_ready(app: &RustGisApp, name: &str) -> bool {
+pub(crate) fn layer_ready(app: &RustGisApp, name: &str) -> bool {
     app.session.map().layer_by_name(name).is_some_and(|l| l.raster.as_ref().is_none_or(|r| r.data.is_some()))
 }
 
 /// Moves the run of steps on: lands what a step made, starts the next.
-fn drive(app: &mut RustGisApp) {
+pub(crate) fn drive(app: &mut RustGisApp) {
     let Some(mut chain) = app.ui.rslab.chain.take() else { return };
     if let Some((s, idle)) = chain.waiting.take() {
         if s.makes.as_deref().is_some_and(|n| layer_ready(app, n)) {
@@ -671,7 +651,7 @@ fn drive(app: &mut RustGisApp) {
     }
 }
 
-fn search(app: &mut RustGisApp) {
+pub(crate) fn search(app: &mut RustGisApp) {
     let a = match area(app) {
         Ok(a) => a,
         Err(e) => return say(app, false, e),
@@ -685,7 +665,7 @@ fn search(app: &mut RustGisApp) {
 
 /// Downloads the date picked (or a composite of the clearest dates), each item on the area's
 /// grid, then merges them, clips the image to the area's shape and styles it.
-fn download(app: &mut RustGisApp) {
+pub(crate) fn download(app: &mut RustGisApp) {
     let a = match area(app) {
         Ok(a) => a,
         Err(e) => return say(app, false, e),
@@ -709,10 +689,9 @@ fn download(app: &mut RustGisApp) {
         first.date.replace('—', "all")
     };
     let image = fresh(app, &format!("{}_{}_{}", ds.short(), date, a.short));
-    let full = format!("{image}_full");
     let items: Vec<(String, f64, f64)> = chosen.iter().flat_map(|s| s.items.iter().map(move |i| (i.clone(), s.scale, s.offset))).collect();
     let clip = st.clip && (a.shape.is_some() || st.area_kind == 2);
-    let area_layer = st.area_layer.clone();
+    let area_layer = if a.shape.is_some() { String::new() } else { st.area_layer.clone() };
     let slope = st.slope;
     if cell > st.cell * 1.01 {
         say(
@@ -734,70 +713,7 @@ fn download(app: &mut RustGisApp) {
             ),
         );
     }
-    let (scale, offset) = items.first().map_or((1.0, 0.0), |i| (i.1, i.2));
-    let mut steps = Vec::new();
-    let mut parts = Vec::new();
-    for (k, (item, ..)) in items.iter().take(MAX_ITEMS).enumerate() {
-        let part = format!("{image}_part{}", k + 1);
-        let url = image_url(ds, item, a.bbox, w, h, mask);
-        steps.push(Step {
-            command: "ui.addUrl".into(),
-            params: json!({"url": url, "name": part, "whole": true}),
-            makes: Some(part.clone()),
-            background: false,
-            keep: None,
-        });
-        parts.push(part);
-    }
-    let merged = if clip { full.clone() } else { image.clone() };
-    let (first_part, rest) = parts.split_first().map(|(f, r)| (f.clone(), r.to_vec())).unwrap_or_default();
-    let mut merge = json!({
-        "layer": first_part, "operation": "merge", "layers": rest, "scale": scale, "offset": offset,
-        "bandNames": ds.band_names(), "combine": if chosen.len() > 1 { "median" } else { "first" }, "name": merged,
-    });
-    if let Some(n) = ds.nodata() {
-        merge["nodata"] = json!(n);
-    }
-    if mask {
-        merge["maskBand"] = json!(7);
-        if ds == Dataset::Sentinel2 {
-            // Scene classes: no data, saturated, cloud shadow, medium and high cloud, cirrus.
-            merge["maskValues"] = json!([0, 1, 3, 8, 9, 10]);
-        } else {
-            // QA_PIXEL bits: fill, dilated cloud, cirrus, cloud, cloud shadow.
-            merge["maskBits"] = json!([0, 1, 2, 3, 4]);
-        }
-    }
-    if ds == Dataset::Sentinel1 {
-        merge["decibels"] = json!(true);
-    }
-    let mut m = makes("raster.process", merge, &merged);
-    m.keep = Some("merge");
-    steps.push(m);
-    let mut leftovers = parts.clone();
-    if clip {
-        let polygon = match &a.shape {
-            Some(f) => {
-                let layer = format!("AOI_{}", a.short);
-                let fc = json!({"type": "FeatureCollection", "features": [f]});
-                if app.session.map().layer_by_name(&layer).is_none() {
-                    steps.push(step(
-                        "layer.addDataText",
-                        json!({"fileName": format!("{layer}.geojson"), "text": fc.to_string(), "name": layer}),
-                    ));
-                }
-                layer
-            }
-            None => area_layer,
-        };
-        steps.push(makes(
-            "raster.process",
-            json!({"layer": full, "operation": "clip", "polygon": polygon, "selectedOnly": false, "name": image}),
-            &image,
-        ));
-        leftovers.push(full.clone());
-    }
-    steps.push(step("layer.remove", json!({"layer": leftovers})));
+    let mut steps = image_steps(app, ds, &items, &a, &image, (w, h), mask, chosen.len() > 1, clip.then_some(area_layer.as_str()));
     if ds.optical() {
         steps.push(step("raster.bands", json!({"layer": image, "red": 3, "green": 2, "blue": 1})));
         steps.push(step("raster.stretch", json!({"layer": image, "type": "percentClip", "low": 2, "high": 2})));
@@ -838,8 +754,84 @@ fn download(app: &mut RustGisApp) {
     start_chain(app, tl!("Downloading imagery").to_string(), steps, finished);
 }
 
+/// The steps that download `items` (id, scale, offset) of `ds` over the area on a `w` × `h` grid,
+/// merge them into `image` (the median when `median`; clouds masked when `mask`), clip it to the
+/// area's shape when `clip` (the area's own, or a polygon layer named) and take away the pieces.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn image_steps(app: &RustGisApp, ds: Dataset, items: &[(String, f64, f64)], a: &Area, image: &str, (w, h): (u32, u32), mask: bool, median: bool, clip: Option<&str>) -> Vec<Step> {
+    let full = format!("{image}_full");
+    let clip_layer = clip.map(str::to_string);
+    let clip = clip.is_some();
+    let chosen_many = median;
+    let (scale, offset) = items.first().map_or((1.0, 0.0), |i| (i.1, i.2));
+    let mut steps = Vec::new();
+    let mut parts = Vec::new();
+    for (k, (item, ..)) in items.iter().take(MAX_ITEMS).enumerate() {
+        let part = format!("{image}_part{}", k + 1);
+        let url = image_url(ds, item, a.bbox, w, h, mask);
+        steps.push(Step {
+            command: "ui.addUrl".into(),
+            params: json!({"url": url, "name": part, "whole": true}),
+            makes: Some(part.clone()),
+            background: false,
+            keep: None,
+        });
+        parts.push(part);
+    }
+    let merged = if clip { full.clone() } else { image.to_string() };
+    let (first_part, rest) = parts.split_first().map(|(f, r)| (f.clone(), r.to_vec())).unwrap_or_default();
+    let mut merge = json!({
+        "layer": first_part, "operation": "merge", "layers": rest, "scale": scale, "offset": offset,
+        "bandNames": ds.band_names(), "combine": if chosen_many { "median" } else { "first" }, "name": merged,
+    });
+    if let Some(n) = ds.nodata() {
+        merge["nodata"] = json!(n);
+    }
+    if mask {
+        merge["maskBand"] = json!(7);
+        if ds == Dataset::Sentinel2 {
+            // Scene classes: no data, saturated, cloud shadow, medium and high cloud, cirrus.
+            merge["maskValues"] = json!([0, 1, 3, 8, 9, 10]);
+        } else {
+            // QA_PIXEL bits: fill, dilated cloud, cirrus, cloud, cloud shadow.
+            merge["maskBits"] = json!([0, 1, 2, 3, 4]);
+        }
+    }
+    if ds == Dataset::Sentinel1 {
+        merge["decibels"] = json!(true);
+    }
+    let mut m = makes("raster.process", merge, &merged);
+    m.keep = Some("merge");
+    steps.push(m);
+    let mut leftovers = parts.clone();
+    if clip {
+        let polygon = match &a.shape {
+            Some(f) => {
+                let layer = format!("AOI_{}", a.short);
+                let fc = json!({"type": "FeatureCollection", "features": [f]});
+                if app.session.map().layer_by_name(&layer).is_none() {
+                    steps.push(step(
+                        "layer.addDataText",
+                        json!({"fileName": format!("{layer}.geojson"), "text": fc.to_string(), "name": layer}),
+                    ));
+                }
+                layer
+            }
+            None => clip_layer.clone().unwrap_or_default(),
+        };
+        steps.push(makes(
+            "raster.process",
+            json!({"layer": full, "operation": "clip", "polygon": polygon, "selectedOnly": false, "name": image}),
+            image,
+        ));
+        leftovers.push(full.clone());
+    }
+    steps.push(step("layer.remove", json!({"layer": leftovers})));
+    steps
+}
+
 /// A map's title from its place and year, as LEE RS Lab makes it.
-fn auto_title(place: &str, year: &str, land_cover: bool, km: bool) -> String {
+pub(crate) fn auto_title(place: &str, year: &str, land_cover: bool, km: bool) -> String {
     let year_ok = year.len() == 4 && year.chars().all(|c| c.is_ascii_digit());
     if km {
         let digits: String = year.chars().map(|c| c.to_digit(10).and_then(|d| char::from_u32(0x17E0 + d)).unwrap_or(c)).collect();
@@ -867,12 +859,7 @@ fn auto_title(place: &str, year: &str, land_cover: bool, km: bool) -> String {
     }
 }
 
-thread_local! {
-    /// geoBoundaries' communes, once fetched.
-    static COMMUNE_CACHE: std::cell::RefCell<Option<Value>> = const { std::cell::RefCell::new(None) };
-}
-
-/// Lands the search and the communes, and moves the run of steps on.
+/// Lands the search, and moves the run of steps on.
 pub fn poll(app: &mut RustGisApp, ctx: &egui::Context) {
     if let Some((slot, ds)) = &app.ui.rslab.search {
         let ds = *ds;
@@ -894,52 +881,23 @@ pub fn poll(app: &mut RustGisApp, ctx: &egui::Context) {
             }
         }
     }
-    if let Some(slot) = &app.ui.rslab.communes_fetch {
-        let landed = slot.lock().unwrap_or_else(|e| e.into_inner()).take();
-        match landed {
-            None => ctx.request_repaint_after(std::time::Duration::from_millis(200)),
-            Some(r) => {
-                app.ui.rslab.communes_fetch = None;
-                match r.and_then(|b| serde_json::from_slice::<Value>(&b).map_err(|e| e.to_string())) {
-                    Ok(all) => {
-                        let st = &mut app.ui.rslab;
-                        let district = crate::khdata::districts(&st.province).into_iter().find(|d| d.0 == st.district);
-                        st.communes = Some(district.map(|d| communes_in(&all, &d.3)).unwrap_or_default());
-                        COMMUNE_CACHE.with(|c| *c.borrow_mut() = Some(all));
-                    }
-                    Err(e) => say(app, false, e),
-                }
-            }
-        }
-    }
     if app.ui.rslab.chain.is_some() {
         ctx.request_repaint_after(std::time::Duration::from_millis(300));
         drive(app);
     }
 }
 
-fn want_communes(app: &mut RustGisApp) {
+pub(crate) fn want_communes(app: &mut RustGisApp) {
     let st = &mut app.ui.rslab;
     st.commune.clear();
-    st.communes = None;
-    if st.district.is_empty() {
-        return;
-    }
-    let district = crate::khdata::districts(&st.province).into_iter().find(|d| d.0 == st.district);
-    let cached =
-        COMMUNE_CACHE.with(|c| c.borrow().as_ref().map(|all| district.as_ref().map(|d| communes_in(all, &d.3)).unwrap_or_default()));
-    match cached {
-        Some(c) => st.communes = Some(c),
-        None if st.communes_fetch.is_none() => st.communes_fetch = Some(fetch(COMMUNES)),
-        None => {}
-    }
+    st.communes = (!st.district.is_empty()).then(|| crate::khdata::communes(&st.province, &st.district));
 }
 
-fn rasters(app: &RustGisApp) -> Vec<String> {
+pub(crate) fn rasters(app: &RustGisApp) -> Vec<String> {
     app.session.map().layers.iter().filter(|l| l.is_raster()).map(|l| l.name.clone()).collect()
 }
 
-fn vectors(app: &RustGisApp, polygons_only: bool) -> Vec<String> {
+pub(crate) fn vectors(app: &RustGisApp, polygons_only: bool) -> Vec<String> {
     use rustgis_engine::data::GeometryType;
     app.session
         .map()
@@ -950,16 +908,16 @@ fn vectors(app: &RustGisApp, polygons_only: bool) -> Vec<String> {
         .collect()
 }
 
-fn fields(app: &RustGisApp, layer: &str) -> Vec<String> {
+pub(crate) fn fields(app: &RustGisApp, layer: &str) -> Vec<String> {
     app.session.map().layer_by_name(layer).map(|l| l.dataset.fields.iter().map(|f| f.name.clone()).collect()).unwrap_or_default()
 }
 
-fn band_count(app: &RustGisApp, layer: &str) -> usize {
+pub(crate) fn band_count(app: &RustGisApp, layer: &str) -> usize {
     app.session.map().layer_by_name(layer).and_then(|l| l.raster.as_ref()?.data.as_ref().map(|d| d.bands.len())).unwrap_or(0)
 }
 
 /// A name no layer has yet: `base`, or `base_2`, `base_3`…
-fn fresh(app: &RustGisApp, base: &str) -> String {
+pub(crate) fn fresh(app: &RustGisApp, base: &str) -> String {
     let taken = |n: &str| app.session.map().layer_by_name(n).is_some();
     if !taken(base) {
         return base.to_string();
@@ -968,7 +926,7 @@ fn fresh(app: &RustGisApp, base: &str) -> String {
 }
 
 /// A layer chooser. An empty choice takes the first; a choice not (or not yet) on the map is kept.
-fn pick(ui: &mut Ui, id: &str, label: &str, value: &mut String, options: &[String]) {
+pub(crate) fn pick(ui: &mut Ui, id: &str, label: &str, value: &mut String, options: &[String]) {
     if value.is_empty()
         && let Some(first) = options.first()
     {
@@ -984,13 +942,13 @@ fn pick(ui: &mut Ui, id: &str, label: &str, value: &mut String, options: &[Strin
     });
 }
 
-fn heading(ui: &mut Ui, text: &str) {
+pub(crate) fn heading(ui: &mut Ui, text: &str) {
     ui.add_space(4.0);
     ui.label(egui::RichText::new(tl!(text)).strong());
 }
 
 /// Runs one command that makes `layer`, as a run of one step.
-fn run_one(app: &mut RustGisApp, title: &str, command: &str, mut p: Value, layer: &str, keep: Option<&'static str>) {
+pub(crate) fn run_one(app: &mut RustGisApp, title: &str, command: &str, mut p: Value, layer: &str, keep: Option<&'static str>) {
     let layer = fresh(app, layer);
     p["name"] = json!(layer);
     let layer = layer.as_str();
@@ -1000,7 +958,7 @@ fn run_one(app: &mut RustGisApp, title: &str, command: &str, mut p: Value, layer
     start_chain(app, tl!(title).to_string(), vec![s], done);
 }
 
-fn now(app: &mut RustGisApp, command: &str, p: Value) -> Option<Value> {
+pub(crate) fn now(app: &mut RustGisApp, command: &str, p: Value) -> Option<Value> {
     match app.run(command, p) {
         Ok(v) => {
             app.map.invalidate();
@@ -1013,7 +971,7 @@ fn now(app: &mut RustGisApp, command: &str, p: Value) -> Option<Value> {
     }
 }
 
-fn area_choice(app: &mut RustGisApp, ui: &mut Ui) {
+pub(crate) fn area_choice(app: &mut RustGisApp, ui: &mut Ui) {
     heading(ui, "Study area");
     ui.horizontal_wrapped(|ui| {
         for (k, label) in ["Province / district / commune", "Map view", "Polygon layer"].into_iter().enumerate() {
@@ -1043,7 +1001,7 @@ fn area_choice(app: &mut RustGisApp, ui: &mut Ui) {
                 });
                 let ds = crate::khdata::districts(&st.province);
                 let whole = tl!("Whole province").to_string();
-                let current = if st.district.is_empty() { whole.clone() } else { st.district.clone() };
+                let current = ds.iter().find(|d| d.0 == st.district).map(|d| crate::khdata::label(&d.0, &d.1)).unwrap_or_else(|| whole.clone());
                 ui.add_enabled_ui(!ds.is_empty(), |ui| {
                     egui::ComboBox::from_label(tl!("District")).selected_text(current).width(200.0).truncate().show_ui(ui, |ui| {
                         if ui.selectable_label(st.district.is_empty(), &whole).clicked() {
@@ -1051,7 +1009,7 @@ fn area_choice(app: &mut RustGisApp, ui: &mut Ui) {
                             changed_district = true;
                         }
                         for d in &ds {
-                            if ui.selectable_label(st.district == d.0, &d.0).clicked() {
+                            if ui.selectable_label(st.district == d.0, crate::khdata::label(&d.0, &d.1)).clicked() {
                                 st.district = d.0.clone();
                                 changed_district = true;
                             }
@@ -1063,31 +1021,26 @@ fn area_choice(app: &mut RustGisApp, ui: &mut Ui) {
                 want_communes(app);
             }
             let st = &mut app.ui.rslab;
-            if !st.district.is_empty() {
-                match &st.communes {
-                    Some(cs) => {
-                        let whole = tl!("Whole district").to_string();
-                        let current = if st.commune.is_empty() { whole.clone() } else { st.commune.clone() };
-                        let names: Vec<String> = cs.iter().map(|c| c.0.clone()).collect();
-                        egui::ComboBox::from_label(tl!("Commune")).selected_text(current).width(200.0).truncate().show_ui(ui, |ui| {
-                            if ui.selectable_label(st.commune.is_empty(), &whole).clicked() {
-                                st.commune.clear();
-                            }
-                            for n in &names {
-                                if ui.selectable_label(st.commune == *n, n).clicked() {
-                                    st.commune.clone_from(n);
-                                }
-                            }
-                        });
+            if !st.district.is_empty()
+                && let Some(cs) = &st.communes
+            {
+                let whole = tl!("Whole district").to_string();
+                let current = cs
+                    .iter()
+                    .find(|c| c.0 == st.commune)
+                    .map(|c| crate::khdata::label(&c.0, &c.1))
+                    .unwrap_or_else(|| whole.clone());
+                let names: Vec<(String, String)> = cs.iter().map(|c| (c.0.clone(), crate::khdata::label(&c.0, &c.1))).collect();
+                egui::ComboBox::from_label(tl!("Commune")).selected_text(current).width(200.0).truncate().show_ui(ui, |ui| {
+                    if ui.selectable_label(st.commune.is_empty(), &whole).clicked() {
+                        st.commune.clear();
                     }
-                    None if st.communes_fetch.is_some() => {
-                        ui.horizontal(|ui| {
-                            ui.spinner();
-                            ui.label(tl!("Loading communes…"));
-                        });
+                    for (n, shown) in &names {
+                        if ui.selectable_label(st.commune == *n, shown).clicked() {
+                            st.commune.clone_from(n);
+                        }
                     }
-                    None => {}
-                }
+                });
             }
         }
         2 => {
@@ -1105,7 +1058,7 @@ fn area_choice(app: &mut RustGisApp, ui: &mut Ui) {
     }
 }
 
-fn data_step(app: &mut RustGisApp, ui: &mut Ui) {
+pub(crate) fn data_step(app: &mut RustGisApp, ui: &mut Ui) {
     area_choice(app, ui);
     ui.add_space(4.0);
     let st = &mut app.ui.rslab;
@@ -1194,6 +1147,7 @@ fn data_step(app: &mut RustGisApp, ui: &mut Ui) {
                 .weak(),
         );
     }
+    crate::rstools::seasons_ui(app, ui);
 }
 
 /// An index: its name, what it shows, and its formula over bands 1–6 (Blue … SWIR2).
@@ -1210,7 +1164,7 @@ const INDICES: &[(&str, &str, &str)] = &[
     ("NBR", "Burned areas", "(b4 - b6) / (b4 + b6)"),
 ];
 
-fn enhance_step(app: &mut RustGisApp, ui: &mut Ui) {
+pub(crate) fn enhance_step(app: &mut RustGisApp, ui: &mut Ui) {
     let rs = rasters(app);
     pick(ui, "rslab_img", "Image", &mut app.ui.rslab.image, &rs);
     let image = app.ui.rslab.image.clone();
@@ -1363,9 +1317,13 @@ fn enhance_step(app: &mut RustGisApp, ui: &mut Ui) {
             feature_stack(app, &image, six, count);
         }
     });
+    heading(ui, "Look at the image");
+    crate::rstools::profile_ui(app, ui);
+    ui.add_space(4.0);
+    crate::rstools::plots_ui(app, ui);
 }
 
-fn filter_label(f: &str) -> &'static str {
+pub(crate) fn filter_label(f: &str) -> &'static str {
     match f {
         "mean" => "Mean (low-pass)",
         "median" => "Median (removes speckle/noise)",
@@ -1379,7 +1337,7 @@ fn filter_label(f: &str) -> &'static str {
     }
 }
 
-fn pca_table(ui: &mut Ui, v: &Value) {
+pub(crate) fn pca_table(ui: &mut Ui, v: &Value) {
     let explained: Vec<f64> = v["explained"].as_array().map(|a| a.iter().filter_map(Value::as_f64).collect()).unwrap_or_default();
     let mut cumulative = 0.0;
     egui::Grid::new("rslab_pca").striped(true).show(ui, |ui| {
@@ -1397,7 +1355,7 @@ fn pca_table(ui: &mut Ui, v: &Value) {
     });
 }
 
-fn band_names(app: &RustGisApp, layer: &str) -> Vec<String> {
+pub(crate) fn layer_band_names(app: &RustGisApp, layer: &str) -> Vec<String> {
     app.session
         .map()
         .layer_by_name(layer)
@@ -1413,11 +1371,11 @@ fn band_names(app: &RustGisApp, layer: &str) -> Vec<String> {
         .unwrap_or_default()
 }
 
-fn feature_stack(app: &mut RustGisApp, image: &str, six: bool, count: usize) {
+pub(crate) fn feature_stack(app: &mut RustGisApp, image: &str, six: bool, count: usize) {
     let (indices, texture, extra) = (app.ui.rslab.stack_indices, app.ui.rslab.stack_texture, app.ui.rslab.stack_extra.clone());
     let mut steps = Vec::new();
     let mut layers = Vec::new();
-    let mut names = band_names(app, image);
+    let mut names = layer_band_names(app, image);
     if indices && six {
         for idx in ["NDVI", "NDWI", "NDBI"] {
             let Some((_, _, expr)) = INDICES.iter().find(|i| i.0 == idx) else { continue };
@@ -1435,7 +1393,7 @@ fn feature_stack(app: &mut RustGisApp, image: &str, six: bool, count: usize) {
         names.extend(["contrast", "homogeneity", "entropy"].map(String::from));
     }
     if !extra.is_empty() {
-        names.extend(band_names(app, &extra));
+        names.extend(layer_band_names(app, &extra));
         layers.push(extra);
     }
     if layers.is_empty() {
@@ -1469,7 +1427,7 @@ const CLASSIFIERS: &[(&str, &str, Option4)] = &[
     ("parallelepiped", "Parallelepiped", Some(("Box size (± n std. dev.)", 2.0, 0.5, 5.0))),
 ];
 
-fn classify_step(app: &mut RustGisApp, ui: &mut Ui) {
+pub(crate) fn classify_step(app: &mut RustGisApp, ui: &mut Ui) {
     let rs = rasters(app);
     pick(ui, "rslab_cimg", "Image", &mut app.ui.rslab.image, &rs);
     let image = app.ui.rslab.image.clone();
@@ -1555,6 +1513,9 @@ fn classify_step(app: &mut RustGisApp, ui: &mut Ui) {
             ui.add(egui::DragValue::new(&mut st.per_class).range(50.0..=20_000.0).speed(10.0).fixed_decimals(0));
         });
     }
+    if !app.ui.rslab.training_from_map {
+        crate::rstools::wand_ui(app, ui);
+    }
     let st = &app.ui.rslab;
     let ready = !image.is_empty()
         && if st.training_from_map { !st.training_map.is_empty() } else { !st.training.is_empty() && !st.class_field.is_empty() };
@@ -1575,9 +1536,19 @@ fn classify_step(app: &mut RustGisApp, ui: &mut Ui) {
         training_result(ui, &v);
     }
     accuracy_section(app, ui, &rs);
+    let class_map = app.ui.rslab.class_map.clone();
+    if !class_map.is_empty()
+        && app.session.map().layer_by_name(&class_map).is_some()
+        && ui.button(tl!("Class map to polygons")).on_hover_text(tl!("Each patch of one class becomes a polygon with its class and hectares")).clicked()
+    {
+        let out = fresh(app, &format!("{class_map}_polygons"));
+        if let Some(v) = now(app, "raster.toPolygons", json!({"layer": class_map, "minPixels": 4, "name": out})) {
+            say(app, true, crate::i18n::fmt("{n} polygons made.", &[("n", &v["polygons"].to_string())]));
+        }
+    }
 }
 
-fn training_result(ui: &mut Ui, v: &Value) {
+pub(crate) fn training_result(ui: &mut Ui, v: &Value) {
     if let Some(a) = v["trainingAccuracy"].as_f64() {
         ui.label(crate::i18n::fmt("Training accuracy (optimistic): {p}%", &[("p", &format!("{:.1}", a * 100.0))]));
     }
@@ -1605,7 +1576,7 @@ fn training_result(ui: &mut Ui, v: &Value) {
     }
 }
 
-fn accuracy_section(app: &mut RustGisApp, ui: &mut Ui, rs: &[String]) {
+pub(crate) fn accuracy_section(app: &mut RustGisApp, ui: &mut Ui, rs: &[String]) {
     heading(ui, "Classified map");
     pick(ui, "rslab_cmap", "Map", &mut app.ui.rslab.class_map, rs);
     let map = app.ui.rslab.class_map.clone();
@@ -1702,7 +1673,7 @@ fn accuracy_section(app: &mut RustGisApp, ui: &mut Ui, rs: &[String]) {
     }
 }
 
-fn accuracy_tables(ui: &mut Ui, v: &Value) {
+pub(crate) fn accuracy_tables(ui: &mut Ui, v: &Value) {
     let classes: Vec<String> =
         v["classes"].as_array().map(|a| a.iter().filter_map(|c| c.as_str().map(str::to_string)).collect()).unwrap_or_default();
     let f = |k: &str| v[k].as_f64().unwrap_or(0.0);
@@ -1759,7 +1730,7 @@ fn accuracy_tables(ui: &mut Ui, v: &Value) {
 }
 
 /// A colour for the `i`th class of a diagram.
-fn class_color(i: usize) -> egui::Color32 {
+pub(crate) fn class_color(i: usize) -> egui::Color32 {
     const C: [(u8, u8, u8); 10] = [
         (0x2E, 0x86, 0xC1),
         (0x27, 0xAE, 0x60),
@@ -1778,7 +1749,7 @@ fn class_color(i: usize) -> egui::Color32 {
 
 /// The Sankey diagram of a from → to matrix: date 1's classes on the left, date 2's on the right,
 /// bands as wide as the area that went from one to the other.
-fn sankey(ui: &mut Ui, rows: &[(String, String, f64)]) {
+pub(crate) fn sankey(ui: &mut Ui, rows: &[(String, String, f64)]) {
     let mut left: Vec<(String, f64)> = Vec::new();
     let mut right: Vec<(String, f64)> = Vec::new();
     for (a, b, ha) in rows {
@@ -1855,7 +1826,7 @@ fn sankey(ui: &mut Ui, rows: &[(String, String, f64)]) {
     }
 }
 
-fn change_step(app: &mut RustGisApp, ui: &mut Ui) {
+pub(crate) fn change_step(app: &mut RustGisApp, ui: &mut Ui) {
     let rs = rasters(app);
     heading(ui, "From → to: compare two classified maps");
     // Two different maps to start with: the one below the top, and the top one.
@@ -1896,7 +1867,7 @@ fn change_step(app: &mut RustGisApp, ui: &mut Ui) {
     }
 }
 
-fn change_result(ui: &mut Ui, v: &Value) {
+pub(crate) fn change_result(ui: &mut Ui, v: &Value) {
     let rows: Vec<(String, String, f64)> = v["matrix"]
         .as_array()
         .map(|a| {
@@ -1946,7 +1917,7 @@ fn change_result(ui: &mut Ui, v: &Value) {
     }
 }
 
-fn map_step(app: &mut RustGisApp, ui: &mut Ui) {
+pub(crate) fn map_step(app: &mut RustGisApp, ui: &mut Ui) {
     heading(ui, "Map layout (print)");
     let km = crate::khdata::khmer();
     if app.ui.rslab.title.is_empty() {
@@ -1981,6 +1952,13 @@ fn map_step(app: &mut RustGisApp, ui: &mut Ui) {
             Err(e) => say(app, false, e),
         }
     }
+    if ui
+        .button(egui::RichText::new(tl!("PDF report")).strong())
+        .on_hover_text(tl!("An A4 report: the map, legend, class areas (table and chart), accuracy and change, saved as PDF"))
+        .clicked()
+    {
+        crate::rstools::report(app);
+    }
     heading(ui, "3D");
     if ui
         .button(tl!("Open in Cambodia 3D"))
@@ -1996,7 +1974,7 @@ fn map_step(app: &mut RustGisApp, ui: &mut Ui) {
 pub fn pane(app: &mut RustGisApp, ui: &mut Ui) {
     let t = crate::theme::Tokens::get(ui.ctx());
     ui.horizontal_wrapped(|ui| {
-        for (i, label) in ["1 Data", "2 Enhance", "3 Classify", "4 Change", "5 Map"].into_iter().enumerate() {
+        for (i, label) in ["1 Data", "2 Enhance", "3 Classify", "4 Change", "5 LEE", "6 Map"].into_iter().enumerate() {
             if ui.add(egui::Button::selectable(app.ui.rslab.step == i, tl!(label))).clicked() {
                 app.ui.rslab.step = i;
             }
@@ -2039,6 +2017,7 @@ pub fn pane(app: &mut RustGisApp, ui: &mut Ui) {
             1 => enhance_step(app, ui),
             2 => classify_step(app, ui),
             3 => change_step(app, ui),
+            4 => crate::leelab::pane(app, ui),
             _ => map_step(app, ui),
         }
         ui.add_space(6.0);
@@ -2047,11 +2026,42 @@ pub fn pane(app: &mut RustGisApp, ui: &mut Ui) {
         }
         ui.add_space(6.0);
         ui.label(
-            egui::RichText::new(tl!("Data: Copernicus Sentinel-1/2 and DEM (ESA), Landsat (USGS/NASA), ESA WorldCover, Esri | Impact Observatory land cover, JRC Global Surface Water, via Microsoft Planetary Computer; communes from geoBoundaries. After the LEE RS Lab plugin, Geoinformatics and Research Lab, RUPP."))
+            egui::RichText::new(tl!("Data: Copernicus Sentinel-1/2 and DEM (ESA), Landsat (USGS/NASA), ESA WorldCover, Esri | Impact Observatory land cover, JRC Global Surface Water, via Microsoft Planetary Computer; administrative boundaries 2024. After the LEE RS Lab plugin, Geoinformatics and Research Lab, RUPP."))
                 .small()
                 .color(t.text_dim),
         );
     });
+}
+
+/// Whether the lab is making something (a run of steps, or a workflow in the background).
+pub(crate) fn busy(app: &RustGisApp) -> bool {
+    app.ui.rslab.chain.is_some() || crate::analysispane::background_job(app).is_some()
+}
+
+/// The study area's box.
+pub(crate) fn area_bbox(app: &RustGisApp) -> Result<[f64; 4], String> {
+    area(app).map(|a| a.bbox)
+}
+
+/// The steps that make an image of `ds` from `chosen` over the study area (clouds masked, the
+/// median of several dates, clipped to the area's shape), named for a script: its name and the
+/// steps.
+pub(crate) fn composite_steps(app: &RustGisApp, ds: Dataset, chosen: &[Scene], cell: f64, median: bool) -> Result<(String, Vec<Step>), String> {
+    let a = area(app)?;
+    let st = &app.ui.rslab;
+    let (w, h, _) = grid(a.bbox, cell.max(ds.cell()));
+    let items: Vec<(String, f64, f64)> = chosen.iter().flat_map(|s| s.items.iter().map(move |i| (i.clone(), s.scale, s.offset))).collect();
+    let image = fresh(app, &format!("lee_{}", ds.short().replace('-', "")));
+    let clip_layer = if a.shape.is_some() { String::new() } else { st.area_layer.clone() };
+    let clip = st.clip && (a.shape.is_some() || st.area_kind == 2);
+    let mut steps = image_steps(app, ds, &items, &a, &image, (w, h), ds.optical(), median && chosen.len() > 1, clip.then_some(clip_layer.as_str()));
+    let classes = ds.classes();
+    if !classes.is_empty() {
+        let names: serde_json::Map<String, Value> = classes.iter().map(|(v, n)| (v.to_string(), json!(n))).collect();
+        steps.push(step("raster.classNames", json!({"layer": image, "names": names})));
+        steps.push(step("raster.symbology", json!({"layer": image, "type": "unique"})));
+    }
+    Ok((image, steps))
 }
 
 #[cfg(test)]
@@ -2108,15 +2118,10 @@ mod tests {
     }
 
     #[test]
-    fn communes_are_found_in_their_district() {
-        let square = json!({"type": "Polygon", "coordinates": [[[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0], [0.0, 0.0]]]});
-        let district = json!({"geometry": square});
-        let all = json!({"features": [
-            {"properties": {"shapeName": "In"}, "geometry": {"type": "Polygon", "coordinates": [[[0.2, 0.2], [0.4, 0.2], [0.4, 0.4], [0.2, 0.2]]]}},
-            {"properties": {"shapeName": "Out"}, "geometry": {"type": "Polygon", "coordinates": [[[2.2, 0.2], [2.4, 0.2], [2.4, 0.4], [2.2, 0.2]]]}},
-        ]});
-        let c = communes_in(&all, &district);
-        assert_eq!(c.iter().map(|c| c.0.as_str()).collect::<Vec<_>>(), ["In"]);
+    fn communes_are_bundled_with_khmer_names() {
+        let c = crate::khdata::communes("Kandal", "Kien Svay");
+        assert!(c.len() >= 5, "{}", c.len());
+        assert!(c.iter().all(|c| !c.1.is_empty() && !c.2.is_empty()));
     }
 
     #[test]

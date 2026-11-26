@@ -13,6 +13,7 @@ rustgis-geom = { workspace = true }
 rustgis-data = { workspace = true }
 rustgis-map = { workspace = true }
 rustgis-analysis = { workspace = true }
+miniz_oxide = { workspace = true }
 rustgis-render = { workspace = true }
 tiny-skia = { workspace = true }
 serde = { workspace = true }

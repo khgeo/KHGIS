@@ -1688,3 +1688,56 @@ Supervised — classes & training	មានណែនាំ — ថ្នាក�
 Supervised — classify	មានណែនាំ — ចាត់ថ្នាក់
 Unsupervised (K-means, ISODATA)	មិនណែនាំ (K-means, ISODATA)
 ± 95% CI (ha)	± CI 95% (ហិកតា)
+5 LEE	5 LEE
+6 Map	6 ផែនទី
+Magic wand (click-to-grow)	ដំបងវេទមន្ត (ចុចដើម្បីពង្រីក)
+Click the map: the pixels like the one clicked, around it, become a training polygon of this class	ចុចលើផែនទី៖ ភីកសែលដែលស្រដៀងនឹងភីកសែលដែលបានចុច នៅជុំវិញវា ក្លាយជាពហុកោណបណ្តុះបណ្តាលនៃថ្នាក់នេះ
+e.g. Rice	ឧ. ស្រូវ
+Similarity tolerance	កម្រិតស្រដៀង
+Click the map to grow a training area (click the button again to stop).	ចុចលើផែនទីដើម្បីពង្រីកតំបន់បណ្តុះបណ្តាល (ចុចប៊ូតុងម្តងទៀតដើម្បីបញ្ឈប់)។
+Choose an image first.	សូមជ្រើសរើសរូបភាពជាមុនសិន។
+Type the class first (e.g. Rice).	សូមវាយឈ្មោះថ្នាក់ជាមុនសិន (ឧ. ស្រូវ)។
+{class}: {n} pixels ({ha} ha) added.	{class}៖ បានបន្ថែម {n} ភីកសែល ({ha} ហិកតា)។
+Outside the image or no data there.	នៅក្រៅរូបភាព ឬគ្មានទិន្នន័យនៅទីនោះ។
+Spectral profile tool	ឧបករណ៍ប្រវត្តិរលកពន្លឺ
+Click the map: each click adds the pixel's values in every band	ចុចលើផែនទី៖ ការចុចនីមួយៗបន្ថែមតម្លៃភីកសែលក្នុងប៊ែននីមួយៗ
+Histogram	អ៊ីស្តូក្រាម
+Feature space X / Y	លំហលក្ខណៈ X / Y
+Look at the image	ពិនិត្យរូបភាព
+Multi-season stack	ការផ្គុំច្រើនរដូវ
+A median composite of each season of one year, and its NDVI, stacked: crops and forests differ by season.	រូបភាពផ្សំមធ្យមភាគ (median) នៃរដូវនីមួយៗក្នុងមួយឆ្នាំ និង NDVI របស់វា ផ្គុំចូលគ្នា៖ ដំណាំ និងព្រៃឈើខុសគ្នាតាមរដូវ។
+Year	ឆ្នាំ
+Early dry (Dec–Feb)	ប្រាំងដើម (ធ្នូ–កុម្ភៈ)
+Late dry (Mar–May)	ប្រាំងចុង (មីនា–ឧសភា)
+Wet (Jun–Oct)	វស្សា (មិថុនា–តុលា)
+Build multi-season stack	បង្កើតការផ្គុំច្រើនរដូវ
+No clear images in the {s} season: left out.	គ្មានរូបភាពច្បាស់ក្នុងរដូវ {s}៖ ទុកចោល។
+{name} is ready: the seasons' bands and NDVI, ready to classify.	{name} រួចរាល់៖ ប៊ែន និង NDVI នៃរដូវនីមួយៗ រួចរាល់សម្រាប់ចាត់ថ្នាក់។
+Class areas	ផ្ទៃដីតាមថ្នាក់
+Report page made: choose where to save the PDF.	ទំព័ររបាយការណ៍បានបង្កើត៖ សូមជ្រើសទីតាំងរក្សាទុក PDF។
+PDF report	របាយការណ៍ PDF
+An A4 report: the map, legend, class areas (table and chart), accuracy and change, saved as PDF	របាយការណ៍ A4៖ ផែនទី តារាងសម្គាល់ ផ្ទៃដីតាមថ្នាក់ (តារាង និងក្រាហ្វ) ភាពត្រឹមត្រូវ និងការប្រែប្រួល រក្សាទុកជា PDF
+Class map to polygons	ផែនទីថ្នាក់ទៅជាពហុកោណ
+Each patch of one class becomes a polygon with its class and hectares	បំណែកនីមួយៗនៃថ្នាក់មួយក្លាយជាពហុកោណ ដែលមានថ្នាក់ និងហិកតារបស់វា
+{n} polygons made.	បានបង្កើតពហុកោណ {n}។
+Earth-Engine-style scripts (Python), run on your computer: the study area of tab 1 is `aoi`.	ស្គ្រីបតាមរបៀប Earth Engine (Python) ដំណើរការលើកុំព្យូទ័ររបស់អ្នក៖ តំបន់សិក្សានៃផ្ទាំងទី ១ គឺ `aoi`។
+Example	ឧទាហរណ៍
+Stop	បញ្ឈប់
+▶ Run script	▶ ដំណើរការស្គ្រីប
+Clear output	សម្អាតលទ្ធផល
+Forget made images	បំភ្លេចរូបភាពដែលបានធ្វើ
+Run everything again from the downloads	ដំណើរការទាំងអស់ម្តងទៀតចាប់ពីការទាញយក
+Done.	រួចរាល់។
+LEE script	ស្គ្រីប LEE
+Searching {d}…	កំពុងស្វែងរក {d}…
+No {d} images found for those dates and clouds.	រកមិនឃើញរូបភាព {d} សម្រាប់កាលបរិច្ឆេទ និងពពកទាំងនោះទេ។
+True colour + NDVI (dry-season median)	ពណ៌ពិត + NDVI (មធ្យមភាគរដូវប្រាំង)
+Water mapping (MNDWI + Otsu)	ការគូសផែនទីទឹក (MNDWI + Otsu)
+Terrain: slope, aspect, hillshade (Copernicus DEM)	សណ្ឋានដី៖ ជម្រាល ទិស ស្រមោលភ្នំ (Copernicus DEM)
+Land-cover statistics (ESA WorldCover)	ស្ថិតិគម្របដី (ESA WorldCover)
+Land-cover change 2017 → 2023 (annual LULC)	ការប្រែប្រួលគម្របដី ២០១៧ → ២០២៣ (LULC ប្រចាំឆ្នាំ)
+Burn severity dNBR (Landsat before / after)	កម្រិតឆេះ dNBR (Landsat មុន / ក្រោយ)
+Flood mapping with Sentinel-1 (before / after)	ការគូសផែនទីទឹកជំនន់ដោយ Sentinel-1 (មុន / ក្រោយ)
+Unsupervised clustering (K-means)	ការចាត់ក្រុមដោយគ្មានការត្រួតពិនិត្យ (K-means)
+Surface-water occurrence 1984–2021 (JRC)	ការកើតមានទឹកលើផ្ទៃ ១៩៨៤–២០២១ (JRC)
+Vegetation & soil indices pack (EVI, SAVI, NDMI, NDBI, BSI)	កញ្ចប់សន្ទស្សន៍រុក្ខជាតិ និងដី (EVI, SAVI, NDMI, NDBI, BSI)

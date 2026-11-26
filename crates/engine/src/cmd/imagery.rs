@@ -66,7 +66,7 @@ pub fn commands() -> Vec<C> {
             r#"{"layer": raster, "index": "ndvi"|"ndwi"|"savi"|"nbr"|"ndbi"|"evi", "red"?, "green"?, "blue"?, "nir"?, "swir"?: band numbers, "name"?: output, "ran"?: (internal: a raster the app has worked out)}"#,
         ),
         C::new("raster.process", "Process", "Analyze › Imagery Tools", process).inputs(process_inputs).roles(&[]).effects(crate::policy::Effects::NONE)
-            .params(r#"{"layer": raster, "operation": "clip"|"resample"|"stack"|"merge", "layers"?: [raster names] (stack: the rasters whose bands follow layer's; merge: other pieces of the same image, filling where layer has no value; both resampled onto layer's grid), "bandNames"?: [names], "maskBand"?: 1-based (merge: a quality band; pixels whose value is in maskValues, or has a bit of maskBits set, are no value; the band is left out), "maskValues"?: [n], "maskBits"?: [bit numbers], "combine"?: "first" (default)|"median" (merge: the median of the pieces' values, e.g. a composite of several dates), "nodata"?: n (stack, merge: this stored value is no value), "scale"?: n, "offset"?: n (stack, merge: value × scale + offset, e.g. reflectance), "decibels"?: bool (stack, merge: then 10·log10, e.g. radar backscatter), "extent"?: [minLon, minLat, maxLon, maxLat] (clip; the view when omitted), "polygon"?: polygon layer (clip to its selected or all polygons; cells outside become no-data), "selectedOnly"?: bool (clip to selected polygons when true, all when false), "factor"?: n (resample: n×n pixels become one), "name"?: output, "ran"?: (internal: a raster the app has worked out)}"#),
+            .params(r#"{"layer": raster, "operation": "clip"|"resample"|"stack"|"merge"|"select", "bands"?: [1-based band numbers] (select: the bands kept, in that order), "layers"?: [raster names] (stack: the rasters whose bands follow layer's; merge: other pieces of the same image, filling where layer has no value; both resampled onto layer's grid), "bandNames"?: [names], "maskBand"?: 1-based (merge: a quality band; pixels whose value is in maskValues, or has a bit of maskBits set, are no value; the band is left out), "maskValues"?: [n], "maskBits"?: [bit numbers], "combine"?: "first" (default)|"median" (merge: the median of the pieces' values, e.g. a composite of several dates), "nodata"?: n (stack, merge: this stored value is no value), "scale"?: n, "offset"?: n (stack, merge: value × scale + offset, e.g. reflectance), "decibels"?: bool (stack, merge: then 10·log10, e.g. radar backscatter), "extent"?: [minLon, minLat, maxLon, maxLat] (clip; the view when omitted), "polygon"?: polygon layer (clip to its selected or all polygons; cells outside become no-data), "selectedOnly"?: bool (clip to selected polygons when true, all when false), "factor"?: n (resample: n×n pixels become one), "name"?: output, "ran"?: (internal: a raster the app has worked out)}"#),
         C::new("raster.mosaic", "Mosaic Rasters", "Analyze › Imagery Tools", raster_mosaic).inputs(mosaic_inputs).roles(&[]).effects(crate::policy::Effects::NONE.with(crate::policy::Effect::Files)).params(
             r#"{"inputs": [raster layer or file path, …] (two or more, in one coordinate system and cell size; where they overlap the first wins), "name"?: output, "path"?: GeoTIFF to write the mosaic to}"#,
         ),
@@ -1030,6 +1030,29 @@ pub(crate) fn process_work(s: &Session, p: &Value) -> Result<super::workflows::W
         // pieces of one image (a scene's tiles) laid together, the first value found kept.
         // Either takes the value `nodata` as none, and gives `value × scale + offset`
         // (reflectance from a satellite's stored numbers).
+        // Some of a raster's bands, in the order given.
+        "select" => {
+            let bands = bands_param(p, &r)?;
+            if bands.is_empty() {
+                return Err("select: bands is required: [1-based band numbers]".into());
+            }
+            r.require_coordinates()?;
+            let out = name(p, format!("{}_select", r.name));
+            Ok(Box::new(move || {
+                let picked: Vec<Vec<f32>> = bands.iter().filter_map(|b| r.bands.get(*b).map(|x| x.data.iter().map(|v| if r.is_valid(*v) { *v } else { NODATA }).collect())).collect();
+                if rustgis_analysis::control::stop_requested() {
+                    return Err(rustgis_analysis::control::CANCELLED.to_string());
+                }
+                let mut made = rasterops::derive(&r, &out, picked)?;
+                for (band, b) in made.bands.iter_mut().zip(&bands) {
+                    if let Some(src) = r.bands.get(*b) {
+                        band.name.clone_from(&src.name);
+                        band.classes.clone_from(&src.classes);
+                    }
+                }
+                super::workflows::made(made, None)
+            }))
+        }
         op @ ("stack" | "merge") => {
             const MAX_STACK: usize = 64;
             let merge = op == "merge";

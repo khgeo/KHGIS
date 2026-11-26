@@ -92,6 +92,25 @@ pub(crate) fn districts(province: &str) -> Vec<(String, String, String, Value)> 
     units(rustgis_engine::sample::CAMBODIA_DISTRICTS).into_iter().filter(|d| d.2 == province).collect()
 }
 
+/// A district's communes and sangkats (bundled, 2024), by name: (English name, Khmer name, kind
+/// in Khmer, feature).
+pub(crate) fn communes(province: &str, district: &str) -> Vec<(String, String, String, Value)> {
+    static ALL: std::sync::OnceLock<Value> = std::sync::OnceLock::new();
+    let v = ALL.get_or_init(|| serde_json::from_str(rustgis_engine::sample::cambodia_communes()).unwrap_or(Value::Null));
+    let mut out: Vec<(String, String, String, Value)> = v["features"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter(|f| f["properties"]["province"].as_str() == Some(province) && f["properties"]["district"].as_str() == Some(district))
+        .map(|f| {
+            let s = |k: &str| f["properties"][k].as_str().unwrap_or("").to_string();
+            (s("name"), s("name_km"), s("type_km"), f.clone())
+        })
+        .collect();
+    out.sort_by(|a, b| a.0.cmp(&b.0));
+    out
+}
+
 pub(crate) fn label(en: &str, km: &str) -> String {
     if khmer() && !km.is_empty() { format!("{km} ({en})") } else { en.to_string() }
 }

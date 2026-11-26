@@ -1325,6 +1325,165 @@ pub fn sample_points(r: &Raster, b: usize, per_class: usize, seed: u64) -> Resul
     Ok(out)
 }
 
+/// The magic wand: the pixels connected (4-way) to `seed` (column, row) whose values over `bands`
+/// lie within `tolerance` of the seed's, each band measured in its own standard deviations (so
+/// bands of different ranges count alike), up to `max_pixels`. Returns the region as a mask over
+/// the raster's grid (row by row) and its pixel count.
+pub fn region_grow(r: &Raster, bands: &[usize], seed: (usize, usize), tolerance: f64, max_pixels: usize) -> Result<(Vec<bool>, usize), String> {
+    let data = bands_of(r, bands)?;
+    let (w, h) = (r.width as usize, r.height as usize);
+    if seed.0 >= w || seed.1 >= h {
+        return Err("the point is outside the image".into());
+    }
+    let n = w * h;
+    let mut buf = Vec::with_capacity(data.len());
+    // Each band's spread, from a sample.
+    let sample: Vec<Vec<f64>> =
+        (0..n).step_by((n / 20_000).max(1)).filter_map(|i| if pixel_into(r, &data, i, &mut buf) { Some(buf.clone()) } else { None }).collect();
+    let m = mean(&sample, data.len());
+    let cov = covariance(&sample, &m);
+    let sd: Vec<f64> = (0..data.len()).map(|i| cov[i][i].sqrt().max(1e-12)).collect();
+    let start = seed.1 * w + seed.0;
+    if !pixel_into(r, &data, start, &mut buf) {
+        return Err("the image has no value at that point".into());
+    }
+    let centre = buf.clone();
+    let mut mask = new_band(w, h, false)?;
+    let mut stack = vec![start];
+    mask[start] = true;
+    let mut count = 0usize;
+    while let Some(i) = stack.pop() {
+        count += 1;
+        if count >= max_pixels {
+            break;
+        }
+        let (c, rr) = (i % w, i / w);
+        let mut next = |j: usize, mask: &mut Vec<bool>, stack: &mut Vec<usize>| {
+            if !mask[j] && pixel_into(r, &data, j, &mut buf) {
+                let d: f64 = buf.iter().zip(&centre).zip(&sd).map(|((v, c0), s)| ((v - c0) / s).powi(2)).sum::<f64>().sqrt();
+                if d <= tolerance {
+                    mask[j] = true;
+                    stack.push(j);
+                }
+            }
+        };
+        if c > 0 {
+            next(i - 1, &mut mask, &mut stack);
+        }
+        if c + 1 < w {
+            next(i + 1, &mut mask, &mut stack);
+        }
+        if rr > 0 {
+            next(i - w, &mut mask, &mut stack);
+        }
+        if rr + 1 < h {
+            next(i + w, &mut mask, &mut stack);
+        }
+    }
+    let count = mask.iter().filter(|m| **m).count();
+    Ok((mask, count))
+}
+
+/// The outlines of a mask's cells (row by row, `w` across): polygons of rings of pixel corners
+/// (column, row), the first ring of each its outside and the others its holes. Straight runs
+/// keep only their ends.
+pub fn trace(mask: &[bool], w: usize, h: usize) -> Vec<Vec<Vec<(f64, f64)>>> {
+    let at = |c: i64, r: i64| c >= 0 && r >= 0 && (c as usize) < w && (r as usize) < h && mask.get(r as usize * w + c as usize).copied().unwrap_or(false);
+    // Edges with the inside on their right (rows grow downwards): each cell's sides on the
+    // boundary, clockwise round the cell.
+    let mut from: std::collections::HashMap<(i64, i64), Vec<(i64, i64)>> = std::collections::HashMap::new();
+    for r in 0..h as i64 {
+        for c in 0..w as i64 {
+            if !at(c, r) {
+                continue;
+            }
+            if !at(c, r - 1) {
+                from.entry((c, r)).or_default().push((c + 1, r));
+            }
+            if !at(c + 1, r) {
+                from.entry((c + 1, r)).or_default().push((c + 1, r + 1));
+            }
+            if !at(c, r + 1) {
+                from.entry((c + 1, r + 1)).or_default().push((c, r + 1));
+            }
+            if !at(c - 1, r) {
+                from.entry((c, r + 1)).or_default().push((c, r));
+            }
+        }
+    }
+    let mut rings: Vec<Vec<(i64, i64)>> = Vec::new();
+    let mut starts: Vec<(i64, i64)> = from.keys().copied().collect();
+    starts.sort_unstable();
+    for s0 in starts {
+        while let Some(first) = from.get_mut(&s0).and_then(Vec::pop) {
+            let mut ring = vec![s0];
+            let (mut prev, mut cur) = (s0, first);
+            while cur != s0 {
+                ring.push(cur);
+                let dir = (cur.0 - prev.0, cur.1 - prev.1);
+                let Some(nexts) = from.get_mut(&cur) else { break };
+                if nexts.is_empty() {
+                    break;
+                }
+                // At a corner two regions share, turn right: keeps them apart.
+                let right = (-dir.1, dir.0);
+                let k = nexts.iter().position(|n| (n.0 - cur.0, n.1 - cur.1) == right).unwrap_or(0);
+                let n = nexts.swap_remove(k);
+                prev = cur;
+                cur = n;
+            }
+            if ring.len() >= 4 {
+                rings.push(ring);
+            }
+        }
+    }
+    // Straight runs to their ends.
+    let simplify = |ring: &[(i64, i64)]| -> Vec<(f64, f64)> {
+        let n = ring.len();
+        let mut out: Vec<(f64, f64)> = (0..n)
+            .filter(|i| {
+                let (a, b, c) = (ring[(i + n - 1) % n], ring[*i], ring[(i + 1) % n]);
+                (b.0 - a.0) * (c.1 - b.1) != (b.1 - a.1) * (c.0 - b.0)
+            })
+            .map(|i| (ring[i].0 as f64, ring[i].1 as f64))
+            .collect();
+        if let Some(f) = out.first().copied() {
+            out.push(f);
+        }
+        out
+    };
+    let area = |ring: &[(f64, f64)]| ring.windows(2).map(|p| p[0].0 * p[1].1 - p[1].0 * p[0].1).sum::<f64>() / 2.0;
+    let simple: Vec<Vec<(f64, f64)>> = rings.iter().map(|r| simplify(r)).filter(|r| r.len() >= 4).collect();
+    // Clockwise on screen (positive here) is an outside; the others are holes.
+    let (outer, holes): (Vec<_>, Vec<_>) = simple.into_iter().partition(|r| area(r) > 0.0);
+    let mut polys: Vec<Vec<Vec<(f64, f64)>>> = outer.into_iter().map(|o| vec![o]).collect();
+    let inside = |pt: (f64, f64), ring: &[(f64, f64)]| {
+        let mut hit = false;
+        for k in 0..ring.len().saturating_sub(1) {
+            let (a, b) = (ring[k], ring[k + 1]);
+            if (a.1 > pt.1) != (b.1 > pt.1) && pt.0 < (b.0 - a.0) * (pt.1 - a.1) / (b.1 - a.1) + a.0 {
+                hit = !hit;
+            }
+        }
+        hit
+    };
+    for hole in holes {
+        // A point just inside the hole's first edge: on no ring's line.
+        let (a, b) = (hole[0], hole[1]);
+        let probe = ((a.0 + b.0) / 2.0 + (b.1 - a.1) * 0.25, (a.1 + b.1) / 2.0 - (b.0 - a.0) * 0.25);
+        let owner = polys
+            .iter()
+            .enumerate()
+            .filter(|(_, p)| inside(probe, &p[0]))
+            .min_by(|x, y| area(&x.1[0]).total_cmp(&area(&y.1[0])))
+            .map(|(i, _)| i);
+        if let Some(i) = owner {
+            polys[i].push(hole);
+        }
+    }
+    polys
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1427,6 +1586,29 @@ mod tests {
         assert!((a.estimated_ha[0] - 358_615.27).abs() < 0.1, "{:?}", a.estimated_ha);
         assert!((a.ci95_ha[0] - 108_857.86).abs() < 0.1, "{:?}", a.ci95_ha);
         assert!((a.overall - 587.0 / 640.0).abs() < 1e-12);
+    }
+
+    #[test]
+    fn magic_wand_grows_a_region_and_traces_it() {
+        // A bright 3 × 3 square with a dark hole in a dark image.
+        let mut v = vec![0.0f32; 49];
+        for r in 2..5 {
+            for c in 2..5 {
+                v[r * 7 + c] = 10.0;
+            }
+        }
+        v[3 * 7 + 3] = 0.0;
+        let r = img(7, 7, vec![v]);
+        let (mask, n) = region_grow(&r, &[0], (2, 2), 0.5, 1000).unwrap();
+        assert_eq!(n, 8);
+        assert!(!mask[3 * 7 + 3]);
+        let polys = trace(&mask, 7, 7);
+        assert_eq!(polys.len(), 1);
+        assert_eq!(polys[0].len(), 2, "an outside and a hole: {polys:?}");
+        assert_eq!(polys[0][0].len(), 5);
+        // Two cells touching at a corner stay two polygons.
+        let diag = [true, false, false, true];
+        assert_eq!(trace(&diag, 2, 2).len(), 2);
     }
 
     #[test]

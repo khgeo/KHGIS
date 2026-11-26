@@ -58,6 +58,18 @@ pub fn commands() -> Vec<C> {
             .roles(&[])
             .effects(crate::policy::Effects::NONE)
             .params(r#"{"layer": class raster, "perClass"?: n (default 30), "name"?: output layer} → a stratified random point layer: map_class (the map's), ref_class (empty, to fill in)"#),
+        // Runs here, not in the background: it stops at maxPixels (at most 500,000).
+        C::new("raster.magicWand", "Magic Wand", "Analyze › Image Classification", magic_wand)
+            .inputs(one_input)
+            .roles(&[])
+            .effects(crate::policy::Effects::NONE)
+            .params(r#"{"layer": raster, "lon", "lat": the seed, "tolerance"?: n (how far in standard deviations a pixel's values may be from the seed's; default 1.5), "maxPixels"?: n (default 20000, at most 500000), "bands"?: [1-based] (default all), "addTo"?: polygon layer (the region added to it as a feature), "class"?: text (its classField), "classField"?: field (default "name")} → the region's polygon (GeoJSON) and pixels"#),
+        // Runs here: one pass over the raster and its edges; refused past 25 million pixels.
+        C::new("raster.toPolygons", "Class Map to Polygons", "Analyze › Image Classification", to_polygons)
+            .inputs(one_input)
+            .roles(&[])
+            .effects(crate::policy::Effects::NONE)
+            .params(r#"{"layer": class raster, "minPixels"?: n (smaller regions left out; default 1), "name"?: output layer} → a polygon layer: value, class, hectares"#),
         C::new("raster.classNames", "Class Names", "Analyze › Image Classification", class_names)
             .inputs(one_input)
             .roles(&[])
@@ -454,4 +466,87 @@ pub(crate) fn training_polygons(s: &Session, p: &Value) -> Result<Vec<(String, V
         polygons.extend(polys.iter().map(|rings| (key.clone(), rings.clone())));
     }
     Ok(polygons)
+}
+
+/// A traced polygon (pixel corners) as GeoJSON coordinates on the raster's grid, in lon/lat.
+fn rings_lonlat(r: &Raster, poly: &[Vec<(f64, f64)>], dx: f64, dy: f64) -> Vec<Vec<[f64; 2]>> {
+    let tr = r.transformer();
+    poly.iter()
+        .map(|ring| {
+            ring.iter()
+                .filter_map(|(c, rr)| tr.to_lonlat(r.transform.to_world(c + dx, rr + dy)))
+                .map(|ll| [(ll.x * 1e7).round() / 1e7, (ll.y * 1e7).round() / 1e7])
+                .collect()
+        })
+        .collect()
+}
+
+fn magic_wand(s: &mut Session, p: &Value) -> CmdResult {
+    let r = raster(s, p)?;
+    r.require_coordinates()?;
+    let bands = all_bands(p, &r)?;
+    let at = rustgis_geom::Coord::new(super::f(p, "lon").ok_or("lon is required")?, super::f(p, "lat").ok_or("lat is required")?);
+    let (c, row) = r.pixel_at(at).ok_or("the point is outside the image")?;
+    let tolerance = super::f(p, "tolerance").unwrap_or(1.5).clamp(0.01, 20.0);
+    let max = uint(p, "maxPixels").map_or(20_000, |v| v as usize).clamp(1, 500_000);
+    let (mask, n) = rslab::region_grow(&r, &bands, (c as usize, row as usize), tolerance, max)?;
+    let polys = rslab::trace(&mask, r.width as usize, r.height as usize);
+    // The largest piece (the region is one: holes are its rings).
+    let poly = polys.into_iter().max_by_key(|p| p.first().map_or(0, Vec::len)).ok_or("the region has no outline")?;
+    let geometry = json!({"type": "Polygon", "coordinates": rings_lonlat(&r, &poly, 0.0, 0.0)});
+    let mut out = json!({"geometry": geometry, "pixels": n, "hectares": n as f64 * rslab::pixel_hectares(&r), "full": n >= max});
+    if n >= max {
+        s.notify(format!("Magic wand: stopped at {max} pixels: the region may go on (lower the tolerance)"), false);
+    }
+    if let Some(layer) = ps(p, "addTo") {
+        let field = ps(p, "classField").unwrap_or("name");
+        let mut q = json!({"layer": layer, "geometry": out["geometry"].clone()});
+        if let Some(class) = ps(p, "class") {
+            q["attributes"] = json!({field: class});
+        }
+        out["added"] = s.run("edit.addFeature", &q)?;
+    }
+    Ok(out)
+}
+
+fn to_polygons(s: &mut Session, p: &Value) -> CmdResult {
+    const MOST: usize = 25_000_000;
+    let r = raster(s, p)?;
+    r.require_coordinates()?;
+    let (w, h) = (r.width as usize, r.height as usize);
+    if w.saturating_mul(h) > MOST {
+        return Err(format!("{} has {} pixels; this makes polygons of {MOST} at most: resample it first", r.name, w * h));
+    }
+    let min = uint(p, "minPixels").map_or(1, |v| v as usize).max(1);
+    let classes = rslab::counts(&r, 0)?;
+    let ha = rslab::pixel_hectares(&r);
+    let data = r.bands.first().map(|b| b.data.as_slice()).unwrap_or(&[]);
+    let mut features = Vec::new();
+    let mut small = 0usize;
+    for (v, _) in &classes {
+        let mask: Vec<bool> = data.iter().map(|x| x == v).collect();
+        for poly in rslab::trace(&mask, w, h) {
+            // The region's pixels, from its rings' areas (outside less holes).
+            let area = |ring: &Vec<(f64, f64)>| ring.windows(2).map(|q| q[0].0 * q[1].1 - q[1].0 * q[0].1).sum::<f64>().abs() / 2.0;
+            let px = poly.first().map_or(0.0, area) - poly.iter().skip(1).map(area).sum::<f64>();
+            if (px.round() as usize) < min {
+                small += 1;
+                continue;
+            }
+            features.push(json!({"type": "Feature", "properties": {"value": v, "class": class_label(&r, 0, *v), "hectares": px * ha},
+                "geometry": {"type": "Polygon", "coordinates": rings_lonlat(&r, &poly, 0.0, 0.0)}}));
+        }
+        if rustgis_analysis::control::stop_requested() {
+            return Err(rustgis_analysis::control::CANCELLED.to_string());
+        }
+    }
+    if small > 0 {
+        s.notify(format!("Class map to polygons: {small} region(s) under {min} pixel(s) left out"), false);
+    }
+    let n = features.len();
+    let layer = name(p, format!("{}_polygons", r.name));
+    let text = json!({"type": "FeatureCollection", "features": features}).to_string();
+    let mut out = s.run("layer.addDataText", &json!({"fileName": format!("{layer}.geojson"), "text": text, "name": layer}))?;
+    out["polygons"] = json!(n);
+    Ok(out)
 }
