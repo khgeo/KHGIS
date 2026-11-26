@@ -163,6 +163,10 @@ fn right_title(pane: RightPane) -> (&'static str, &'static str) {
 /// A right pane's tab, in the interface language: a plugin's panel is named by its title.
 fn right_name(app: &RustGisApp, pane: RightPane) -> String {
     match pane {
+        // QGIS's names, in the QGIS layout.
+        RightPane::Symbology if app.ui.qgis_layout => tl!("Layer Styling").to_string(),
+        RightPane::Geoprocessing if app.ui.qgis_layout => tl!("Processing Toolbox").to_string(),
+        RightPane::Format if app.ui.qgis_layout => tl!("Item Properties").to_string(),
         RightPane::Plugin => crate::pluginpanel::title(app),
         RightPane::WebData => tl!(web_data_title(app)).to_string(),
         _ => tl!(right_title(pane).0).to_string(),
@@ -221,6 +225,11 @@ fn right_pane(app: &mut RustGisApp, ui: &mut Ui, right: RightPane, t: &Tokens) {
 }
 
 fn right_contents(app: &mut RustGisApp, ui: &mut Ui, right: RightPane, t: &Tokens) {
+    // The QGIS layout's Layer Styling panel: the layer, a strip of pages, the page.
+    if app.ui.qgis_layout && right == RightPane::Symbology {
+        crate::qgisui::layer_styling(app, ui, t);
+        return;
+    }
     // The chat lays out its own scrolling, with the message box kept at the bottom.
     if right == RightPane::Assistant {
         crate::assistantpane::show(app, ui, t);
@@ -4182,6 +4191,28 @@ fn pending_symbology(app: &RustGisApp, ctx: &egui::Context) -> Option<PendingSym
 }
 
 /// Shows the active layer's renderer controls, including No Fill for polygon layers.
+/// The renderer's icon before the QGIS layout's renderer list.
+fn icons_for(ui: &mut Ui, code: &str, t: &Tokens) {
+    let icon = match code {
+        "single" => "single",
+        "unique" => "unique",
+        "graduated" => "graduated",
+        _ => "proportional",
+    };
+    let (r, _) = ui.allocate_exact_size(vec2(22.0, 22.0), Sense::hover());
+    icons::paint(ui.painter(), r, icon, t.icon, t.accent);
+}
+
+/// The Symbology page's contents (the QGIS layout's Layer Styling panel shows it).
+pub(crate) fn symbology_in(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
+    symbology(app, ui, t);
+}
+
+/// The Details page's contents, for the Layer Styling panel's Information page.
+pub(crate) fn details_in(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
+    details(app, ui, t);
+}
+
 fn symbology(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
     if app.ui.symbology_pending.as_ref().is_some_and(|pending| !pending.is_current(&app.session)) {
         app.ui.symbology_pending = None;
@@ -4197,9 +4228,11 @@ fn symbology(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
     let g = l.geometry_type();
     let numeric: Vec<String> = l.dataset.fields.iter().filter(|f| f.ty.is_numeric()).map(|f| f.name.clone()).collect();
     let all: Vec<String> = l.dataset.fields.iter().map(|f| f.name.clone()).collect();
-    ui.label(egui::RichText::new(&l.name).font(semibold(14.0)));
-    ui.add_space(6.0);
-    ui.label(egui::RichText::new(tl!("Primary symbology")).size(11.5).color(t.text_dim));
+    if !app.ui.qgis_layout {
+        ui.label(egui::RichText::new(&l.name).font(semibold(14.0)));
+        ui.add_space(6.0);
+        ui.label(egui::RichText::new(tl!("Primary symbology")).size(11.5).color(t.text_dim));
+    }
     let kinds: Vec<(&str, &str)> = if g == GeometryType::Point {
         vec![
             ("single", "Single Symbol"),
@@ -4211,72 +4244,100 @@ fn symbology(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
         vec![("single", "Single Symbol"), ("unique", "Unique Values"), ("graduated", "Graduated Colors")]
     };
     let cur_kind = l.renderer.kind_label();
-    ui.horizontal_wrapped(|ui| {
-        for (code, label) in &kinds {
-            let icon = match *code {
-                "single" => "single",
-                "unique" => "unique",
-                "graduated" => "graduated",
-                _ => "proportional",
-            };
-            let sel = if app.ui.symbology_pending.is_some() { *code == "unique" } else { cur_kind == *label };
-            let (r, resp) = ui.allocate_exact_size(vec2(68.0, 56.0), Sense::click());
-            resp.widget_info(|| egui::WidgetInfo::selected(egui::Role::Button, true, sel, tl!(*label)));
-            ui.painter().rect_filled(
-                r,
-                CornerRadius::same(6),
-                if sel {
-                    t.checked
-                } else if resp.hovered() {
-                    t.hover
-                } else {
-                    t.pane
-                },
-            );
-            ui.painter().rect_stroke(
-                r,
-                CornerRadius::same(6),
-                Stroke::new(1.0, if sel { t.accent } else { t.border }),
-                egui::StrokeKind::Inside,
-            );
-            icons::paint(
-                ui.painter(),
-                Rect::from_center_size(pos2(r.center().x, r.min.y + 19.0), vec2(24.0, 24.0)),
-                icon,
-                t.icon,
-                t.accent,
-            );
-            let short = tl!(label).split(' ').next().unwrap_or(label);
-            ui.painter().text(pos2(r.center().x, r.max.y - 11.0), Align2::CENTER_CENTER, short, regular(11.0), t.text);
-            if resp.on_hover_text(tl!(*label)).clicked() && !sel {
-                if *code == "unique" && !all.is_empty() {
-                    let field = l.dataset.fields.iter().find(|f| !f.ty.is_numeric()).or_else(|| l.dataset.fields.first());
-                    if let Some(field) = field {
-                        app.ui.symbology_pending = Some(crate::PendingUniqueSymbology::new(&app.session, &l, field.name.clone()));
-                        clear_pending_symbology(ui.ctx());
+    let current =
+        |app: &RustGisApp, label: &str, code: &str| if app.ui.symbology_pending.is_some() { code == "unique" } else { cur_kind == label };
+    let mut picked: Option<&'static str> = None;
+    if app.ui.qgis_layout {
+        // As QGIS's Layer Styling panel: the renderer in a list, its symbol below.
+        let qgis_name = |code: &str| match code {
+            "single" => "Single Symbol",
+            "unique" => "Categorized",
+            "graduated" => "Graduated",
+            _ => "Proportional Symbols",
+        };
+        let shown = kinds.iter().find(|(c, l)| current(app, l, c)).map(|(c, _)| qgis_name(c)).unwrap_or("Single Symbol");
+        ui.horizontal(|ui| {
+            icons_for(ui, kinds.iter().find(|(c, l)| current(app, l, c)).map(|(c, _)| *c).unwrap_or("single"), t);
+            egui::ComboBox::from_id_salt("qgis_renderer").width(ui.available_width() - 8.0).selected_text(tl!(shown)).show_ui(ui, |ui| {
+                for (code, label) in &kinds {
+                    let sel = current(app, label, code);
+                    if ui.selectable_label(sel, tl!(qgis_name(code))).on_hover_text(tl!(*label)).clicked() && !sel {
+                        picked = Some(*code);
                     }
-                    continue;
                 }
-                match app.run("layer.symbology", json!({"type": code})) {
-                    Err(error) => {
-                        let pending = PendingSymbology {
-                            project: app.session.opened,
-                            map: app.session.project.active_map,
-                            layer: l.id,
-                            kind: code,
-                            error: error.into(),
-                            renderer: std::sync::Arc::new(l.renderer.clone()),
-                        };
-                        ui.data_mut(|data| data.insert_temp(egui::Id::unique(PENDING_SYMBOLOGY), pending));
-                    }
-                    Ok(_) => {
-                        clear_pending_symbology(ui.ctx());
-                        app.ui.symbology_pending = None;
-                    }
+            });
+        });
+    } else {
+        ui.horizontal_wrapped(|ui| {
+            for (code, label) in &kinds {
+                let icon = match *code {
+                    "single" => "single",
+                    "unique" => "unique",
+                    "graduated" => "graduated",
+                    _ => "proportional",
+                };
+                let sel = current(app, label, code);
+                let (r, resp) = ui.allocate_exact_size(vec2(68.0, 56.0), Sense::click());
+                resp.widget_info(|| egui::WidgetInfo::selected(egui::Role::Button, true, sel, tl!(*label)));
+                ui.painter().rect_filled(
+                    r,
+                    CornerRadius::same(6),
+                    if sel {
+                        t.checked
+                    } else if resp.hovered() {
+                        t.hover
+                    } else {
+                        t.pane
+                    },
+                );
+                ui.painter().rect_stroke(
+                    r,
+                    CornerRadius::same(6),
+                    Stroke::new(1.0, if sel { t.accent } else { t.border }),
+                    egui::StrokeKind::Inside,
+                );
+                icons::paint(
+                    ui.painter(),
+                    Rect::from_center_size(pos2(r.center().x, r.min.y + 19.0), vec2(24.0, 24.0)),
+                    icon,
+                    t.icon,
+                    t.accent,
+                );
+                let short = tl!(label).split(' ').next().unwrap_or(label);
+                ui.painter().text(pos2(r.center().x, r.max.y - 11.0), Align2::CENTER_CENTER, short, regular(11.0), t.text);
+                if resp.on_hover_text(tl!(*label)).clicked() && !sel {
+                    picked = Some(*code);
+                }
+            }
+        });
+    }
+    if let Some(code) = picked {
+        if code == "unique" && !all.is_empty() {
+            let field = l.dataset.fields.iter().find(|f| !f.ty.is_numeric()).or_else(|| l.dataset.fields.first());
+            if let Some(field) = field {
+                app.ui.symbology_pending = Some(crate::PendingUniqueSymbology::new(&app.session, &l, field.name.clone()));
+                clear_pending_symbology(ui.ctx());
+            }
+        } else {
+            match app.run("layer.symbology", json!({"type": code})) {
+                Err(error) => {
+                    let pending = PendingSymbology {
+                        project: app.session.opened,
+                        map: app.session.project.active_map,
+                        layer: l.id,
+                        kind: code,
+                        error: error.into(),
+                        renderer: std::sync::Arc::new(l.renderer.clone()),
+                    };
+                    ui.data_mut(|data| data.insert_temp(egui::Id::unique(PENDING_SYMBOLOGY), pending));
+                }
+                Ok(_) => {
+                    clear_pending_symbology(ui.ctx());
+                    app.ui.symbology_pending = None;
                 }
             }
         }
-    });
+    }
     ui.add_space(8.0);
     if let Some(mut pending) = app.ui.symbology_pending.clone() {
         let pending_field = pending.field.clone();

@@ -95,6 +95,8 @@ pub struct Docks {
     areas: [Vec<Group>; 2],
     /// The right pane in view last frame, so a pane brought into view (by a command) shows.
     last_right: Option<RightPane>,
+    /// The layout open last frame, so opening one brings up its Item Properties.
+    last_layout: Option<usize>,
     /// Where the panel being dragged would land, found while drawing this frame.
     drop: Option<Drop>,
     loaded: bool,
@@ -194,7 +196,16 @@ fn open_panels(app: &RustGisApp) -> Vec<Panel> {
     out
 }
 
+/// Whether a panel is drawn: open, and, while a print layout is open, one of the layout's
+/// (Item Properties, as in QGIS's Layout window).
 fn is_open(app: &RustGisApp, p: Panel) -> bool {
+    if app.session.active_layout.is_some() && p != Panel::Right(RightPane::Format) {
+        return false;
+    }
+    is_open_any(app, p)
+}
+
+fn is_open_any(app: &RustGisApp, p: Panel) -> bool {
     match p {
         Panel::Browser => app.ui.qgis.browser,
         Panel::Layers => app.ui.qgis.layers,
@@ -242,13 +253,23 @@ fn sync(app: &mut RustGisApp) {
         }
         _ => {}
     }
+    // A print layout opened: its Item Properties come up, as in QGIS's Layout window.
+    if app.session.active_layout != app.ui.qgis.docks.last_layout {
+        app.ui.qgis.docks.last_layout = app.session.active_layout;
+        if app.session.active_layout.is_some() {
+            app.ui.open_right(RightPane::Format);
+        } else {
+            // Back on the map, the layout's panel goes with it.
+            app.ui.close_right(RightPane::Format);
+        }
+    }
     let open = open_panels(app);
     for p in open {
         if app.ui.qgis.docks.find(p).is_some() {
             continue;
         }
         let side = p.home();
-        let shown = app.ui.qgis.docks.areas[side].iter().position(|g| g.tabs.iter().any(|t| is_open(app, *t)));
+        let shown = app.ui.qgis.docks.areas[side].iter().position(|g| g.tabs.iter().any(|t| is_open_any(app, *t)));
         let drop = match (p, shown) {
             (Panel::Browser, _) => Drop::Group(side, 0),
             (Panel::Layers, _) => Drop::Group(side, app.ui.qgis.docks.areas[side].len()),
