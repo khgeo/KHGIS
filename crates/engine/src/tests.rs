@@ -35452,3 +35452,40 @@ fn long_commands_stop_when_cancelled_while_they_run() {
     }
     assert!(kept_going.is_empty(), "these ran on after Cancel:\n{}", kept_going.join("\n"));
 }
+
+/// `raster.process` stacks rasters' bands into one, and merges pieces of one image (a scene's
+/// tiles on one grid), taking a stored value as none and scaling to reflectance.
+#[test]
+fn process_stacks_and_merges_bands() {
+    let dir = std::env::temp_dir().join(format!("rustgis-engine-stack-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let mut s = Session::new(Project::default());
+    let mut names = Vec::new();
+    for (file, values) in [("a.asc", "1000 2000\n0 4000"), ("b.asc", "9 9\n3000 0")] {
+        let path = dir.join(file);
+        std::fs::write(&path, format!("ncols 2\nnrows 2\nxllcorner 104\nyllcorner 11\ncellsize 0.001\n{values}")).unwrap();
+        let id = s.run("layer.addData", &json!({"path": path})).unwrap()["layer"].as_u64().unwrap();
+        names.push(s.map().layer(id as u32).unwrap().name.clone());
+    }
+    let get = |s: &Session, n: &str| s.map().layer_by_name(n).and_then(|l| l.raster.as_ref()?.data.clone()).unwrap();
+    s.run(
+        "raster.process",
+        &json!({"layer": names[0], "operation": "stack", "layers": [names[1]], "bandNames": ["red", "nir"], "name": "st"}),
+    )
+    .unwrap();
+    let st = get(&s, "st");
+    assert_eq!((st.bands.len(), st.bands[0].name.as_str(), st.bands[1].name.as_str()), (2, "red", "nir"));
+    assert_eq!(st.bands[1].data, vec![9.0, 9.0, 3000.0, 0.0]);
+    s.run(
+        "raster.process",
+        &json!({"layer": names[0], "operation": "merge", "layers": [names[1]], "nodata": 0, "scale": 0.0001, "offset": -0.1, "name": "m"}),
+    )
+    .unwrap();
+    let m = get(&s, "m");
+    let want = [0.0, 0.1, 0.2, 0.3];
+    for (got, want) in m.bands[0].data.iter().zip(want) {
+        assert!((got - want).abs() < 1e-6, "{:?}", m.bands[0].data);
+    }
+    assert!(s.run("raster.process", &json!({"layer": names[0], "operation": "stack"})).is_err());
+    std::fs::remove_dir_all(dir).unwrap();
+}

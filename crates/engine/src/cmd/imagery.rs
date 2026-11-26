@@ -66,7 +66,7 @@ pub fn commands() -> Vec<C> {
             r#"{"layer": raster, "index": "ndvi"|"ndwi"|"savi"|"nbr"|"ndbi"|"evi", "red"?, "green"?, "blue"?, "nir"?, "swir"?: band numbers, "name"?: output, "ran"?: (internal: a raster the app has worked out)}"#,
         ),
         C::new("raster.process", "Process", "Analyze › Imagery Tools", process).inputs(process_inputs).roles(&[]).effects(crate::policy::Effects::NONE)
-            .params(r#"{"layer": raster, "operation": "clip"|"resample", "extent"?: [minLon, minLat, maxLon, maxLat] (clip; the view when omitted), "polygon"?: polygon layer (clip to its selected or all polygons; cells outside become no-data), "selectedOnly"?: bool (clip to selected polygons when true, all when false), "factor"?: n (resample: n×n pixels become one), "name"?: output, "ran"?: (internal: a raster the app has worked out)}"#),
+            .params(r#"{"layer": raster, "operation": "clip"|"resample"|"stack"|"merge", "layers"?: [raster names] (stack: the rasters whose bands follow layer's; merge: other pieces of the same image, filling where layer has no value; both resampled onto layer's grid), "bandNames"?: [names], "nodata"?: n (stack, merge: this stored value is no value), "scale"?: n, "offset"?: n (stack, merge: value × scale + offset, e.g. reflectance), "extent"?: [minLon, minLat, maxLon, maxLat] (clip; the view when omitted), "polygon"?: polygon layer (clip to its selected or all polygons; cells outside become no-data), "selectedOnly"?: bool (clip to selected polygons when true, all when false), "factor"?: n (resample: n×n pixels become one), "name"?: output, "ran"?: (internal: a raster the app has worked out)}"#),
         C::new("raster.mosaic", "Mosaic Rasters", "Analyze › Imagery Tools", raster_mosaic).inputs(mosaic_inputs).roles(&[]).effects(crate::policy::Effects::NONE.with(crate::policy::Effect::Files)).params(
             r#"{"inputs": [raster layer or file path, …] (two or more, in one coordinate system and cell size; where they overlap the first wins), "name"?: output, "path"?: GeoTIFF to write the mosaic to}"#,
         ),
@@ -996,6 +996,109 @@ fn process(s: &mut Session, p: &Value) -> CmdResult {
 pub(crate) fn process_work(s: &Session, p: &Value) -> Result<super::workflows::Work, String> {
     let r = raster(s, p)?;
     match ps(p, "operation").ok_or("operation is required")? {
+        // Several rasters' bands as one raster on the first's grid (`layer` first, then
+        // `layers`), as a multispectral image is put together from its band files; or ("merge")
+        // pieces of one image (a scene's tiles) laid together, the first value found kept.
+        // Either takes the value `nodata` as none, and gives `value × scale + offset`
+        // (reflectance from a satellite's stored numbers).
+        op @ ("stack" | "merge") => {
+            const MAX_STACK: usize = 64;
+            let merge = op == "merge";
+            let others: Vec<String> = match p.get("layers") {
+                None | Some(Value::Null) if merge => Vec::new(),
+                v => v
+                    .and_then(Value::as_array)
+                    .ok_or_else(|| format!("{op}: layers is required: the other rasters, in order"))?
+                    .iter()
+                    .map(|v| v.as_str().map(str::to_string).ok_or_else(|| format!("{op}: layers are raster names")))
+                    .collect::<Result<_, _>>()?,
+            };
+            let mut inputs = vec![r.clone()];
+            for n in &others {
+                inputs.push(raster_named(s, n)?);
+            }
+            r.require_coordinates()?;
+            let names: Vec<String> = p
+                .get("bandNames")
+                .and_then(Value::as_array)
+                .map(|a| a.iter().filter_map(Value::as_str).map(|n| n.chars().take(60).collect()).collect())
+                .unwrap_or_default();
+            let num = |k: &str, d: f64| -> Result<f64, String> {
+                match p.get(k) {
+                    None | Some(Value::Null) => Ok(d),
+                    Some(v) => v.as_f64().filter(|f| f.is_finite()).ok_or_else(|| format!("{op}: {k} is a number")),
+                }
+            };
+            let (scale, offset) = (num("scale", 1.0)?, num("offset", 0.0)?);
+            let none = match p.get("nodata") {
+                None | Some(Value::Null) => None,
+                Some(v) => Some(v.as_f64().ok_or_else(|| format!("{op}: nodata is a number"))? as f32),
+            };
+            let total: usize = if merge { r.bands.len() } else { inputs.iter().map(|i| i.bands.len()).sum() };
+            if total > MAX_STACK {
+                return Err(format!("{op}: {total} bands are more than {MAX_STACK}"));
+            }
+            if merge && let Some(short) = inputs.iter().find(|i| i.bands.len() < r.bands.len()) {
+                return Err(format!(
+                    "merge: {} has {} band(s), {} has {}: pieces of one image have the same bands",
+                    short.name,
+                    short.bands.len(),
+                    r.name,
+                    r.bands.len()
+                ));
+            }
+            let out = name(p, format!("{}_{op}", r.name));
+            Ok(Box::new(move || {
+                let stop = || -> Result<(), String> {
+                    if rustgis_analysis::control::stop_requested() { Err(rustgis_analysis::control::CANCELLED.to_string()) } else { Ok(()) }
+                };
+                // A value read, as the result holds it: none stays none.
+                let value =
+                    |v: f32| if v == NODATA || !v.is_finite() || Some(v) == none { NODATA } else { (f64::from(v) * scale + offset) as f32 };
+                let mut bands = Vec::with_capacity(total);
+                let mut labels = Vec::with_capacity(total);
+                if merge {
+                    for b in 0..r.bands.len() {
+                        let mut acc: Vec<f32> = Vec::new();
+                        for src in &inputs {
+                            stop()?;
+                            let got = rasterops::resample_to(src, b, &r)?;
+                            if acc.is_empty() {
+                                acc = got.into_iter().map(value).collect();
+                            } else {
+                                for (a, g) in acc.iter_mut().zip(got) {
+                                    if *a == NODATA {
+                                        *a = value(g);
+                                    }
+                                }
+                            }
+                        }
+                        bands.push(acc);
+                        let own = r.bands.get(b).map(|x| x.name.clone()).unwrap_or_default();
+                        labels.push(names.get(b).cloned().unwrap_or(own));
+                    }
+                } else {
+                    for src in &inputs {
+                        for (b, band) in src.bands.iter().enumerate() {
+                            stop()?;
+                            bands.push(rasterops::resample_to(src, b, &r)?.into_iter().map(value).collect());
+                            let label = names
+                                .get(labels.len())
+                                .cloned()
+                                .unwrap_or_else(|| if band.name.is_empty() { src.name.clone() } else { band.name.clone() });
+                            labels.push(label);
+                        }
+                    }
+                }
+                let mut made = rasterops::derive(&r, &out, bands)?;
+                for (band, label) in made.bands.iter_mut().zip(labels) {
+                    if !label.is_empty() {
+                        band.name = label;
+                    }
+                }
+                super::workflows::made(made, None)
+            }))
+        }
         "clip" if p.get("polygon").is_some_and(|v| !v.is_null()) => {
             // Before the mask, which places the polygons on the raster's coordinates.
             r.require_coordinates()?;
@@ -1826,7 +1929,9 @@ fn supervised_inputs(input: &super::InputContext<'_>, p: &Value) -> Result<super
 fn process_inputs(input: &super::InputContext<'_>, p: &Value) -> Result<super::Inputs, String> {
     let s = input;
     let clip = clip_polygon(p);
-    super::Inputs::named(s.map(), std::iter::once(raster_name(p)?).chain(clip))
+    // A stack's other rasters.
+    let stacked = p.get("layers").and_then(Value::as_array).into_iter().flatten().filter_map(Value::as_str).take(64);
+    super::Inputs::named(s.map(), std::iter::once(raster_name(p)?).chain(clip).chain(stacked))
 }
 /// Binds the grid template when present, otherwise the optional extent layer.
 fn project_inputs(input: &super::InputContext<'_>, p: &Value) -> Result<super::Inputs, String> {

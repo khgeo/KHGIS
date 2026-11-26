@@ -63,7 +63,7 @@ impl Default for State {
     }
 }
 
-fn khmer() -> bool {
+pub(crate) fn khmer() -> bool {
     crate::i18n::current().code() == "km"
 }
 
@@ -84,20 +84,20 @@ fn units(text: &str) -> Vec<(String, String, String, Value)> {
     out
 }
 
-fn provinces() -> Vec<(String, String, String, Value)> {
+pub(crate) fn provinces() -> Vec<(String, String, String, Value)> {
     units(rustgis_engine::sample::CAMBODIA_PROVINCES)
 }
 
-fn districts(province: &str) -> Vec<(String, String, String, Value)> {
+pub(crate) fn districts(province: &str) -> Vec<(String, String, String, Value)> {
     units(rustgis_engine::sample::CAMBODIA_DISTRICTS).into_iter().filter(|d| d.2 == province).collect()
 }
 
-fn label(en: &str, km: &str) -> String {
+pub(crate) fn label(en: &str, km: &str) -> String {
     if khmer() && !km.is_empty() { format!("{km} ({en})") } else { en.to_string() }
 }
 
 /// The box round a GeoJSON feature's coordinates.
-fn bbox(f: &Value) -> Option<[f64; 4]> {
+pub(crate) fn bbox(f: &Value) -> Option<[f64; 4]> {
     let mut b = [f64::MAX, f64::MAX, f64::MIN, f64::MIN];
     fn walk(v: &Value, b: &mut [f64; 4]) {
         match v.as_array() {
@@ -269,7 +269,7 @@ pub fn poll(app: &mut RustGisApp, ctx: &egui::Context) {
     next(app);
 }
 
-fn lang() -> &'static str {
+pub(crate) fn lang() -> &'static str {
     if khmer() { "km" } else { "en" }
 }
 

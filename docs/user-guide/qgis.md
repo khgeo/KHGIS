@@ -52,6 +52,40 @@ as GeoTIFF with **Layer › Save As**); what isn't saved is listed in the messag
 
 KHGIS projects themselves save as `.kgis` (older `.rgis` projects still open).
 
+## LEE RS Lab
+
+The **LEE RS Lab** panel (a tab beside Layer Styling; also **Raster › LEE RS Lab** and the
+Cambodia menu) brings the LEE RS Lab QGIS plugin's lessons into KHGIS, so a class can do them in
+the browser with no QGIS installed:
+
+1. **Data** — choose the study area (a province or district, or the map view), the satellite
+   (Sentinel-2 at 10 m or Landsat 8/9 at 30 m), the dates and the most cloud, and **Search**.
+   Pick a date and **Download Image**: each tile of that date over the area is downloaded clipped
+   to it, and the tiles are merged into one image of six bands — Blue, Green, Red, NIR, SWIR1,
+   SWIR2 — in surface reflectance. A large area gets larger cells (at most 2,500 across), and the
+   lab says so.
+2. **Enhance** — band combinations (natural color, color infrared, agriculture, urban,
+   land/water) and indices (NDVI, NDWI, NDBI, SAVI, EVI, NBR).
+3. **Classify** — k-means with the number of classes, or supervised from a polygon layer of
+   training areas and its class field.
+4. **Change** — two images or indices compared by difference, ratio or percent.
+5. **Map** — the A4 map layout, in Khmer or English, and **Open in Cambodia 3D**.
+
+Imagery comes from Microsoft's Planetary Computer (Copernicus Sentinel-2, USGS Landsat), which
+needs no account. On the desktop the slow steps run in the background, with their progress and
+Cancel in the lab.
+
+`raster.process` gained two operations the lab uses, which scripts can use too: `stack` (several
+rasters' bands as one raster) and `merge` (pieces of one image on one grid), both with `nodata`,
+`scale` and `offset`.
+
+## Cambodia 3D
+
+**View › Open in Cambodia 3D** (also in the Cambodia menu and the LEE RS Lab's Map step) opens
+[Cambodia 3D](https://khgeo.github.io/cambodia-3d/) on the middle of the map view, up to 4 × 4 km:
+terrain on satellite imagery, with trees, houses, roads and land cover built from it.
+`ui.cambodia3d {"bbox": [w, s, e, n]}` opens a given area.
+
 ## QGIS plugins and algorithms
 
 QGIS plugins are Python programs written for QGIS's own window (PyQt) and API (PyQGIS), so they
