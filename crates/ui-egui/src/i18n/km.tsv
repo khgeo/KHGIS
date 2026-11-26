@@ -1484,12 +1484,12 @@ Renderer	កម្មវិធីគូរ
 4 Change	4 ការប្រែប្រួល
 5 Map	5 ផែនទី
 Agriculture (5-4-1)	កសិកម្ម (5-4-1)
-Band combination	ការផ្សំបាន់
+Band combination	បន្សំប៊ែន
 Built-up (SWIR1, NIR)	តំបន់សំណង់ (SWIR1, NIR)
 Burned areas (NIR, SWIR2)	តំបន់ឆេះ (NIR, SWIR2)
 Choose a province (or the map view) first.	សូមជ្រើសខេត្ត (ឬទិដ្ឋភាពផែនទី) ជាមុនសិន។
 Class field	វាលថ្នាក់
-Clipped to the study area, as one six-band reflectance image	កាត់តាមតំបន់សិក្សា ជារូបភាពចំណាំងផ្លាតមួយមាន ៦ បាន់
+Clipped to the study area, as one six-band reflectance image	កាត់តាមតំបន់សិក្សា ជារូបភាពចំណាំងផ្លាតមួយមាន ៦ ប៊ែន
 Cloud cover	គម្របពពក
 Color infrared (4-3-2)	អ៊ីនហ្វ្រារ៉េដពណ៌ (4-3-2)
 Compare two dates: download two images (or make an index of each), then pick them here.	ប្រៀបធៀបពីរកាលបរិច្ឆេទ៖ ទាញយករូបភាពពីរ (ឬបង្កើតសន្ទស្សន៍នៃនីមួយៗ) រួចជ្រើសវានៅទីនេះ។
@@ -1529,7 +1529,162 @@ Vegetation on bare soil	រុក្ខជាតិលើដីទទេ
 Water (Green, NIR)	ទឹក (Green, NIR)
 view	ទិដ្ឋភាព
 {date} · cloud {c}% · {n} tile(s)	{date} · ពពក {c}% · {n} ផ្ទាំង
-{name} is ready: six bands of reflectance (Blue, Green, Red, NIR, SWIR1, SWIR2).	{name} រួចរាល់៖ ចំណាំងផ្លាត ៦ បាន់ (Blue, Green, Red, NIR, SWIR1, SWIR2)។
+{name} is ready: six bands of reflectance (Blue, Green, Red, NIR, SWIR1, SWIR2).	{name} រួចរាល់៖ ចំណាំងផ្លាត ៦ ប៊ែន (Blue, Green, Red, NIR, SWIR1, SWIR2)។
 {n} date(s) found.	រកឃើញ {n} កាលបរិច្ឆេទ។
 {n} tiles cover the area; the first {k} are read.	មាន {n} ផ្ទាំងគ្របតំបន់នេះ ប៉ុន្តែអានតែ {k} ផ្ទាំងដំបូង។
 The tiles could not be merged: see Messages.	មិនអាចបញ្ចូលផ្ទាំងរូបភាពបានទេ៖ សូមមើលសារ។
+1: the date picked. More: the median of the picked and the next clearest dates, which fills clouds	1៖ កាលបរិច្ឆេទដែលបានជ្រើស។ ច្រើនជាងនេះ៖ មេដ្យាននៃកាលបរិច្ឆេទដែលបានជ្រើស និងកាលបរិច្ឆេទស្រឡះបន្ទាប់ ដែលបំពេញកន្លែងពពក
+Add or draw a polygon layer first.	សូមបន្ថែម ឬគូរស្រទាប់ពហុកោណជាមុនសិន។
+Add slope	បន្ថែមជម្រាល
+Adds layers to the image's bands, ready to classify.	បន្ថែមស្រទាប់ទៅលើប៊ែនរបស់រូបភាព ត្រៀមសម្រាប់ចាត់ថ្នាក់។
+Another date, Sentinel-1 radar or elevation (put on the image's grid)	កាលបរិច្ឆេទផ្សេង រ៉ាដា Sentinel-1 ឬរយៈកម្ពស់ (ដាក់លើក្រឡាចត្រង្គរបស់រូបភាព)
+Another layer	ស្រទាប់ផ្សេងទៀត
+Another step is still running: wait for it, or cancel it.	ជំហានមួយទៀតកំពុងដំណើរការ៖ សូមរង់ចាំ ឬបោះបង់វា។
+Band math	គណិតវិទ្យាប៊ែន
+Built-up areas	តំបន់សំណង់
+Burned areas	តំបន់ឆេះ
+Changed area: {ha} ha	ផ្ទៃដែលប្រែប្រួល៖ {ha} ហិកតា
+Chlorophyll	ក្លរ៉ូភីល
+Class names saved.	បានរក្សាឈ្មោះថ្នាក់។
+Clean up	សម្អាត
+Cleaning up	កំពុងសម្អាត
+Clip to the area's shape	កាត់តាមរាងតំបន់
+Clipped to the study area and merged into one image	កាត់តាមតំបន់សិក្សា ហើយបញ្ចូលជារូបភាពតែមួយ
+Clouds and shadows masked: {p}% of the pixels read.	បានបិទពពក និងស្រមោល៖ {p}% នៃភីកសែលដែលបានអាន។
+Copernicus DEM (30 m elevation)	Copernicus DEM (រយៈកម្ពស់ 30 ម៉ែត្រ)
+Data: Copernicus Sentinel-1/2 and DEM (ESA), Landsat (USGS/NASA), ESA WorldCover, Esri | Impact Observatory land cover, JRC Global Surface Water, via Microsoft Planetary Computer; communes from geoBoundaries. After the LEE RS Lab plugin, Geoinformatics and Research Lab, RUPP.	ទិន្នន័យ៖ Copernicus Sentinel-1/2 និង DEM (ESA), Landsat (USGS/NASA), ESA WorldCover, គម្របដី Esri | Impact Observatory, JRC Global Surface Water តាមរយៈ Microsoft Planetary Computer; ឃុំ/សង្កាត់ពី geoBoundaries។ ផ្អែកលើកម្មវិធីជំនួយ LEE RS Lab ក្រុមស្រាវជ្រាវ និងអភិវឌ្ឍន៍ព័ត៌មានភូមិសាស្ត្រ សភូមិន្ទភ្នំពេញ។
+Dates in the composite	ចំនួនកាលបរិច្ឆេទក្នុងរូបភាពសមាស
+Download ESA WorldCover or Esri land cover in 1 Data: its classes teach the classifier.	ទាញយក ESA WorldCover ឬគម្របដី Esri នៅ 1 ទិន្នន័យ៖ ថ្នាក់របស់វាបង្រៀនវិធីចាត់ថ្នាក់។
+Downloading imagery	កំពុងទាញយករូបភាព
+ESA WorldCover land cover (10 m)	គម្របដី ESA WorldCover (10 ម៉ែត្រ)
+Each class's area; name the classes (clusters) here	ផ្ទៃក្រឡានៃថ្នាក់នីមួយៗ; ដាក់ឈ្មោះថ្នាក់ (ក្រុម) នៅទីនេះ
+Esri land cover (10 m, 2017–2023)	គម្របដី Esri (10 ម៉ែត្រ, 2017–2023)
+From a land cover map	ពីផែនទីគម្របដី
+Histogram equalization	ការធ្វើឲ្យស្មើអ៊ីស្តូក្រាម
+Image title	ចំណងជើងរូបភាព
+Indices (NDVI, NDWI, NDBI)	សន្ទស្សន៍ (NDVI, NDWI, NDBI)
+Indices need a six-band image (Blue, Green, Red, NIR, SWIR1, SWIR2) from 1 Data.	សន្ទស្សន៍ត្រូវការរូបភាព ៦ ប៊ែន (Blue, Green, Red, NIR, SWIR1, SWIR2) ពី 1 ទិន្នន័យ។
+JRC surface water occurrence (30 m)	ភាពញឹកញាប់ទឹកលើផ្ទៃដី JRC (30 ម៉ែត្រ)
+Land cover title	ចំណងជើងគម្របដី
+Landsat 4–7 (30 m, 1982–2022)	Landsat 4–7 (30 ម៉ែត្រ, 1982–2022)
+Landsat 8–9 (30 m, 2013–)	Landsat 8–9 (30 ម៉ែត្រ, 2013–)
+Loading communes…	កំពុងផ្ទុកឃុំ/សង្កាត់…
+Mahalanobis Distance	Mahalanobis Distance (ចម្ងាយ Mahalanobis)
+Map \ Ref	ផែនទី \ យោង
+Maximum	អតិបរមា
+Minimum	អប្បបរមា
+Moisture in plants	សំណើមក្នុងរុក្ខជាតិ
+Open water	ផ្ទៃទឹក
+Overall accuracy {oa}% · kappa {k} · area-weighted {w}% · {n} samples	ភាពត្រឹមត្រូវរួម {oa}% · kappa {k} · តាមទម្ងន់ផ្ទៃ {w}% · {n} គំរូ
+Percent clip (2%)	កាត់ភាគរយ (2%)
+Province / district / commune	ខេត្ត / ស្រុក / ឃុំ
+Save class names	រក្សាឈ្មោះថ្នាក់
+Sentinel-1 radar VV, VH (10 m)	រ៉ាដា Sentinel-1 VV, VH (10 ម៉ែត្រ)
+Sentinel-2 (10 m, 2017–)	Sentinel-2 (10 ម៉ែត្រ, 2017–)
+Sieve: {n} pixels changed.	Sieve៖ ភីកសែល {n} បានប្ដូរ។
+Standard deviation (2)	គម្លាតស្តង់ដារ (2)
+Stratified random points: fill ref_class with the true class (attribute table), then compute accuracy	ចំណុចចៃដន្យតាមស្រទាប់៖ បំពេញ ref_class ដោយថ្នាក់ពិត (តារាងលក្ខណៈ) រួចគណនាភាពត្រឹមត្រូវ
+Texture of the NIR band (GLCM contrast, homogeneity, entropy)	វាយនភាពនៃប៊ែន NIR (GLCM contrast, homogeneity, entropy)
+Then draw polygons with Add Polygon Feature and type each one's class in its name field	បន្ទាប់មកគូរពហុកោណដោយ បន្ថែមពហុកោណ ហើយវាយថ្នាក់របស់វានីមួយៗក្នុងវាល name
+Training accuracy (optimistic): {p}%	ភាពត្រឹមត្រូវហ្វឹកហាត់ (សុទិដ្ឋិនិយម)៖ {p}%
+Training pixels per class (most)	ភីកសែលហ្វឹកហាត់ក្នុងមួយថ្នាក់ (អតិបរមា)
+Vegetation (5-4-3)	រុក្ខជាតិ (5-4-3)
+Water near towns	ទឹកក្បែរទីប្រជុំជន
+Water occurrence %	ភាពញឹកញាប់ទឹក %
+Whole district	ទាំងស្រុក/ខណ្ឌ
+max	អតិ.
+min	អប្ប.
+{date} · {n} tile(s)	{date} · {n} ផ្ទាំង
+{name} is ready.	{name} រួចរាល់។
+{n} items cover the area; the first {k} are read.	មាន {n} ផ្ទាំងគ្របតំបន់នេះ ប៉ុន្តែអានតែ {k} ផ្ទាំងដំបូង។
+{step} stopped: see Messages.	{step} បានឈប់៖ សូមមើលសារ។
+Apply filter	អនុវត្តតម្រង
+Area (ha)	ផ្ទៃក្រឡា (ហិកតា)
+Area-adjusted estimates	ការប៉ាន់ស្មានកែតម្រូវតាមផ្ទៃក្រឡា
+Bare soil	ដីទទេ
+Box size (± n std. dev.)	ទំហំប្រអប់ (± n គម្លាតស្តង់ដារ)
+Build feature stack	បង្កើតជង់លក្ខណៈ
+Building feature stack	កំពុងបង្កើតជង់លក្ខណៈ
+Change detection	ការរកមើលការប្រែប្រួល
+Choose a polygon layer.	សូមជ្រើសស្រទាប់ពហុកោណ។
+Class area (ha)	ផ្ទៃក្រឡាថ្នាក់ (ហិកតា)
+Classifier	វិធីចាត់ថ្នាក់
+Classifying	កំពុងចាត់ថ្នាក់
+Clustering	កំពុងចាត់ក្រុម
+Commune	ឃុំ/សង្កាត់
+Component	សមាសធាតុ
+Components	សមាសធាតុ
+Compute accuracy	គណនាភាពត្រឹមត្រូវ
+Computing indices	កំពុងគណនាសន្ទស្សន៍
+Create map layout	បង្កើតប្លង់ផែនទី
+Create training layer (polygons)	បង្កើតស្រទាប់ហ្វឹកហាត់ (ពហុកោណ)
+Cumulative %	បូកបន្ត %
+Date 1 (before)	កាលបរិច្ឆេទ 1 (មុន)
+Date 1 (ha)	កាលបរិច្ឆេទ 1 (ហិកតា)
+Date 2 (after)	កាលបរិច្ឆេទ 2 (ក្រោយ)
+Date 2 (ha)	កាលបរិច្ឆេទ 2 (ហិកតា)
+Detect change	រកមើលការប្រែប្រួល
+Download	ទាញយក
+Emboss	ផុស (Emboss)
+Estimated (ha)	ប៉ាន់ស្មាន (ហិកតា)
+Explained %	ពន្យល់បាន %
+Filtering	កំពុងត្រង
+Gain	កើន
+Gains and losses per class	ការកើន និងការថយតាមថ្នាក់
+Gaussian (low-pass)	Gaussian (low-pass)
+Generate validation points	បង្កើតចំណុចផ្ទៀងផ្ទាត់
+High-pass sharpen	High-pass ធ្វើឲ្យច្បាស់
+Land cover	គម្របដី
+Land-cover change	ការប្រែប្រួលគម្របដី
+Laplacian edges	គែម Laplacian
+Largest changes (from → to)	ការប្រែប្រួលធំបំផុត (ពី → ទៅ)
+Loss	ថយ
+Majority filter (0 = off)	តម្រងភាគច្រើន (0 = បិទ)
+Mapped (ha)	លើផែនទី (ហិកតា)
+Mask clouds and shadows (SCL / QA_PIXEL)	បិទពពក និងស្រមោល (SCL / QA_PIXEL)
+Max scene cloud cover	ពពកអតិបរមាក្នុងរូបភាព
+Maximum Likelihood	Maximum Likelihood (ប្រូបាបខ្ពស់បំផុត)
+Mean (low-pass)	មធ្យម (low-pass)
+Median (removes speckle/noise)	មេដ្យាន (លុបចំណុចរំខាន)
+Minimum Distance	Minimum Distance (ចម្ងាយខ្លីបំផុត)
+Minimum mapping unit	ឯកតាគូសផែនទីអប្បបរមា
+Min–max	អប្បបរមា–អតិបរមា
+Most important bands	ប៊ែនសំខាន់បំផុត
+Net	សុទ្ធ
+Number of trees	ចំនួនដើមឈើ
+Parallelepiped	Parallelepiped (ប្រអប់)
+Pixel size	ទំហំភីកសែល
+Points per class	ចំណុចក្នុងមួយថ្នាក់
+Principal Component Analysis	ការវិភាគសមាសធាតុចម្បង (PCA)
+Producer's acc.	ត្រឹមត្រូវអ្នកផលិត
+Random Forest	Random Forest
+Reference class field	វាលថ្នាក់យោង
+Reference layer	ស្រទាប់យោង
+Run PCA	ដំណើរការ PCA
+Run clustering	ដំណើរការចាត់ក្រុម
+Sankey diagram	ដ្យាក្រាម Sankey
+Sobel edges	គែម Sobel
+Spectral Angle Mapper	Spectral Angle Mapper (មុំវិសាលគម)
+Training layer	ស្រទាប់ហ្វឹកហាត់
+User's acc.	ត្រឹមត្រូវអ្នកប្រើ
+Value	តម្លៃ
+Vegetation	រុក្ខជាតិ
+Water	ទឹក
+cancelled	បានបោះបង់
+nothing ticked yet	មិនទាន់បានធីកអ្វីទេ
+window	បង្អួច
+Accuracy / clean-up	ភាពត្រឹមត្រូវ / សម្អាត
+Band math (your own formula)	គណិតវិទ្យាប៊ែន (រូបមន្តផ្ទាល់ខ្លួន)
+Classified map	ផែនទីចំណាត់ថ្នាក់
+Contrast stretch	ការលាតកម្រិតពន្លឺ
+Dataset	សំណុំទិន្នន័យ
+Feature stack for classification	ជង់លក្ខណៈសម្រាប់ការចាត់ថ្នាក់
+From → to: compare two classified maps	ពី → ទៅ៖ ប្រៀបធៀបផែនទីចាត់ថ្នាក់ពីរ
+Image differencing (index or band)	ការដករូបភាព (សន្ទស្សន៍ ឬប៊ែន)
+Map / Ref	ផែនទី / យោង
+Map layout (print)	ប្លង់ផែនទី (បោះពុម្ព)
+Spatial filter	តម្រងលំហ
+Supervised — classes & training	មានណែនាំ — ថ្នាក់ និងទិន្នន័យហ្វឹកហាត់
+Supervised — classify	មានណែនាំ — ចាត់ថ្នាក់
+Unsupervised (K-means, ISODATA)	មិនណែនាំ (K-means, ISODATA)
+± 95% CI (ha)	± CI 95% (ហិកតា)

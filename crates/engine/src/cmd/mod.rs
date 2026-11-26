@@ -1,7 +1,6 @@
 //! Every command, grouped by ribbon tab.
 
 pub mod arcgis;
-pub mod khgis;
 pub mod catalogs;
 pub mod clipboard;
 pub mod connections;
@@ -25,6 +24,7 @@ pub mod group;
 pub mod history;
 pub mod imagery;
 pub mod items;
+pub mod khgis;
 pub mod labels;
 pub mod layer;
 pub mod layer_copy;
@@ -42,6 +42,7 @@ pub mod raster;
 pub mod reads;
 pub mod repair;
 pub mod report;
+pub mod rslab;
 pub mod s3;
 pub mod search;
 pub mod select;
@@ -103,6 +104,7 @@ pub fn all() -> Vec<CommandSpec> {
     v.extend(workflows::commands());
     v.extend(effects::commands());
     v.extend(imagery::commands());
+    v.extend(rslab::commands());
     v.extend(deeplearning::commands());
     v.extend(view::commands());
     v.extend(workspace::commands());

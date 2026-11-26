@@ -1,15 +1,25 @@
 //! LEE RS Lab: KHGIS's built-in remote sensing lab, after the LEE RS Lab QGIS plugin, for
-//! teaching basic remote sensing online, no QGIS needed. Five steps: 1 Data (a study area from
-//! Cambodia's provinces and districts or the map view, a Sentinel-2 or Landsat 8/9 search by date
-//! and cloud, and the scene downloaded clipped to the area as one six-band reflectance image),
-//! 2 Enhance (band combinations and spectral indices), 3 Classify (k-means or supervised),
-//! 4 Change (two dates compared) and 5 Map (the A4 layout, and the area in Cambodia 3D).
+//! teaching remote sensing online, no QGIS needed. Five steps:
 //!
-//! The search and the images come from Microsoft's Planetary Computer, with no login: its STAC
-//! search, and its data API's `item/{bbox}` GeoTIFFs, which clip and stack a scene's bands on the
-//! server (and answer the browser, so the web app reads them too). A scene's tiles are downloaded
-//! on one grid and merged into one image (`raster.process` "merge"), its stored numbers made
-//! reflectance on the way.
+//! 1. **Data**: a study area (a province, district or commune, the map view or a polygon layer),
+//!    then imagery or another dataset over it: Sentinel-2, Landsat 8–9 or 4–7 (clouds and shadows
+//!    masked, one date or a median composite of the clearest), Sentinel-1 radar, the Copernicus
+//!    DEM, ESA WorldCover, Esri land cover or JRC surface water, clipped to the area.
+//! 2. **Enhance**: band combinations, stretches, indices, band math, filters, principal
+//!    components and a feature stack (indices, GLCM texture and other layers) for classification.
+//! 3. **Classify**: k-means and ISODATA (clusters named after), seven supervised classifiers
+//!    trained from polygons or a land cover map, clean-up (majority filter and sieve), class areas,
+//!    accuracy points and an accuracy assessment with area-adjusted estimates.
+//! 4. **Change**: a from → to matrix with gains and losses and a Sankey diagram, and image
+//!    differencing.
+//! 5. **Map**: the A4 layout with a title made from the area and date, and Cambodia 3D.
+//!
+//! The data come from Microsoft's Planetary Computer, with no login: its STAC search, and its data
+//! API's `item/{bbox}` GeoTIFFs, which clip and stack an item's assets on the server and answer
+//! the browser, so the web app reads them too. Each item is downloaded on one grid and the pieces
+//! merged (`raster.process` "merge"), clouds masked and numbers made reflectance on the way. A
+//! run of steps (downloads, merges, indices…) goes one after another ([`Chain`]), each waiting for
+//! the layer the one before makes.
 
 use egui::Ui;
 use rustgis_engine::render::rustgis_tiles::cache;
@@ -22,49 +32,158 @@ type Answer = Slot<Result<Vec<u8>, String>>;
 /// The Planetary Computer's STAC search and data API.
 const STAC: &str = "https://planetarycomputer.microsoft.com/api/stac/v1/search";
 const DATA: &str = "https://planetarycomputer.microsoft.com/api/data/v1/item/bbox";
+/// geoBoundaries' Cambodian communes (simplified), fetched when a district's communes are wanted.
+const COMMUNES: &str = "https://www.geoboundaries.org/data/snapshots/1c423398df24ddf6e730b116567d2181c9782778d0459c3f3b76ca2f9f12b6bc/gbOpen/KHM/ADM3/geoBoundaries-KHM-ADM3_simplified.geojson";
 /// The longest side of an image downloaded, in cells: past it the cells are made larger.
 pub(crate) const MAX_SIDE: u32 = 2500;
-/// The most tiles of one date downloaded for an area.
-const MAX_TILES: usize = 6;
-/// The bands of an image, in order (1 to 6), as both satellites name them.
+/// The most items downloaded for one image (tiles × dates).
+const MAX_ITEMS: usize = 12;
+/// The bands of an optical image, in order (1 to 6), as both satellites name them.
 pub(crate) const BANDS: [&str; 6] = ["Blue", "Green", "Red", "NIR", "SWIR1", "SWIR2"];
 
-/// A satellite the lab searches.
+/// ESA WorldCover's classes.
+const WORLDCOVER: &[(u32, &str)] = &[
+    (10, "Tree cover"),
+    (20, "Shrubland"),
+    (30, "Grassland"),
+    (40, "Cropland"),
+    (50, "Built-up"),
+    (60, "Bare / sparse vegetation"),
+    (70, "Snow and ice"),
+    (80, "Permanent water bodies"),
+    (90, "Herbaceous wetland"),
+    (95, "Mangroves"),
+    (100, "Moss and lichen"),
+];
+/// Esri | Impact Observatory land cover's classes.
+const ESRI_LULC: &[(u32, &str)] = &[
+    (1, "Water"),
+    (2, "Trees"),
+    (4, "Flooded vegetation"),
+    (5, "Crops"),
+    (7, "Built area"),
+    (8, "Bare ground"),
+    (9, "Snow/ice"),
+    (10, "Clouds"),
+    (11, "Rangeland"),
+];
+
+/// What the data step downloads.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Sensor {
+pub enum Dataset {
     Sentinel2,
-    Landsat,
+    Landsat89,
+    Landsat47,
+    Sentinel1,
+    Dem,
+    WorldCover,
+    EsriLandCover,
+    Water,
 }
 
-impl Sensor {
-    fn collection(self) -> &'static str {
+impl Dataset {
+    const ALL: [Dataset; 8] = [
+        Dataset::Sentinel2,
+        Dataset::Landsat89,
+        Dataset::Landsat47,
+        Dataset::Sentinel1,
+        Dataset::Dem,
+        Dataset::WorldCover,
+        Dataset::EsriLandCover,
+        Dataset::Water,
+    ];
+    fn label(self) -> &'static str {
         match self {
-            Sensor::Sentinel2 => "sentinel-2-l2a",
-            Sensor::Landsat => "landsat-c2-l2",
+            Dataset::Sentinel2 => "Sentinel-2 (10 m, 2017–)",
+            Dataset::Landsat89 => "Landsat 8–9 (30 m, 2013–)",
+            Dataset::Landsat47 => "Landsat 4–7 (30 m, 1982–2022)",
+            Dataset::Sentinel1 => "Sentinel-1 radar VV, VH (10 m)",
+            Dataset::Dem => "Copernicus DEM (30 m elevation)",
+            Dataset::WorldCover => "ESA WorldCover land cover (10 m)",
+            Dataset::EsriLandCover => "Esri land cover (10 m, 2017–2023)",
+            Dataset::Water => "JRC surface water occurrence (30 m)",
         }
     }
-    /// The assets read, blue to SWIR 2.
-    fn assets(self) -> [&'static str; 6] {
+    fn collection(self) -> &'static str {
         match self {
-            Sensor::Sentinel2 => ["B02", "B03", "B04", "B08", "B11", "B12"],
-            Sensor::Landsat => ["blue", "green", "red", "nir08", "swir16", "swir22"],
+            Dataset::Sentinel2 => "sentinel-2-l2a",
+            Dataset::Landsat89 | Dataset::Landsat47 => "landsat-c2-l2",
+            Dataset::Sentinel1 => "sentinel-1-rtc",
+            Dataset::Dem => "cop-dem-glo-30",
+            Dataset::WorldCover => "esa-worldcover",
+            Dataset::EsriLandCover => "io-lulc-annual-v02",
+            Dataset::Water => "jrc-gsw",
         }
+    }
+    /// The assets read, in band order; a quality band last when clouds are masked.
+    fn assets(self, mask: bool) -> Vec<&'static str> {
+        let mut a = match self {
+            Dataset::Sentinel2 => vec!["B02", "B03", "B04", "B08", "B11", "B12"],
+            Dataset::Landsat89 | Dataset::Landsat47 => vec!["blue", "green", "red", "nir08", "swir16", "swir22"],
+            Dataset::Sentinel1 => vec!["vv", "vh"],
+            Dataset::Dem => vec!["data"],
+            Dataset::WorldCover => vec!["map"],
+            Dataset::EsriLandCover => vec!["data"],
+            Dataset::Water => vec!["occurrence"],
+        };
+        if mask && self.optical() {
+            a.push(if self == Dataset::Sentinel2 { "SCL" } else { "qa_pixel" });
+        }
+        a
+    }
+    fn band_names(self) -> Vec<&'static str> {
+        match self {
+            Dataset::Sentinel2 | Dataset::Landsat89 | Dataset::Landsat47 => BANDS.to_vec(),
+            Dataset::Sentinel1 => vec!["VV dB", "VH dB"],
+            Dataset::Dem => vec!["Elevation"],
+            Dataset::WorldCover | Dataset::EsriLandCover => vec!["Class"],
+            Dataset::Water => vec!["Water occurrence %"],
+        }
+    }
+    fn optical(self) -> bool {
+        matches!(self, Dataset::Sentinel2 | Dataset::Landsat89 | Dataset::Landsat47)
+    }
+    /// Searched by date (else every item over the area).
+    fn dated(self) -> bool {
+        self.optical() || self == Dataset::Sentinel1
     }
     fn cell(self) -> f64 {
         match self {
-            Sensor::Sentinel2 => 10.0,
-            Sensor::Landsat => 30.0,
+            Dataset::Sentinel2 | Dataset::Sentinel1 | Dataset::WorldCover | Dataset::EsriLandCover => 10.0,
+            _ => 30.0,
+        }
+    }
+    fn classes(self) -> &'static [(u32, &'static str)] {
+        match self {
+            Dataset::WorldCover => WORLDCOVER,
+            Dataset::EsriLandCover => ESRI_LULC,
+            _ => &[],
+        }
+    }
+    /// The stored value that is no data.
+    fn nodata(self) -> Option<f64> {
+        match self {
+            Dataset::Water => Some(255.0),
+            Dataset::Dem => None,
+            _ => Some(0.0),
         }
     }
     fn short(self) -> &'static str {
         match self {
-            Sensor::Sentinel2 => "S2",
-            Sensor::Landsat => "L8-9",
+            Dataset::Sentinel2 => "S2",
+            Dataset::Landsat89 => "L8-9",
+            Dataset::Landsat47 => "L4-7",
+            Dataset::Sentinel1 => "S1",
+            Dataset::Dem => "DEM",
+            Dataset::WorldCover => "WorldCover",
+            Dataset::EsriLandCover => "EsriLC",
+            Dataset::Water => "Water",
         }
     }
 }
 
-/// A date the search found: its tiles over the area, and how cloudy they are.
+/// A date (or, for undated datasets, a year or the whole set) the search found: its items over
+/// the area, and how cloudy they are.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Scene {
     pub date: String,
@@ -75,42 +194,94 @@ pub struct Scene {
     pub offset: f64,
 }
 
-/// What a scene's download waits for: its tiles' layers, then the image they are merged into.
-struct Loading {
-    parts: Vec<String>,
-    image: String,
-    scale: f64,
-    offset: f64,
-    merging: bool,
-    /// Polls since the merge stopped running without its image: it failed (its error was said).
-    idle: u32,
+/// One step of a run: a command, and the layer it makes (waited for before the next).
+#[derive(Clone, Debug)]
+struct Step {
+    command: String,
+    params: Value,
+    makes: Option<String>,
+    /// Run in the background on the desktop (with its progress and Cancel in the lab).
+    background: bool,
+    /// Its answer kept (shown in the lab).
+    keep: Option<&'static str>,
 }
 
-/// The lab's choices and the work under way.
+fn step(command: &str, params: Value) -> Step {
+    Step { command: command.into(), params, makes: None, background: false, keep: None }
+}
+
+fn makes(command: &str, params: Value, layer: &str) -> Step {
+    Step { command: command.into(), params, makes: Some(layer.into()), background: true, keep: None }
+}
+
+/// Steps run one after another (see the module's doc).
+struct Chain {
+    title: String,
+    steps: std::collections::VecDeque<Step>,
+    waiting: Option<(Step, u32)>,
+    done: usize,
+    total: usize,
+    finished: String,
+}
+
+/// The lab's choices, results and the work under way.
 pub struct State {
     pub step: usize,
-    /// The study area: a province (and district), or the map's view.
-    pub use_view: bool,
+    /// The study area: 0 a province/district/commune, 1 the map view, 2 a polygon layer.
+    pub area_kind: usize,
     pub province: String,
     pub district: String,
-    pub sensor: Sensor,
+    pub commune: String,
+    pub area_layer: String,
+    pub clip: bool,
+    communes: Option<Vec<(String, Value)>>,
+    communes_fetch: Option<Answer>,
+    pub dataset: Dataset,
     pub start: String,
     pub end: String,
     pub cloud: f64,
     pub cell: f64,
-    search: Option<(Answer, Sensor)>,
+    pub mask: bool,
+    pub composite: f64,
+    pub slope: bool,
+    search: Option<(Answer, Dataset)>,
     pub scenes: Vec<Scene>,
-    pub scenes_of: Sensor,
+    pub scenes_of: Dataset,
     pub picked: Option<usize>,
-    loading: Option<Loading>,
+    chain: Option<Chain>,
     /// The image the later steps work on.
     pub image: String,
+    pub rgb: [u32; 3],
+    pub expression: String,
+    pub filter: &'static str,
+    pub filter_size: f64,
+    pub components: f64,
+    pub stack_indices: bool,
+    pub stack_texture: bool,
+    pub stack_extra: String,
+    pub unsupervised: &'static str,
     pub classes: f64,
+    pub min_classes: f64,
+    pub class_map: String,
+    pub class_labels: Vec<(f32, String)>,
+    pub training_from_map: bool,
     pub training: String,
     pub class_field: String,
+    pub training_map: String,
+    pub method: &'static str,
+    pub option: f64,
+    pub per_class: f64,
+    pub majority: f64,
+    pub sieve: f64,
+    pub points: f64,
+    pub reference: String,
+    pub ref_field: String,
     pub before: String,
     pub after: String,
-    pub method: &'static str,
+    pub diff_method: &'static str,
+    pub title: String,
+    /// Answers kept to show: training, pca, crossTab, accuracy, areas, merge, sieve.
+    pub results: Vec<(&'static str, Value)>,
     pub log: Vec<(bool, String)>,
 }
 
@@ -118,54 +289,91 @@ impl Default for State {
     fn default() -> Self {
         State {
             step: 0,
-            use_view: false,
+            area_kind: 0,
             province: String::new(),
             district: String::new(),
-            sensor: Sensor::Sentinel2,
+            commune: String::new(),
+            area_layer: String::new(),
+            clip: true,
+            communes: None,
+            communes_fetch: None,
+            dataset: Dataset::Sentinel2,
             start: crate::stacui::days_ago(180),
             end: crate::stacui::days_ago(0),
-            cloud: 20.0,
+            cloud: 30.0,
             cell: 10.0,
+            mask: true,
+            composite: 1.0,
+            slope: true,
             search: None,
             scenes: Vec::new(),
-            scenes_of: Sensor::Sentinel2,
+            scenes_of: Dataset::Sentinel2,
             picked: None,
-            loading: None,
+            chain: None,
             image: String::new(),
+            rgb: [3, 2, 1],
+            expression: "(b4 - b3) / (b4 + b3)".into(),
+            filter: "median",
+            filter_size: 3.0,
+            components: 3.0,
+            stack_indices: true,
+            stack_texture: true,
+            stack_extra: String::new(),
+            unsupervised: "kmeans",
             classes: 6.0,
+            min_classes: 4.0,
+            class_map: String::new(),
+            class_labels: Vec::new(),
+            training_from_map: false,
             training: String::new(),
             class_field: String::new(),
+            training_map: String::new(),
+            method: "randomForest",
+            option: 50.0,
+            per_class: 1000.0,
+            majority: 3.0,
+            sieve: 8.0,
+            points: 30.0,
+            reference: String::new(),
+            ref_field: String::new(),
             before: String::new(),
             after: String::new(),
-            method: "difference",
+            diff_method: "difference",
+            title: String::new(),
+            results: Vec::new(),
             log: Vec::new(),
         }
     }
 }
 
-/// The STAC search for scenes over `bbox` between two dates, the cloudiest left out.
-pub(crate) fn search_url(sensor: Sensor, bbox: [f64; 4], start: &str, end: &str, cloud: f64) -> String {
-    let mut filter = format!("eo:cloud_cover<{}", cloud.clamp(0.0, 100.0));
-    if sensor == Sensor::Landsat {
-        filter.push_str(" AND platform IN ('landsat-8','landsat-9')");
-    }
+/// The STAC search for `dataset` over `bbox`: by date and cloud for imagery.
+pub(crate) fn search_url(dataset: Dataset, bbox: [f64; 4], start: &str, end: &str, cloud: f64) -> String {
     let enc = |s: &str| s.replace('%', "%25").replace(' ', "%20").replace('<', "%3C").replace('\'', "%27").replace('+', "%2B");
-    format!(
-        "{STAC}?collections={}&bbox={:.5},{:.5},{:.5},{:.5}&datetime={}T00:00:00Z/{}T23:59:59Z&limit=100&filter={}&filter-lang=cql2-text&sortby={}",
-        sensor.collection(),
-        bbox[0],
-        bbox[1],
-        bbox[2],
-        bbox[3],
-        start.trim(),
-        end.trim(),
-        enc(&filter),
-        enc("+eo:cloud_cover"),
-    )
+    let mut u =
+        format!("{STAC}?collections={}&bbox={:.5},{:.5},{:.5},{:.5}&limit=200", dataset.collection(), bbox[0], bbox[1], bbox[2], bbox[3]);
+    if dataset.dated() {
+        u.push_str(&format!("&datetime={}T00:00:00Z/{}T23:59:59Z", start.trim(), end.trim()));
+    }
+    let mut filter = Vec::new();
+    if dataset.optical() {
+        filter.push(format!("eo:cloud_cover<{}", cloud.clamp(0.0, 100.0)));
+    }
+    match dataset {
+        Dataset::Landsat89 => filter.push("platform IN ('landsat-8','landsat-9')".into()),
+        Dataset::Landsat47 => filter.push("platform IN ('landsat-4','landsat-5','landsat-7')".into()),
+        _ => {}
+    }
+    if !filter.is_empty() {
+        u.push_str(&format!("&filter={}&filter-lang=cql2-text", enc(&filter.join(" AND "))));
+    }
+    if dataset.optical() {
+        u.push_str(&format!("&sortby={}", enc("+eo:cloud_cover")));
+    }
+    u
 }
 
-/// The search's items as dates: each date's tiles together, the clearest dates first.
-pub(crate) fn scenes(sensor: Sensor, bytes: &[u8]) -> Result<Vec<Scene>, String> {
+/// The search's items as dates (or years): each date's items together, the clearest first.
+pub(crate) fn scenes(dataset: Dataset, bytes: &[u8]) -> Result<Vec<Scene>, String> {
     let v: Value = serde_json::from_slice(bytes).map_err(|e| format!("the search's answer isn't JSON: {e}"))?;
     let features = v["features"].as_array().ok_or_else(|| {
         let why = v["description"].as_str().or_else(|| v["detail"].as_str()).unwrap_or("no features");
@@ -173,18 +381,31 @@ pub(crate) fn scenes(sensor: Sensor, bytes: &[u8]) -> Result<Vec<Scene>, String>
     })?;
     let mut out: Vec<(Scene, usize)> = Vec::new();
     for f in features {
-        let (Some(id), Some(when)) = (f["id"].as_str(), f["properties"]["datetime"].as_str()) else { continue };
-        let date: String = when.chars().take(10).collect();
-        let cloud = f["properties"]["eo:cloud_cover"].as_f64().unwrap_or(0.0);
-        let (scale, offset) = match sensor {
+        let Some(id) = f["id"].as_str() else { continue };
+        let p = &f["properties"];
+        let key: String = if dataset.dated() {
+            p["datetime"].as_str().unwrap_or("").chars().take(10).collect()
+        } else if matches!(dataset, Dataset::WorldCover | Dataset::EsriLandCover) {
+            // The year, from the item's dates or its id.
+            p["start_datetime"]
+                .as_str()
+                .map(|d| d.chars().take(4).collect())
+                .or_else(|| id.split(['_', '-']).find(|t| t.len() == 4 && t.starts_with("20")).map(str::to_string))
+                .unwrap_or_else(|| "—".into())
+        } else {
+            "—".into()
+        };
+        let cloud = p["eo:cloud_cover"].as_f64().unwrap_or(0.0);
+        let (scale, offset) = match dataset {
             // From processing baseline 04.00 (2022) the stored numbers have 1000 added.
-            Sensor::Sentinel2 => {
-                let baseline = f["properties"]["s2:processing_baseline"].as_str().and_then(|b| b.parse::<f64>().ok()).unwrap_or(5.0);
+            Dataset::Sentinel2 => {
+                let baseline = p["s2:processing_baseline"].as_str().and_then(|b| b.parse::<f64>().ok()).unwrap_or(5.0);
                 (0.0001, if baseline >= 4.0 { -0.1 } else { 0.0 })
             }
-            Sensor::Landsat => (0.0000275, -0.2),
+            Dataset::Landsat89 | Dataset::Landsat47 => (0.0000275, -0.2),
+            _ => (1.0, 0.0),
         };
-        match out.iter_mut().find(|(s, _)| s.date == date) {
+        match out.iter_mut().find(|(s, _)| s.date == key) {
             Some((s, n)) => {
                 if !s.items.iter().any(|i| i == id) {
                     s.items.push(id.to_string());
@@ -192,7 +413,7 @@ pub(crate) fn scenes(sensor: Sensor, bytes: &[u8]) -> Result<Vec<Scene>, String>
                     *n += 1;
                 }
             }
-            None => out.push((Scene { date, items: vec![id.to_string()], cloud, scale, offset }, 1)),
+            None => out.push((Scene { date: key, items: vec![id.to_string()], cloud, scale, offset }, 1)),
         }
     }
     let mut out: Vec<Scene> = out
@@ -202,7 +423,11 @@ pub(crate) fn scenes(sensor: Sensor, bytes: &[u8]) -> Result<Vec<Scene>, String>
             s
         })
         .collect();
-    out.sort_by(|a, b| a.cloud.total_cmp(&b.cloud).then(b.date.cmp(&a.date)));
+    if dataset.optical() {
+        out.sort_by(|a, b| a.cloud.total_cmp(&b.cloud).then(b.date.cmp(&a.date)));
+    } else {
+        out.sort_by(|a, b| b.date.cmp(&a.date));
+    }
     Ok(out)
 }
 
@@ -218,16 +443,16 @@ pub(crate) fn grid(bbox: [f64; 4], cell: f64) -> (u32, u32, f64) {
     (side(w_m), side(h_m), cell)
 }
 
-/// One tile's image over `bbox`: its six bands, clipped and stacked by the data API.
-pub(crate) fn image_url(sensor: Sensor, item: &str, bbox: [f64; 4], w: u32, h: u32) -> String {
-    let assets: String = sensor.assets().iter().map(|a| format!("&assets={a}")).collect();
+/// One item's image over `bbox`: its assets, clipped and stacked by the data API.
+pub(crate) fn image_url(dataset: Dataset, item: &str, bbox: [f64; 4], w: u32, h: u32, mask: bool) -> String {
+    let assets: String = dataset.assets(mask).iter().map(|a| format!("&assets={a}")).collect();
     format!(
         "{DATA}/{:.6},{:.6},{:.6},{:.6}/{w}x{h}.tif?collection={}&item={item}{assets}&return_mask=false",
         bbox[0],
         bbox[1],
         bbox[2],
         bbox[3],
-        sensor.collection()
+        dataset.collection()
     )
 }
 
@@ -240,27 +465,116 @@ pub(crate) fn cambodia3d_url(bbox: [f64; 4]) -> String {
     format!("https://khgeo.github.io/cambodia-3d/#aoi={:.5},{:.5},{:.5},{:.5}", cx - half_x, cy - half_y, cx + half_x, cy + half_y)
 }
 
-/// The study area's box: the district or province chosen, or the map's view.
-fn area(app: &RustGisApp) -> Result<([f64; 4], String), String> {
-    let st = &app.ui.rslab;
-    if st.use_view {
-        let e = rustgis_engine::cmd::workspace::view_extent(&app.session);
-        if e.is_empty() {
-            return Err(tl!("The map has no view yet.").to_string());
-        }
-        return Ok(([e.min_x.max(-180.0), e.min_y.max(-90.0), e.max_x.min(180.0), e.max_y.min(90.0)], "view".into()));
-    }
-    if st.province.is_empty() {
-        return Err(tl!("Choose a province (or the map view) first.").to_string());
-    }
-    let unit = if st.district.is_empty() {
-        crate::khdata::provinces().into_iter().find(|p| p.0 == st.province)
-    } else {
-        crate::khdata::districts(&st.province).into_iter().find(|d| d.0 == st.district)
+/// Whether a point is inside a GeoJSON (multi)polygon geometry (even–odd over all rings).
+fn inside(geometry: &Value, x: f64, y: f64) -> bool {
+    let polys: Vec<&Value> = match geometry["type"].as_str() {
+        Some("Polygon") => vec![&geometry["coordinates"]],
+        Some("MultiPolygon") => geometry["coordinates"].as_array().map(|a| a.iter().collect()).unwrap_or_default(),
+        _ => Vec::new(),
     };
-    let (name, _, _, f) = unit.ok_or_else(|| tl!("Choose a province (or the map view) first.").to_string())?;
-    let b = crate::khdata::bbox(&f).ok_or_else(|| tl!("Choose a province (or the map view) first.").to_string())?;
-    Ok((b, name))
+    let mut hit = false;
+    for poly in polys {
+        for ring in poly.as_array().into_iter().flatten() {
+            let pts: Vec<(f64, f64)> =
+                ring.as_array().into_iter().flatten().filter_map(|p| Some((p.get(0)?.as_f64()?, p.get(1)?.as_f64()?))).collect();
+            for k in 0..pts.len() {
+                let (a, b) = (pts[k], pts[(k + 1) % pts.len()]);
+                if (a.1 > y) != (b.1 > y) && x < (b.0 - a.0) * (y - a.1) / (b.1 - a.1) + a.0 {
+                    hit = !hit;
+                }
+            }
+        }
+    }
+    hit
+}
+
+/// The communes of geoBoundaries' layer whose middle falls in `district`.
+fn communes_in(all: &Value, district: &Value) -> Vec<(String, Value)> {
+    let mut out: Vec<(String, Value)> = all["features"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|f| {
+            let b = crate::khdata::bbox(f)?;
+            let (x, y) = ((b[0] + b[2]) / 2.0, (b[1] + b[3]) / 2.0);
+            inside(&district["geometry"], x, y).then(|| (f["properties"]["shapeName"].as_str().unwrap_or("?").to_string(), f.clone()))
+        })
+        .collect();
+    out.sort_by(|a, b| a.0.cmp(&b.0));
+    out
+}
+
+/// The study area: its box, a short name (for layer names), its place name in the interface
+/// language (for titles), and its shape as a GeoJSON feature when it has one of its own.
+struct Area {
+    bbox: [f64; 4],
+    short: String,
+    place: String,
+    shape: Option<Value>,
+}
+
+fn area(app: &RustGisApp) -> Result<Area, String> {
+    let st = &app.ui.rslab;
+    let km = crate::khdata::khmer();
+    let need = || tl!("Choose a province (or the map view) first.").to_string();
+    match st.area_kind {
+        1 => {
+            let e = rustgis_engine::cmd::workspace::view_extent(&app.session);
+            if e.is_empty() {
+                return Err(tl!("The map has no view yet.").to_string());
+            }
+            Ok(Area {
+                bbox: [e.min_x.max(-180.0), e.min_y.max(-90.0), e.max_x.min(180.0), e.max_y.min(90.0)],
+                short: "view".into(),
+                place: String::new(),
+                shape: None,
+            })
+        }
+        2 => {
+            let l = app.session.map().layer_by_name(&st.area_layer).ok_or_else(|| tl!("Choose a polygon layer.").to_string())?;
+            let e = l.dataset.extent();
+            if e.is_empty() {
+                return Err(tl!("Choose a polygon layer.").to_string());
+            }
+            Ok(Area { bbox: [e.min_x, e.min_y, e.max_x, e.max_y], short: l.name.replace(' ', "_"), place: l.name.clone(), shape: None })
+        }
+        _ => {
+            if st.province.is_empty() {
+                return Err(need());
+            }
+            let prov = crate::khdata::provinces().into_iter().find(|p| p.0 == st.province).ok_or_else(need)?;
+            let prov_place = if km {
+                if prov.0 == "Phnom Penh" { format!("រាជធានី{}", prov.1) } else { format!("ខេត្ត{}", prov.1) }
+            } else {
+                prov.0.clone()
+            };
+            let commune = st.communes.as_ref().and_then(|c| c.iter().find(|c| c.0 == st.commune)).filter(|_| !st.commune.is_empty());
+            let district = (!st.district.is_empty())
+                .then(|| crate::khdata::districts(&st.province).into_iter().find(|d| d.0 == st.district))
+                .flatten();
+            let (name, feature, place) = match (commune, district) {
+                (Some(c), Some(d)) => {
+                    let place = if km {
+                        format!("ឃុំ/សង្កាត់ {} ស្រុក/ខណ្ឌ {} {prov_place}", c.0, d.0)
+                    } else {
+                        format!("{} commune, {} district, {}", c.0, d.0, prov.0)
+                    };
+                    (c.0.clone(), c.1.clone(), place)
+                }
+                (_, Some(d)) => {
+                    let place = if km {
+                        format!("ស្រុក/ខណ្ឌ {} {prov_place}", d.0)
+                    } else {
+                        format!("{} district, {}", d.0, prov.0)
+                    };
+                    (d.0.clone(), d.3.clone(), place)
+                }
+                _ => (prov.0.clone(), prov.3.clone(), prov_place),
+            };
+            let bbox = crate::khdata::bbox(&feature).ok_or_else(need)?;
+            Ok(Area { bbox, short: name.replace(' ', "_"), place, shape: Some(feature) })
+        }
+    }
 }
 
 fn fetch(url: &str) -> Answer {
@@ -273,82 +587,306 @@ fn fetch(url: &str) -> Answer {
 fn say(app: &mut RustGisApp, ok: bool, line: String) {
     let log = &mut app.ui.rslab.log;
     log.push((ok, line));
-    if log.len() > 12 {
+    if log.len() > 10 {
         log.remove(0);
     }
 }
 
+fn keep_result(app: &mut RustGisApp, key: &'static str, v: Value) {
+    app.ui.rslab.results.retain(|r| r.0 != key);
+    app.ui.rslab.results.push((key, v));
+}
+
+fn result<'a>(app: &'a RustGisApp, key: &str) -> Option<&'a Value> {
+    app.ui.rslab.results.iter().find(|r| r.0 == key).map(|r| &r.1)
+}
+
+fn start_chain(app: &mut RustGisApp, title: String, steps: Vec<Step>, finished: String) {
+    if app.ui.rslab.chain.is_some() || crate::analysispane::background_job(app).is_some() {
+        return say(app, false, tl!("Another step is still running: wait for it, or cancel it.").to_string());
+    }
+    let total = steps.len();
+    app.ui.rslab.chain = Some(Chain { title, steps: steps.into(), waiting: None, done: 0, total, finished });
+}
+
+fn layer_ready(app: &RustGisApp, name: &str) -> bool {
+    app.session.map().layer_by_name(name).is_some_and(|l| l.raster.as_ref().is_none_or(|r| r.data.is_some()))
+}
+
+/// Moves the run of steps on: lands what a step made, starts the next.
+fn drive(app: &mut RustGisApp) {
+    let Some(mut chain) = app.ui.rslab.chain.take() else { return };
+    if let Some((s, idle)) = chain.waiting.take() {
+        if s.makes.as_deref().is_some_and(|n| layer_ready(app, n)) {
+            if let Some(key) = s.keep
+                && let Some(v) = app.workflow.result.clone()
+            {
+                keep_result(app, key, v);
+            }
+            chain.done += 1;
+        } else {
+            // A background step that stopped without its layer failed (its error was said).
+            let running = crate::analysispane::background_job(app).is_some();
+            if let Some(e) = app.workflow.error.take() {
+                return say(app, false, e);
+            }
+            let idle = if s.background && !running { idle + 1 } else { 0 };
+            if idle > 20 {
+                return say(app, false, crate::i18n::fmt("{step} stopped: see Messages.", &[("step", &s.command)]));
+            }
+            chain.waiting = Some((s, idle));
+            app.ui.rslab.chain = Some(chain);
+            return;
+        }
+    }
+    while let Some(s) = chain.steps.pop_front() {
+        app.workflow.error = None;
+        app.workflow.result = None;
+        if s.background {
+            crate::analysispane::run_quietly(app, &s.command, s.params.clone());
+        } else {
+            match app.run(&s.command, s.params.clone()) {
+                Ok(v) => {
+                    if let Some(key) = s.keep {
+                        keep_result(app, key, v);
+                    }
+                }
+                Err(e) => return say(app, false, e),
+            }
+        }
+        if s.makes.is_some() {
+            if let Some(e) = app.workflow.error.take() {
+                return say(app, false, e);
+            }
+            chain.waiting = Some((s, 0));
+            app.ui.rslab.chain = Some(chain);
+            return;
+        }
+        chain.done += 1;
+    }
+    app.map.invalidate();
+    let finished = std::mem::take(&mut chain.finished);
+    if !finished.is_empty() {
+        say(app, true, finished);
+    }
+}
+
 fn search(app: &mut RustGisApp) {
-    let (bbox, _) = match area(app) {
+    let a = match area(app) {
         Ok(a) => a,
         Err(e) => return say(app, false, e),
     };
     let st = &mut app.ui.rslab;
-    let url = search_url(st.sensor, bbox, &st.start, &st.end, st.cloud);
-    st.search = Some((fetch(&url), st.sensor));
+    let url = search_url(st.dataset, a.bbox, &st.start, &st.end, st.cloud);
+    st.search = Some((fetch(&url), st.dataset));
     st.scenes.clear();
     st.picked = None;
 }
 
-/// Downloads the scene picked, each tile on the area's grid, to be merged when they are in.
+/// Downloads the date picked (or a composite of the clearest dates), each item on the area's
+/// grid, then merges them, clips the image to the area's shape and styles it.
 fn download(app: &mut RustGisApp) {
-    let (bbox, place) = match area(app) {
+    let a = match area(app) {
         Ok(a) => a,
         Err(e) => return say(app, false, e),
     };
     let st = &app.ui.rslab;
-    let Some(scene) = st.picked.and_then(|i| st.scenes.get(i)).cloned() else {
+    let Some(first) = st.picked.and_then(|i| st.scenes.get(i)).cloned() else {
         return say(app, false, tl!("Search, then pick a date.").to_string());
     };
-    let sensor = st.scenes_of;
-    let (w, h, cell) = grid(bbox, st.cell);
+    let ds = st.scenes_of;
+    let composite = if ds.dated() { st.composite.round().clamp(1.0, 8.0) as usize } else { 1 };
+    // The picked date, then the clearest others, for a composite.
+    let mut chosen = vec![first.clone()];
+    chosen.extend(st.scenes.iter().filter(|s| s.date != first.date).take(composite - 1).cloned());
+    let mask = st.mask && ds.optical();
+    let (w, h, cell) = grid(a.bbox, st.cell);
+    let date = if chosen.len() > 1 {
+        let mut d: Vec<&str> = chosen.iter().map(|s| s.date.as_str()).collect();
+        d.sort_unstable();
+        format!("{}_to_{}_median", d.first().unwrap_or(&""), d.last().unwrap_or(&""))
+    } else {
+        first.date.replace('—', "all")
+    };
+    let image = fresh(app, &format!("{}_{}_{}", ds.short(), date, a.short));
+    let full = format!("{image}_full");
+    let items: Vec<(String, f64, f64)> = chosen.iter().flat_map(|s| s.items.iter().map(move |i| (i.clone(), s.scale, s.offset))).collect();
+    let clip = st.clip && (a.shape.is_some() || st.area_kind == 2);
+    let area_layer = st.area_layer.clone();
+    let slope = st.slope;
     if cell > st.cell * 1.01 {
-        let text = crate::i18n::fmt(
-            "The area is large: cells of {m} m (at most {n} across).",
-            &[("m", &format!("{cell:.0}")), ("n", &MAX_SIDE.to_string())],
+        say(
+            app,
+            true,
+            crate::i18n::fmt(
+                "The area is large: cells of {m} m (at most {n} across).",
+                &[("m", &format!("{cell:.0}")), ("n", &MAX_SIDE.to_string())],
+            ),
         );
-        say(app, true, text);
     }
-    let place = if place == "view" { tl!("view").to_string() } else { place.replace(' ', "_") };
-    let image = format!("{}_{}_{place}", sensor.short(), scene.date);
+    if items.len() > MAX_ITEMS {
+        say(
+            app,
+            false,
+            crate::i18n::fmt(
+                "{n} items cover the area; the first {k} are read.",
+                &[("n", &items.len().to_string()), ("k", &MAX_ITEMS.to_string())],
+            ),
+        );
+    }
+    let (scale, offset) = items.first().map_or((1.0, 0.0), |i| (i.1, i.2));
+    let mut steps = Vec::new();
     let mut parts = Vec::new();
-    for (i, item) in scene.items.iter().take(MAX_TILES).enumerate() {
-        let part = format!("{image}_part{}", i + 1);
-        let url = image_url(sensor, item, bbox, w, h);
-        if let Err(e) = app.run("ui.addUrl", json!({"url": url, "name": part, "whole": true})) {
-            return say(app, false, e);
-        }
+    for (k, (item, ..)) in items.iter().take(MAX_ITEMS).enumerate() {
+        let part = format!("{image}_part{}", k + 1);
+        let url = image_url(ds, item, a.bbox, w, h, mask);
+        steps.push(Step {
+            command: "ui.addUrl".into(),
+            params: json!({"url": url, "name": part, "whole": true}),
+            makes: Some(part.clone()),
+            background: false,
+            keep: None,
+        });
         parts.push(part);
     }
-    if scene.items.len() > MAX_TILES {
-        let text = crate::i18n::fmt(
-            "{n} tiles cover the area; the first {k} are read.",
-            &[("n", &scene.items.len().to_string()), ("k", &MAX_TILES.to_string())],
-        );
-        say(app, false, text);
+    let merged = if clip { full.clone() } else { image.clone() };
+    let (first_part, rest) = parts.split_first().map(|(f, r)| (f.clone(), r.to_vec())).unwrap_or_default();
+    let mut merge = json!({
+        "layer": first_part, "operation": "merge", "layers": rest, "scale": scale, "offset": offset,
+        "bandNames": ds.band_names(), "combine": if chosen.len() > 1 { "median" } else { "first" }, "name": merged,
+    });
+    if let Some(n) = ds.nodata() {
+        merge["nodata"] = json!(n);
     }
-    app.ui.rslab.loading = Some(Loading { parts, image, scale: scene.scale, offset: scene.offset, merging: false, idle: 0 });
+    if mask {
+        merge["maskBand"] = json!(7);
+        if ds == Dataset::Sentinel2 {
+            // Scene classes: no data, saturated, cloud shadow, medium and high cloud, cirrus.
+            merge["maskValues"] = json!([0, 1, 3, 8, 9, 10]);
+        } else {
+            // QA_PIXEL bits: fill, dilated cloud, cirrus, cloud, cloud shadow.
+            merge["maskBits"] = json!([0, 1, 2, 3, 4]);
+        }
+    }
+    if ds == Dataset::Sentinel1 {
+        merge["decibels"] = json!(true);
+    }
+    let mut m = makes("raster.process", merge, &merged);
+    m.keep = Some("merge");
+    steps.push(m);
+    let mut leftovers = parts.clone();
+    if clip {
+        let polygon = match &a.shape {
+            Some(f) => {
+                let layer = format!("AOI_{}", a.short);
+                let fc = json!({"type": "FeatureCollection", "features": [f]});
+                if app.session.map().layer_by_name(&layer).is_none() {
+                    steps.push(step(
+                        "layer.addDataText",
+                        json!({"fileName": format!("{layer}.geojson"), "text": fc.to_string(), "name": layer}),
+                    ));
+                }
+                layer
+            }
+            None => area_layer,
+        };
+        steps.push(makes(
+            "raster.process",
+            json!({"layer": full, "operation": "clip", "polygon": polygon, "selectedOnly": false, "name": image}),
+            &image,
+        ));
+        leftovers.push(full.clone());
+    }
+    steps.push(step("layer.remove", json!({"layer": leftovers})));
+    if ds.optical() {
+        steps.push(step("raster.bands", json!({"layer": image, "red": 3, "green": 2, "blue": 1})));
+        steps.push(step("raster.stretch", json!({"layer": image, "type": "percentClip", "low": 2, "high": 2})));
+    } else if ds == Dataset::Sentinel1 {
+        steps.push(step("raster.bands", json!({"layer": image, "red": 1, "green": 2, "blue": 1})));
+        steps.push(step("raster.stretch", json!({"layer": image, "type": "percentClip", "low": 2, "high": 2})));
+    }
+    let classes = ds.classes();
+    if !classes.is_empty() {
+        let names: serde_json::Map<String, Value> = classes.iter().map(|(v, n)| (v.to_string(), json!(n))).collect();
+        steps.push(step("raster.classNames", json!({"layer": image, "names": names})));
+        steps.push(step("raster.symbology", json!({"layer": image, "type": "unique"})));
+    }
+    if ds == Dataset::Dem && slope {
+        let s = format!("{image}_slope");
+        steps.push(makes("raster.function", json!({"layer": image, "function": "slope", "name": s}), &s));
+    }
+    steps.push(step("layer.zoomTo", json!({"layer": image})));
+    let finished = if ds.optical() {
+        crate::i18n::fmt("{name} is ready: six bands of reflectance (Blue, Green, Red, NIR, SWIR1, SWIR2).", &[("name", &image)])
+    } else {
+        crate::i18n::fmt("{name} is ready.", &[("name", &image)])
+    };
+    // Titles follow the area and the date.
+    let year: String = date.chars().take(4).collect();
+    let title = auto_title(&a.place, &year, !classes.is_empty(), crate::khdata::khmer());
+    let st = &mut app.ui.rslab;
+    if classes.is_empty() {
+        st.image = image.clone();
+    } else {
+        st.class_map = image.clone();
+        st.training_map = image.clone();
+    }
+    if ds.optical() {
+        st.rgb = [3, 2, 1];
+    }
+    st.title = title;
+    start_chain(app, tl!("Downloading imagery").to_string(), steps, finished);
 }
 
-fn raster_exists(app: &RustGisApp, name: &str) -> bool {
-    app.session.map().layer_by_name(name).is_some_and(|l| l.raster.as_ref().is_some_and(|r| r.data.is_some()))
+/// A map's title from its place and year, as LEE RS Lab makes it.
+fn auto_title(place: &str, year: &str, land_cover: bool, km: bool) -> String {
+    let year_ok = year.len() == 4 && year.chars().all(|c| c.is_ascii_digit());
+    if km {
+        let digits: String = year.chars().map(|c| c.to_digit(10).and_then(|d| char::from_u32(0x17E0 + d)).unwrap_or(c)).collect();
+        let mut t = if land_cover {
+            "ផែនទីការប្រើប្រាស់ដី និងគម្របដី".to_string()
+        } else {
+            "ផែនទីរូបភាពផ្កាយរណប".to_string()
+        };
+        if !place.is_empty() {
+            t.push_str(&format!(" {place}"));
+        }
+        if year_ok {
+            t.push_str(&format!(" ឆ្នាំ{digits}"));
+        }
+        t
+    } else {
+        let mut t = if land_cover { "Land use and land cover map".to_string() } else { "Satellite image map".to_string() };
+        if !place.is_empty() {
+            t.push_str(&format!(" of {place}"));
+        }
+        if year_ok {
+            t.push_str(&format!(", {year}"));
+        }
+        t
+    }
 }
 
-/// Lands the search, merges a scene's tiles once they are in, and styles the image made.
+thread_local! {
+    /// geoBoundaries' communes, once fetched.
+    static COMMUNE_CACHE: std::cell::RefCell<Option<Value>> = const { std::cell::RefCell::new(None) };
+}
+
+/// Lands the search and the communes, and moves the run of steps on.
 pub fn poll(app: &mut RustGisApp, ctx: &egui::Context) {
-    if let Some((slot, sensor)) = &app.ui.rslab.search {
-        let sensor = *sensor;
+    if let Some((slot, ds)) = &app.ui.rslab.search {
+        let ds = *ds;
         let landed = slot.lock().unwrap_or_else(|e| e.into_inner()).take();
         match landed {
             None => ctx.request_repaint_after(std::time::Duration::from_millis(200)),
             Some(r) => {
                 app.ui.rslab.search = None;
-                match r.and_then(|b| scenes(sensor, &b)) {
+                match r.and_then(|b| scenes(ds, &b)) {
                     Ok(found) => {
                         let text = crate::i18n::fmt("{n} date(s) found.", &[("n", &found.len().to_string())]);
                         app.ui.rslab.picked = (!found.is_empty()).then_some(0);
                         app.ui.rslab.scenes = found;
-                        app.ui.rslab.scenes_of = sensor;
+                        app.ui.rslab.scenes_of = ds;
                         say(app, true, text);
                     }
                     Err(e) => say(app, false, e),
@@ -356,64 +894,89 @@ pub fn poll(app: &mut RustGisApp, ctx: &egui::Context) {
             }
         }
     }
-    let Some(l) = &app.ui.rslab.loading else { return };
-    ctx.request_repaint_after(std::time::Duration::from_millis(300));
-    if !l.merging {
-        if !l.parts.iter().all(|p| raster_exists(app, p)) {
-            return;
-        }
-        let (first, rest) = l.parts.split_first().map(|(f, r)| (f.clone(), r.to_vec())).unwrap_or_default();
-        let p = json!({
-            "layer": first, "operation": "merge", "layers": rest, "nodata": 0, "scale": l.scale, "offset": l.offset,
-            "bandNames": BANDS, "name": l.image,
-        });
-        if let Some(l) = app.ui.rslab.loading.as_mut() {
-            l.merging = true;
-        }
-        crate::analysispane::run_quietly(app, "raster.process", p);
-        return;
-    }
-    if !raster_exists(app, &l.image) {
-        if crate::analysispane::background_job(app).is_none()
-            && let Some(l) = app.ui.rslab.loading.as_mut()
-        {
-            l.idle += 1;
-            if l.idle > 20 {
-                app.ui.rslab.loading = None;
-                say(app, false, tl!("The tiles could not be merged: see Messages.").to_string());
+    if let Some(slot) = &app.ui.rslab.communes_fetch {
+        let landed = slot.lock().unwrap_or_else(|e| e.into_inner()).take();
+        match landed {
+            None => ctx.request_repaint_after(std::time::Duration::from_millis(200)),
+            Some(r) => {
+                app.ui.rslab.communes_fetch = None;
+                match r.and_then(|b| serde_json::from_slice::<Value>(&b).map_err(|e| e.to_string())) {
+                    Ok(all) => {
+                        let st = &mut app.ui.rslab;
+                        let district = crate::khdata::districts(&st.province).into_iter().find(|d| d.0 == st.district);
+                        st.communes = Some(district.map(|d| communes_in(&all, &d.3)).unwrap_or_default());
+                        COMMUNE_CACHE.with(|c| *c.borrow_mut() = Some(all));
+                    }
+                    Err(e) => say(app, false, e),
+                }
             }
         }
+    }
+    if app.ui.rslab.chain.is_some() {
+        ctx.request_repaint_after(std::time::Duration::from_millis(300));
+        drive(app);
+    }
+}
+
+fn want_communes(app: &mut RustGisApp) {
+    let st = &mut app.ui.rslab;
+    st.commune.clear();
+    st.communes = None;
+    if st.district.is_empty() {
         return;
     }
-    let (image, parts) = (l.image.clone(), l.parts.clone());
-    app.ui.rslab.loading = None;
-    let _ = app.run("layer.remove", json!({"layer": parts}));
-    let _ = app.run("raster.bands", json!({"layer": image, "red": 3, "green": 2, "blue": 1}));
-    // Clouds and bright roofs would leave the rest dark under a min–max stretch.
-    let _ = app.run("raster.stretch", json!({"layer": image, "type": "percentClip", "low": 2, "high": 2}));
-    let _ = app.run("layer.zoomTo", json!({"layer": image}));
-    app.ui.rslab.image = image.clone();
-    say(
-        app,
-        true,
-        crate::i18n::fmt("{name} is ready: six bands of reflectance (Blue, Green, Red, NIR, SWIR1, SWIR2).", &[("name", &image)]),
-    );
-    app.map.invalidate();
+    let district = crate::khdata::districts(&st.province).into_iter().find(|d| d.0 == st.district);
+    let cached =
+        COMMUNE_CACHE.with(|c| c.borrow().as_ref().map(|all| district.as_ref().map(|d| communes_in(all, &d.3)).unwrap_or_default()));
+    match cached {
+        Some(c) => st.communes = Some(c),
+        None if st.communes_fetch.is_none() => st.communes_fetch = Some(fetch(COMMUNES)),
+        None => {}
+    }
 }
 
 fn rasters(app: &RustGisApp) -> Vec<String> {
     app.session.map().layers.iter().filter(|l| l.is_raster()).map(|l| l.name.clone()).collect()
 }
 
+fn vectors(app: &RustGisApp, polygons_only: bool) -> Vec<String> {
+    use rustgis_engine::data::GeometryType;
+    app.session
+        .map()
+        .layers
+        .iter()
+        .filter(|l| !l.is_raster() && (!polygons_only || l.geometry_type() == GeometryType::Polygon))
+        .map(|l| l.name.clone())
+        .collect()
+}
+
+fn fields(app: &RustGisApp, layer: &str) -> Vec<String> {
+    app.session.map().layer_by_name(layer).map(|l| l.dataset.fields.iter().map(|f| f.name.clone()).collect()).unwrap_or_default()
+}
+
+fn band_count(app: &RustGisApp, layer: &str) -> usize {
+    app.session.map().layer_by_name(layer).and_then(|l| l.raster.as_ref()?.data.as_ref().map(|d| d.bands.len())).unwrap_or(0)
+}
+
+/// A name no layer has yet: `base`, or `base_2`, `base_3`…
+fn fresh(app: &RustGisApp, base: &str) -> String {
+    let taken = |n: &str| app.session.map().layer_by_name(n).is_some();
+    if !taken(base) {
+        return base.to_string();
+    }
+    (2..1000).map(|i| format!("{base}_{i}")).find(|n| !taken(n)).unwrap_or_else(|| format!("{base}_new"))
+}
+
+/// A layer chooser. An empty choice takes the first; a choice not (or not yet) on the map is kept.
 fn pick(ui: &mut Ui, id: &str, label: &str, value: &mut String, options: &[String]) {
-    if (value.is_empty() || !options.contains(value))
+    if value.is_empty()
         && let Some(first) = options.first()
     {
         value.clone_from(first);
     }
     ui.horizontal(|ui| {
         ui.label(tl!(label));
-        egui::ComboBox::from_id_salt(id).selected_text(value.as_str()).width(190.0).show_ui(ui, |ui| {
+        egui::ComboBox::from_id_salt(id).selected_text(value.as_str()).width(190.0).truncate().show_ui(ui, |ui| {
             for o in options {
                 ui.selectable_value(value, o.clone(), o.as_str());
             }
@@ -421,80 +984,172 @@ fn pick(ui: &mut Ui, id: &str, label: &str, value: &mut String, options: &[Strin
     });
 }
 
-/// Runs a step's command: slow ones in the background on the desktop, their progress and Cancel
-/// shown in the lab (see [`pane`]).
-fn run(app: &mut RustGisApp, id: &str, p: Value) {
-    if let Some((name, _)) = crate::analysispane::background_job(app) {
-        let text = crate::i18n::fmt("{tool} is still running: wait for it, or cancel it.", &[("tool", tl_raw!(name))]);
-        return say(app, false, text);
+fn heading(ui: &mut Ui, text: &str) {
+    ui.add_space(4.0);
+    ui.label(egui::RichText::new(tl!(text)).strong());
+}
+
+/// Runs one command that makes `layer`, as a run of one step.
+fn run_one(app: &mut RustGisApp, title: &str, command: &str, mut p: Value, layer: &str, keep: Option<&'static str>) {
+    let layer = fresh(app, layer);
+    p["name"] = json!(layer);
+    let layer = layer.as_str();
+    let mut s = makes(command, p, layer);
+    s.keep = keep;
+    let done = crate::i18n::fmt("{name} is ready.", &[("name", layer)]);
+    start_chain(app, tl!(title).to_string(), vec![s], done);
+}
+
+fn now(app: &mut RustGisApp, command: &str, p: Value) -> Option<Value> {
+    match app.run(command, p) {
+        Ok(v) => {
+            app.map.invalidate();
+            Some(v)
+        }
+        Err(e) => {
+            say(app, false, e);
+            None
+        }
     }
-    crate::analysispane::run_quietly(app, id, p);
-    app.map.invalidate();
+}
+
+fn area_choice(app: &mut RustGisApp, ui: &mut Ui) {
+    heading(ui, "Study area");
+    ui.horizontal_wrapped(|ui| {
+        for (k, label) in ["Province / district / commune", "Map view", "Polygon layer"].into_iter().enumerate() {
+            ui.radio_value(&mut app.ui.rslab.area_kind, k, tl!(label));
+        }
+    });
+    match app.ui.rslab.area_kind {
+        0 => {
+            let provs = crate::khdata::provinces();
+            let mut changed_district = false;
+            {
+                let st = &mut app.ui.rslab;
+                let current = provs
+                    .iter()
+                    .find(|p| p.0 == st.province)
+                    .map(|p| crate::khdata::label(&p.0, &p.1))
+                    .unwrap_or_else(|| tl!("Choose…").to_string());
+                egui::ComboBox::from_label(tl!("Province")).selected_text(current).width(200.0).truncate().show_ui(ui, |ui| {
+                    for p in &provs {
+                        if ui.selectable_label(st.province == p.0, crate::khdata::label(&p.0, &p.1)).clicked() {
+                            st.province = p.0.clone();
+                            st.district.clear();
+                            st.commune.clear();
+                            st.communes = None;
+                        }
+                    }
+                });
+                let ds = crate::khdata::districts(&st.province);
+                let whole = tl!("Whole province").to_string();
+                let current = if st.district.is_empty() { whole.clone() } else { st.district.clone() };
+                ui.add_enabled_ui(!ds.is_empty(), |ui| {
+                    egui::ComboBox::from_label(tl!("District")).selected_text(current).width(200.0).truncate().show_ui(ui, |ui| {
+                        if ui.selectable_label(st.district.is_empty(), &whole).clicked() {
+                            st.district.clear();
+                            changed_district = true;
+                        }
+                        for d in &ds {
+                            if ui.selectable_label(st.district == d.0, &d.0).clicked() {
+                                st.district = d.0.clone();
+                                changed_district = true;
+                            }
+                        }
+                    });
+                });
+            }
+            if changed_district {
+                want_communes(app);
+            }
+            let st = &mut app.ui.rslab;
+            if !st.district.is_empty() {
+                match &st.communes {
+                    Some(cs) => {
+                        let whole = tl!("Whole district").to_string();
+                        let current = if st.commune.is_empty() { whole.clone() } else { st.commune.clone() };
+                        let names: Vec<String> = cs.iter().map(|c| c.0.clone()).collect();
+                        egui::ComboBox::from_label(tl!("Commune")).selected_text(current).width(200.0).truncate().show_ui(ui, |ui| {
+                            if ui.selectable_label(st.commune.is_empty(), &whole).clicked() {
+                                st.commune.clear();
+                            }
+                            for n in &names {
+                                if ui.selectable_label(st.commune == *n, n).clicked() {
+                                    st.commune.clone_from(n);
+                                }
+                            }
+                        });
+                    }
+                    None if st.communes_fetch.is_some() => {
+                        ui.horizontal(|ui| {
+                            ui.spinner();
+                            ui.label(tl!("Loading communes…"));
+                        });
+                    }
+                    None => {}
+                }
+            }
+        }
+        2 => {
+            let polys = vectors(app, true);
+            if polys.is_empty() {
+                ui.label(egui::RichText::new(tl!("Add or draw a polygon layer first.")).weak());
+            } else {
+                pick(ui, "rslab_area_layer", "Layer", &mut app.ui.rslab.area_layer, &polys);
+            }
+        }
+        _ => {}
+    }
+    if app.ui.rslab.area_kind != 1 {
+        ui.checkbox(&mut app.ui.rslab.clip, tl!("Clip to the area's shape"));
+    }
 }
 
 fn data_step(app: &mut RustGisApp, ui: &mut Ui) {
-    ui.label(egui::RichText::new(tl!("Study area")).strong());
-    ui.horizontal(|ui| {
-        ui.radio_value(&mut app.ui.rslab.use_view, false, tl!("Province or district"));
-        ui.radio_value(&mut app.ui.rslab.use_view, true, tl!("Map view"));
-    });
-    if !app.ui.rslab.use_view {
-        let provs = crate::khdata::provinces();
-        let st = &mut app.ui.rslab;
-        let current = provs
-            .iter()
-            .find(|p| p.0 == st.province)
-            .map(|p| crate::khdata::label(&p.0, &p.1))
-            .unwrap_or_else(|| tl!("Choose…").to_string());
-        egui::ComboBox::from_label(tl!("Province")).selected_text(current).width(200.0).show_ui(ui, |ui| {
-            for p in &provs {
-                if ui.selectable_label(st.province == p.0, crate::khdata::label(&p.0, &p.1)).clicked() {
-                    st.province = p.0.clone();
-                    st.district.clear();
-                }
-            }
-        });
-        let ds = crate::khdata::districts(&st.province);
-        let whole = tl!("Whole province").to_string();
-        let current = if st.district.is_empty() { whole.clone() } else { st.district.clone() };
-        ui.add_enabled_ui(!ds.is_empty(), |ui| {
-            egui::ComboBox::from_label(tl!("District")).selected_text(current).width(200.0).show_ui(ui, |ui| {
-                if ui.selectable_label(st.district.is_empty(), &whole).clicked() {
-                    st.district.clear();
-                }
-                for d in &ds {
-                    if ui.selectable_label(st.district == d.0, crate::khdata::label(&d.0, &d.1)).clicked() {
-                        st.district = d.0.clone();
-                    }
-                }
-            });
-        });
-    }
+    area_choice(app, ui);
     ui.add_space(4.0);
-    ui.label(egui::RichText::new(tl!("Satellite")).strong());
     let st = &mut app.ui.rslab;
-    ui.horizontal(|ui| {
-        for (s, label) in [(Sensor::Sentinel2, "Sentinel-2 (10 m)"), (Sensor::Landsat, "Landsat 8/9 (30 m)")] {
-            if ui.radio(st.sensor == s, tl!(label)).clicked() && st.sensor != s {
-                st.sensor = s;
-                st.cell = s.cell();
+    egui::ComboBox::from_label(tl!("Dataset")).selected_text(tl!(st.dataset.label())).width(230.0).truncate().show_ui(ui, |ui| {
+        for d in Dataset::ALL {
+            if ui.selectable_label(st.dataset == d, tl!(d.label())).clicked() && st.dataset != d {
+                st.dataset = d;
+                st.cell = d.cell();
+                st.scenes.clear();
+                st.picked = None;
             }
         }
     });
+    let ds = st.dataset;
     egui::Grid::new("rslab_dates").num_columns(2).show(ui, |ui| {
-        ui.label(tl!("From"));
-        ui.add(egui::TextEdit::singleline(&mut st.start).desired_width(110.0).hint_text("YYYY-MM-DD"));
-        ui.end_row();
-        ui.label(tl!("To"));
-        ui.add(egui::TextEdit::singleline(&mut st.end).desired_width(110.0).hint_text("YYYY-MM-DD"));
-        ui.end_row();
-        ui.label(tl!("Cloud cover"));
-        ui.add(egui::Slider::new(&mut st.cloud, 0.0..=100.0).suffix(" %").integer());
-        ui.end_row();
-        ui.label(tl!("Cell size"));
-        ui.add(egui::DragValue::new(&mut st.cell).range(10.0..=500.0).speed(1.0).suffix(" m"));
+        if ds.dated() {
+            ui.label(tl!("From"));
+            ui.add(egui::TextEdit::singleline(&mut st.start).desired_width(110.0).hint_text("YYYY-MM-DD"));
+            ui.end_row();
+            ui.label(tl!("To"));
+            ui.add(egui::TextEdit::singleline(&mut st.end).desired_width(110.0).hint_text("YYYY-MM-DD"));
+            ui.end_row();
+        }
+        if ds.optical() {
+            ui.label(tl!("Max scene cloud cover"));
+            ui.add(egui::Slider::new(&mut st.cloud, 0.0..=100.0).suffix(" %").integer());
+            ui.end_row();
+        }
+        if ds.dated() {
+            ui.label(tl!("Dates in the composite"));
+            ui.add(egui::DragValue::new(&mut st.composite).range(1.0..=8.0).speed(0.05).fixed_decimals(0))
+                .on_hover_text(tl!("1: the date picked. More: the median of the picked and the next clearest dates, which fills clouds"));
+            ui.end_row();
+        }
+        ui.label(tl!("Pixel size"));
+        ui.add(egui::DragValue::new(&mut st.cell).range(10.0..=1000.0).speed(1.0).suffix(" m"));
         ui.end_row();
     });
+    if ds.optical() {
+        ui.checkbox(&mut st.mask, tl!("Mask clouds and shadows (SCL / QA_PIXEL)"));
+    }
+    if ds == Dataset::Dem {
+        ui.checkbox(&mut st.slope, tl!("Add slope"));
+    }
     let searching = st.search.is_some();
     ui.horizontal(|ui| {
         if ui.add_enabled(!searching, egui::Button::new(egui::RichText::new(tl!("Search")).strong())).clicked() {
@@ -506,161 +1161,827 @@ fn data_step(app: &mut RustGisApp, ui: &mut Ui) {
     });
     if !app.ui.rslab.scenes.is_empty() {
         let st = &mut app.ui.rslab;
+        let optical = st.scenes_of.optical();
         egui::ScrollArea::vertical().id_salt("rslab_scenes").max_height(150.0).show(ui, |ui| {
             for (i, s) in st.scenes.iter().enumerate() {
-                let text = crate::i18n::fmt(
-                    "{date} · cloud {c}% · {n} tile(s)",
-                    &[("date", &s.date), ("c", &format!("{:.1}", s.cloud)), ("n", &s.items.len().to_string())],
-                );
+                let text = if optical {
+                    crate::i18n::fmt(
+                        "{date} · cloud {c}% · {n} tile(s)",
+                        &[("date", &s.date), ("c", &format!("{:.1}", s.cloud)), ("n", &s.items.len().to_string())],
+                    )
+                } else {
+                    crate::i18n::fmt("{date} · {n} tile(s)", &[("date", &s.date), ("n", &s.items.len().to_string())])
+                };
                 if ui.selectable_label(st.picked == Some(i), text).clicked() {
                     st.picked = Some(i);
                 }
             }
         });
-        let busy = app.ui.rslab.loading.is_some();
+        let busy = app.ui.rslab.chain.is_some();
         ui.add_enabled_ui(!busy && app.ui.rslab.picked.is_some(), |ui| {
             if ui
-                .button(egui::RichText::new(tl!("Download Image")).strong())
-                .on_hover_text(tl!("Clipped to the study area, as one six-band reflectance image"))
+                .button(egui::RichText::new(tl!("Download")).strong())
+                .on_hover_text(tl!("Clipped to the study area and merged into one image"))
                 .clicked()
             {
                 download(app);
             }
         });
     }
-    if let Some(l) = &app.ui.rslab.loading {
-        let text = if l.merging {
-            tl!("Merging the tiles…").to_string()
-        } else {
-            let left = l.parts.iter().filter(|p| !raster_exists(app, p)).count();
-            crate::i18n::fmt("Downloading… {n} left", &[("n", &left.to_string())])
-        };
-        let mut cancel = false;
-        ui.horizontal(|ui| {
-            ui.spinner();
-            ui.label(text);
-            cancel = ui.small_button(tl!("Cancel")).clicked();
-        });
-        if cancel {
-            app.ui.rslab.loading = None;
-        }
+    if let Some(m) = result(app, "merge").and_then(|v| v["maskedPercent"].as_f64()) {
+        ui.label(
+            egui::RichText::new(crate::i18n::fmt("Clouds and shadows masked: {p}% of the pixels read.", &[("p", &format!("{m:.1}"))]))
+                .weak(),
+        );
     }
 }
+
+/// An index: its name, what it shows, and its formula over bands 1–6 (Blue … SWIR2).
+const INDICES: &[(&str, &str, &str)] = &[
+    ("NDVI", "Vegetation", "(b4 - b3) / (b4 + b3)"),
+    ("GNDVI", "Chlorophyll", "(b4 - b2) / (b4 + b2)"),
+    ("SAVI", "Vegetation on bare soil", "1.5 * (b4 - b3) / (b4 + b3 + 0.5)"),
+    ("EVI", "Dense vegetation", "2.5 * (b4 - b3) / (b4 + 6 * b3 - 7.5 * b1 + 1)"),
+    ("NDWI", "Open water", "(b2 - b4) / (b2 + b4)"),
+    ("MNDWI", "Water near towns", "(b2 - b5) / (b2 + b5)"),
+    ("NDMI", "Moisture in plants", "(b4 - b5) / (b4 + b5)"),
+    ("NDBI", "Built-up areas", "(b5 - b4) / (b5 + b4)"),
+    ("BSI", "Bare soil", "((b5 + b3) - (b4 + b1)) / ((b5 + b3) + (b4 + b1))"),
+    ("NBR", "Burned areas", "(b4 - b6) / (b4 + b6)"),
+];
 
 fn enhance_step(app: &mut RustGisApp, ui: &mut Ui) {
     let rs = rasters(app);
     pick(ui, "rslab_img", "Image", &mut app.ui.rslab.image, &rs);
     let image = app.ui.rslab.image.clone();
+    let count = band_count(app, &image);
+    let six = count >= 6;
     ui.add_enabled_ui(!image.is_empty(), |ui| {
-        ui.label(egui::RichText::new(tl!("Band combination")).strong());
+        heading(ui, "Band combination");
+        if six {
+            ui.horizontal_wrapped(|ui| {
+                for (label, rgb) in [
+                    ("Natural color (3-2-1)", [3, 2, 1]),
+                    ("Color infrared (4-3-2)", [4, 3, 2]),
+                    ("Agriculture (5-4-1)", [5, 4, 1]),
+                    ("Urban (6-5-3)", [6, 5, 3]),
+                    ("Land/water (4-5-3)", [4, 5, 3]),
+                    ("Vegetation (5-4-3)", [5, 4, 3]),
+                ] {
+                    if ui.button(tl!(label)).clicked() {
+                        app.ui.rslab.rgb = rgb;
+                        now(app, "raster.bands", json!({"layer": image, "red": rgb[0], "green": rgb[1], "blue": rgb[2]}));
+                    }
+                }
+            });
+        }
+        ui.horizontal(|ui| {
+            let n = count.max(1) as u32;
+            let st = &mut app.ui.rslab;
+            for (i, c) in ["R", "G", "B"].iter().enumerate() {
+                ui.label(*c);
+                ui.add(egui::DragValue::new(&mut st.rgb[i]).range(1..=n));
+            }
+            if ui.button(tl!("Apply")).clicked() {
+                let rgb = app.ui.rslab.rgb;
+                now(app, "raster.bands", json!({"layer": image, "red": rgb[0], "green": rgb[1], "blue": rgb[2]}));
+            }
+        });
+        heading(ui, "Contrast stretch");
         ui.horizontal_wrapped(|ui| {
-            for (label, [r, g, b]) in [
-                ("Natural color (3-2-1)", [3, 2, 1]),
-                ("Color infrared (4-3-2)", [4, 3, 2]),
-                ("Agriculture (5-4-1)", [5, 4, 1]),
-                ("Urban (6-5-3)", [6, 5, 3]),
-                ("Land/water (4-5-3)", [4, 5, 3]),
+            for (label, p) in [
+                ("Min–max", json!({"type": "minMax"})),
+                ("Percent clip (2%)", json!({"type": "percentClip", "low": 2, "high": 2})),
+                ("Standard deviation (2)", json!({"type": "standardDeviation", "n": 2})),
+                ("Histogram equalization", json!({"type": "histogramEqualize"})),
             ] {
                 if ui.button(tl!(label)).clicked() {
-                    let _ = app.run("raster.bands", json!({"layer": image, "red": r, "green": g, "blue": b}));
-                    app.map.invalidate();
+                    let mut p = p;
+                    p["layer"] = json!(image);
+                    now(app, "raster.stretch", p);
                 }
             }
         });
-        ui.label(egui::RichText::new(tl!("Spectral indices")).strong());
+        heading(ui, "Spectral indices");
+        if !six {
+            ui.label(egui::RichText::new(tl!("Indices need a six-band image (Blue, Green, Red, NIR, SWIR1, SWIR2) from 1 Data.")).weak());
+        }
+        ui.add_enabled_ui(six, |ui| {
+            ui.horizontal_wrapped(|ui| {
+                for (idx, tip, expr) in INDICES {
+                    if ui.button(*idx).on_hover_text(format!("{} · {expr}", tl!(tip))).clicked() {
+                        let out = format!("{image}_{idx}");
+                        run_one(
+                            app,
+                            "Computing indices",
+                            "raster.function",
+                            json!({"layer": image, "function": "bandMath", "expression": expr, "name": out}),
+                            &out,
+                            None,
+                        );
+                    }
+                }
+            });
+        });
+        heading(ui, "Band math (your own formula)");
+        ui.horizontal(|ui| {
+            ui.add(egui::TextEdit::singleline(&mut app.ui.rslab.expression).desired_width(200.0).hint_text("(b4 - b3) / (b4 + b3)"));
+            if ui.button(tl!("Run")).clicked() {
+                let expr = app.ui.rslab.expression.clone();
+                let out = format!("{image}_math");
+                run_one(
+                    app,
+                    "Band math",
+                    "raster.function",
+                    json!({"layer": image, "function": "bandMath", "expression": expr, "name": out}),
+                    &out,
+                    None,
+                );
+            }
+        });
+        heading(ui, "Spatial filter");
         ui.horizontal_wrapped(|ui| {
-            for (idx, tip) in [
-                ("ndvi", "Vegetation (NIR, Red)"),
-                ("ndwi", "Water (Green, NIR)"),
-                ("ndbi", "Built-up (SWIR1, NIR)"),
-                ("savi", "Vegetation on bare soil"),
-                ("evi", "Dense vegetation"),
-                ("nbr", "Burned areas (NIR, SWIR2)"),
-            ] {
-                if ui.button(idx.to_uppercase()).on_hover_text(tl!(tip)).clicked() {
-                    let swir = if idx == "nbr" { 6 } else { 5 };
-                    let p = json!({"layer": image, "index": idx, "blue": 1, "green": 2, "red": 3, "nir": 4, "swir": swir, "name": format!("{image}_{idx}")});
-                    run(app, "raster.index", p);
-                }
+            let st = &mut app.ui.rslab;
+            egui::ComboBox::from_id_salt("rslab_filter").selected_text(tl!(filter_label(st.filter))).width(170.0).truncate().show_ui(
+                ui,
+                |ui| {
+                    for f in ["mean", "median", "gaussian", "sharpen", "sobel", "laplacian", "emboss", "min", "max"] {
+                        ui.selectable_value(&mut st.filter, f, tl!(filter_label(f)));
+                    }
+                },
+            );
+            ui.label(tl!("window"));
+            ui.add(egui::DragValue::new(&mut st.filter_size).range(3.0..=15.0).speed(0.1).fixed_decimals(0));
+            if ui.button(tl!("Apply filter")).clicked() {
+                let (f, size) = (st.filter, (st.filter_size.round() as u64) | 1);
+                let out = format!("{image}_{f}");
+                run_one(app, "Filtering", "raster.filter", json!({"layer": image, "filter": f, "size": size, "name": out}), &out, None);
             }
         });
+        heading(ui, "Principal Component Analysis");
+        ui.horizontal(|ui| {
+            ui.label(tl!("Components"));
+            ui.add(egui::DragValue::new(&mut app.ui.rslab.components).range(1.0..=count.max(1) as f64).speed(0.05).fixed_decimals(0));
+            if ui.add_enabled(count >= 2, egui::Button::new(tl!("Run PCA"))).clicked() {
+                let k = app.ui.rslab.components.round() as u64;
+                let out = format!("{image}_pca");
+                run_one(
+                    app,
+                    "Principal Component Analysis",
+                    "raster.pca",
+                    json!({"layer": image, "components": k, "name": out}),
+                    &out,
+                    Some("pca"),
+                );
+            }
+        });
+        if let Some(v) = result(app, "pca").cloned() {
+            pca_table(ui, &v);
+        }
+        heading(ui, "Feature stack for classification");
+        ui.label(egui::RichText::new(tl!("Adds layers to the image's bands, ready to classify.")).weak());
+        let others: Vec<String> = rs.iter().filter(|n| **n != image).cloned().collect();
+        let st = &mut app.ui.rslab;
+        ui.add_enabled(six, egui::Checkbox::new(&mut st.stack_indices, tl!("Indices (NDVI, NDWI, NDBI)")));
+        ui.checkbox(&mut st.stack_texture, tl!("Texture of the NIR band (GLCM contrast, homogeneity, entropy)"));
+        ui.horizontal(|ui| {
+            ui.label(tl!("Another layer"));
+            let none = tl!("None").to_string();
+            egui::ComboBox::from_id_salt("rslab_stack_extra")
+                .selected_text(if st.stack_extra.is_empty() { none.clone() } else { st.stack_extra.clone() })
+                .width(180.0)
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(&mut st.stack_extra, String::new(), none.as_str());
+                    for o in &others {
+                        ui.selectable_value(&mut st.stack_extra, o.clone(), o.as_str());
+                    }
+                })
+                .response
+                .on_hover_text(tl!("Another date, Sentinel-1 radar or elevation (put on the image's grid)"));
+        });
+        if ui.button(egui::RichText::new(tl!("Build feature stack")).strong()).clicked() {
+            feature_stack(app, &image, six, count);
+        }
     });
 }
+
+fn filter_label(f: &str) -> &'static str {
+    match f {
+        "mean" => "Mean (low-pass)",
+        "median" => "Median (removes speckle/noise)",
+        "gaussian" => "Gaussian (low-pass)",
+        "sharpen" => "High-pass sharpen",
+        "sobel" => "Sobel edges",
+        "laplacian" => "Laplacian edges",
+        "emboss" => "Emboss",
+        "min" => "Minimum",
+        _ => "Maximum",
+    }
+}
+
+fn pca_table(ui: &mut Ui, v: &Value) {
+    let explained: Vec<f64> = v["explained"].as_array().map(|a| a.iter().filter_map(Value::as_f64).collect()).unwrap_or_default();
+    let mut cumulative = 0.0;
+    egui::Grid::new("rslab_pca").striped(true).show(ui, |ui| {
+        for h in ["Component", "Explained %", "Cumulative %"] {
+            ui.label(egui::RichText::new(tl!(h)).strong());
+        }
+        ui.end_row();
+        for (i, e) in explained.iter().enumerate() {
+            cumulative += e;
+            ui.label(format!("PC{}", i + 1));
+            ui.label(format!("{e:.1}"));
+            ui.label(format!("{cumulative:.1}"));
+            ui.end_row();
+        }
+    });
+}
+
+fn band_names(app: &RustGisApp, layer: &str) -> Vec<String> {
+    app.session
+        .map()
+        .layer_by_name(layer)
+        .and_then(|l| {
+            l.raster.as_ref()?.data.as_ref().map(|d| {
+                d.bands
+                    .iter()
+                    .enumerate()
+                    .map(|(i, b)| if b.name.is_empty() { format!("{layer}_{}", i + 1) } else { b.name.clone() })
+                    .collect()
+            })
+        })
+        .unwrap_or_default()
+}
+
+fn feature_stack(app: &mut RustGisApp, image: &str, six: bool, count: usize) {
+    let (indices, texture, extra) = (app.ui.rslab.stack_indices, app.ui.rslab.stack_texture, app.ui.rslab.stack_extra.clone());
+    let mut steps = Vec::new();
+    let mut layers = Vec::new();
+    let mut names = band_names(app, image);
+    if indices && six {
+        for idx in ["NDVI", "NDWI", "NDBI"] {
+            let Some((_, _, expr)) = INDICES.iter().find(|i| i.0 == idx) else { continue };
+            let out = fresh(app, &format!("{image}_{idx}_fs"));
+            steps.push(makes("raster.function", json!({"layer": image, "function": "bandMath", "expression": expr, "name": out}), &out));
+            layers.push(out);
+            names.push(idx.to_string());
+        }
+    }
+    if texture {
+        let out = fresh(app, &format!("{image}_texture_fs"));
+        let band = if count >= 4 { 4 } else { 1 };
+        steps.push(makes("raster.texture", json!({"layer": image, "band": band, "window": 5, "name": out}), &out));
+        layers.push(out);
+        names.extend(["contrast", "homogeneity", "entropy"].map(String::from));
+    }
+    if !extra.is_empty() {
+        names.extend(band_names(app, &extra));
+        layers.push(extra);
+    }
+    if layers.is_empty() {
+        return say(app, false, tl!("nothing ticked yet").to_string());
+    }
+    let out = fresh(app, &format!("{image}_features"));
+    steps.push(makes(
+        "raster.process",
+        json!({"layer": image, "operation": "stack", "layers": layers, "bandNames": names, "name": out}),
+        &out,
+    ));
+    let temporary: Vec<String> = layers.iter().filter(|l| l.ends_with("_fs")).cloned().collect();
+    if !temporary.is_empty() {
+        steps.push(step("layer.remove", json!({"layer": temporary})));
+    }
+    let done = crate::i18n::fmt("{name} is ready.", &[("name", &out)]);
+    app.ui.rslab.image = out;
+    start_chain(app, tl!("Building feature stack").to_string(), steps, done);
+}
+
+/// A classifier: id (as `raster.classifySupervised` takes it), name, and its option (name,
+/// default, least, most).
+type Option4 = Option<(&'static str, f64, f64, f64)>;
+const CLASSIFIERS: &[(&str, &str, Option4)] = &[
+    ("randomForest", "Random Forest", Some(("Number of trees", 50.0, 5.0, 300.0))),
+    ("knn", "k-Nearest Neighbours", Some(("k neighbours", 5.0, 1.0, 25.0))),
+    ("maxLikelihood", "Maximum Likelihood", None),
+    ("mahalanobis", "Mahalanobis Distance", None),
+    ("minDistance", "Minimum Distance", None),
+    ("sam", "Spectral Angle Mapper", None),
+    ("parallelepiped", "Parallelepiped", Some(("Box size (± n std. dev.)", 2.0, 0.5, 5.0))),
+];
 
 fn classify_step(app: &mut RustGisApp, ui: &mut Ui) {
     let rs = rasters(app);
     pick(ui, "rslab_cimg", "Image", &mut app.ui.rslab.image, &rs);
     let image = app.ui.rslab.image.clone();
-    ui.label(egui::RichText::new(tl!("Unsupervised (K-means)")).strong());
-    ui.horizontal(|ui| {
-        ui.label(tl!("Classes"));
-        ui.add(egui::DragValue::new(&mut app.ui.rslab.classes).range(2.0..=20.0).speed(0.1).fixed_decimals(0));
-        if ui.add_enabled(!image.is_empty(), egui::Button::new(tl!("Classify"))).clicked() {
-            let k = app.ui.rslab.classes.round() as u64;
-            run(app, "raster.classify", json!({"layer": image, "classes": k, "name": format!("{image}_kmeans{k}")}));
+    let bands: Vec<usize> = (1..=band_count(app, &image)).collect();
+    heading(ui, "Unsupervised (K-means, ISODATA)");
+    ui.horizontal_wrapped(|ui| {
+        let st = &mut app.ui.rslab;
+        ui.radio_value(&mut st.unsupervised, "kmeans", "K-means");
+        ui.radio_value(&mut st.unsupervised, "isodata", "ISODATA");
+        if st.unsupervised == "isodata" {
+            ui.label(tl!("min"));
+            ui.add(egui::DragValue::new(&mut st.min_classes).range(2.0..=20.0).speed(0.05).fixed_decimals(0));
+            ui.label(tl!("max"));
+        } else {
+            ui.label(tl!("Classes"));
+        }
+        ui.add(egui::DragValue::new(&mut st.classes).range(2.0..=30.0).speed(0.05).fixed_decimals(0));
+        if ui.add_enabled(!image.is_empty(), egui::Button::new(tl!("Run clustering"))).clicked() {
+            let (k, m, method) = (st.classes.round() as u64, st.min_classes.round() as u64, st.unsupervised);
+            let out = fresh(app, &format!("{image}_{method}{k}"));
+            app.ui.rslab.class_map = out.clone();
+            let p = json!({"layer": image, "method": method, "classes": k, "minClasses": m.min(k), "bands": bands, "name": out});
+            run_one(app, "Clustering", "raster.classify", p, &out, None);
         }
     });
-    ui.add_space(4.0);
-    ui.label(egui::RichText::new(tl!("Supervised (training polygons)")).strong());
-    let map = app.session.map();
-    let polygons: Vec<String> = map
-        .layers
-        .iter()
-        .filter(|l| !l.is_raster() && l.geometry_type() == rustgis_engine::data::GeometryType::Polygon)
-        .map(|l| l.name.clone())
-        .collect();
-    if polygons.is_empty() {
-        ui.label(egui::RichText::new(tl!("Draw or add a polygon layer of training areas with a class field.")).weak());
+    heading(ui, "Supervised — classes & training");
+    {
+        let st = &mut app.ui.rslab;
+        ui.horizontal(|ui| {
+            ui.radio_value(&mut st.training_from_map, false, tl!("Training polygons"));
+            ui.radio_value(&mut st.training_from_map, true, tl!("From a land cover map"));
+        });
+    }
+    if app.ui.rslab.training_from_map {
+        let maps: Vec<String> = rs.iter().filter(|n| **n != image).cloned().collect();
+        pick(ui, "rslab_tmap", "Land cover", &mut app.ui.rslab.training_map, &maps);
+        ui.label(
+            egui::RichText::new(tl!("Download ESA WorldCover or Esri land cover in 1 Data: its classes teach the classifier.")).weak(),
+        );
+    } else {
+        if ui
+            .button(tl!("Create training layer (polygons)"))
+            .on_hover_text(tl!("Then draw polygons with Add Polygon Feature and type each one's class in its name field"))
+            .clicked()
+        {
+            if app.session.map().layer_by_name("training").is_none() {
+                now(app, "layer.template", json!({"template": "polygons", "name": "training"}));
+            }
+            app.ui.rslab.training = "training".into();
+            app.ui.rslab.class_field = "name".into();
+            now(app, "edit.enable", json!({"on": true}));
+        }
+        let polys = vectors(app, true);
+        if !polys.is_empty() {
+            pick(ui, "rslab_train", "Training layer", &mut app.ui.rslab.training, &polys);
+            let fs = fields(app, &app.ui.rslab.training.clone());
+            pick(ui, "rslab_field", "Class field", &mut app.ui.rslab.class_field, &fs);
+        }
+    }
+    heading(ui, "Supervised — classify");
+    {
+        let st = &mut app.ui.rslab;
+        let current = CLASSIFIERS.iter().find(|c| c.0 == st.method).map_or("", |c| c.1);
+        egui::ComboBox::from_label(tl!("Classifier")).selected_text(tl!(current)).width(200.0).truncate().show_ui(ui, |ui| {
+            for (id, label, opt) in CLASSIFIERS {
+                if ui.selectable_label(st.method == *id, tl!(label)).clicked() {
+                    st.method = id;
+                    if let Some((_, d, ..)) = opt {
+                        st.option = *d;
+                    }
+                }
+            }
+        });
+        if let Some((_, _, Some((label, _, lo, hi)))) = CLASSIFIERS.iter().find(|c| c.0 == st.method) {
+            ui.horizontal(|ui| {
+                ui.label(tl!(label));
+                let decimals = if st.method == "parallelepiped" { 1 } else { 0 };
+                ui.add(egui::DragValue::new(&mut st.option).range(*lo..=*hi).speed(0.1).fixed_decimals(decimals));
+            });
+        }
+        ui.horizontal(|ui| {
+            ui.label(tl!("Training pixels per class (most)"));
+            ui.add(egui::DragValue::new(&mut st.per_class).range(50.0..=20_000.0).speed(10.0).fixed_decimals(0));
+        });
+    }
+    let st = &app.ui.rslab;
+    let ready = !image.is_empty()
+        && if st.training_from_map { !st.training_map.is_empty() } else { !st.training.is_empty() && !st.class_field.is_empty() };
+    if ui.add_enabled(ready, egui::Button::new(egui::RichText::new(tl!("Classify")).strong())).clicked() {
+        let st = &app.ui.rslab;
+        let out = fresh(app, &format!("{image}_{}", st.method));
+        let mut p = json!({"layer": image, "method": st.method, "option": st.option, "perClass": st.per_class.round() as u64, "bands": bands, "name": out});
+        if st.training_from_map {
+            p["trainingRaster"] = json!(st.training_map);
+        } else {
+            p["training"] = json!(st.training);
+            p["classField"] = json!(st.class_field);
+        }
+        app.ui.rslab.class_map = out.clone();
+        run_one(app, "Classifying", "raster.classifySupervised", p, &out, Some("training"));
+    }
+    if let Some(v) = result(app, "training").cloned() {
+        training_result(ui, &v);
+    }
+    accuracy_section(app, ui, &rs);
+}
+
+fn training_result(ui: &mut Ui, v: &Value) {
+    if let Some(a) = v["trainingAccuracy"].as_f64() {
+        ui.label(crate::i18n::fmt("Training accuracy (optimistic): {p}%", &[("p", &format!("{:.1}", a * 100.0))]));
+    }
+    let mut imp: Vec<(String, f64)> = v["importance"]
+        .as_array()
+        .map(|a| a.iter().filter_map(|x| Some((x["band"].as_str()?.to_string(), x["importance"].as_f64()?))).collect())
+        .unwrap_or_default();
+    if imp.is_empty() {
         return;
     }
-    pick(ui, "rslab_train", "Training", &mut app.ui.rslab.training, &polygons);
-    let fields: Vec<String> = app
-        .session
-        .map()
-        .layer_by_name(&app.ui.rslab.training)
-        .map(|l| l.dataset.fields.iter().map(|f| f.name.clone()).collect())
-        .unwrap_or_default();
-    pick(ui, "rslab_field", "Class field", &mut app.ui.rslab.class_field, &fields);
-    let (training, field) = (app.ui.rslab.training.clone(), app.ui.rslab.class_field.clone());
-    if ui.add_enabled(!image.is_empty() && !field.is_empty(), egui::Button::new(tl!("Classify"))).clicked() {
-        run(
-            app,
-            "raster.classifySupervised",
-            json!({"layer": image, "training": training, "classField": field, "name": format!("{image}_supervised")}),
-        );
+    imp.sort_by(|a, b| b.1.total_cmp(&a.1));
+    let most = imp.first().map_or(1.0, |m| m.1).max(1e-9);
+    ui.label(egui::RichText::new(tl!("Most important bands")).strong());
+    for (n, v) in imp.iter().take(8) {
+        ui.horizontal(|ui| {
+            ui.label(n.as_str());
+            let (r, _) = ui.allocate_exact_size(egui::vec2(120.0, 10.0), egui::Sense::hover());
+            ui.painter().rect_filled(
+                egui::Rect::from_min_size(r.min, egui::vec2(120.0 * (*v / most) as f32, 10.0)),
+                2.0,
+                egui::Color32::from_rgb(0x08, 0x91, 0xB2),
+            );
+            ui.label(format!("{:.0}%", v * 100.0));
+        });
+    }
+}
+
+fn accuracy_section(app: &mut RustGisApp, ui: &mut Ui, rs: &[String]) {
+    heading(ui, "Classified map");
+    pick(ui, "rslab_cmap", "Map", &mut app.ui.rslab.class_map, rs);
+    let map = app.ui.rslab.class_map.clone();
+    if map.is_empty() {
+        return;
+    }
+    if ui.button(tl!("Class area (ha)")).on_hover_text(tl!("Each class's area; name the classes (clusters) here")).clicked()
+        && let Some(v) = now(app, "raster.classAreas", json!({"layer": map}))
+    {
+        app.ui.rslab.class_labels = v["classes"]
+            .as_array()
+            .map(|a| a.iter().filter_map(|c| Some((c["value"].as_f64()? as f32, c["class"].as_str()?.to_string()))).collect())
+            .unwrap_or_default();
+        keep_result(app, "areas", v);
+    }
+    if let Some(v) = result(app, "areas").cloned() {
+        egui::Grid::new("rslab_areas").striped(true).show(ui, |ui| {
+            for h in ["Value", "Class", "Area (ha)"] {
+                ui.label(egui::RichText::new(tl!(h)).strong());
+            }
+            ui.end_row();
+            let rows = v["classes"].as_array().cloned().unwrap_or_default();
+            for (i, c) in rows.iter().enumerate() {
+                ui.label(c["value"].to_string());
+                if let Some(l) = app.ui.rslab.class_labels.get_mut(i) {
+                    ui.add(egui::TextEdit::singleline(&mut l.1).desired_width(130.0));
+                } else {
+                    ui.label(c["class"].as_str().unwrap_or(""));
+                }
+                ui.label(format!("{:.1}", c["hectares"].as_f64().unwrap_or(0.0)));
+                ui.end_row();
+            }
+        });
+        if ui.button(tl!("Save class names")).clicked() {
+            let names: serde_json::Map<String, Value> = app.ui.rslab.class_labels.iter().map(|(v, n)| (format!("{v}"), json!(n))).collect();
+            if now(app, "raster.classNames", json!({"layer": map, "names": names})).is_some() {
+                say(app, true, tl!("Class names saved.").to_string());
+            }
+        }
+    }
+    heading(ui, "Accuracy / clean-up");
+    ui.horizontal_wrapped(|ui| {
+        let st = &mut app.ui.rslab;
+        ui.label(tl!("Majority filter (0 = off)"));
+        ui.add(egui::DragValue::new(&mut st.majority).range(0.0..=7.0).speed(0.05).fixed_decimals(0));
+        ui.label(tl!("Minimum mapping unit"));
+        ui.add(egui::DragValue::new(&mut st.sieve).range(1.0..=1000.0).speed(0.5).fixed_decimals(0).suffix(" px"));
+        if ui.button(tl!("Clean up")).clicked() {
+            let maj = match st.majority.round() as u64 {
+                0 => 0,
+                1..=4 => 3,
+                5..=6 => 5,
+                _ => 7,
+            };
+            let out = format!("{map}_clean");
+            let p = json!({"layer": map, "minPixels": st.sieve.round() as u64, "majority": maj, "name": out});
+            run_one(app, "Cleaning up", "raster.sieve", p, &out, Some("sieve"));
+        }
+    });
+    if let Some(n) = result(app, "sieve").and_then(|v| v["changed"].as_u64()) {
+        ui.label(egui::RichText::new(crate::i18n::fmt("Sieve: {n} pixels changed.", &[("n", &n.to_string())])).weak());
+    }
+    ui.horizontal(|ui| {
+        ui.label(tl!("Points per class"));
+        ui.add(egui::DragValue::new(&mut app.ui.rslab.points).range(5.0..=500.0).speed(0.5).fixed_decimals(0));
+        if ui
+            .button(tl!("Generate validation points"))
+            .on_hover_text(tl!("Stratified random points: fill ref_class with the true class (attribute table), then compute accuracy"))
+            .clicked()
+        {
+            let per = app.ui.rslab.points.round() as u64;
+            let name = format!("{map}_validation");
+            if now(app, "raster.samplePoints", json!({"layer": map, "perClass": per, "name": name})).is_some() {
+                app.ui.rslab.reference = name;
+                app.ui.rslab.ref_field = "ref_class".into();
+                let _ = app.run("table.open", json!({}));
+            }
+        }
+    });
+    let refs = vectors(app, false);
+    if !refs.is_empty() {
+        pick(ui, "rslab_ref", "Reference layer", &mut app.ui.rslab.reference, &refs);
+        let fs = fields(app, &app.ui.rslab.reference.clone());
+        pick(ui, "rslab_reff", "Reference class field", &mut app.ui.rslab.ref_field, &fs);
+        if ui.button(egui::RichText::new(tl!("Compute accuracy")).strong()).clicked() {
+            let (r, f) = (app.ui.rslab.reference.clone(), app.ui.rslab.ref_field.clone());
+            if let Some(v) = now(app, "raster.accuracy", json!({"layer": map, "reference": r, "classField": f})) {
+                keep_result(app, "accuracy", v);
+            }
+        }
+    }
+    if let Some(v) = result(app, "accuracy").cloned() {
+        accuracy_tables(ui, &v);
+    }
+}
+
+fn accuracy_tables(ui: &mut Ui, v: &Value) {
+    let classes: Vec<String> =
+        v["classes"].as_array().map(|a| a.iter().filter_map(|c| c.as_str().map(str::to_string)).collect()).unwrap_or_default();
+    let f = |k: &str| v[k].as_f64().unwrap_or(0.0);
+    ui.label(crate::i18n::fmt(
+        "Overall accuracy {oa}% · kappa {k} · area-weighted {w}% · {n} samples",
+        &[
+            ("oa", &format!("{:.1}", f("overall") * 100.0)),
+            ("k", &format!("{:.3}", f("kappa"))),
+            ("w", &format!("{:.1}", f("weightedOverall") * 100.0)),
+            ("n", &v["samples"].to_string()),
+        ],
+    ));
+    let arr = |k: &str| -> Vec<f64> { v[k].as_array().map(|a| a.iter().filter_map(Value::as_f64).collect()).unwrap_or_default() };
+    let (users, producers, mapped, est, ci) =
+        (arr("users"), arr("producers"), arr("mappedHectares"), arr("estimatedHectares"), arr("ci95Hectares"));
+    egui::ScrollArea::horizontal().id_salt("rslab_acc").show(ui, |ui| {
+        egui::Grid::new("rslab_matrix").striped(true).show(ui, |ui| {
+            ui.label(egui::RichText::new(tl!("Map / Ref")).strong());
+            for c in &classes {
+                ui.label(egui::RichText::new(c).strong());
+            }
+            ui.label(egui::RichText::new(tl!("User's acc.")).strong());
+            ui.end_row();
+            for (i, c) in classes.iter().enumerate() {
+                ui.label(egui::RichText::new(c).strong());
+                for j in 0..classes.len() {
+                    let n = v["matrix"][i][j].as_u64().unwrap_or(0).to_string();
+                    ui.label(if i == j { egui::RichText::new(n).strong() } else { egui::RichText::new(n) });
+                }
+                ui.label(format!("{:.0}%", users.get(i).copied().unwrap_or(0.0) * 100.0));
+                ui.end_row();
+            }
+            ui.label(egui::RichText::new(tl!("Producer's acc.")).strong());
+            for j in 0..classes.len() {
+                ui.label(format!("{:.0}%", producers.get(j).copied().unwrap_or(0.0) * 100.0));
+            }
+            ui.end_row();
+        });
+    });
+    ui.label(egui::RichText::new(tl!("Area-adjusted estimates")).strong());
+    egui::Grid::new("rslab_est").striped(true).show(ui, |ui| {
+        for h in ["Class", "Mapped (ha)", "Estimated (ha)", "± 95% CI (ha)"] {
+            ui.label(egui::RichText::new(tl!(h)).strong());
+        }
+        ui.end_row();
+        for (i, c) in classes.iter().enumerate() {
+            ui.label(c);
+            for x in [&mapped, &est, &ci] {
+                ui.label(format!("{:.0}", x.get(i).copied().unwrap_or(0.0)));
+            }
+            ui.end_row();
+        }
+    });
+}
+
+/// A colour for the `i`th class of a diagram.
+fn class_color(i: usize) -> egui::Color32 {
+    const C: [(u8, u8, u8); 10] = [
+        (0x2E, 0x86, 0xC1),
+        (0x27, 0xAE, 0x60),
+        (0xF3, 0x9C, 0x12),
+        (0xC0, 0x39, 0x2B),
+        (0x8E, 0x44, 0xAD),
+        (0x16, 0xA0, 0x85),
+        (0xD3, 0x54, 0x00),
+        (0x7F, 0x8C, 0x8D),
+        (0xF1, 0xC4, 0x0F),
+        (0x2C, 0x3E, 0x50),
+    ];
+    let (r, g, b) = C[i % C.len()];
+    egui::Color32::from_rgb(r, g, b)
+}
+
+/// The Sankey diagram of a from → to matrix: date 1's classes on the left, date 2's on the right,
+/// bands as wide as the area that went from one to the other.
+fn sankey(ui: &mut Ui, rows: &[(String, String, f64)]) {
+    let mut left: Vec<(String, f64)> = Vec::new();
+    let mut right: Vec<(String, f64)> = Vec::new();
+    for (a, b, ha) in rows {
+        match left.iter_mut().find(|x| x.0 == *a) {
+            Some(x) => x.1 += ha,
+            None => left.push((a.clone(), *ha)),
+        }
+        match right.iter_mut().find(|x| x.0 == *b) {
+            Some(x) => x.1 += ha,
+            None => right.push((b.clone(), *ha)),
+        }
+    }
+    let total: f64 = left.iter().map(|x| x.1).sum();
+    if total <= 0.0 {
+        return;
+    }
+    let width = ui.available_width().clamp(260.0, 420.0);
+    let height = 260.0;
+    let (rect, _) = ui.allocate_exact_size(egui::vec2(width, height), egui::Sense::hover());
+    let p = ui.painter_at(rect);
+    let gap = 4.0;
+    let usable = |n: usize| height - gap * n.saturating_sub(1) as f32;
+    let (scale_l, scale_r) = (usable(left.len()) / total as f32, usable(right.len()) / total as f32);
+    let (lx, rx, bar) = (rect.left() + 100.0, rect.right() - 100.0, 10.0);
+    // Labels shortened to fit their side.
+    let short = |s: &str| -> String {
+        if s.chars().count() > 15 { format!("{}…", s.chars().take(14).collect::<String>()) } else { s.to_string() }
+    };
+    let mut names: Vec<&str> = left.iter().map(|x| x.0.as_str()).collect();
+    for r in &right {
+        if !names.contains(&r.0.as_str()) {
+            names.push(&r.0);
+        }
+    }
+    let colour_of = |name: &str| class_color(names.iter().position(|x| *x == name).unwrap_or(0));
+    let font = egui::FontId::proportional(11.0);
+    let text = ui.visuals().text_color();
+    let mut ly: Vec<f32> = Vec::new();
+    let mut y = rect.top();
+    for (name, ha) in &left {
+        let h = (*ha as f32 * scale_l).max(1.0);
+        p.rect_filled(egui::Rect::from_min_size(egui::pos2(lx - bar, y), egui::vec2(bar, h)), 1.0, colour_of(name));
+        p.text(egui::pos2(lx - bar - 4.0, y + h / 2.0), egui::Align2::RIGHT_CENTER, short(name), font.clone(), text);
+        ly.push(y);
+        y += h + gap;
+    }
+    let mut ry: Vec<f32> = Vec::new();
+    let mut y = rect.top();
+    for (name, ha) in &right {
+        let h = (*ha as f32 * scale_r).max(1.0);
+        p.rect_filled(egui::Rect::from_min_size(egui::pos2(rx, y), egui::vec2(bar, h)), 1.0, colour_of(name));
+        p.text(egui::pos2(rx + bar + 4.0, y + h / 2.0), egui::Align2::LEFT_CENTER, short(name), font.clone(), text);
+        ry.push(y);
+        y += h + gap;
+    }
+    for (a, b, ha) in rows {
+        let (Some(i), Some(j)) = (left.iter().position(|x| x.0 == *a), right.iter().position(|x| x.0 == *b)) else { continue };
+        let (hl, hr) = (*ha as f32 * scale_l, *ha as f32 * scale_r);
+        let (y0, y1) = (ly[i], ry[j]);
+        ly[i] += hl;
+        ry[j] += hr;
+        let c = colour_of(a).gamma_multiply(if a == b { 0.25 } else { 0.55 });
+        // The band in vertical strips (each a convex quad) along a smooth S.
+        const N: usize = 24;
+        let at = |t: f32, from: f32, to: f32| {
+            let s = t * t * (3.0 - 2.0 * t);
+            egui::pos2(lx + (rx - lx) * t, from + (to - from) * s)
+        };
+        for k in 0..N {
+            let (t0, t1) = (k as f32 / N as f32, (k + 1) as f32 / N as f32);
+            let quad = vec![at(t0, y0, y1), at(t1, y0, y1), at(t1, y0 + hl, y1 + hr), at(t0, y0 + hl, y1 + hr)];
+            p.add(egui::Shape::convex_polygon(quad, c, egui::Stroke::NONE));
+        }
     }
 }
 
 fn change_step(app: &mut RustGisApp, ui: &mut Ui) {
-    ui.label(egui::RichText::new(tl!("Compare two dates: download two images (or make an index of each), then pick them here.")).weak());
     let rs = rasters(app);
-    pick(ui, "rslab_before", "Before", &mut app.ui.rslab.before, &rs);
-    pick(ui, "rslab_after", "After", &mut app.ui.rslab.after, &rs);
+    heading(ui, "From → to: compare two classified maps");
+    // Two different maps to start with: the one below the top, and the top one.
+    if app.ui.rslab.before.is_empty() && app.ui.rslab.after.is_empty() && rs.len() >= 2 {
+        app.ui.rslab.before.clone_from(&rs[1]);
+        app.ui.rslab.after.clone_from(&rs[0]);
+    }
+    pick(ui, "rslab_before", "Date 1 (before)", &mut app.ui.rslab.before, &rs);
+    pick(ui, "rslab_after", "Date 2 (after)", &mut app.ui.rslab.after, &rs);
+    let (before, after) = (app.ui.rslab.before.clone(), app.ui.rslab.after.clone());
+    let ok = !before.is_empty() && !after.is_empty() && before != after;
+    if ui.add_enabled(ok, egui::Button::new(egui::RichText::new(tl!("Detect change")).strong())).clicked() {
+        let out = format!("{before}_to_{after}");
+        run_one(app, "Land-cover change", "raster.crossTab", json!({"from": before, "to": after, "name": out}), &out, Some("crossTab"));
+    }
+    if let Some(v) = result(app, "crossTab").cloned() {
+        change_result(ui, &v);
+    }
+    heading(ui, "Image differencing (index or band)");
+    let st = &mut app.ui.rslab;
     ui.horizontal(|ui| {
         ui.label(tl!("Method"));
         for (m, label) in [("difference", "Difference"), ("ratio", "Ratio"), ("percent", "Percent")] {
-            ui.radio_value(&mut app.ui.rslab.method, m, tl!(label));
+            ui.radio_value(&mut st.diff_method, m, tl!(label));
         }
     });
-    let st = &app.ui.rslab;
-    let (before, after, method) = (st.before.clone(), st.after.clone(), st.method);
-    if ui.add_enabled(!before.is_empty() && !after.is_empty() && before != after, egui::Button::new(tl!("Detect Change"))).clicked() {
-        run(app, "raster.change", json!({"before": before, "after": after, "method": method, "name": format!("change_{method}")}));
+    let method = st.diff_method;
+    if ui.add_enabled(ok, egui::Button::new(tl!("Run"))).clicked() {
+        let out = format!("change_{method}");
+        run_one(
+            app,
+            "Change detection",
+            "raster.change",
+            json!({"before": before, "after": after, "method": method, "name": out}),
+            &out,
+            None,
+        );
+    }
+}
+
+fn change_result(ui: &mut Ui, v: &Value) {
+    let rows: Vec<(String, String, f64)> = v["matrix"]
+        .as_array()
+        .map(|a| {
+            a.iter()
+                .filter_map(|r| Some((r["fromClass"].as_str()?.to_string(), r["toClass"].as_str()?.to_string(), r["hectares"].as_f64()?)))
+                .collect()
+        })
+        .unwrap_or_default();
+    ui.label(crate::i18n::fmt("Changed area: {ha} ha", &[("ha", &format!("{:.1}", v["changedHectares"].as_f64().unwrap_or(0.0)))]));
+    ui.label(egui::RichText::new(tl!("Sankey diagram")).strong());
+    sankey(ui, &rows);
+    let mut classes: Vec<String> = Vec::new();
+    for (a, b, _) in &rows {
+        for c in [a, b] {
+            if !classes.contains(c) {
+                classes.push(c.clone());
+            }
+        }
+    }
+    ui.label(egui::RichText::new(tl!("Gains and losses per class")).strong());
+    egui::ScrollArea::horizontal().id_salt("rslab_gain_scroll").show(ui, |ui| {
+        egui::Grid::new("rslab_gain").striped(true).show(ui, |ui| {
+            for h in ["Class", "Date 1 (ha)", "Date 2 (ha)", "Gain", "Loss", "Net"] {
+                ui.label(egui::RichText::new(tl!(h)).strong());
+            }
+            ui.end_row();
+            for c in &classes {
+                let sum = |f: &dyn Fn(&(String, String, f64)) -> bool| rows.iter().filter(|r| f(r)).map(|r| r.2).sum::<f64>();
+                let d1 = sum(&|r| r.0 == *c);
+                let d2 = sum(&|r| r.1 == *c);
+                let gain = sum(&|r| r.1 == *c && r.0 != *c);
+                let loss = sum(&|r| r.0 == *c && r.1 != *c);
+                ui.label(c);
+                for x in [d1, d2, gain, loss] {
+                    ui.label(format!("{x:.1}"));
+                }
+                ui.label(format!("{:+.1}", gain - loss));
+                ui.end_row();
+            }
+        })
+    });
+    ui.label(egui::RichText::new(tl!("Largest changes (from → to)")).strong());
+    let mut changes: Vec<&(String, String, f64)> = rows.iter().filter(|r| r.0 != r.1).collect();
+    changes.sort_by(|a, b| b.2.total_cmp(&a.2));
+    for (a, b, ha) in changes.iter().take(8) {
+        ui.label(format!("{a} → {b}: {ha:.1} ha"));
     }
 }
 
 fn map_step(app: &mut RustGisApp, ui: &mut Ui) {
+    heading(ui, "Map layout (print)");
+    let km = crate::khdata::khmer();
+    if app.ui.rslab.title.is_empty() {
+        let place = area(app).map(|a| a.place).unwrap_or_default();
+        app.ui.rslab.title = auto_title(&place, "", false, km);
+    }
+    ui.horizontal(|ui| {
+        ui.label(tl!("Title"));
+        ui.add(egui::TextEdit::singleline(&mut app.ui.rslab.title).desired_width(250.0));
+    });
+    ui.horizontal(|ui| {
+        let place = area(app).map(|a| a.place).unwrap_or_default();
+        let year: String = app.ui.rslab.image.split('_').nth(1).map(|d| d.chars().take(4).collect()).unwrap_or_default();
+        if ui.button(tl!("Image title")).clicked() {
+            app.ui.rslab.title = auto_title(&place, &year, false, km);
+        }
+        if ui.button(tl!("Land cover title")).clicked() {
+            app.ui.rslab.title = auto_title(&place, &year, true, km);
+        }
+    });
     if ui
-        .button(egui::RichText::new(tl!("Auto Map Layout")).strong())
+        .button(egui::RichText::new(tl!("Create map layout")).strong())
         .on_hover_text(tl!("An A4 map of the view: title, legend, scale bar, north arrow, inset and sources"))
         .clicked()
     {
-        match app.run("khgis.autoLayout", json!({"lang": crate::khdata::lang()})) {
+        let title = app.ui.rslab.title.clone();
+        match app.run(
+            "khgis.autoLayout",
+            json!({"lang": crate::khdata::lang(), "title": title, "author": "Geoinformatics and Research Lab, RUPP"}),
+        ) {
             Ok(_) => say(app, true, tl!("Map layout made: Publish › Export to save it as PDF.").to_string()),
             Err(e) => say(app, false, e),
         }
     }
-    ui.add_space(4.0);
+    heading(ui, "3D");
     if ui
         .button(tl!("Open in Cambodia 3D"))
         .on_hover_text(tl!("The middle of the map view as a 3D landscape with trees and houses (up to 4 × 4 km)"))
@@ -681,21 +2002,35 @@ pub fn pane(app: &mut RustGisApp, ui: &mut Ui) {
             }
         }
     });
-    if let Some((name, done)) = crate::analysispane::background_job(app) {
-        let mut cancel = false;
-        ui.horizontal(|ui| {
+    // The run under way: its step, the background work's progress, and Cancel.
+    let mut cancel = false;
+    let job = crate::analysispane::background_job(app);
+    if let Some(c) = &app.ui.rslab.chain {
+        ui.horizontal_wrapped(|ui| {
             ui.spinner();
-            let text = match done {
-                Some(f) => format!("{} {:.0}%", tl!(name), f * 100.0),
-                None => tl!(name).to_string(),
-            };
+            let mut text = format!("{} ({}/{})", c.title, (c.done + 1).min(c.total), c.total);
+            if let Some((name, Some(f))) = job {
+                text.push_str(&format!(" · {} {:.0}%", tl!(name), f * 100.0));
+            }
             ui.label(text);
             cancel = ui.small_button(tl!("Cancel")).clicked();
         });
-        if cancel {
-            crate::analysispane::cancel_job(app);
-        }
         ui.ctx().request_repaint_after(std::time::Duration::from_millis(250));
+    } else if let Some((name, done)) = job {
+        ui.horizontal(|ui| {
+            ui.spinner();
+            ui.label(match done {
+                Some(f) => format!("{} {:.0}%", tl!(name), f * 100.0),
+                None => tl!(name).to_string(),
+            });
+            cancel = ui.small_button(tl!("Cancel")).clicked();
+        });
+        ui.ctx().request_repaint_after(std::time::Duration::from_millis(250));
+    }
+    if cancel {
+        crate::analysispane::cancel_job(app);
+        app.ui.rslab.chain = None;
+        say(app, false, tl!("cancelled").to_string());
     }
     ui.separator();
     egui::ScrollArea::vertical().id_salt("rslab_step").auto_shrink([false, true]).show(ui, |ui| {
@@ -712,7 +2047,7 @@ pub fn pane(app: &mut RustGisApp, ui: &mut Ui) {
         }
         ui.add_space(6.0);
         ui.label(
-            egui::RichText::new(tl!("Imagery: Copernicus Sentinel-2 (ESA) and Landsat (USGS/NASA), served by Microsoft Planetary Computer. After the LEE RS Lab plugin, Geoinformatics and Research Lab, RUPP."))
+            egui::RichText::new(tl!("Data: Copernicus Sentinel-1/2 and DEM (ESA), Landsat (USGS/NASA), ESA WorldCover, Esri | Impact Observatory land cover, JRC Global Surface Water, via Microsoft Planetary Computer; communes from geoBoundaries. After the LEE RS Lab plugin, Geoinformatics and Research Lab, RUPP."))
                 .small()
                 .color(t.text_dim),
         );
@@ -725,12 +2060,14 @@ mod tests {
 
     #[test]
     fn search_asks_for_clear_scenes_of_the_area() {
-        let u = search_url(Sensor::Landsat, [104.8, 11.5, 105.0, 11.7], "2025-01-01", "2025-03-31", 20.0);
+        let u = search_url(Dataset::Landsat89, [104.8, 11.5, 105.0, 11.7], "2025-01-01", "2025-03-31", 20.0);
         assert!(u.starts_with(STAC), "{u}");
         assert!(u.contains("collections=landsat-c2-l2&bbox=104.80000,11.50000,105.00000,11.70000"), "{u}");
         assert!(u.contains("datetime=2025-01-01T00:00:00Z/2025-03-31T23:59:59Z"), "{u}");
         assert!(u.contains("filter=eo:cloud_cover%3C20%20AND%20platform%20IN%20(%27landsat-8%27,%27landsat-9%27)"), "{u}");
         assert!(u.ends_with("sortby=%2Beo:cloud_cover"), "{u}");
+        let dem = search_url(Dataset::Dem, [104.8, 11.5, 105.0, 11.7], "", "", 20.0);
+        assert!(!dem.contains("datetime") && !dem.contains("filter"), "{dem}");
     }
 
     #[test]
@@ -740,11 +2077,14 @@ mod tests {
             {"id": "a2", "properties": {"datetime": "2025-02-28T03:17:21Z", "eo:cloud_cover": 4.0, "s2:processing_baseline": "05.11"}},
             {"id": "b1", "properties": {"datetime": "2021-02-08T03:19:31Z", "eo:cloud_cover": 1.0, "s2:processing_baseline": "02.12"}},
         ]});
-        let s = scenes(Sensor::Sentinel2, fc.to_string().as_bytes()).unwrap();
+        let s = scenes(Dataset::Sentinel2, fc.to_string().as_bytes()).unwrap();
         assert_eq!(s.len(), 2);
         assert_eq!((s[0].date.as_str(), s[0].offset), ("2021-02-08", 0.0));
         assert_eq!((s[1].items.len(), s[1].cloud, s[1].offset), (2, 3.0, -0.1));
-        assert!(scenes(Sensor::Sentinel2, br#"{"description": "bad"}"#).is_err());
+        assert!(scenes(Dataset::Sentinel2, br#"{"description": "bad"}"#).is_err());
+        let wc = json!({"features": [{"id": "ESA_WorldCover_10m_2021_v200_N09E102", "properties": {}}, {"id": "ESA_WorldCover_10m_2020_v100_N09E102", "properties": {}}]});
+        let s = scenes(Dataset::WorldCover, wc.to_string().as_bytes()).unwrap();
+        assert_eq!(s.iter().map(|s| s.date.as_str()).collect::<Vec<_>>(), ["2021", "2020"]);
     }
 
     #[test]
@@ -753,12 +2093,10 @@ mod tests {
         assert!((1080..1100).contains(&w) && (1100..1120).contains(&h) && cell == 10.0, "{w} {h} {cell}");
         let (w, h, cell) = grid([102.0, 11.0, 104.0, 13.0], 10.0);
         assert!(w <= MAX_SIDE && h == MAX_SIDE && cell > 80.0, "{w} {h} {cell}");
-        let u = image_url(Sensor::Sentinel2, "S2C_X", [104.85, 11.52, 104.95, 11.62], w, h);
-        assert!(
-            u.contains("/104.850000,11.520000,104.950000,11.620000/")
-                && u.contains("&assets=B02&assets=B03&assets=B04&assets=B08&assets=B11&assets=B12"),
-            "{u}"
-        );
+        let u = image_url(Dataset::Sentinel2, "S2C_X", [104.85, 11.52, 104.95, 11.62], w, h, true);
+        assert!(u.contains("/104.850000,11.520000,104.950000,11.620000/"), "{u}");
+        assert!(u.contains("&assets=B02&assets=B03&assets=B04&assets=B08&assets=B11&assets=B12&assets=SCL"), "{u}");
+        assert!(image_url(Dataset::Landsat89, "L", [0.0, 0.0, 1.0, 1.0], 9, 9, true).contains("&assets=qa_pixel"));
     }
 
     #[test]
@@ -767,5 +2105,24 @@ mod tests {
         let b: Vec<f64> = u.split("aoi=").nth(1).unwrap().split(',').map(|v| v.parse().unwrap()).collect();
         assert!((b[3] - b[1]) * 111.32 <= 4.01 && (b[2] - b[0]) * 111.32 * 12f64.to_radians().cos() <= 4.01, "{u}");
         assert!(((b[0] + b[2]) / 2.0 - 105.0).abs() < 1e-4);
+    }
+
+    #[test]
+    fn communes_are_found_in_their_district() {
+        let square = json!({"type": "Polygon", "coordinates": [[[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0], [0.0, 0.0]]]});
+        let district = json!({"geometry": square});
+        let all = json!({"features": [
+            {"properties": {"shapeName": "In"}, "geometry": {"type": "Polygon", "coordinates": [[[0.2, 0.2], [0.4, 0.2], [0.4, 0.4], [0.2, 0.2]]]}},
+            {"properties": {"shapeName": "Out"}, "geometry": {"type": "Polygon", "coordinates": [[[2.2, 0.2], [2.4, 0.2], [2.4, 0.4], [2.2, 0.2]]]}},
+        ]});
+        let c = communes_in(&all, &district);
+        assert_eq!(c.iter().map(|c| c.0.as_str()).collect::<Vec<_>>(), ["In"]);
+    }
+
+    #[test]
+    fn titles_follow_the_place_and_year() {
+        assert_eq!(auto_title("Kandal", "2025", true, false), "Land use and land cover map of Kandal, 2025");
+        assert_eq!(auto_title("ខេត្តកណ្ដាល", "2025", true, true), "ផែនទីការប្រើប្រាស់ដី និងគម្របដី ខេត្តកណ្ដាល ឆ្នាំ២០២៥");
+        assert_eq!(auto_title("", "view", false, false), "Satellite image map");
     }
 }

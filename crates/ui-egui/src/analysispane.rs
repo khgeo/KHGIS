@@ -185,8 +185,10 @@ pub fn run_quietly(app: &mut RustGisApp, id: &str, p: Value) {
         }
         return;
     }
-    if let Err(e) = app.run(id, p) {
-        app.session.notify(e, true);
+    // Its answer kept where a background run's lands (`Workflow::result`).
+    match app.run(id, p) {
+        Ok(v) => app.workflow.result = Some(v),
+        Err(e) => app.session.notify(e, true),
     }
 }
 

@@ -49,10 +49,14 @@ A4 map — are single commands.
   the Processing Toolbox and the Vector and Raster menus; the web app uses a QGIS bridge service
   (`packaging/qgis-bridge`). See [QGIS layout and QGIS plugins](docs/user-guide/qgis.md).
 - **LEE RS Lab, built in.** A remote sensing lab after the LEE RS Lab QGIS plugin, docked beside
-  Layer Styling and in **Raster › LEE RS Lab**: pick a province, district or the map view, search
-  Sentinel-2 or Landsat 8/9 by date and cloud, download the scene clipped to the area as one
-  six-band reflectance image, then band combinations, indices, k-means or supervised
-  classification, change detection and an A4 map — in the browser too, no QGIS or login needed.
+  Layer Styling and in **Raster › LEE RS Lab**: a province, district, commune, the view or your
+  own polygon; Sentinel-2, Landsat 4–9, Sentinel-1, Copernicus DEM, WorldCover, Esri land cover or
+  JRC water, clouds masked and median composites; band combinations, stretches, ten indices, band
+  math, filters, PCA and a feature stack with GLCM texture; K-means, ISODATA and seven supervised
+  classifiers (Random Forest, kNN, Maximum Likelihood, Mahalanobis, Minimum Distance, SAM,
+  Parallelepiped), trained from polygons or a land cover map; clean-up, accuracy assessment with
+  area-adjusted estimates; from → to change with a Sankey diagram; and an A4 map with a Khmer
+  title — in the browser too, no QGIS or login needed.
 - **Cambodia 3D.** **View › Open in Cambodia 3D** opens the middle of the map in
   [Cambodia 3D](https://khgeo.github.io/cambodia-3d/): terrain, imagery, trees, houses and roads.
 - **A Cambodia-aware assistant.** The bundled `cambodia` skill understands province names in

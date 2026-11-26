@@ -33054,6 +33054,7 @@ fn raster_tools_run_on_another_thread() {
         l.raster.as_ref().unwrap().data.as_ref().unwrap().bands.iter().flat_map(|b| b.data.iter().map(|x| x.to_bits())).collect()
     };
     let ranges = json!([[f64::MIN, 300.0, 1], [300.0, f64::MAX, 10]]);
+    s.run("raster.process", &json!({"layer": dem, "operation": "stack", "layers": ["dem_later"], "name": "two"})).unwrap();
     for (command, p) in [
         ("raster.function", json!({"layer": dem, "function": "hillshade"})),
         ("raster.function", json!({"layer": dem, "function": "resample", "target": "dem_later"})),
@@ -33068,6 +33069,11 @@ fn raster_tools_run_on_another_thread() {
         ("raster.process", json!({"layer": dem, "operation": "clip", "polygon": "Training"})),
         ("raster.process", json!({"layer": dem, "operation": "clip", "extent": [10.005, 45.005, 10.02, 45.02]})),
         ("raster.process", json!({"layer": dem, "operation": "resample", "factor": 4})),
+        ("raster.filter", json!({"layer": dem, "filter": "median", "size": 5})),
+        ("raster.pca", json!({"layer": "two", "components": 2})),
+        ("raster.texture", json!({"layer": dem, "window": 5})),
+        ("raster.sieve", json!({"layer": dem, "minPixels": 4})),
+        ("raster.crossTab", json!({"from": dem, "to": "dem_later"})),
         ("imagery.mosaic", json!({"name": "Valley"})),
     ] {
         assert!(runs_in_background(command).is_some(), "{command}");
@@ -35401,6 +35407,11 @@ fn long_commands_stop_when_cancelled_while_they_run() {
         ("raster.change", json!({"before": dem, "after": "dem_later", "method": "difference"})),
         ("raster.index", json!({"layer": dem, "index": "ndvi", "nir": 1, "red": 1})),
         ("raster.process", json!({"layer": dem, "operation": "resample", "factor": 4})),
+        ("raster.filter", json!({"layer": dem, "filter": "median", "size": 5})),
+        ("raster.pca", json!({"layer": "scene", "bands": [1, 2], "components": 2})),
+        ("raster.texture", json!({"layer": dem, "window": 5})),
+        ("raster.sieve", json!({"layer": dem, "minPixels": 4})),
+        ("raster.crossTab", json!({"from": dem, "to": "dem_later"})),
         ("imagery.mosaic", json!({"name": "Valley"})),
         (
             "dl.classify",
@@ -35493,5 +35504,82 @@ fn process_stacks_and_merges_bands() {
         assert!((got - want).abs() < 1e-6, "{:?}", m.bands[0].data);
     }
     assert!(s.run("raster.process", &json!({"layer": names[0], "operation": "stack"})).is_err());
+    // A quality band masks flagged pixels and is left out; the median of two dates.
+    s.run("raster.process", &json!({"layer": names[0], "operation": "stack", "layers": [names[1]], "name": "withQa"})).unwrap();
+    let out = s
+        .run("raster.process", &json!({"layer": "withQa", "operation": "merge", "layers": ["withQa"], "maskBand": 2, "maskValues": [3000], "combine": "median", "name": "masked"}))
+        .unwrap();
+    let m = get(&s, "masked");
+    assert_eq!(m.bands.len(), 1);
+    assert!(m.bands[0].data[2] < -1e30 && m.bands[0].data[0] == 1000.0, "{:?}", m.bands[0].data);
+    assert!(out["maskedPercent"].as_f64().unwrap() > 0.0);
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
+/// The lab's classifiers, filters, components, texture, sieve, change matrix, class areas,
+/// accuracy points and assessment run end to end on a small two-class scene.
+#[test]
+fn remote_sensing_lab_commands_run_end_to_end() {
+    let dir = std::env::temp_dir().join(format!("rustgis-engine-rslab-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let mut s = Session::new(Project::default());
+    // Left half water (low in both bands), right half fields (high NIR).
+    let mut rows = (String::new(), String::new());
+    for _ in 0..20 {
+        let (mut a, mut b) = (Vec::new(), Vec::new());
+        for c in 0..20 {
+            let field = c >= 10;
+            a.push(if field { 30 + c % 3 } else { 5 + c % 2 });
+            b.push(if field { 60 + c % 4 } else { 3 + c % 2 });
+        }
+        rows.0 += &(a.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(" ") + "\n");
+        rows.1 += &(b.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(" ") + "\n");
+    }
+    let mut names = Vec::new();
+    for (file, values) in [("red.asc", &rows.0), ("nir.asc", &rows.1)] {
+        let path = dir.join(file);
+        std::fs::write(&path, format!("ncols 20\nnrows 20\nxllcorner 104\nyllcorner 11\ncellsize 0.001\n{values}")).unwrap();
+        let id = s.run("layer.addData", &json!({"path": path})).unwrap()["layer"].as_u64().unwrap();
+        names.push(s.map().layer(id as u32).unwrap().name.clone());
+    }
+    s.run("raster.process", &json!({"layer": names[0], "operation": "stack", "layers": [names[1]], "name": "img"})).unwrap();
+    let training = json!({"type": "FeatureCollection", "features": [
+        {"type": "Feature", "properties": {"class": "water"}, "geometry": {"type": "Polygon", "coordinates": [[[104.001, 11.001], [104.008, 11.001], [104.008, 11.019], [104.001, 11.019], [104.001, 11.001]]]}},
+        {"type": "Feature", "properties": {"class": "field"}, "geometry": {"type": "Polygon", "coordinates": [[[104.012, 11.001], [104.019, 11.001], [104.019, 11.019], [104.012, 11.019], [104.012, 11.001]]]}}]});
+    s.run("layer.addDataText", &json!({"fileName": "training.geojson", "text": training.to_string(), "name": "training"})).unwrap();
+    for method in ["minDistance", "mahalanobis", "maxLikelihood", "sam", "parallelepiped", "knn", "randomForest"] {
+        let out = s
+            .run(
+                "raster.classifySupervised",
+                &json!({"layer": "img", "training": "training", "classField": "class", "bands": [1, 2], "method": method, "name": method}),
+            )
+            .unwrap_or_else(|e| panic!("{method}: {e}"));
+        assert!(out["trainingAccuracy"].as_f64().unwrap() > 0.9, "{method}: {out}");
+        let areas = s.run("raster.classAreas", &json!({"layer": method})).unwrap();
+        let classes: Vec<&str> = areas["classes"].as_array().unwrap().iter().filter_map(|c| c["class"].as_str()).collect();
+        assert!(classes.contains(&"water") && classes.contains(&"field"), "{method}: {areas}");
+    }
+    // Trained from a class raster instead.
+    s.run("raster.classifySupervised", &json!({"layer": "img", "trainingRaster": "randomForest", "bands": [1, 2], "name": "fromMap"}))
+        .unwrap();
+    s.run("raster.classify", &json!({"layer": "img", "method": "isodata", "classes": 4, "bands": [1, 2], "name": "iso"})).unwrap();
+    let pca = s.run("raster.pca", &json!({"layer": "img", "name": "pc"})).unwrap();
+    assert_eq!(pca["explained"].as_array().unwrap().len(), 2);
+    s.run("raster.filter", &json!({"layer": "img", "filter": "gaussian", "size": 5})).unwrap();
+    s.run("raster.texture", &json!({"layer": "img", "band": 2, "measures": ["contrast", "entropy"]})).unwrap();
+    let sieve = s.run("raster.sieve", &json!({"layer": "knn", "minPixels": 3, "majority": 3})).unwrap();
+    assert!(sieve["changed"].as_u64().is_some());
+    let change = s.run("raster.crossTab", &json!({"from": "knn", "to": "randomForest"})).unwrap();
+    assert!(!change["matrix"].as_array().unwrap().is_empty());
+    let pts = s.run("raster.samplePoints", &json!({"layer": "knn", "perClass": 5, "name": "check"})).unwrap();
+    assert_eq!(pts["points"], 10);
+    // Unlabelled points: nothing to assess yet.
+    assert!(s.run("raster.accuracy", &json!({"layer": "knn", "reference": "check", "classField": "ref_class"})).is_err());
+    let acc = s.run("raster.accuracy", &json!({"layer": "knn", "reference": "training", "classField": "class"})).unwrap();
+    assert!(acc["overall"].as_f64().unwrap() > 0.9, "{acc}");
+    assert_eq!(acc["matrix"].as_array().unwrap().len(), 2);
+    s.run("raster.classNames", &json!({"layer": "iso", "names": {"1": "Water", "2": "Field"}})).unwrap();
+    let areas = s.run("raster.classAreas", &json!({"layer": "iso"})).unwrap();
+    assert_eq!(areas["classes"][0]["class"], "Water");
     std::fs::remove_dir_all(dir).unwrap();
 }

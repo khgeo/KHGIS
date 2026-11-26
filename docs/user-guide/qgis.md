@@ -56,28 +56,66 @@ KHGIS projects themselves save as `.kgis` (older `.rgis` projects still open).
 
 The **LEE RS Lab** panel (a tab beside Layer Styling; also **Raster › LEE RS Lab** and the
 Cambodia menu) brings the LEE RS Lab QGIS plugin's lessons into KHGIS, so a class can do them in
-the browser with no QGIS installed:
+the browser with no QGIS installed. Slow steps run in the background on the desktop, with their
+progress and Cancel at the top of the lab; a run of steps (download, merge, clip…) goes one after
+another by itself.
 
-1. **Data** — choose the study area (a province or district, or the map view), the satellite
-   (Sentinel-2 at 10 m or Landsat 8/9 at 30 m), the dates and the most cloud, and **Search**.
-   Pick a date and **Download Image**: each tile of that date over the area is downloaded clipped
-   to it, and the tiles are merged into one image of six bands — Blue, Green, Red, NIR, SWIR1,
-   SWIR2 — in surface reflectance. A large area gets larger cells (at most 2,500 across), and the
-   lab says so.
-2. **Enhance** — band combinations (natural color, color infrared, agriculture, urban,
-   land/water) and indices (NDVI, NDWI, NDBI, SAVI, EVI, NBR).
-3. **Classify** — k-means with the number of classes, or supervised from a polygon layer of
-   training areas and its class field.
-4. **Change** — two images or indices compared by difference, ratio or percent.
-5. **Map** — the A4 map layout, in Khmer or English, and **Open in Cambodia 3D**.
+**1 Data**
 
-Imagery comes from Microsoft's Planetary Computer (Copernicus Sentinel-2, USGS Landsat), which
-needs no account. On the desktop the slow steps run in the background, with their progress and
-Cancel in the lab.
+- **Study area**: a province, district or commune (communes from geoBoundaries, loaded when a
+  district is picked), the map view, or a polygon layer of your own. *Clip to the area's shape*
+  cuts the image to the boundary, not just its box.
+- **Datasets** (Microsoft Planetary Computer, no account): Sentinel-2 (10 m), Landsat 8–9 and
+  Landsat 4–7 (30 m), Sentinel-1 radar VV/VH in dB, the Copernicus 30 m DEM (with slope), ESA
+  WorldCover and Esri land cover (10 m, class names filled in), and JRC surface water occurrence.
+- Imagery is searched by date and scene cloud cover. *Mask clouds and shadows* uses Sentinel-2's
+  scene classes (SCL) or Landsat's QA_PIXEL bits. *Dates in the composite* above 1 makes a median
+  composite of the picked date and the next clearest ones, which fills the clouds.
+- Each tile is downloaded clipped to the area, and the tiles merged into one image: six bands of
+  surface reflectance (Blue, Green, Red, NIR, SWIR1, SWIR2) for optical imagery. A large area gets
+  larger cells (at most 2,500 across), and the lab says so.
 
-`raster.process` gained two operations the lab uses, which scripts can use too: `stack` (several
-rasters' bands as one raster) and `merge` (pieces of one image on one grid), both with `nodata`,
-`scale` and `offset`.
+**2 Enhance**: band combinations (natural colour, colour infrared, agriculture, urban,
+land/water, vegetation, or any R/G/B); stretches (min–max, percent clip, standard deviation,
+histogram equalization); ten indices (NDVI, GNDVI, SAVI, EVI, NDWI, MNDWI, NDMI, NDBI, BSI, NBR);
+band math with your own formula; spatial filters (mean, median, Gaussian, sharpen, Sobel,
+Laplacian, emboss, minimum, maximum); principal components (with each one's explained
+variance); and a **feature stack** for classification: the image's bands plus NDVI, NDWI, NDBI,
+GLCM texture of the NIR band (contrast, homogeneity, entropy) and another layer (another date,
+radar or elevation).
+
+**3 Classify**
+
+- Unsupervised: K-means or ISODATA (clusters split and merged between a fewest and most). Name
+  the clusters in the class area table and **Save class names**.
+- Supervised, trained from polygons you draw (**Create training layer**, then Add Polygon
+  Feature, the class in the name field) or **from a land cover map** (WorldCover or Esri
+  downloaded in 1 Data): Random Forest (with each band's importance), k-Nearest Neighbours,
+  Maximum Likelihood, Mahalanobis Distance, Minimum Distance, Spectral Angle Mapper and
+  Parallelepiped. The training accuracy is shown (optimistic: the pixels taught it).
+- Clean-up: a majority filter and a minimum mapping unit (sieve).
+- Accuracy: **Generate validation points** (stratified random, a number per class), fill in
+  `ref_class` in the attribute table, then **Compute accuracy**: error matrix, overall accuracy,
+  kappa, user's and producer's accuracy, and area-adjusted estimates with 95 % confidence
+  intervals (Olofsson et al. 2014). Polygons of known classes work as reference too.
+
+**4 Change**: two class maps compared from → to: the change map, a Sankey diagram, gains and
+losses per class and the largest changes. Maps numbered differently (WorldCover and a
+classification trained on it) are matched by class name. Image differencing (difference, ratio,
+percent) compares two images or indices.
+
+**5 Map**: the A4 layout with a title made from the area and the date (in Khmer, e.g.
+*ផែនទីការប្រើប្រាស់ដី និងគម្របដី ស្រុក/ខណ្ឌ … ខេត្ត… ឆ្នាំ២០២៥*), and Cambodia 3D.
+
+Commands the lab uses, which scripts can use too: `raster.process` (`stack`, and `merge` with
+`maskBand`/`maskValues`/`maskBits`, `combine: "median"`, `nodata`, `scale`, `offset`,
+`decibels`), `raster.classify` (`method: "isodata"`), `raster.classifySupervised` (`method`,
+`trainingRaster`), `raster.filter`, `raster.pca`, `raster.texture`, `raster.sieve`,
+`raster.crossTab`, `raster.classAreas`, `raster.accuracy`, `raster.samplePoints` and
+`raster.classNames`.
+
+Still to come from the plugin: the magic wand for training areas, multi-season stacks, the PDF
+report, and the LEE (Earth-Engine-style) scripts.
 
 ## Cambodia 3D
 

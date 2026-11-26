@@ -192,6 +192,11 @@ pub(crate) const IN_BACKGROUND: &[(&str, &str, Start)] = &[
     ("raster.change", "Change Detection", super::imagery::change_work),
     ("raster.index", "Indices", super::imagery::index_work),
     ("raster.process", "Process", super::imagery::process_work),
+    ("raster.filter", "Spatial Filter", super::rslab::filter_work),
+    ("raster.pca", "Principal Components", super::rslab::pca_work),
+    ("raster.texture", "GLCM Texture", super::rslab::texture_work),
+    ("raster.sieve", "Sieve", super::rslab::sieve_work),
+    ("raster.crossTab", "From–To Change", super::rslab::cross_work),
     ("imagery.mosaic", "Build Mosaic", super::imagery::mosaic_work),
     ("dl.classify", "Deep Learning", super::deeplearning::classify_work),
 ];

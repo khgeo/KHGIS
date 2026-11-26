@@ -30,6 +30,7 @@ mod parallel;
 mod parameters;
 pub mod rasterops;
 mod repair;
+pub mod rslab;
 pub mod selection;
 pub mod sketch_edit;
 mod stats;

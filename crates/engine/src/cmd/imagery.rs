@@ -59,14 +59,14 @@ pub fn commands() -> Vec<C> {
         C::new("raster.classify", "Classification Wizard", "Analyze › Image Classification", |s, p| {
             super::workflows::made_or_ran(s, p, "raster.classify")
         }).inputs(raster_inputs).roles(&[]).effects(crate::policy::Effects::NONE)
-        .params(r#"{"layer": raster, "classes"?: 2..50, "bands"?: [1-based], "name"?: output, "ran"?: (internal: classes the app has worked out)}"#),
+        .params(r#"{"layer": raster, "classes"?: 2..50 (isodata: the most), "method"?: "kmeans" (default)|"isodata", "minClasses"?: 2..50 (isodata: the fewest), "iterations"?: 2..50 (default 20), "bands"?: [1-based], "name"?: output, "ran"?: (internal: classes the app has worked out)}"#),
         C::new("raster.classifySupervised", "Classification Tools", "Analyze › Image Classification", supervised).inputs(supervised_inputs).roles(&[]).effects(crate::policy::Effects::NONE)
-            .params(r#"{"layer": raster, "training": polygon layer, "classField": field, "bands"?: [1-based], "name"?: output, "ran"?: (internal: a raster the app has worked out)}"#),
+            .params(r#"{"layer": raster, "training"?: polygon layer, "classField"?: its class field, "trainingRaster"?: class raster to train from instead (a land cover map; 0 and no-data are no class), "method"?: "minDistance" (default)|"mahalanobis"|"maxLikelihood"|"sam"|"parallelepiped"|"knn"|"randomForest", "option"?: n (parallelepiped: standard deviations, default 2; knn: k, default 5; randomForest: trees, default 50), "perClass"?: training pixels kept a class (default 2000), "bands"?: [1-based], "name"?: output, "ran"?: (internal: a raster the app has worked out)} → the classes, the training accuracy (optimistic) and, for a random forest, each band's importance"#),
         C::new("raster.index", "Indices", "Analyze › Imagery Tools", index).inputs(raster_inputs).roles(&[]).effects(crate::policy::Effects::NONE).params(
             r#"{"layer": raster, "index": "ndvi"|"ndwi"|"savi"|"nbr"|"ndbi"|"evi", "red"?, "green"?, "blue"?, "nir"?, "swir"?: band numbers, "name"?: output, "ran"?: (internal: a raster the app has worked out)}"#,
         ),
         C::new("raster.process", "Process", "Analyze › Imagery Tools", process).inputs(process_inputs).roles(&[]).effects(crate::policy::Effects::NONE)
-            .params(r#"{"layer": raster, "operation": "clip"|"resample"|"stack"|"merge", "layers"?: [raster names] (stack: the rasters whose bands follow layer's; merge: other pieces of the same image, filling where layer has no value; both resampled onto layer's grid), "bandNames"?: [names], "nodata"?: n (stack, merge: this stored value is no value), "scale"?: n, "offset"?: n (stack, merge: value × scale + offset, e.g. reflectance), "extent"?: [minLon, minLat, maxLon, maxLat] (clip; the view when omitted), "polygon"?: polygon layer (clip to its selected or all polygons; cells outside become no-data), "selectedOnly"?: bool (clip to selected polygons when true, all when false), "factor"?: n (resample: n×n pixels become one), "name"?: output, "ran"?: (internal: a raster the app has worked out)}"#),
+            .params(r#"{"layer": raster, "operation": "clip"|"resample"|"stack"|"merge", "layers"?: [raster names] (stack: the rasters whose bands follow layer's; merge: other pieces of the same image, filling where layer has no value; both resampled onto layer's grid), "bandNames"?: [names], "maskBand"?: 1-based (merge: a quality band; pixels whose value is in maskValues, or has a bit of maskBits set, are no value; the band is left out), "maskValues"?: [n], "maskBits"?: [bit numbers], "combine"?: "first" (default)|"median" (merge: the median of the pieces' values, e.g. a composite of several dates), "nodata"?: n (stack, merge: this stored value is no value), "scale"?: n, "offset"?: n (stack, merge: value × scale + offset, e.g. reflectance), "decibels"?: bool (stack, merge: then 10·log10, e.g. radar backscatter), "extent"?: [minLon, minLat, maxLon, maxLat] (clip; the view when omitted), "polygon"?: polygon layer (clip to its selected or all polygons; cells outside become no-data), "selectedOnly"?: bool (clip to selected polygons when true, all when false), "factor"?: n (resample: n×n pixels become one), "name"?: output, "ran"?: (internal: a raster the app has worked out)}"#),
         C::new("raster.mosaic", "Mosaic Rasters", "Analyze › Imagery Tools", raster_mosaic).inputs(mosaic_inputs).roles(&[]).effects(crate::policy::Effects::NONE.with(crate::policy::Effect::Files)).params(
             r#"{"inputs": [raster layer or file path, …] (two or more, in one coordinate system and cell size; where they overlap the first wins), "name"?: output, "path"?: GeoTIFF to write the mosaic to}"#,
         ),
@@ -106,7 +106,7 @@ pub fn commands() -> Vec<C> {
     ]
 }
 
-fn raster_named(input: &impl super::InputSource, n: &str) -> Result<Arc<Raster>, String> {
+pub(crate) fn raster_named(input: &impl super::InputSource, n: &str) -> Result<Arc<Raster>, String> {
     let context = input.input_context();
     let s = &context;
     s.map().layer_by_name(n).and_then(|l| l.raster.as_ref()).and_then(|r| r.data.clone()).ok_or_else(|| format!("no raster layer '{n}'"))
@@ -171,16 +171,27 @@ pub(crate) fn classify_work(s: &Session, p: &Value) -> Result<super::workflows::
         None => 5,
         Some(_) => uint(p, "classes").filter(|k| (2..=50).contains(k)).ok_or("classes is 2 to 50")? as usize,
     };
+    let isodata = match ps(p, "method") {
+        None | Some("kmeans") => false,
+        Some("isodata") => true,
+        Some(o) => return Err(format!("unknown method '{o}': kmeans or isodata")),
+    };
+    let min_k = uint(p, "minClasses").map_or(k.saturating_sub(2).max(2), |v| v as usize).clamp(2, 50);
+    let iterations = uint(p, "iterations").map_or(20, |v| v as usize).clamp(2, 50);
     let out = name(p, format!("{}_classes", r.name));
     Ok(Box::new(move || {
-        let classes = rasterops::kmeans(&r, &bands, k, 20)?;
+        let classes = if isodata {
+            rustgis_analysis::rslab::isodata(&r, &bands, min_k, k, iterations)?
+        } else {
+            rasterops::kmeans(&r, &bands, k, iterations)?
+        };
         let layer = class_layer(rasterops::derive(&r, &out, vec![classes])?)?;
         Ok(super::workflows::made_layer(out, layer, None, None))
     }))
 }
 
 /// Replaces a raster layer's pixels, keeping its look.
-fn replace(s: &mut Session, layer: &str, r: Raster) -> CmdResult {
+pub(crate) fn replace(s: &mut Session, layer: &str, r: Raster) -> CmdResult {
     replace_layer(s, layer, layer_of(r)?)
 }
 
@@ -913,31 +924,49 @@ pub(crate) fn supervised_work(s: &Session, p: &Value) -> Result<super::workflows
     if bands.is_empty() {
         return Err("give at least one band".into());
     }
-    let tl = training_name(p)?;
-    let l = s
-        .map()
-        .layer_by_name(tl)
-        .filter(|l| l.geometry_type() == GeometryType::Polygon)
-        .ok_or_else(|| format!("no polygon layer '{tl}'"))?;
-    let fi = l.dataset.field_index(ps(p, "classField").ok_or("classField is required")?).ok_or("no such class field")?;
-    let mut polygons = Vec::new();
-    for (row, ft) in l.dataset.features.iter().enumerate() {
-        let Some(Geometry::Polygon(polys)) = &ft.geometry else { continue };
-        let key = l.dataset.value(row, fi).to_string();
-        polygons.extend(polys.iter().map(|rings| (key.clone(), rings.clone())));
+    let method = rustgis_analysis::rslab::Method::parse(ps(p, "method").unwrap_or("minDistance"), f(p, "option"))?;
+    let per_class = match p.get("perClass") {
+        None | Some(Value::Null) => 2000,
+        Some(_) => uint(p, "perClass").filter(|n| (10..=20_000).contains(n)).ok_or("perClass is 10 to 20000")? as usize,
+    };
+    // Training from a class raster (a land cover map), or from polygons and their class field.
+    enum Training {
+        Raster(Arc<Raster>),
+        Polygons(Vec<(String, Vec<Vec<Coord>>)>),
     }
+    let training = match ps(p, "trainingRaster") {
+        Some(n) => Training::Raster(raster_named(s, n)?),
+        None => Training::Polygons(super::rslab::training_polygons(s, p)?),
+    };
     let out = name(p, format!("{}_classified", r.name));
     Ok(Box::new(move || {
-        // Mean of each class's training pixels.
-        let classes = rasterops::class_means(&r, &bands, &polygons)?;
-        if classes.len() < 2 {
-            return Err("the training polygons need at least two classes with pixels under them".into());
+        use rustgis_analysis::rslab;
+        let samples = match &training {
+            Training::Raster(labels) => super::rslab::raster_samples(&r, &bands, labels, per_class)?,
+            Training::Polygons(polygons) => rslab::samples_from_polygons(&r, &bands, polygons, per_class)?,
+        };
+        if samples.len() < 2 {
+            return Err("the training data need at least two classes with pixels under them".into());
         }
-        let means: Vec<(f32, Vec<f64>)> = classes.iter().enumerate().map(|(i, c)| ((i + 1) as f32, c.1.clone())).collect();
-        let pixels = rasterops::classify_min_distance(&r, &bands, &means)?;
-        let layer = class_layer(rasterops::derive(&r, &out, vec![pixels])?)?;
-        let legend: Vec<Value> = classes.iter().enumerate().map(|(i, c)| json!({"value": i + 1, "class": c.0, "pixels": c.2})).collect();
-        Ok(super::workflows::made_layer(out, layer, Some(json!({"classes": legend})), None))
+        let model = rslab::train(&samples, method)?;
+        let pixels = rslab::classify(&r, &bands, &model)?;
+        let mut res = rasterops::derive(&r, &out, vec![pixels])?;
+        if let Some(b) = res.bands.get_mut(0) {
+            b.classes = std::iter::once("Unclassified".to_string()).chain(model.classes.iter().cloned()).collect();
+        }
+        let layer = class_layer(res)?;
+        let legend: Vec<Value> =
+            samples.iter().enumerate().map(|(i, c)| json!({"value": i + 1, "class": c.0, "pixels": c.1.len()})).collect();
+        let band_names: Vec<String> = bands
+            .iter()
+            .map(|b| r.bands.get(*b).map(|x| x.name.clone()).filter(|n| !n.is_empty()).unwrap_or_else(|| format!("Band {}", b + 1)))
+            .collect();
+        let extra = json!({
+            "classes": legend,
+            "trainingAccuracy": rslab::training_accuracy(&model, &samples),
+            "importance": model.importance.iter().zip(&band_names).map(|(v, n)| json!({"band": n, "importance": v})).collect::<Vec<_>>(),
+        });
+        Ok(super::workflows::made_layer(out, layer, Some(extra), None))
     }))
 }
 
@@ -1030,6 +1059,7 @@ pub(crate) fn process_work(s: &Session, p: &Value) -> Result<super::workflows::W
                 }
             };
             let (scale, offset) = (num("scale", 1.0)?, num("offset", 0.0)?);
+            let decibels = super::b(p, "decibels").unwrap_or(false);
             let none = match p.get("nodata") {
                 None | Some(Value::Null) => None,
                 Some(v) => Some(v.as_f64().ok_or_else(|| format!("{op}: nodata is a number"))? as f32),
@@ -1047,35 +1077,105 @@ pub(crate) fn process_work(s: &Session, p: &Value) -> Result<super::workflows::W
                     r.bands.len()
                 ));
             }
+            // Merge: a band of quality flags (Sentinel-2's scene classes, Landsat's QA bits) masks
+            // the pixels flagged, and is left out of the result; "median" keeps the median of the
+            // pieces' values (a composite of several dates) instead of the first.
+            let mask_band = match p.get("maskBand") {
+                None | Some(Value::Null) => None,
+                Some(_) if merge => Some(
+                    uint(p, "maskBand")
+                        .map(|b| b as usize)
+                        .filter(|b| *b >= 1 && *b <= r.bands.len())
+                        .ok_or("maskBand is one of the bands")?
+                        - 1,
+                ),
+                Some(_) => return Err("maskBand goes with merge".into()),
+            };
+            let nums = |k: &str| -> Vec<f64> {
+                p.get(k).and_then(Value::as_array).map(|a| a.iter().filter_map(Value::as_f64).collect()).unwrap_or_default()
+            };
+            let (mask_values, mask_bits) = (nums("maskValues"), nums("maskBits"));
+            let median = match ps(p, "combine") {
+                None | Some("first") => false,
+                Some("median") => true,
+                Some(o) => return Err(format!("combine is first or median, not '{o}'")),
+            };
+            let masked = move |v: f32| -> bool {
+                if !v.is_finite() || v == NODATA {
+                    return false;
+                }
+                mask_values.iter().any(|m| (f64::from(v) - m).abs() < 1e-6)
+                    || mask_bits.iter().any(|bit| *bit >= 0.0 && *bit < 32.0 && (v as u32 >> (*bit as u32)) & 1 == 1)
+            };
             let out = name(p, format!("{}_{op}", r.name));
             Ok(Box::new(move || {
                 let stop = || -> Result<(), String> {
                     if rustgis_analysis::control::stop_requested() { Err(rustgis_analysis::control::CANCELLED.to_string()) } else { Ok(()) }
                 };
                 // A value read, as the result holds it: none stays none.
-                let value =
-                    |v: f32| if v == NODATA || !v.is_finite() || Some(v) == none { NODATA } else { (f64::from(v) * scale + offset) as f32 };
+                let value = |v: f32| {
+                    if v == NODATA || !v.is_finite() || Some(v) == none {
+                        return NODATA;
+                    }
+                    let x = f64::from(v) * scale + offset;
+                    // Radar backscatter as decibels: none for no power.
+                    if decibels { if x > 0.0 { (10.0 * x.log10()) as f32 } else { NODATA } } else { x as f32 }
+                };
                 let mut bands = Vec::with_capacity(total);
                 let mut labels = Vec::with_capacity(total);
+                let mut masked_share: Option<f64> = None;
                 if merge {
-                    for b in 0..r.bands.len() {
-                        let mut acc: Vec<f32> = Vec::new();
+                    // Each piece's flagged pixels, on the result's grid.
+                    let mut flags: Vec<Vec<bool>> = Vec::new();
+                    if let Some(mb) = mask_band {
                         for src in &inputs {
                             stop()?;
-                            let got = rasterops::resample_to(src, b, &r)?;
-                            if acc.is_empty() {
-                                acc = got.into_iter().map(value).collect();
-                            } else {
-                                for (a, g) in acc.iter_mut().zip(got) {
-                                    if *a == NODATA {
-                                        *a = value(g);
+                            flags.push(rasterops::resample_to(src, mb, &r)?.into_iter().map(&masked).collect());
+                        }
+                    }
+                    let (mut dropped, mut total_px) = (0usize, 0usize);
+                    for b in (0..r.bands.len()).filter(|b| Some(*b) != mask_band) {
+                        let mut pieces: Vec<Vec<f32>> = Vec::new();
+                        for (k, src) in inputs.iter().enumerate() {
+                            stop()?;
+                            let mut got: Vec<f32> = rasterops::resample_to(src, b, &r)?.into_iter().map(value).collect();
+                            if let Some(f) = flags.get(k) {
+                                for (g, m) in got.iter_mut().zip(f) {
+                                    if *m && *g != NODATA {
+                                        *g = NODATA;
+                                        if b == 0 {
+                                            dropped += 1;
+                                        }
                                     }
                                 }
+                            }
+                            if b == 0 {
+                                total_px += got.len();
+                            }
+                            pieces.push(got);
+                        }
+                        let n = pieces.first().map_or(0, Vec::len);
+                        let mut acc = vec![NODATA; n];
+                        let mut vals = Vec::with_capacity(pieces.len());
+                        for (i, a) in acc.iter_mut().enumerate() {
+                            vals.clear();
+                            vals.extend(pieces.iter().filter_map(|pc| pc.get(i).copied().filter(|v| *v != NODATA)));
+                            if median {
+                                vals.sort_by(f32::total_cmp);
+                                if !vals.is_empty() {
+                                    let m = vals.len() / 2;
+                                    *a = if vals.len() % 2 == 1 { vals[m] } else { (vals[m - 1] + vals[m]) / 2.0 };
+                                }
+                            } else if let Some(v) = vals.first() {
+                                *a = *v;
                             }
                         }
                         bands.push(acc);
                         let own = r.bands.get(b).map(|x| x.name.clone()).unwrap_or_default();
-                        labels.push(names.get(b).cloned().unwrap_or(own));
+                        labels.push(names.get(labels.len()).cloned().unwrap_or(own));
+                    }
+                    if mask_band.is_some() && total_px > 0 {
+                        masked_share = Some(dropped as f64 / total_px as f64 * 100.0);
                     }
                 } else {
                     for src in &inputs {
@@ -1096,7 +1196,7 @@ pub(crate) fn process_work(s: &Session, p: &Value) -> Result<super::workflows::W
                         band.name = label;
                     }
                 }
-                super::workflows::made(made, None)
+                super::workflows::made(made, masked_share.map(|m| json!({"maskedPercent": m})))
             }))
         }
         "clip" if p.get("polygon").is_some_and(|v| !v.is_null()) => {
@@ -1923,7 +2023,11 @@ fn spectral_inputs(input: &super::InputContext<'_>, p: &Value) -> Result<super::
 /// Binds the primary raster and the actual training polygon selector.
 fn supervised_inputs(input: &super::InputContext<'_>, p: &Value) -> Result<super::Inputs, String> {
     let s = input;
-    super::Inputs::named(s.map(), [raster_name(p)?, training_name(p)?])
+    let training = match ps(p, "trainingRaster") {
+        Some(t) => t,
+        None => training_name(p)?,
+    };
+    super::Inputs::named(s.map(), [raster_name(p)?, training])
 }
 /// Binds a clip polygon only when the selected processing operation consumes one.
 fn process_inputs(input: &super::InputContext<'_>, p: &Value) -> Result<super::Inputs, String> {
