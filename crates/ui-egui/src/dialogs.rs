@@ -171,7 +171,7 @@ impl Dialogs {
             "definitionQuery" => self.text = active.and_then(|l| l.definition_query.clone()).unwrap_or_default(),
             "renameLayer" => self.text = active.map(|l| l.name.clone()).unwrap_or_default(),
             // A file name can't hold a folder separator, which a project name may.
-            "saveProject" => self.text = format!("{}.rgis", s.project.name.replace(['/', '\\'], "-")),
+            "saveProject" => self.text = format!("{}.{}", s.project.name.replace(['/', '\\'], "-"), rustgis_engine::project::EXTENSION),
             "exportLayer" => {
                 self.mode = "geojson";
                 self.gpkg_mode = "newFile";

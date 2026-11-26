@@ -129,7 +129,7 @@ fn start(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
                 app.map.invalidate();
             }
         }
-        if card(ui, t, "Open…", "Open a .rgis project", "open") {
+        if card(ui, t, "Open…", "Open a .kgis project", "open") {
             let _ = app.run("ui.open", Value::Null);
         }
         if card(ui, t, "GeoLibre Project…", "A .geolibre project as a map", "open") {

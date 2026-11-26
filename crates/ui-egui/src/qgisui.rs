@@ -55,6 +55,11 @@ pub struct State {
     pub options: bool,
     /// The Layer Styling panel's page: 0 Symbology, 1 Labels, 2 Information.
     pub styling_page: u8,
+    /// Layer Styling's Live update: changes show on the map as they're made; off, they show
+    /// when Apply is pressed.
+    pub live: bool,
+    /// With Live update off, the styled layer as the map last showed it: its id and a copy.
+    pub staged: Option<(u32, Box<rustgis_engine::map::Layer>)>,
     /// Plugins › QGIS Plugins & Tools.
     pub bridge: Bridge,
 }
@@ -69,6 +74,8 @@ impl Default for State {
             ribbon: false,
             options: false,
             styling_page: 0,
+            live: true,
+            staged: None,
             bridge: Bridge::default(),
         }
     }
@@ -120,10 +127,12 @@ pub fn load(app: &mut RustGisApp) {
         }
         app.ui.qgis.bridge.service = s;
     }
-    // QGIS opens with its Processing Toolbox docked on the right.
+    // As set up for teaching: Layer Styling docked on the right (the Browser and the Layers are
+    // tabbed together on the left, see `qgisdock`).
     if app.ui.qgis_layout && app.ui.right.is_none() {
-        app.ui.open_right(RightPane::Geoprocessing);
+        app.ui.open_right(RightPane::Symbology);
     }
+    app.ui.qgis.live = load("qgis_style_live").as_deref() != Some("off");
 }
 
 /// `ui.interface {"style": "qgis" | "ribbon"}`: switches the layout (no style: the other one).
@@ -318,6 +327,7 @@ fn project_menu(app: &mut RustGisApp, ui: &mut Ui) {
     ui.separator();
     menu_item(ui, app, "save", "Save", "ui.save", Value::Null);
     menu_item(ui, app, "save_as", "Save As…", "ui.saveAs", Value::Null);
+    menu_item(ui, app, "package", "Save As GeoPackage for QGIS…", "ui.saveGpkgQgis", Value::Null);
     ui.separator();
     submenu_row(ui, "export", tl!("Import/Export"), |ui| {
         menu_item(ui, app, "export_map", "Export Map to Image…", "ui.exportMap", Value::Null);
@@ -852,18 +862,27 @@ pub fn layer_styling(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
             let (r, _) = ui.allocate_exact_size(vec2(20.0, 20.0), Sense::hover());
             icons::paint(ui.painter(), r, icon, t.icon, t.accent);
             let shown = active.as_ref().map_or_else(|| tl!("Pick a layer").to_string(), |l| l.1.clone());
-            egui::ComboBox::from_id_salt("qgis_styling_layer").width(ui.available_width() - 4.0).selected_text(shown).show_ui(ui, |ui| {
-                for (id, name, _) in &layers {
-                    if ui.selectable_label(Some(*id) == active.as_ref().map(|l| l.0), name).clicked() {
-                        let _ = app.run_by_user("layer.select", json!({"layer": name}));
+            let combo = egui::ComboBox::from_id_salt("qgis_styling_layer").width(ui.available_width() - 4.0).selected_text(shown).show_ui(
+                ui,
+                |ui| {
+                    for (id, name, _) in &layers {
+                        if ui.selectable_label(Some(*id) == active.as_ref().map(|l| l.0), name).clicked() {
+                            let _ = app.run_by_user("layer.select", json!({"layer": name}));
+                        }
                     }
-                }
-            });
+                },
+            );
+            let name = tl!("Layer").to_string();
+            combo.response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::ComboBox, true, &name));
         });
     });
     let sep_y = ui.cursor().min.y;
     ui.painter().line_segment([pos2(ui.max_rect().min.x, sep_y), pos2(ui.max_rect().max.x, sep_y)], Stroke::new(1.0, t.border));
-    let rest = ui.available_rect_before_wrap();
+    let all = ui.available_rect_before_wrap();
+    // The foot: Live update, and Apply when it's off.
+    let foot = Rect::from_min_max(pos2(all.min.x, all.max.y - 36.0), all.max);
+    let rest = Rect::from_min_max(all.min, pos2(all.max.x, foot.min.y));
+    styling_foot(app, ui, foot, active.as_ref().map(|l| (l.0, l.2 == "raster_layer")), t);
     // The page strip.
     let strip = Rect::from_min_size(rest.min, vec2(36.0, rest.height()));
     ui.painter().rect_filled(strip, 0.0, t.pane_header);
@@ -898,7 +917,118 @@ pub fn layer_styling(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
             });
         },
     );
-    ui.advance_cursor_after_rect(rest);
+    ui.advance_cursor_after_rect(all);
+}
+
+/// Layer Styling's foot: the Live update switch, and Apply while it's off.
+fn styling_foot(app: &mut RustGisApp, ui: &mut Ui, foot: Rect, layer: Option<(u32, bool)>, t: &Tokens) {
+    ui.painter().rect_filled(foot, 0.0, t.pane_header);
+    ui.painter().line_segment([foot.left_top(), foot.right_top()], Stroke::new(1.0, t.border));
+    let mut bar = ui
+        .new_child(egui::UiBuilder::new().max_rect(foot.shrink2(vec2(10.0, 4.0))).layout(egui::Layout::left_to_right(egui::Align::Center)));
+    // Rasters always update live: holding their style back would copy their pixels.
+    let raster = layer.is_some_and(|l| l.1);
+    let mut live = app.ui.qgis.live || raster;
+    let resp = bar
+        .add_enabled(!raster, egui::Checkbox::new(&mut live, tl!("Live update")))
+        .on_hover_text(tl!("On: the map shows each change at once. Off: change the style, then press Apply."))
+        .on_disabled_hover_text(tl!("A raster's style always shows at once"));
+    if resp.changed() {
+        app.ui.qgis.live = live;
+        if live {
+            // Everything changed so far shows now.
+            app.ui.qgis.staged = None;
+            app.map.invalidate();
+        }
+        if let Some(save) = &app.services.save_pref {
+            save("qgis_style_live", if live { "on" } else { "off" });
+        }
+    }
+    // Live update off: the layer as the map shows it is kept, to draw the map with until Apply.
+    if !app.ui.qgis.live && !raster {
+        match (layer, &app.ui.qgis.staged) {
+            (Some((id, _)), Some((staged, _))) if *staged == id => {}
+            (Some((id, _)), _) => {
+                app.ui.qgis.staged = app.session.map().layer(id).map(|l| (id, Box::new(l.clone())));
+            }
+            (None, _) => app.ui.qgis.staged = None,
+        }
+    } else {
+        app.ui.qgis.staged = None;
+    }
+    bar.with_layout(egui::Layout::right_to_left(egui::Align::Center), |bar| {
+        if !app.ui.qgis.live && !raster && crate::widgets::primary_button(bar, tl!("Apply"), true, vec2(80.0, 26.0)).clicked() {
+            app.ui.qgis.staged = None;
+            app.map.invalidate();
+        }
+    });
+}
+
+/// Swaps the styled layer's look with the copy kept while Live update is off, so the map draws
+/// the style it showed last until Apply; called before the map is drawn and again after.
+pub fn swap_staged(app: &mut RustGisApp) {
+    if !app.ui.qgis_layout || app.ui.qgis.live {
+        return;
+    }
+    let Some((id, kept)) = app.ui.qgis.staged.as_mut() else { return };
+    let Some(l) = app.session.map_mut().layer_mut(*id) else {
+        app.ui.qgis.staged = None;
+        return;
+    };
+    let k = kept.as_mut();
+    std::mem::swap(&mut l.renderer, &mut k.renderer);
+    std::mem::swap(&mut l.labels, &mut k.labels);
+    std::mem::swap(&mut l.transparency, &mut k.transparency);
+    std::mem::swap(&mut l.min_scale, &mut k.min_scale);
+    std::mem::swap(&mut l.max_scale, &mut k.max_scale);
+    std::mem::swap(&mut l.blend, &mut k.blend);
+    std::mem::swap(&mut l.mask, &mut k.mask);
+    std::mem::swap(&mut l.display_filters, &mut k.display_filters);
+    std::mem::swap(&mut l.aggregation, &mut k.aggregation);
+    std::mem::swap(&mut l.extrusion, &mut k.extrusion);
+    std::mem::swap(&mut l.line_strokes, &mut k.line_strokes);
+    std::mem::swap(&mut l.fill_layers, &mut k.fill_layers);
+    std::mem::swap(&mut l.no_fill, &mut k.no_fill);
+    std::mem::swap(&mut l.stroke_levels, &mut k.stroke_levels);
+    std::mem::swap(&mut l.marker_rotation, &mut k.marker_rotation);
+    std::mem::swap(&mut l.diagram, &mut k.diagram);
+    std::mem::swap(&mut l.symbol_by, &mut k.symbol_by);
+    std::mem::swap(&mut l.reference_scale, &mut k.reference_scale);
+}
+
+/// `ui.saveGpkgQgis`: Project › Save As GeoPackage for QGIS — the map's vector layers, their
+/// styles and a QGIS project in one GeoPackage (`rustgis_engine::qgispkg`). The desktop asks
+/// where; the browser downloads it.
+pub fn save_gpkg(app: &mut RustGisApp) -> Result<Value, String> {
+    let stem = rustgis_engine::qgispkg::title_file(&app.session.project.name);
+    let suggested = format!("{stem}.gpkg");
+    #[cfg(not(target_arch = "wasm32"))]
+    let (path, file) = {
+        let Some(path) = crate::dialogs::pick_save(&suggested, &["gpkg"], tl!("GeoPackage for QGIS")) else { return Ok(Value::Null) };
+        let file = std::path::Path::new(&path).file_name().map(|f| f.to_string_lossy().into_owned()).unwrap_or(suggested.clone());
+        (path, file)
+    };
+    #[cfg(target_arch = "wasm32")]
+    let file = suggested.clone();
+    let pkg = rustgis_engine::qgispkg::save(&app.session, &file)?;
+    #[cfg(not(target_arch = "wasm32"))]
+    std::fs::write(&path, &pkg.bytes).map_err(|e| format!("{path}: {e}"))?;
+    #[cfg(target_arch = "wasm32")]
+    {
+        let download = app.services.download.as_ref().ok_or("this page can't download files")?;
+        download(&file, pkg.bytes)?;
+    }
+    for n in pkg.notices {
+        app.session.notify(n, false);
+    }
+    app.session.notify(
+        crate::i18n::fmt(
+            "Saved {file} for QGIS. In QGIS open it with Project › Open From › GeoPackage (or drag it into QGIS): the layers keep their styles. Keep the file's name, as the project refers to it.",
+            &[("file", &file)],
+        ),
+        false,
+    );
+    Ok(json!({"file": file}))
 }
 
 /// The windows the layout opens: Settings › Options… and Plugins › QGIS Plugins & Tools.

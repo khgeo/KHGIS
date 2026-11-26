@@ -1471,3 +1471,10 @@ Click an item to select it, drag to move it; its properties are on the right	ច
 Categorized	តាមប្រភេទ
 Graduated	តាមកម្រិត
 Pick a layer	ជ្រើសស្រទាប់
+Live update	ធ្វើបច្ចុប្បន្នភាពភ្លាមៗ
+On: the map shows each change at once. Off: change the style, then press Apply.	បើក៖ ផែនទីបង្ហាញការផ្លាស់ប្ដូរនីមួយៗភ្លាមៗ។ បិទ៖ ផ្លាស់ប្ដូររចនាប័ទ្ម រួចចុច អនុវត្ត។
+A raster's style always shows at once	រចនាប័ទ្មរ៉ាស្ទ័របង្ហាញភ្លាមៗជានិច្ច
+Save As GeoPackage for QGIS…	រក្សាទុកជា GeoPackage សម្រាប់ QGIS…
+GeoPackage for QGIS	GeoPackage សម្រាប់ QGIS
+Saved {file} for QGIS. In QGIS open it with Project › Open From › GeoPackage (or drag it into QGIS): the layers keep their styles. Keep the file's name, as the project refers to it.	បានរក្សាទុក {file} សម្រាប់ QGIS។ ក្នុង QGIS បើកវាដោយ គម្រោង › បើកពី › GeoPackage (ឬអូសវាចូល QGIS)៖ ស្រទាប់រក្សារចនាប័ទ្មរបស់វា។ សូមរក្សាឈ្មោះឯកសារដដែល ព្រោះគម្រោងយោងទៅវា។
+Renderer	កម្មវិធីគូរ

@@ -27,6 +27,31 @@ The **ខ្មែរ | EN** switch at the top right changes the interface langu
 choice. **Settings › Options…** has the rest of the settings (theme, interface scale, language,
 start-up project, autosave…).
 
+## Layer Styling: Live update
+
+At the foot of **Layer Styling**, **Live update** (on by default) shows every change on the map
+at once. Turn it off to change the style first and see it on the map when you press **Apply**,
+as in QGIS. A raster's style always shows at once.
+
+## Continue in QGIS: Save As GeoPackage for QGIS
+
+**Project › Save As GeoPackage for QGIS…** saves the map as one `.gpkg` file that QGIS opens and
+keeps working with — on the desktop and in the browser (where it downloads):
+
+- every vector layer as a GeoPackage table, in longitude/latitude (EPSG:4326);
+- each layer's style (single symbol, categories, graduated classes, proportional symbols, labels,
+  transparency, scale range) as the table's default style, so the style comes with a layer
+  however it is added in QGIS;
+- a QGIS project inside the GeoPackage with the layers in their order, the XYZ web tile layers
+  (satellite imagery, OpenStreetMap…) and the view.
+
+In QGIS: **Project › Open From › GeoPackage**, or drag the file into QGIS and open the project
+listed under it in the Browser. QGIS can edit the layers and save the project back into the same
+file. Keep the file's name: the project refers to it. Raster layers aren't included (export them
+as GeoTIFF with **Layer › Save As**); what isn't saved is listed in the messages.
+
+KHGIS projects themselves save as `.kgis` (older `.rgis` projects still open).
+
 ## QGIS plugins and algorithms
 
 QGIS plugins are Python programs written for QGIS's own window (PyQt) and API (PyQGIS), so they
