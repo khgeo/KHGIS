@@ -48,6 +48,13 @@ A4 map — are single commands.
   its Processing algorithms — QGIS's and every installed QGIS plugin's — run on KHGIS layers from
   the Processing Toolbox and the Vector and Raster menus; the web app uses a QGIS bridge service
   (`packaging/qgis-bridge`). See [QGIS layout and QGIS plugins](docs/user-guide/qgis.md).
+- **LEE RS Lab, built in.** A remote sensing lab after the LEE RS Lab QGIS plugin, docked beside
+  Layer Styling and in **Raster › LEE RS Lab**: pick a province, district or the map view, search
+  Sentinel-2 or Landsat 8/9 by date and cloud, download the scene clipped to the area as one
+  six-band reflectance image, then band combinations, indices, k-means or supervised
+  classification, change detection and an A4 map — in the browser too, no QGIS or login needed.
+- **Cambodia 3D.** **View › Open in Cambodia 3D** opens the middle of the map in
+  [Cambodia 3D](https://khgeo.github.io/cambodia-3d/): terrain, imagery, trees, houses and roads.
 - **A Cambodia-aware assistant.** The bundled `cambodia` skill understands province names in
   Khmer, English and loose romanisations ("Kompong Cham", "Siemreap"), and replies in Khmer when
   you write in Khmer.

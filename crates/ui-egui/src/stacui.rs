@@ -501,7 +501,7 @@ pub fn open_preset(app: &mut RustGisApp, preset: Option<Preset>, p: &serde_json:
 }
 
 /// The day `n` days before today (UTC), as `YYYY-MM-DD`.
-fn days_ago(n: u64) -> String {
+pub(crate) fn days_ago(n: u64) -> String {
     let now = web_time::SystemTime::now().duration_since(web_time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
     let days = (now / 86_400).saturating_sub(n) as i64;
     // Days to a civil date (proleptic Gregorian), after Howard Hinnant's algorithm.

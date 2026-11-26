@@ -715,6 +715,8 @@ pub(crate) const UI_COMMANDS: &[(&str, &str, &str)] = &[
     ("ui.pane.sql", "SQL Pane", "Analyze › Workflows"),
     ("ui.pane.directions", "Directions", "Home › Navigate"),
     ("ui.pane.bookmarks", "Bookmarks Pane", "Home › Navigate › Bookmarks"),
+    ("ui.pane.rslab", "LEE RS Lab", "Raster › LEE RS Lab"),
+    ("ui.cambodia3d", "Open in Cambodia 3D", "View › Open in Cambodia 3D"),
     ("ui.theme", "Toggle Dark Mode", "Settings › Theme"),
     ("ui.themeFile", "Follow the System", "Settings › Theme"),
     ("ui.themeLoad", "Load a Theme from File…", "Settings › Theme"),

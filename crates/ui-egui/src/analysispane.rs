@@ -174,6 +174,41 @@ fn run(app: &mut RustGisApp, id: &str, p: Value) {
     run_now(app, id, p);
 }
 
+/// Runs a workflow's command from a panel that shows the run itself ([`background_job`],
+/// [`cancel_job`]): as [`run_elsewhere`], without bringing the Workflows pane into view.
+pub fn run_quietly(app: &mut RustGisApp, id: &str, p: Value) {
+    #[cfg(not(target_arch = "wasm32"))]
+    if let Some((command, name)) = background(id) {
+        start(app, command, name, p);
+        if let Some(e) = app.workflow.error.take() {
+            app.session.notify(e, true);
+        }
+        return;
+    }
+    if let Err(e) = app.run(id, p) {
+        app.session.notify(e, true);
+    }
+}
+
+/// The workflow running in the background, by name, and how far it is (0 to 1) when it counts.
+pub fn background_job(app: &RustGisApp) -> Option<(&'static str, Option<f32>)> {
+    #[cfg(not(target_arch = "wasm32"))]
+    if let Some(job) = &app.workflow.job {
+        return Some((job.name, job.control.progress().filter(|(_, n)| *n > 0).map(|(d, n)| (d as f64 / n as f64) as f32)));
+    }
+    let _ = app;
+    None
+}
+
+/// Stops the workflow running in the background.
+pub fn cancel_job(app: &RustGisApp) {
+    #[cfg(not(target_arch = "wasm32"))]
+    if let Some(job) = &app.workflow.job {
+        job.control.cancel();
+    }
+    let _ = app;
+}
+
 /// Runs a workflow's command from outside the pane (the map's menu). On the desktop a slow one runs
 /// in the background, the pane opened at `section` to show its progress, Cancel and result; one
 /// that can't start (another is under way) is said in the status bar too. The rest run here, a

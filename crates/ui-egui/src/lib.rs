@@ -10,9 +10,6 @@
 pub mod i18n;
 #[cfg(not(target_arch = "wasm32"))]
 mod agentthreads;
-mod radial;
-mod xray;
-mod khdata;
 mod analysispane;
 mod approvalcard;
 mod arcgisui;
@@ -51,6 +48,7 @@ mod globe_drape;
 mod graphicformat;
 pub mod icons;
 mod keymap;
+mod khdata;
 mod labelfonts;
 mod labelpane;
 mod layerchooser;
@@ -73,8 +71,11 @@ mod portalsui;
 mod qgisdock;
 mod qgislayout;
 mod qgisui;
+mod radial;
 #[cfg(not(target_arch = "wasm32"))]
 mod readjob;
+mod rslab;
+mod xray;
 
 /// How a command asked for ended ([`readjob::run_then`] on the desktop; the browser runs it where
 /// it's asked): what it answered when it ran, or why it never ran (cancelled, or left), which is
@@ -117,7 +118,6 @@ mod webdataui;
 mod widgets;
 mod workspacepanes;
 mod zarrui;
-
 
 /// The product name shown in the window: KHGIS, built on KHGIS.
 pub const APP_NAME: &str = "KHGIS";
@@ -622,6 +622,8 @@ pub enum RightPane {
     WebData,
     /// A plugin's panel: the one `UiState::plugin_panel` names.
     Plugin,
+    /// LEE RS Lab: imagery search, enhancement, classification and change (`rslab`).
+    RsLab,
 }
 
 /// A Unique Values field choice scoped to the layer and renderer that opened it.
@@ -820,6 +822,8 @@ pub struct UiState {
     pub portals: portalsui::State,
     /// KHGIS's Cambodia Data pane.
     pub khdata: khdata::State,
+    /// LEE RS Lab, the built-in remote sensing lab.
+    pub rslab: rslab::State,
     /// Overture Maps and Source Cooperative: choices, results and the request under way.
     pub catalogs: catalogsui::State,
     /// Search Open Data: the portal, the search under way and the datasets found.
@@ -988,6 +992,7 @@ impl Default for UiState {
             connection_tree: Default::default(),
             portals: Default::default(),
             khdata: Default::default(),
+            rslab: Default::default(),
             catalogs: Default::default(),
             opendata: Default::default(),
             embeddings: Default::default(),
@@ -1774,7 +1779,8 @@ impl RustGisApp {
     pub(crate) fn save_download(&mut self, file: &str) -> Result<(), String> {
         let file = file.trim();
         let lower = file.to_ascii_lowercase();
-        let stem = if lower.ends_with(".rgis") || lower.ends_with(".kgis") { file.get(..file.len() - 5).unwrap_or(file) } else { file }.trim();
+        let stem =
+            if lower.ends_with(".rgis") || lower.ends_with(".kgis") { file.get(..file.len() - 5).unwrap_or(file) } else { file }.trim();
         if stem.is_empty() || stem.contains(['/', '\\']) {
             return Err(tl!("type a file name").into());
         }
@@ -2746,6 +2752,27 @@ impl RustGisApp {
             "ui.pane.directions" => toggle_right(&mut self.ui, RightPane::Directions),
             "ui.pane.webData" => toggle_right(&mut self.ui, RightPane::WebData),
             "ui.pane.bookmarks" => toggle_right(&mut self.ui, RightPane::Bookmarks),
+            "ui.pane.rslab" => toggle_right(&mut self.ui, RightPane::RsLab),
+            // The map's view (or `bbox`) in Cambodia 3D, at most 4 × 4 km about its middle.
+            "ui.cambodia3d" => {
+                let bbox = match p.get("bbox").and_then(Value::as_array) {
+                    Some(a) if a.len() == 4 && a.iter().all(|v| v.as_f64().is_some_and(f64::is_finite)) => {
+                        [0, 1, 2, 3].map(|i| a.get(i).and_then(Value::as_f64).unwrap_or(0.0))
+                    }
+                    Some(_) => return Err("bbox is [west, south, east, north]".into()),
+                    None => {
+                        let e = rustgis_engine::cmd::workspace::view_extent(&self.session);
+                        if e.is_empty() {
+                            return Err(tl!("The map has no view yet.").to_string());
+                        }
+                        [e.min_x, e.min_y, e.max_x, e.max_y]
+                    }
+                };
+                if !(bbox[0] < bbox[2] && bbox[1] < bbox[3]) {
+                    return Err("bbox is [west, south, east, north]".into());
+                }
+                self.ui.open_url = Some(rslab::cambodia3d_url(bbox));
+            }
             "ui.pane.format" => toggle_right(&mut self.ui, RightPane::Format),
             // The Labeling pane, on `{"layer": id}` when given (a layer's right-click menu).
             "ui.pane.labeling" => {
@@ -5186,6 +5213,7 @@ impl RustGisApp {
         connectiontree::poll(self, ctx);
         portalsui::poll(self, ctx);
         khdata::poll(self, ctx);
+        rslab::poll(self, ctx);
         catalogsui::poll(self, ctx);
         opendataui::poll(self, ctx);
         embeddingsui::poll(self, ctx);

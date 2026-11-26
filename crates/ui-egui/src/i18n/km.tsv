@@ -1478,3 +1478,58 @@ Save As GeoPackage for QGIS…	រក្សាទុកជា GeoPackage សម�
 GeoPackage for QGIS	GeoPackage សម្រាប់ QGIS
 Saved {file} for QGIS. In QGIS open it with Project › Open From › GeoPackage (or drag it into QGIS): the layers keep their styles. Keep the file's name, as the project refers to it.	បានរក្សាទុក {file} សម្រាប់ QGIS។ ក្នុង QGIS បើកវាដោយ គម្រោង › បើកពី › GeoPackage (ឬអូសវាចូល QGIS)៖ ស្រទាប់រក្សារចនាប័ទ្មរបស់វា។ សូមរក្សាឈ្មោះឯកសារដដែល ព្រោះគម្រោងយោងទៅវា។
 Renderer	កម្មវិធីគូរ
+1 Data	1 ទិន្នន័យ
+2 Enhance	2 កែលម្អ
+3 Classify	3 ចាត់ថ្នាក់
+4 Change	4 ការប្រែប្រួល
+5 Map	5 ផែនទី
+Agriculture (5-4-1)	កសិកម្ម (5-4-1)
+Band combination	ការផ្សំបាន់
+Built-up (SWIR1, NIR)	តំបន់សំណង់ (SWIR1, NIR)
+Burned areas (NIR, SWIR2)	តំបន់ឆេះ (NIR, SWIR2)
+Choose a province (or the map view) first.	សូមជ្រើសខេត្ត (ឬទិដ្ឋភាពផែនទី) ជាមុនសិន។
+Class field	វាលថ្នាក់
+Clipped to the study area, as one six-band reflectance image	កាត់តាមតំបន់សិក្សា ជារូបភាពចំណាំងផ្លាតមួយមាន ៦ បាន់
+Cloud cover	គម្របពពក
+Color infrared (4-3-2)	អ៊ីនហ្វ្រារ៉េដពណ៌ (4-3-2)
+Compare two dates: download two images (or make an index of each), then pick them here.	ប្រៀបធៀបពីរកាលបរិច្ឆេទ៖ ទាញយករូបភាពពីរ (ឬបង្កើតសន្ទស្សន៍នៃនីមួយៗ) រួចជ្រើសវានៅទីនេះ។
+Dense vegetation	រុក្ខជាតិក្រាស់
+Detect Change	រកការប្រែប្រួល
+Difference	ផលដក
+Download Image	ទាញយករូបភាព
+Draw or add a polygon layer of training areas with a class field.	គូរ ឬបន្ថែមស្រទាប់ពហុកោណនៃតំបន់បណ្ដុះបណ្ដាល ដែលមានវាលថ្នាក់។
+Image	រូបភាព
+Imagery: Copernicus Sentinel-2 (ESA) and Landsat (USGS/NASA), served by Microsoft Planetary Computer. After the LEE RS Lab plugin, Geoinformatics and Research Lab, RUPP.	រូបភាព៖ Copernicus Sentinel-2 (ESA) និង Landsat (USGS/NASA) ផ្ដល់ដោយ Microsoft Planetary Computer។ ផ្អែកលើកម្មវិធីជំនួយ LEE RS Lab ក្រុមស្រាវជ្រាវ និងអភិវឌ្ឍន៍ព័ត៌មានភូមិសាស្ត្រ សភូមិន្ទភ្នំពេញ។
+LEE RS Lab	LEE RS Lab
+LEE RS Lab (Satellite Imagery)	LEE RS Lab (រូបភាពផ្កាយរណប)
+LEE RS Lab…	LEE RS Lab…
+Land/water (4-5-3)	ដី/ទឹក (4-5-3)
+Landsat 8/9 (30 m)	Landsat 8/9 (30 ម៉ែត្រ)
+Map view	ទិដ្ឋភាពផែនទី
+Merging the tiles…	កំពុងបញ្ចូលផ្ទាំងរូបភាព…
+Natural color (3-2-1)	ពណ៌ធម្មជាតិ (3-2-1)
+Open in Cambodia 3D	បើកក្នុង Cambodia 3D
+Open in Cambodia 3D (Landscape, Trees, Houses)	បើកក្នុង Cambodia 3D (ទេសភាព ដើមឈើ ផ្ទះ)
+Percent	ភាគរយ
+Province or district	ខេត្ត ឬស្រុក/ខណ្ឌ
+Ratio	ផលធៀប
+Satellite	ផ្កាយរណប
+Search, then pick a date.	ស្វែងរក រួចជ្រើសកាលបរិច្ឆេទ។
+Sentinel-2 (10 m)	Sentinel-2 (10 ម៉ែត្រ)
+Study area	តំបន់សិក្សា
+Supervised (training polygons)	មានការត្រួតពិនិត្យ (ពហុកោណបណ្ដុះបណ្ដាល)
+The area is large: cells of {m} m (at most {n} across).	តំបន់ធំ៖ ក្រឡា {m} ម៉ែត្រ (យ៉ាងច្រើន {n} ក្រឡា)។
+The map has no view yet.	ផែនទីមិនទាន់មានទិដ្ឋភាពនៅឡើយ។
+The middle of the map view as a 3D landscape with trees and houses (up to 4 × 4 km)	កណ្ដាលទិដ្ឋភាពផែនទីជាទេសភាព 3D មានដើមឈើ និងផ្ទះ (រហូតដល់ 4 × 4 គ.ម)
+Training	បណ្ដុះបណ្ដាល
+Unsupervised (K-means)	គ្មានការត្រួតពិនិត្យ (K-means)
+Urban (6-5-3)	ទីក្រុង (6-5-3)
+Vegetation (NIR, Red)	រុក្ខជាតិ (NIR, Red)
+Vegetation on bare soil	រុក្ខជាតិលើដីទទេ
+Water (Green, NIR)	ទឹក (Green, NIR)
+view	ទិដ្ឋភាព
+{date} · cloud {c}% · {n} tile(s)	{date} · ពពក {c}% · {n} ផ្ទាំង
+{name} is ready: six bands of reflectance (Blue, Green, Red, NIR, SWIR1, SWIR2).	{name} រួចរាល់៖ ចំណាំងផ្លាត ៦ បាន់ (Blue, Green, Red, NIR, SWIR1, SWIR2)។
+{n} date(s) found.	រកឃើញ {n} កាលបរិច្ឆេទ។
+{n} tiles cover the area; the first {k} are read.	មាន {n} ផ្ទាំងគ្របតំបន់នេះ ប៉ុន្តែអានតែ {k} ផ្ទាំងដំបូង។
+The tiles could not be merged: see Messages.	មិនអាចបញ្ចូលផ្ទាំងរូបភាពបានទេ៖ សូមមើលសារ។

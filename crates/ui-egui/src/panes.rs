@@ -157,6 +157,7 @@ fn right_title(pane: RightPane) -> (&'static str, &'static str) {
         RightPane::WebData => ("Web Data", "ui.pane.webData"),
         // Its tab says whose panel it is (see `right_name`).
         RightPane::Plugin => ("Plugin", "ui.pane.plugin"),
+        RightPane::RsLab => ("LEE RS Lab", "ui.pane.rslab"),
     }
 }
 
@@ -174,7 +175,7 @@ fn right_name(app: &RustGisApp, pane: RightPane) -> String {
 }
 
 /// Every right pane, for the QGIS layout's saved dock arrangement.
-pub(crate) const RIGHT_PANES: [RightPane; 27] = [
+pub(crate) const RIGHT_PANES: [RightPane; 28] = [
     RightPane::Geoprocessing,
     RightPane::Symbology,
     RightPane::History,
@@ -202,6 +203,7 @@ pub(crate) const RIGHT_PANES: [RightPane; 27] = [
     RightPane::Labeling,
     RightPane::WebData,
     RightPane::Plugin,
+    RightPane::RsLab,
 ];
 
 /// A right pane's command id (`ui.pane.…`), which names it in saved arrangements.
@@ -275,6 +277,7 @@ fn right_contents(app: &mut RustGisApp, ui: &mut Ui, right: RightPane, t: &Token
             RightPane::Labeling => crate::labelpane::show(app, ui, t),
             RightPane::Plugin => crate::pluginpanel::show(app, ui, t),
             RightPane::WebData => web_data(app, ui),
+            RightPane::RsLab => crate::rslab::pane(app, ui),
         });
     });
 }

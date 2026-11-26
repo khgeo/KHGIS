@@ -130,6 +130,8 @@ pub fn load(app: &mut RustGisApp) {
     // As set up for teaching: Layer Styling docked on the right (the Browser and the Layers are
     // tabbed together on the left, see `qgisdock`).
     if app.ui.qgis_layout && app.ui.right.is_none() {
+        // LEE RS Lab is a tab beside it, a default tool for the remote sensing class.
+        app.ui.open_right(RightPane::RsLab);
         app.ui.open_right(RightPane::Symbology);
     }
     app.ui.qgis.live = load("qgis_style_live").as_deref() != Some("off");
@@ -417,6 +419,7 @@ fn view_menu(app: &mut RustGisApp, ui: &mut Ui) {
     });
     menu_item(ui, app, "globe_view", "3D Map View (Globe)", "map.projection", json!({"projection": "globe"}));
     menu_item(ui, app, "map", "2D Map View", "map.projection", json!({"projection": "mercator"}));
+    menu_item(ui, app, "relief", "Open in Cambodia 3D (Landscape, Trees, Houses)", "ui.cambodia3d", json!({}));
     menu_item(ui, app, "time_slider", "Temporal Controller", "ui.timeSlider", Value::Null);
     ui.separator();
     submenu_row(ui, "pane", tl!("Panels"), |ui| panels(app, ui));
@@ -456,6 +459,7 @@ fn panels(app: &mut RustGisApp, ui: &mut Ui) {
         (RightPane::Labeling, "Labels", "ui.pane.labeling"),
         (RightPane::History, "Processing History", "ui.pane.history"),
         (RightPane::Bookmarks, "Spatial Bookmarks", "ui.pane.bookmarks"),
+        (RightPane::RsLab, "LEE RS Lab", "ui.pane.rslab"),
         (RightPane::Script, "Python Console (Scripts)", "ui.pane.script"),
         (RightPane::Notebook, "Notebook", "ui.pane.notebook"),
         (RightPane::Sql, "SQL", "ui.pane.sql"),
@@ -592,6 +596,10 @@ fn tools_menu(app: &mut RustGisApp, ui: &mut Ui, raster: bool) {
     if own.is_empty() && qgis.is_empty() {
         ui.label(egui::RichText::new(tl!("No tools")).weak());
     }
+    if raster {
+        menu_item(ui, app, "rgb", "LEE RS Lab…", "ui.pane.rslab", Value::Null);
+        ui.separator();
+    }
     tree(app, ui, &own);
     if !qgis.is_empty() {
         ui.separator();
@@ -663,6 +671,8 @@ fn cambodia_menu(app: &mut RustGisApp, ui: &mut Ui) {
     ui.set_min_width(260.0);
     menu_item(ui, app, "cambodia", "Load a Province or District…", "ui.dialog", json!({"name": "cambodia"}));
     menu_item(ui, app, "new_layout", "A4 Map Layout (Khmer or English)", "khgis.autoLayout", json!({"lang": lang()}));
+    menu_item(ui, app, "rgb", "LEE RS Lab (Satellite Imagery)", "ui.pane.rslab", Value::Null);
+    menu_item(ui, app, "relief", "Open in Cambodia 3D", "ui.cambodia3d", json!({}));
     ui.separator();
     for (id, label) in [
         ("floodExposure", "Villages Exposed to Floods"),
@@ -810,6 +820,9 @@ fn toolbars(app: &mut RustGisApp, ui: &mut Ui) {
                     button(ui, app, "web_map", "Add WMS/WMTS, WFS or ArcGIS Layer", "ui.addService", Value::Null, false);
                     button(ui, app, "basemap", "Add XYZ Tile Layer", "ui.dialog", json!({"name": "addTiles"}), false);
                     button(ui, app, "cambodia", "Add Cambodia Data", "ui.dialog", json!({"name": "cambodia"}), false);
+                    let lab = app.ui.right == Some(RightPane::RsLab);
+                    button(ui, app, "rgb", "LEE RS Lab", "ui.pane.rslab", Value::Null, lab);
+                    button(ui, app, "relief", "Open in Cambodia 3D", "ui.cambodia3d", json!({}), false);
                 });
                 toolbar(ui, app, "plugins", |ui, app| {
                     let tb = app.ui.right == Some(RightPane::Geoprocessing);
