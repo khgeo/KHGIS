@@ -1,0 +1,472 @@
+{
+ "bridge": 1,
+ "qgis": "3.34.4-Prizren",
+ "algorithms": [
+  {
+   "id": "gdal:slope",
+   "name": "Slope",
+   "group": "Raster analysis",
+   "provider": "GDAL",
+   "provider_id": "gdal",
+   "help": "",
+   "params": [
+    {
+     "name": "INPUT",
+     "description": "Input layer",
+     "help": "",
+     "type": "raster",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": null,
+     "layer": "raster"
+    },
+    {
+     "name": "BAND",
+     "description": "Band number",
+     "help": "",
+     "type": "band",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": 1,
+     "parent": "INPUT"
+    },
+    {
+     "name": "SCALE",
+     "description": "Ratio of vertical units to horizontal",
+     "help": "",
+     "type": "number",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": 1.0,
+     "integer": false
+    },
+    {
+     "name": "AS_PERCENT",
+     "description": "Slope expressed as percent instead of degrees",
+     "help": "",
+     "type": "boolean",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": false
+    },
+    {
+     "name": "COMPUTE_EDGES",
+     "description": "Compute edges",
+     "help": "",
+     "type": "boolean",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": false
+    },
+    {
+     "name": "ZEVENBERGEN",
+     "description": "Use Zevenbergen&Thorne formula instead of the Horn's one",
+     "help": "",
+     "type": "boolean",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": false
+    },
+    {
+     "name": "OPTIONS",
+     "description": "Additional creation options",
+     "help": "",
+     "type": "string",
+     "optional": true,
+     "hidden": false,
+     "advanced": true,
+     "destination": false,
+     "default": ""
+    },
+    {
+     "name": "EXTRA",
+     "description": "Additional command-line parameters",
+     "help": "",
+     "type": "string",
+     "optional": true,
+     "hidden": false,
+     "advanced": true,
+     "destination": false,
+     "default": null
+    },
+    {
+     "name": "OUTPUT",
+     "description": "Slope",
+     "help": "",
+     "type": "rasterDestination",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": true,
+     "default": null,
+     "layer": "raster"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "OUTPUT",
+     "type": "outputRaster",
+     "description": "Slope"
+    }
+   ]
+  },
+  {
+   "id": "native:buffer",
+   "name": "Buffer",
+   "group": "Vector geometry",
+   "provider": "QGIS (native c++)",
+   "provider_id": "native",
+   "help": "This algorithm computes a buffer area for all the features in an input layer, us",
+   "params": [
+    {
+     "name": "INPUT",
+     "description": "Input layer",
+     "help": "",
+     "type": "source",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": null,
+     "layer": "vector",
+     "geometry": ""
+    },
+    {
+     "name": "DISTANCE",
+     "description": "Distance",
+     "help": "",
+     "type": "distance",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": 10,
+     "integer": false
+    },
+    {
+     "name": "SEGMENTS",
+     "description": "Segments",
+     "help": "The segments parameter controls the number of line segments to use to approximate a quarter circle when creating rounded offsets.",
+     "type": "number",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": 5,
+     "integer": true
+    },
+    {
+     "name": "END_CAP_STYLE",
+     "description": "End cap style",
+     "help": "",
+     "type": "enum",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": 0,
+     "options": [
+      "Round",
+      "Flat",
+      "Square"
+     ],
+     "multiple": false
+    },
+    {
+     "name": "JOIN_STYLE",
+     "description": "Join style",
+     "help": "",
+     "type": "enum",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": 0,
+     "options": [
+      "Round",
+      "Miter",
+      "Bevel"
+     ],
+     "multiple": false
+    },
+    {
+     "name": "MITER_LIMIT",
+     "description": "Miter limit",
+     "help": "",
+     "type": "number",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": 2,
+     "integer": false
+    },
+    {
+     "name": "DISSOLVE",
+     "description": "Dissolve result",
+     "help": "",
+     "type": "boolean",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": false
+    },
+    {
+     "name": "SEPARATE_DISJOINT",
+     "description": "Keep disjoint results separate",
+     "help": "If checked, then any disjoint parts in the buffer results will be output as separate single-part features.",
+     "type": "boolean",
+     "optional": false,
+     "hidden": false,
+     "advanced": true,
+     "destination": false,
+     "default": false
+    },
+    {
+     "name": "OUTPUT",
+     "description": "Buffered",
+     "help": "",
+     "type": "sink",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": true,
+     "default": null,
+     "layer": "vector"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "OUTPUT",
+     "type": "outputVector",
+     "description": "Buffered"
+    }
+   ]
+  },
+  {
+   "id": "native:countpointsinpolygon",
+   "name": "Count points in polygon",
+   "group": "Vector analysis",
+   "provider": "QGIS (native c++)",
+   "provider_id": "native",
+   "help": "This algorithm takes a points layer and a polygon layer and counts the number of",
+   "params": [
+    {
+     "name": "POLYGONS",
+     "description": "Polygons",
+     "help": "",
+     "type": "source",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": null,
+     "layer": "vector",
+     "geometry": "polygon"
+    },
+    {
+     "name": "POINTS",
+     "description": "Points",
+     "help": "",
+     "type": "source",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": null,
+     "layer": "vector",
+     "geometry": "point"
+    },
+    {
+     "name": "WEIGHT",
+     "description": "Weight field",
+     "help": "",
+     "type": "field",
+     "optional": true,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": null,
+     "parent": "POINTS",
+     "multiple": false
+    },
+    {
+     "name": "CLASSFIELD",
+     "description": "Class field",
+     "help": "",
+     "type": "field",
+     "optional": true,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": null,
+     "parent": "POINTS",
+     "multiple": false
+    },
+    {
+     "name": "FIELD",
+     "description": "Count field name",
+     "help": "",
+     "type": "string",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": "NUMPOINTS"
+    },
+    {
+     "name": "OUTPUT",
+     "description": "Count",
+     "help": "",
+     "type": "sink",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": true,
+     "default": null,
+     "layer": "vector"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "OUTPUT",
+     "type": "outputVector",
+     "description": "Count"
+    }
+   ]
+  },
+  {
+   "id": "native:dissolve",
+   "name": "Dissolve",
+   "group": "Vector geometry",
+   "provider": "QGIS (native c++)",
+   "provider_id": "native",
+   "help": "This algorithm takes a vector layer and combines their features into new feature",
+   "params": [
+    {
+     "name": "INPUT",
+     "description": "Input layer",
+     "help": "",
+     "type": "source",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": null,
+     "layer": "vector",
+     "geometry": ""
+    },
+    {
+     "name": "FIELD",
+     "description": "Dissolve field(s)",
+     "help": "",
+     "type": "field",
+     "optional": true,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": null,
+     "parent": "INPUT",
+     "multiple": true
+    },
+    {
+     "name": "SEPARATE_DISJOINT",
+     "description": "Keep disjoint features separate",
+     "help": "",
+     "type": "boolean",
+     "optional": false,
+     "hidden": false,
+     "advanced": true,
+     "destination": false,
+     "default": false
+    },
+    {
+     "name": "OUTPUT",
+     "description": "Dissolved",
+     "help": "",
+     "type": "sink",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": true,
+     "default": null,
+     "layer": "vector"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "OUTPUT",
+     "type": "outputVector",
+     "description": "Dissolved"
+    }
+   ]
+  },
+  {
+   "id": "native:mergevectorlayers",
+   "name": "Merge vector layers",
+   "group": "Vector general",
+   "provider": "QGIS (native c++)",
+   "provider_id": "native",
+   "help": "This algorithm combines multiple vector layers of the same geometry type into a ",
+   "params": [
+    {
+     "name": "LAYERS",
+     "description": "Input layers",
+     "help": "",
+     "type": "multilayer",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": null,
+     "layer": "vector",
+     "multiple": true
+    },
+    {
+     "name": "CRS",
+     "description": "Destination CRS",
+     "help": "",
+     "type": "crs",
+     "optional": true,
+     "hidden": false,
+     "advanced": false,
+     "destination": false,
+     "default": null
+    },
+    {
+     "name": "OUTPUT",
+     "description": "Merged",
+     "help": "",
+     "type": "sink",
+     "optional": false,
+     "hidden": false,
+     "advanced": false,
+     "destination": true,
+     "default": null,
+     "layer": "vector"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "OUTPUT",
+     "type": "outputVector",
+     "description": "Merged"
+    }
+   ]
+  }
+ ],
+ "plugins": []
+}

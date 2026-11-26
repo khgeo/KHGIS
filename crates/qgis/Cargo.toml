@@ -1,0 +1,15 @@
+[package]
+name = "rustgis-qgis"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "KHGIS L3: QGIS Processing algorithms (QGIS's own and those of installed QGIS plugins) as geoprocessing tools, run by the user's QGIS through a bridge script"
+
+[lints]
+workspace = true
+
+[dependencies]
+rustgis-data = { workspace = true }
+rustgis-analysis = { workspace = true }
+serde_json = { workspace = true }
+log = { workspace = true }

@@ -803,6 +803,9 @@ pub struct Session {
     /// Asynchronous runs started and not yet complete: (id, job, resolved params, start time).
     #[cfg(feature = "geolibre")]
     pub(crate) started: Vec<(u64, rustgis_geolibre::Job, serde_json::Value, u64, policy::Continuation)>,
+    /// QGIS runs the web app's bridge service is carrying out (`gp::qgis_start`).
+    #[cfg(feature = "qgis")]
+    pub(crate) started_qgis: Vec<(u64, rustgis_qgis::Job, serde_json::Value, u64, policy::Continuation)>,
     /// Plugin tool runs started and not yet complete (`gp::plugin_start`).
     pub(crate) plugin_runs: Vec<cmd::gp::StartedRun>,
     /// Plugins' panels, by plugin id: the widgets' values and what the plugin last said about
@@ -1069,6 +1072,8 @@ impl Session {
         // Trusted native startup publishes tool schemas before restricted metadata consumers run.
         #[cfg(feature = "geolibre")]
         rustgis_geolibre::register();
+        #[cfg(feature = "qgis")]
+        rustgis_qgis::register();
         rustgis_plugins::tools::register();
         let _ = rustgis_analysis::external_tools();
         // FlatGeobuf and GeoParquet by their web address are read through the tile fetchers, and
@@ -1155,6 +1160,8 @@ impl Session {
             next_pending: 0,
             #[cfg(feature = "geolibre")]
             started: Vec::new(),
+            #[cfg(feature = "qgis")]
+            started_qgis: Vec::new(),
             plugin_runs: Vec::new(),
             plugin_panels: std::collections::BTreeMap::new(),
             plugin_watch: Default::default(),

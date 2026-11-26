@@ -58,11 +58,12 @@ is out of scope.
 | L2 | `tiles` | web map tiles: XYZ/TMS/WMS rasters, Mapbox Vector Tiles, PMTiles and MBTiles archives, a MapLibre style subset; the tile cache and background fetching (see `docs/user-guide/maps.md` › Basemaps) |
 | L2 | `keychain` | the system's secret store (macOS Keychain, Windows Credential Manager, Secret Service) behind `SecretStore`; the desktop app, the CLI's `--use-saved-secrets` and Python's `use_saved_secrets` |
 | L3 | `render` | tiny-skia map renderer, label placement, PNG export, font discovery |
+| L3 | `qgis` | QGIS Processing algorithms (QGIS's and installed QGIS plugins') as geoprocessing tools, run by the user's QGIS through `bridge/khgis_qgis_bridge.py` (natively a subprocess; in the browser the `packaging/qgis-bridge` service) |
 | L3 | `plugins` | plugins: sandboxed WebAssembly modules (`wasmi`) adding commands and tools; `.rgplugin` packages, the plugin registry (see `docs/plugins.md`) |
 | L3 | `geolibre` | the GeoLibre/Whitebox tool suite as geoprocessing tools (engine feature `geolibre`): run by the optional `geolibre` program natively, by geolibre-rust's WASI runner in the browser |
 | L4 | `engine` | `Session`, undo, command registry, sample project |
 | L5 | `assistant` | the AI Assistant: a chat agent (sans I/O: `provider` builds and reads OpenAI Chat Completions/Responses, Anthropic and Gemini requests, `chatgpt` signs in with ChatGPT to use the user's plan, `agent` loops, `tools` run commands; file, network and plugin commands wait for the user's approval) |
-| L6 | `ui-egui` | ribbon, panes, map view, attribute table, dialogs (swappable) |
+| L6 | `ui-egui` | the QGIS-style layout (`qgisui`: menu bar, toolbars, docks; the default) and the ribbon, panes, map view, attribute table, dialogs (swappable) |
 | apps | `rustgis`, `rustgis-cli`, `rustgis-web`, `rustgis-python` | desktop app, command line, browser (WebAssembly), the `rustgis` Python package (PyO3, built with maturin) |
 
 - **Everything is a command**: a `CommandSpec` in `crates/engine/src/cmd/*.rs`. UI-only

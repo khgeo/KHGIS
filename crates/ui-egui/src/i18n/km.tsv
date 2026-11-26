@@ -1254,3 +1254,171 @@ Run KHGIS Workflow	ដំណើរការលំហូរការងារ KHG
 Welcome to {app}	សូមស្វាគមន៍មកកាន់ {app}
 Provinces, districts, imagery	ខេត្ត ស្រុក រូបភាពផ្កាយរណប
 Elevation needs the desktop app: the Copernicus server does not allow web pages to read its files.	រយៈកម្ពស់ត្រូវការកម្មវិធីលើកុំព្យូទ័រ៖ ម៉ាស៊ីនមេ Copernicus មិនអនុញ្ញាតឱ្យទំព័របណ្ដាញអានឯកសាររបស់វាទេ។
+2D Map View	ទិដ្ឋភាពផែនទី 2D
+3D Map View (Globe)	ទិដ្ឋភាពផែនទី 3D (សកលលោក)
+A plugin .zip from plugins.qgis.org goes into your QGIS profile, where QGIS and KHGIS both find it. Plugins run Python code on this computer: install only those you trust.	ឯកសារ .zip នៃកម្មវិធីបន្ថែមពី plugins.qgis.org ត្រូវដាក់ក្នុងប្រវត្តិរូប QGIS របស់អ្នក ដែល QGIS និង KHGIS រកឃើញទាំងពីរ។ កម្មវិធីបន្ថែមដំណើរការកូដ Python លើកុំព្យូទ័រនេះ៖ ដំឡើងតែកម្មវិធីដែលអ្នកទុកចិត្តប៉ុណ្ណោះ។
+A4 Map Layout (Khmer or English)	ប្លង់ផែនទី A4 (ខ្មែរ ឬអង់គ្លេស)
+Add Cambodia Data	បន្ថែមទិន្នន័យកម្ពុជា
+Add Cambodia Data…	បន្ថែមទិន្នន័យកម្ពុជា…
+Add Database Layer…	បន្ថែមស្រទាប់មូលដ្ឋានទិន្នន័យ…
+Add Delimited Text Layer	បន្ថែមស្រទាប់អត្ថបទមានសញ្ញាបំបែក
+Add Delimited Text Layer…	បន្ថែមស្រទាប់អត្ថបទមានសញ្ញាបំបែក…
+Add Field…	បន្ថែមវាល…
+Add GeoPackage Layer…	បន្ថែមស្រទាប់ GeoPackage…
+Add Layer	បន្ថែមស្រទាប់
+Add Layer From URL…	បន្ថែមស្រទាប់ពី URL…
+Add Line Feature	បន្ថែមធាតុខ្សែ
+Add Point Feature	បន្ថែមធាតុចំណុច
+Add Polygon Feature	បន្ថែមធាតុពហុកោណ
+Add Vector or Raster Layer	បន្ថែមស្រទាប់វ៉ិចទ័រ ឬរ៉ាស្ទ័រ
+Add Vector or Raster Layer…	បន្ថែមស្រទាប់វ៉ិចទ័រ ឬរ៉ាស្ទ័រ…
+Add WMS/WMTS, WFS or ArcGIS Layer	បន្ថែមស្រទាប់ WMS/WMTS, WFS ឬ ArcGIS
+Add WMS/WMTS, WFS or ArcGIS Layer…	បន្ថែមស្រទាប់ WMS/WMTS, WFS ឬ ArcGIS…
+Add XYZ Tile Layer	បន្ថែមស្រទាប់ក្រឡា XYZ
+Add XYZ Tile Layer…	បន្ថែមស្រទាប់ក្រឡា XYZ…
+Administrative Boundaries…	ព្រំដែនរដ្ឋបាល…
+Algorithms in the toolbox	ក្បួនដោះស្រាយនៅក្នុងប្រអប់ឧបករណ៍
+Attributes Toolbar	របារឧបករណ៍គុណលក្ខណៈ
+Basemaps and XYZ Tiles…	ផែនទីមូលដ្ឋាន និងក្រឡា XYZ…
+Browse plugins.qgis.org	រុករក plugins.qgis.org
+Browse…	រុករក…
+Cambodia A4 Map Layout	ប្លង់ផែនទីកម្ពុជា A4
+Connect	ភ្ជាប់
+Connect QGIS	ភ្ជាប់ QGIS
+Connect QGIS for its Algorithms…	ភ្ជាប់ QGIS ដើម្បីប្រើក្បួនដោះស្រាយរបស់វា…
+Connected QGIS {version}: {n} algorithms are in the Processing Toolbox under QGIS.	បានភ្ជាប់ QGIS {version}៖ ក្បួនដោះស្រាយ {n} នៅក្នុងប្រអប់ឧបករណ៍ដំណើរការ ក្រោម QGIS។
+Connected: QGIS {version}, {n} algorithms	បានភ្ជាប់៖ QGIS {version}, ក្បួនដោះស្រាយ {n}
+Copy Features	ចម្លងធាតុ
+Cut Features	កាត់ធាតុ
+Dark	ងងឹត
+Data Source Manager	កម្មវិធីគ្រប់គ្រងប្រភពទិន្នន័យ
+Data Source Manager Toolbar	របារឧបករណ៍គ្រប់គ្រងប្រភពទិន្នន័យ
+Decorations	ការតុបតែង
+Delete Selected	លុបធាតុដែលបានជ្រើស
+Deselect Features from All Layers	ឈប់ជ្រើសធាតុពីគ្រប់ស្រទាប់
+Digitizing Toolbar	របារឧបករណ៍ឌីជីថលកម្ម
+Disconnect	ផ្ដាច់
+Done	រួចរាល់
+Edit Status	ស្ថានភាពកែសម្រួល
+Edits	ការកែសម្រួល
+Exit KHGIS	ចាកចេញពី KHGIS
+Export Layer…	នាំចេញស្រទាប់…
+Export Map to Image…	នាំចេញផែនទីជារូបភាព…
+Export Map to PDF	នាំចេញផែនទីជា PDF
+Export Map to PDF…	នាំចេញផែនទីជា PDF…
+Failed to load	ផ្ទុកមិនបាន
+Field Calculator…	ម៉ាស៊ីនគណនាវាល…
+Found automatically (python-qgis.bat, QGIS.app/…/python3)	រកដោយស្វ័យប្រវត្តិ (python-qgis.bat, QGIS.app/…/python3)
+Go to Coordinates…	ទៅកូអរដោនេ…
+Graphical Modeler	កម្មវិធីបង្កើតគំរូក្រាហ្វិក
+Graphical Modeler…	កម្មវិធីបង្កើតគំរូក្រាហ្វិក…
+Grid (Graticule)	ក្រឡាចត្រង្គ (ខ្សែរយៈបណ្ដោយ-រយៈទទឹង)
+History…	ប្រវត្តិ…
+Import/Export	នាំចូល/នាំចេញ
+In the browser, QGIS runs as a KHGIS QGIS bridge service (packaging/qgis-bridge: a Docker image for Cloud Run or any server). Enter its address:	នៅក្នុងកម្មវិធីរុករក QGIS ដំណើរការជាសេវាស្ពាន KHGIS QGIS (packaging/qgis-bridge៖ រូបភាព Docker សម្រាប់ Cloud Run ឬម៉ាស៊ីនមេណាមួយ)។ បញ្ចូលអាសយដ្ឋានរបស់វា៖
+Install a QGIS plugin	ដំឡើងកម្មវិធីបន្ថែម QGIS
+Install Plugin From File…	ដំឡើងកម្មវិធីបន្ថែមពីឯកសារ…
+Installed QGIS plugins	កម្មវិធីបន្ថែម QGIS ដែលបានដំឡើង
+Installed {name}. Connect again to list its algorithms.	បានដំឡើង {name}។ ភ្ជាប់ម្ដងទៀតដើម្បីបង្ហាញក្បួនដោះស្រាយរបស់វា។
+Installed {name}. It has no Processing algorithms, so it works in QGIS itself but adds no tools to KHGIS.	បានដំឡើង {name}។ វាគ្មានក្បួនដោះស្រាយដំណើរការទេ ដូច្នេះវាដំណើរការក្នុង QGIS ផ្ទាល់ ប៉ុន្តែមិនបន្ថែមឧបករណ៍ទៅ KHGIS ទេ។
+Interface	ចំណុចប្រទាក់
+Invert Feature Selection	ដាក់បញ្ច្រាសការជ្រើសធាតុ
+Keyboard Shortcuts…	ផ្លូវកាត់ក្ដារចុច…
+KHGIS runs the algorithms of your own QGIS: QGIS's Processing toolbox and every installed QGIS plugin that adds Processing algorithms. They appear in the Processing Toolbox under QGIS, and in the Vector and Raster menus. A plugin's own windows and dock panels stay in QGIS.	KHGIS ដំណើរការក្បួនដោះស្រាយនៃ QGIS របស់អ្នកផ្ទាល់៖ ប្រអប់ឧបករណ៍ដំណើរការរបស់ QGIS និងកម្មវិធីបន្ថែម QGIS ទាំងអស់ដែលបានដំឡើង ហើយបន្ថែមក្បួនដោះស្រាយដំណើរការ។ ពួកវាបង្ហាញក្នុងប្រអប់ឧបករណ៍ដំណើរការ ក្រោម QGIS និងក្នុងម៉ឺនុយវ៉ិចទ័រ និងរ៉ាស្ទ័រ។ បង្អួច និងផ្ទាំងចតផ្ទាល់របស់កម្មវិធីបន្ថែមនៅតែក្នុង QGIS។
+Layer Details	ព័ត៌មានលម្អិតស្រទាប់
+Layer Properties (Details)	លក្ខណៈសម្បត្តិស្រទាប់ (ព័ត៌មានលម្អិត)
+Layer Styling	ការរចនាស្រទាប់
+Layer Styling (Symbology)	ការរចនាស្រទាប់ (និមិត្តសញ្ញា)
+Light	ភ្លឺ
+Load a Province or District…	ផ្ទុកខេត្ត ឬស្រុក…
+Log Messages	សារកំណត់ហេតុ
+Manage and Install Plugins	គ្រប់គ្រង និងដំឡើងកម្មវិធីបន្ថែម
+Manage and Install Plugins…	គ្រប់គ្រង និងដំឡើងកម្មវិធីបន្ថែម…
+Map Effects	បែបផែនផែនទី
+Map Navigation Toolbar	របារឧបករណ៍រុករកផែនទី
+Measure Line	វាស់ប្រវែង
+Merge Selected Features	បញ្ចូលធាតុដែលបានជ្រើសចូលគ្នា
+Multipart to Singleparts	ពហុផ្នែកទៅជាផ្នែកតែមួយ
+New Layer From Selection	ស្រទាប់ថ្មីពីការជ្រើសរើស
+New Map View	ទិដ្ឋភាពផែនទីថ្មី
+New Print Layout	ប្លង់បោះពុម្ពថ្មី
+New Spatial Bookmark…	ចំណាំទីតាំងថ្មី…
+No plugins are installed in your QGIS profile.	គ្មានកម្មវិធីបន្ថែមដែលបានដំឡើងក្នុងប្រវត្តិរូប QGIS របស់អ្នកទេ។
+No tools	គ្មានឧបករណ៍
+Open Attribute Table	បើកតារាងគុណលក្ខណៈ
+Open Data Source Manager	បើកកម្មវិធីគ្រប់គ្រងប្រភពទិន្នន័យ
+Open Field Calculator	បើកម៉ាស៊ីនគណនាវាល
+Open From Catalog	បើកពីកាតាឡុក
+Open Project	បើកគម្រោង
+OpenStreetMap…	OpenStreetMap…
+Options…	ជម្រើស…
+Other Languages…	ភាសាផ្សេងទៀត…
+Pan Map	អូសផែនទី
+Pan Map (click a feature to identify it)	អូសផែនទី (ចុចលើធាតុដើម្បីកំណត់អត្តសញ្ញាណ)
+Panels	ផ្ទាំង
+Paste Features	បិទភ្ជាប់ធាតុ
+Paste Features as New Layer	បិទភ្ជាប់ធាតុជាស្រទាប់ថ្មី
+Planet Open Data…	ទិន្នន័យបើកចំហ Planet…
+Plugins Toolbar	របារឧបករណ៍កម្មវិធីបន្ថែម
+Portolan…	Portolan…
+Processing	ដំណើរការ
+Processing History	ប្រវត្តិដំណើរការ
+Processing Toolbox	ប្រអប់ឧបករណ៍ដំណើរការ
+Project Toolbar	របារឧបករណ៍គម្រោង
+Properties… (Coordinate System)	លក្ខណៈសម្បត្តិ… (ប្រព័ន្ធកូអរដោនេ)
+Python Console (Scripts)	កុងសូល Python (ស្គ្រីប)
+QGIS isn't connected.	QGIS មិនទាន់បានភ្ជាប់ទេ។
+QGIS Layout (menus and toolbars)	ប្លង់ QGIS (ម៉ឺនុយ និងរបារឧបករណ៍)
+QGIS Plugins & Tools	កម្មវិធីបន្ថែម និងឧបករណ៍ QGIS
+QGIS Plugins & Tools…	កម្មវិធីបន្ថែម និងឧបករណ៍ QGIS…
+QGIS Processing	ដំណើរការ QGIS
+QGIS Python:	Python របស់ QGIS៖
+QGIS's Python	Python របស់ QGIS
+Reconnect (reload algorithms)	ភ្ជាប់ម្ដងទៀត (ផ្ទុកក្បួនដោះស្រាយឡើងវិញ)
+Remove Layer	ដកស្រទាប់ចេញ
+Reshape Features	កែរាងធាតុ
+Ribbon (every KHGIS tool)	ខ្សែបូ (ឧបករណ៍ KHGIS ទាំងអស់)
+Ribbon Layout	ប្លង់ខ្សែបូ
+Satellite Imagery (STAC)	រូបភាពផ្កាយរណប (STAC)
+Save As…	រក្សាទុកជា…
+Save Project	រក្សាទុកគម្រោង
+Save Project As…	រក្សាទុកគម្រោងជា…
+Schools per District	សាលារៀនតាមស្រុក
+Scripts	ស្គ្រីប
+Select All Features	ជ្រើសធាតុទាំងអស់
+Select Features by Area or Single Click	ជ្រើសធាតុតាមផ្ទៃ ឬចុចម្ដង
+Select Features by Freehand	ជ្រើសធាតុដោយគូរដោយសេរី
+Select Features by Polygon	ជ្រើសធាតុតាមពហុកោណ
+Select Features by Radius	ជ្រើសធាតុតាមកាំ
+Settings › Interface switches between the QGIS layout and the ribbon.	ការកំណត់ › ចំណុចប្រទាក់ ប្ដូររវាងប្លង់ QGIS និងខ្សែបូ។
+Share…	ចែករំលែក…
+Show Spatial Bookmarks	បង្ហាញចំណាំទីតាំង
+Snapping Options	ជម្រើសការភ្ជាប់ស្វ័យប្រវត្តិ
+Spatial Bookmarks	ចំណាំទីតាំង
+Split Features	បំបែកធាតុ
+Starting QGIS and loading its plugins… (this can take a minute)	កំពុងចាប់ផ្ដើម QGIS និងផ្ទុកកម្មវិធីបន្ថែម… (អាចចំណាយពេលមួយនាទី)
+Switch Between the QGIS Layout and the Ribbon	ប្ដូររវាងប្លង់ QGIS និងខ្សែបូ
+Temporal Controller	ឧបករណ៍គ្រប់គ្រងពេលវេលា
+This page can't reach a QGIS bridge service.	ទំព័រនេះមិនអាចភ្ជាប់ទៅសេវាស្ពាន QGIS បានទេ។
+Toggle Editing	បិទ/បើកការកែសម្រួល
+Toggle Full Screen Mode	បិទ/បើកពេញអេក្រង់
+Toolbars	របារឧបករណ៍
+Toolbox	ប្រអប់ឧបករណ៍
+User Guide	សៀវភៅណែនាំ
+Vantor…	Vantor…
+Vector	វ៉ិចទ័រ
+Vertex Tool	ឧបករណ៍កំពូល
+Villages Exposed to Floods	ភូមិប្រឈមនឹងទឹកជំនន់
+Villages Far From a School	ភូមិនៅឆ្ងាយពីសាលារៀន
+Villages Far From Health Care	ភូមិនៅឆ្ងាយពីសេវាសុខាភិបាល
+Web	បណ្ដាញ
+WMS/WMTS, WFS and ArcGIS Services…	សេវា WMS/WMTS, WFS និង ArcGIS…
+Working…	កំពុងដំណើរការ…
+Works in QGIS only (no Processing algorithms)	ដំណើរការតែក្នុង QGIS (គ្មានក្បួនដោះស្រាយដំណើរការ)
+Zoom Full	ពង្រីកពេញ
+Zoom In (Box)	ពង្រីក (ប្រអប់)
+Zoom In (drag a box)	ពង្រីក (អូសប្រអប់)
+Zoom Last	ពង្រីកមុន
+Zoom Next	ពង្រីកបន្ទាប់
+Zoom to Layer	ពង្រីកទៅស្រទាប់
+Zoom to Selection	ពង្រីកទៅការជ្រើសរើស

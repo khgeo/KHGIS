@@ -68,6 +68,7 @@ mod prefs {
                 }
             })),
             secrets: Some(secrets),
+            qgis_layout_default: true,
             ..Services::default()
         }
     }

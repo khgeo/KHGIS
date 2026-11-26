@@ -26,9 +26,12 @@ iana-time-zone = { version = "0.1", features = ["fallback"] }
 sys-locale = { version = "0.3", features = ["js"] }
 # The GeoLibre tool suite (native only: its tools read and write files).
 rustgis-geolibre = { workspace = true, optional = true }
+# QGIS Processing (QGIS's algorithms and those of QGIS plugins), run by the user's QGIS.
+rustgis-qgis = { workspace = true, optional = true }
 
 [features]
 geolibre = ["dep:rustgis-geolibre"]
+qgis = ["dep:rustgis-qgis"]
 # Existing in-tree Wasm fixtures for adapter tests; no guest or production interface change.
 testing = ["rustgis-plugins/testing"]
 

@@ -684,6 +684,9 @@ pub(crate) fn command_available(id: &str, web: bool) -> bool {
 
 /// The `ui.*` commands Command Search lists: (id, label, ribbon location).
 pub(crate) const UI_COMMANDS: &[(&str, &str, &str)] = &[
+    ("ui.interface", "Switch Between the QGIS Layout and the Ribbon", "Settings › Interface"),
+    ("ui.qgisBridge", "QGIS Plugins & Tools…", "Plugins"),
+    ("ui.qgisOptions", "Options…", "Settings"),
     ("ui.radialMenu", "Toggle Radial Menu", "View"),
     ("ui.xray", "Toggle X-ray Lens", "View"),
     ("ui.shortcuts.import", "Import Keyboard Shortcuts…", "Settings › Customize › Keyboard Shortcuts"),

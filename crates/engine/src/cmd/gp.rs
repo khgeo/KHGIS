@@ -288,6 +288,90 @@ pub fn external_complete(s: &mut Session, id: u64, ran: ExternalOutput) -> Resul
     }
 }
 
+/// A QGIS run for the web app's bridge service: send `request` with `files` (its `@WORK@`
+/// paths are the service's working folder), then pass the new files and the bridge's answer to
+/// [`qgis_complete`] with `id`.
+#[cfg(feature = "qgis")]
+#[derive(Clone)]
+pub struct QgisRun {
+    continuation: crate::policy::Continuation,
+    pub id: u64,
+    pub request: Value,
+    pub files: Vec<(String, Vec<u8>)>,
+}
+
+#[cfg(feature = "qgis")]
+impl QgisRun {
+    pub fn can_start(&self) -> Result<(), String> {
+        self.continuation.check()
+    }
+}
+
+/// The new files of a finished QGIS run and the bridge's answer (`{"results", "notes"}`), with
+/// the lines QGIS logged; or the service's error.
+pub type QgisOutput = Result<(Vec<(String, Vec<u8>)>, Value, Vec<String>), String>;
+
+/// Whether a tool is one of the connected QGIS's algorithms.
+pub fn is_qgis_tool(spec: &rustgis_analysis::ToolSpec) -> bool {
+    spec.id.starts_with("qgis:") && rustgis_analysis::external_source(spec) == Some("qgis")
+}
+
+/// Prepares a run of a QGIS algorithm on the active map for the web app's bridge service,
+/// checking its parameters as `gp.run` does; the session keeps it until [`qgis_complete`].
+#[cfg(feature = "qgis")]
+pub fn qgis_start(s: &mut Session, tool: &str, params: &Value) -> Result<QgisRun, String> {
+    let op = s.authorize_tool(tool, params)?;
+    let continuation = s.tool_continuation(&op)?;
+    let crate::policy::ToolOp { pin, params } = op.op();
+    let spec = pin.spec();
+    if pin.resolved().source() != Some(rustgis_qgis::SOURCE) {
+        return Err(format!("no QGIS algorithm '{tool}'"));
+    }
+    let params = params.clone();
+    let job = preparing(&continuation, || rustgis_qgis::prepare(spec, &map_inputs(s, Some(spec), &params)?, &params))?;
+    s.next_pending = s.next_pending.wrapping_add(1);
+    let id = s.next_pending;
+    let run = QgisRun { id, request: job.request("@WORK@"), files: job.files.clone(), continuation: continuation.clone() };
+    s.started_qgis.push((id, job, params, now_ms(), continuation));
+    if s.started_qgis.len() > MAX_ASYNC_RUNS {
+        s.started_qgis.remove(0);
+    }
+    Ok(run)
+}
+
+/// Finishes a run from [`qgis_start`]: turns the service's files and answer into a result
+/// that `gp.finish {"id"}` then applies like `gp.run` would, with undo and history.
+#[cfg(feature = "qgis")]
+pub fn qgis_complete(s: &mut Session, id: u64, ran: QgisOutput) -> Result<(), String> {
+    let i = s
+        .started_qgis
+        .iter()
+        .position(|(n, ..)| *n == id)
+        .ok_or("the QGIS run was dropped (its project was closed, or too many runs were waiting)")?;
+    s.check_delivery(&s.started_qgis.get(i).ok_or("no started QGIS run with that id")?.4)?;
+    let (_, job, params, t0, continuation) = s.started_qgis.remove(i);
+    s.check_continuation(&continuation)?;
+    let result = ran.map_err(|e| format!("{}: {e}", job.name)).and_then(|(files, answer, logs)| {
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| rustgis_qgis::finish(&job, &files, &answer, &logs)))
+            .map_err(|_| format!("{}: its output couldn't be read", job.name))
+    });
+    let tool_id = format!("{}{}", rustgis_qgis::PREFIX, job.alg);
+    s.pending.push(crate::PendingRun {
+        id,
+        continuation,
+        tool: job.name.clone(),
+        tool_id,
+        params,
+        result,
+        started: t0,
+        millis: now_ms().saturating_sub(t0),
+    });
+    if s.pending.len() > MAX_ASYNC_RUNS {
+        s.pending.remove(0);
+    }
+    Ok(())
+}
+
 /// A plugin tool's run, prepared on the session by [`plugin_start`] and carried out elsewhere
 /// (the desktop app runs it on a thread of its own, so the window stays responsive): call
 /// [`PluginRun::run`] there, hand what it returns to [`plugin_complete`], then apply it with

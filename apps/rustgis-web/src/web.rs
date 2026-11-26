@@ -1121,6 +1121,8 @@ fn services(inbox: Inbox, font_inbox: Inbox, notes: Notes, ctx: egui::Context, e
     };
     let arcgis_ctx = ctx.clone();
     let clipboard_ctx = ctx.clone();
+    let qgis_ctx = ctx.clone();
+    let qgis_run_ctx = ctx.clone();
     Services {
         // A text field's Paste: the page reads the clipboard (Firefox and Safari show a Paste
         // button to confirm, Chrome asks once); only over HTTPS, where the browser offers it.
@@ -1254,6 +1256,9 @@ fn services(inbox: Inbox, font_inbox: Inbox, notes: Notes, ctx: egui::Context, e
                 ctx.request_repaint();
             });
         })),
+        qgis_layout_default: true,
+        qgis_connect: Some(Box::new(move |url: String, slot| crate::qgisbridge::connect(url, slot, qgis_ctx.clone()))),
+        qgis_run: Some(Box::new(move |job, slot| crate::qgisbridge::run(job, slot, qgis_run_ctx.clone()))),
     }
 }
 

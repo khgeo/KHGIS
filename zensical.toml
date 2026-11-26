@@ -29,6 +29,7 @@ nav = [
     "user-guide/sharing.md",
     "user-guide/workspace.md",
     "user-guide/assistant.md",
+    "user-guide/qgis.md",
   ] },
   { "Comparison" = [
     "comparison/index.md",
