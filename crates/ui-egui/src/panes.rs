@@ -35,7 +35,7 @@ pub fn show(app: &mut RustGisApp, ui: &mut Ui) {
     let frame = egui::Frame::NONE.fill(t.pane).inner_margin(egui::Margin::ZERO);
     app.ui.pane_rects = [None; 2];
     if app.ui.qgis_layout {
-        app.ui.pane_rects[0] = crate::qgisui::left_docks(app, ui, frame, &t);
+        // The QGIS layout docks every pane itself (`qgisui::docks`), below.
     } else if let Some(left) = app.ui.left {
         let pane =
             egui::Panel::left("left_pane").resizable(true).default_size(270.0).size_range(200.0..=480.0).frame(frame).show(ui, |ui| {
@@ -72,7 +72,9 @@ pub fn show(app: &mut RustGisApp, ui: &mut Ui) {
     {
         app.ui.right_open.push(right);
     }
-    if let Some(right) = app.ui.right {
+    if app.ui.qgis_layout {
+        app.ui.pane_rects = crate::qgisui::docks(app, ui, frame, &t);
+    } else if let Some(right) = app.ui.right {
         // The pane can take all the room right of the left pane but the map's minimum, so a
         // notebook or a table can be read side by side with the map (#1056). Where that is less
         // than `RIGHT_PANE_MAX`, the pane keeps that much (as far as it fits), as it always could.
@@ -167,8 +169,58 @@ fn right_name(app: &RustGisApp, pane: RightPane) -> String {
     }
 }
 
+/// Every right pane, for the QGIS layout's saved dock arrangement.
+pub(crate) const RIGHT_PANES: [RightPane; 27] = [
+    RightPane::Geoprocessing,
+    RightPane::Symbology,
+    RightPane::History,
+    RightPane::Details,
+    RightPane::Editing,
+    RightPane::Design,
+    RightPane::Workflows,
+    RightPane::Script,
+    RightPane::Tasks,
+    RightPane::Jobs,
+    RightPane::Profile,
+    RightPane::TimeSeries,
+    RightPane::Diagnostics,
+    RightPane::DiagnosticLog,
+    RightPane::Infographics,
+    RightPane::Report,
+    RightPane::Presentation,
+    RightPane::Notebook,
+    RightPane::Assistant,
+    RightPane::Shares,
+    RightPane::Sql,
+    RightPane::Directions,
+    RightPane::Bookmarks,
+    RightPane::Format,
+    RightPane::Labeling,
+    RightPane::WebData,
+    RightPane::Plugin,
+];
+
+/// A right pane's command id (`ui.pane.…`), which names it in saved arrangements.
+pub(crate) fn right_id(pane: RightPane) -> &'static str {
+    right_title(pane).1
+}
+
+/// A right pane's name on its tab, in the interface language.
+pub(crate) fn right_label(app: &RustGisApp, pane: RightPane) -> String {
+    right_name(app, pane)
+}
+
+/// A right pane's contents without its tab strip, for the QGIS layout's docks.
+pub(crate) fn right_body(app: &mut RustGisApp, ui: &mut Ui, right: RightPane, t: &Tokens) {
+    right_contents(app, ui, right, t);
+}
+
 fn right_pane(app: &mut RustGisApp, ui: &mut Ui, right: RightPane, t: &Tokens) {
     right_header(app, ui, right, t);
+    right_contents(app, ui, right, t);
+}
+
+fn right_contents(app: &mut RustGisApp, ui: &mut Ui, right: RightPane, t: &Tokens) {
     // The chat lays out its own scrolling, with the message box kept at the bottom.
     if right == RightPane::Assistant {
         crate::assistantpane::show(app, ui, t);
