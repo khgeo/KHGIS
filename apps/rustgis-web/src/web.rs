@@ -1227,7 +1227,21 @@ fn services(inbox: Inbox, font_inbox: Inbox, notes: Notes, ctx: egui::Context, e
             };
             // Data may come several files at once (photos gather in one layer).
             let many = matches!(purpose, "data" | "shapefile");
+            // Add Data and Add Shapefile: a Shapefile by its .shp alone where the browser can read
+            // its folder (`shppick`); the ordinary picker elsewhere.
+            let folder_exts: Option<&'static [&'static str]> = match purpose {
+                "data" => Some(DATA_EXTS),
+                "shapefile" => Some(&["shp", "zip"]),
+                _ => None,
+            };
             wasm_bindgen_futures::spawn_local(async move {
+                if let Some(exts) = folder_exts
+                    && let Some(files) = crate::shppick::pick(exts, many).await
+                {
+                    read_together(files, mark, &inbox, notes).await;
+                    ctx.request_repaint();
+                    return;
+                }
                 let files: Vec<rfd::FileHandle> =
                     if many { dialog.pick_files().await.unwrap_or_default() } else { dialog.pick_file().await.into_iter().collect() };
                 read_together(files.iter().map(|f| f.inner().clone()).collect(), mark, &inbox, notes).await;
