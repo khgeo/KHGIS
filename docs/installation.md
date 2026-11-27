@@ -104,7 +104,7 @@ cargo build --release -p rustgis-cli      # the command-line tool
 ```
 
 The build downloads the Natural Earth sample data from
-[rustgis-assets](https://github.com/khgeo/KHGIS-assets). To build offline, download
+[rustgis-assets](https://github.com/opengeos/rustgis-assets). To build offline, download
 `countries.geojson`, `countries_chn.geojson`, `cities.geojson`, `rivers.geojson` and
 `lakes.geojson` from `https://assets.rustgis.app/data/` once and point the build at them:
 

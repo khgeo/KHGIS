@@ -1727,6 +1727,21 @@ pub fn pane(app: &mut RustGisApp, ui: &mut egui::Ui) {
             app.ui.rslab.lee.searches.clear();
         }
     });
+    ui.horizontal(|ui| {
+        if ui.small_button(tl!("Save…")).on_hover_text(tl!("Save the script as a .py file")).clicked() {
+            crate::rsclasses::save_script(app);
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        if ui.small_button(tl!("Open…")).on_hover_text(tl!("Open a .py script")).clicked() {
+            crate::rsclasses::open_script(app);
+        }
+    });
+    egui::CollapsingHeader::new(tl!("API: what scripts can use")).id_salt("lee_api").show(ui, |ui| {
+        for (group, items) in API {
+            ui.label(egui::RichText::new(*group).strong());
+            ui.label(egui::RichText::new(*items).monospace().small());
+        }
+    });
     if go {
         start(app);
     }
@@ -1767,6 +1782,23 @@ fn bars_chart(ui: &mut egui::Ui, title: &str, bars: &[(String, f64)]) {
         });
     }
 }
+
+/// What scripts can use, by object: (object, its functions).
+pub const API: &[(&str, &str)] = &[
+    ("aoi", "the study area of tab 1"),
+    (
+        "lee.ImageCollection(name)",
+        "\"sentinel-2\", \"landsat-9\", \"landsat-8\", \"landsat-7\", \"landsat-5\", \"sentinel-1\"\n.filterDate(start, end) .filterBounds(aoi) .filterMetadata(\"eo:cloud_cover\", \"lt\", n)\n.limit(n) .select(bands) .size() .median() .mean() .mosaic() .first()",
+    ),
+    ("lee.Image", "lee.Image.load(\"dem\" | \"worldcover\" | \"lulc-annual\" | \"surface-water\", year)\nlee.Image(\"a raster layer of the project\")"),
+    (
+        "image",
+        ".normalizedDifference(a, b) .expression(\"(nir-red)/(nir+red)\") .select(b) .rename(n)\n+ - * / ** .add .subtract .multiply .divide\n.gt .lt .gte .lte .eq .neq .And .Or .Not .updateMask(m) .clip(aoi)\n.slope() .aspect() .hillshade(az, alt) .cluster(k=, bands=) .otsu()\n.reduceRegion(\"mean\"|\"median\"|\"min\"|\"max\"|\"sum\"|\"count\"|\"stdDev\")\n.classAreas() .bandNames() .grid.scale",
+    ),
+    ("Map", "Map.addLayer(image, {\"bands\": [r, g, b], \"min\": , \"max\": , \"palette\": \"RdYlGn\"}, name)\nMap.centerObject(aoi)"),
+    ("Chart, lee", "Chart.bars(dict, title)   lee.config(scale=30)"),
+    ("Python", "= for … in …: print round len str int float abs min max sum sorted range, \"%s\" % x, \"{}\".format(x), d[k] = v, dict.items() keys() values() get()"),
+];
 
 /// Ready-to-run scripts: (title, code).
 pub const EXAMPLES: &[(&str, &str)] = &[

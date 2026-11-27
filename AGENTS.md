@@ -99,7 +99,7 @@ is out of scope.
   the paper or standard. Name in the pull request any project whose code you followed (see
   [CONTRIBUTING.md](CONTRIBUTING.md#where-code-comes-from)).
 - Screenshots and other images are not committed here: they live in
-  [opengeos/rustgis-assets](https://github.com/khgeo/KHGIS-assets) (WebP, served at
+  [opengeos/rustgis-assets](https://github.com/opengeos/rustgis-assets) (WebP, served at
   `https://assets.rustgis.app/images/…`) and docs link to them by URL.
 
 ## Quality gates

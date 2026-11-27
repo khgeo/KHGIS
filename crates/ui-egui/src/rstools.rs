@@ -60,6 +60,37 @@ pub fn wand_ui(app: &mut RustGisApp, ui: &mut Ui) {
         }
         ui.label(tl!("Class"));
         ui.add(egui::TextEdit::singleline(&mut app.ui.rslab.wand_class).desired_width(90.0).hint_text(tl!("e.g. Rice")));
+        if ui.button(tl!("Undo last")).on_hover_text(tl!("Removes the last training polygon")).clicked() {
+            let _ = app.run("edit.undo", json!({}));
+        }
+    });
+    // A button per class of the list: it picks the class and turns the wand on.
+    let counts = training_counts(app);
+    let classes = app.ui.rslab.class_list.clone();
+    ui.horizontal_wrapped(|ui| {
+        for c in &classes {
+            let picked = app.ui.rslab.wand_class.trim().eq_ignore_ascii_case(c.name.trim());
+            let n = counts.iter().find(|(k, _)| k.eq_ignore_ascii_case(c.name.trim())).map_or(0, |x| x.1);
+            let light = u32::from(c.color[0]) * 299 + u32::from(c.color[1]) * 587 + u32::from(c.color[2]) * 114 > 140_000;
+            let label = if n > 0 { format!("{} ({n})", tl!(&c.name)) } else { tl!(&c.name).to_string() };
+            let text = egui::RichText::new(label).color(if light { Color32::BLACK } else { Color32::WHITE });
+            let stroke = if picked { egui::Stroke::new(2.5, Color32::BLACK) } else { egui::Stroke::new(1.0, Color32::from_gray(120)) };
+            let b = egui::Button::new(if picked { text.strong() } else { text }).fill(Color32::from_rgb(c.color[0], c.color[1], c.color[2])).stroke(stroke);
+            if ui.add(b).on_hover_text(tl!("Draw training areas of this class with the magic wand")).clicked() {
+                app.ui.rslab.wand_class = c.name.clone();
+                if !armed(app, WAND) {
+                    arm(app, WAND, true);
+                    if app.session.map().layer_by_name(&app.ui.rslab.training).is_none() {
+                        if app.session.map().layer_by_name("training").is_none() {
+                            let _ = app.run("layer.template", json!({"template": "polygons", "name": "training"}));
+                        }
+                        app.ui.rslab.training = "training".into();
+                        app.ui.rslab.class_field = "name".into();
+                    }
+                    let _ = app.run("edit.enable", json!({"on": true}));
+                }
+            }
+        }
     });
     ui.horizontal(|ui| {
         ui.label(tl!("Similarity tolerance"));
@@ -68,6 +99,22 @@ pub fn wand_ui(app: &mut RustGisApp, ui: &mut Ui) {
     if on {
         ui.label(egui::RichText::new(tl!("Click the map to grow a training area (click the button again to stop).")).weak());
     }
+}
+
+/// The training layer's polygons per class: (class, count).
+fn training_counts(app: &RustGisApp) -> Vec<(String, usize)> {
+    let st = &app.ui.rslab;
+    let Some(l) = app.session.map().layer_by_name(&st.training) else { return Vec::new() };
+    let Some(fi) = l.dataset.field_index(if st.class_field.is_empty() { "name" } else { &st.class_field }) else { return Vec::new() };
+    let mut out: Vec<(String, usize)> = Vec::new();
+    for f in l.dataset.features.iter() {
+        let k = f.attrs.get(fi).map(|v| v.to_string()).unwrap_or_default();
+        match out.iter_mut().find(|x| x.0.eq_ignore_ascii_case(&k)) {
+            Some(x) => x.1 += 1,
+            None => out.push((k, 1)),
+        }
+    }
+    out
 }
 
 fn wand_at(app: &mut RustGisApp, lon: f64, lat: f64) {

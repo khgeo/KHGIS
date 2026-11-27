@@ -106,21 +106,38 @@ plot (the density of two bands' values against each other).
 
 **3 Classify**
 
-- Unsupervised: K-means or ISODATA (clusters split and merged between a fewest and most). Name
-  the clusters in the class area table and **Save class names**.
+- **Classes (legend)**: one class list (id, name, colour) for the whole tab — cluster labelling,
+  the magic wand, classification colours, point labelling and change. Start from a scheme (RS Lab
+  default 6 classes, LULC level 1, Auto 7 from WorldCover, ESA WorldCover's 11), edit, add or
+  remove classes, and save or open the list as CSV.
+- Unsupervised: K-means or ISODATA (clusters split and merged between a fewest and most). The
+  clusters are then listed with their area, %, a **hint** read from their spectrum (water,
+  built-up, bare, crop, forest…; from the seasons in a multi-season stack) and a **→ class**
+  box. Click a cluster to zoom to an example pixel of it on imagery (again for another);
+  **Suggest classes from hints** fills the empty boxes; **Split selected cluster into** 2–6
+  re-clusters a mixed one; **Plot cluster spectra** draws their mean spectra; **Create labelled
+  map** merges the clusters into their classes, named and coloured from the list.
 - Supervised, trained from polygons you draw (**Create training layer**, then Toggle Editing and
   Add Polygon Feature; when the polygon is finished, type its class in the form's name box) or **from a land cover map** (WorldCover or Esri
   downloaded in 1 Data): Random Forest (with each band's importance), k-Nearest Neighbours,
   Maximum Likelihood, Mahalanobis Distance, Minimum Distance, Spectral Angle Mapper and
-  Parallelepiped. The **magic wand** draws training polygons for you: type the class, turn it
-  on and click the map; the pixels around the click that are like it (within the similarity
+  Parallelepiped. **Training signatures** plots each training class's mean spectrum (classes
+  whose lines lie close will be confused). The **magic wand** draws training polygons for you:
+  press a class's button (or type the class) and click the map, **Undo last** takes the last one
+  back, and each button counts its polygons; the pixels around the click that are like it (within the similarity
   tolerance, in standard deviations of each band) become one polygon of that class. The training accuracy is shown (optimistic: the pixels taught it).
 - Clean-up: a majority filter and a minimum mapping unit (sieve). **Class map to polygons** turns
   each patch into a polygon with its class and hectares.
-- Accuracy: **Generate validation points** (stratified random, a number per class), fill in
-  `ref_class` in the attribute table, then **Compute accuracy**: error matrix, overall accuracy,
+- A classification is drawn in the class list's colours; **Apply class colours** does the same
+  for any class map, and the class areas show as a bar chart.
+- Accuracy: **Generate validation points** with a sample design — Cochran's total for the
+  accuracy expected and its margin, shared out by class area with a minimum per class
+  (recommended), or equally, or a fixed number per class. **Label the points** goes through
+  them one by one: the map zooms to each, a button per class labels it, **Next unlabelled**
+  moves on, and the map's class can be hidden for blind labelling. Then **Compute accuracy**: error matrix, overall accuracy,
   kappa, user's and producer's accuracy, and area-adjusted estimates with 95 % confidence
-  intervals (Olofsson et al. 2014). Polygons of known classes work as reference too.
+  intervals (Olofsson et al. 2014). Polygons of known classes work as reference too. **Export CSV**
+  saves the error matrix and the figures.
 
 **4 Change**: two class maps compared from → to: the change map, a Sankey diagram, gains and
 losses per class and the largest changes. Maps numbered differently (WorldCover and a
@@ -154,7 +171,7 @@ formula), `select`, `rename`, `+ - * / **`, `add`, `subtract`, `multiply`, `divi
 `min`, `max` and a `palette` name (ColorBrewer and matplotlib names, `_r` reversed);
 `Map.centerObject(aoi)`; `Chart.bars(dict, title)`; `lee.config(scale=30)` sets the cell size.
 Images are made only when needed (downloads and steps run in the background, then the script
-runs again from the top, with what it already made, printed or drew kept). Not yet: `lambda`,
+runs again from the top, with what it already made, printed or drew kept). **Save…** and **Open…** keep scripts as `.py` files; **API** lists what scripts can use. Not yet: `lambda`,
 `map` over a collection, `if`, `def` and `import`.
 
 **6 Map**: the A4 layout with a title made from the area and the date (in Khmer, e.g.

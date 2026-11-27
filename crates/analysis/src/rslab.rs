@@ -1293,6 +1293,18 @@ pub fn accuracy(classes: &[String], pairs: &[(usize, usize)], mapped_ha: &[f64])
 /// Stratified random points: up to `per_class` pixel centres of each value of band `b`, as
 /// (longitude, latitude, value).
 pub fn sample_points(r: &Raster, b: usize, per_class: usize, seed: u64) -> Result<Vec<(Coord, f32)>, String> {
+    sample_points_by(r, b, |_, _| per_class, seed)
+}
+
+/// Cochran's sample size for estimating an accuracy expected near `p` within ± `e` (95 %
+/// confidence), with 10 % more for points that can't be labelled: z²·p·(1−p)/e² × 1.1.
+pub fn cochran_n(p: f64, e: f64) -> usize {
+    let (p, e) = (p.clamp(0.5, 0.99), e.clamp(0.005, 0.3));
+    (1.96f64.powi(2) * p * (1.0 - p) / (e * e) * 1.1).ceil() as usize
+}
+
+/// [`sample_points`] with a number of points of its own for each class: `per(value, pixels)`.
+pub fn sample_points_by(r: &Raster, b: usize, per: impl Fn(f32, usize) -> usize, seed: u64) -> Result<Vec<(Coord, f32)>, String> {
     let data = band(r, b)?;
     let w = r.width as usize;
     let mut by: Vec<(f32, Vec<usize>)> = Vec::new();
@@ -1315,7 +1327,8 @@ pub fn sample_points(r: &Raster, b: usize, per_class: usize, seed: u64) -> Resul
         for i in (1..idx.len()).rev() {
             idx.swap(i, rng.below(i + 1));
         }
-        for i in idx.into_iter().take(per_class) {
+        let take = per(v, idx.len());
+        for i in idx.into_iter().take(take) {
             let world = r.transform.to_world((i % w.max(1)) as f64 + 0.5, (i / w.max(1)) as f64 + 0.5);
             if let Some(ll) = tr.to_lonlat(world) {
                 out.push((ll, v));

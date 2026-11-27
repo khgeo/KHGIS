@@ -300,6 +300,10 @@ pub struct MapView {
     sketch_full_said: bool,
     /// The magnifying lens follows the pointer.
     pub magnifier: bool,
+    /// A place to point out (an example pixel, a point being labelled): a ring drawn there for a
+    /// few seconds, with when it started.
+    pub flash: Option<Coord>,
+    flash_since: Option<f64>,
     pub popup: Option<Popup>,
     /// The session revision the popup was last checked against the map at ([`follow_popup`]).
     popup_rev: u64,
@@ -406,6 +410,8 @@ impl Default for MapView {
             trace_edges: false,
             sketch_full_said: false,
             magnifier: false,
+            flash: None,
+            flash_since: None,
             popup: None,
             popup_rev: 0,
             deleting: None,
@@ -3180,6 +3186,20 @@ fn overlays(app: &mut RustGisApp, ui: &mut Ui, p: &egui::Painter, rect: Rect, t:
     }
     // A feature drawn, waiting in the Feature Attributes form.
     crate::featureform::draw(app, p, rect);
+    // A place pointed out: a magenta ring, for six seconds.
+    if let Some(c) = app.map.flash {
+        let now = ui.input(|i| i.time);
+        let since = *app.map.flash_since.get_or_insert(now);
+        if now - since > 6.0 {
+            app.map.flash = None;
+            app.map.flash_since = None;
+        } else if let Some(s) = lonlat_to_screen(app, rect, c) {
+            let pulse = 9.0 + 3.0 * ((now - since) * 4.0).sin().abs() as f32;
+            p.circle_stroke(s, pulse, Stroke::new(3.5, Color32::WHITE));
+            p.circle_stroke(s, pulse, Stroke::new(2.0, Color32::from_rgb(0xff, 0x00, 0xff)));
+            ui.ctx().request_repaint();
+        }
+    }
     // Sketch.
     if !app.map.sketch.is_empty() && !previewed {
         let mut pts: Vec<Coord> = app.map.sketch.clone();

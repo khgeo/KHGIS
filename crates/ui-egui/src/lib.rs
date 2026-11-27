@@ -76,6 +76,7 @@ mod radial;
 mod readjob;
 mod featureform;
 mod leelab;
+mod rsclasses;
 mod rslab;
 mod rstools;
 mod xray;

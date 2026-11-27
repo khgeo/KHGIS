@@ -35587,6 +35587,53 @@ fn remote_sensing_lab_commands_run_end_to_end() {
     assert!(polys["polygons"].as_u64().unwrap() >= 2, "{polys}");
     let sel = s.run("raster.process", &json!({"layer": "img", "operation": "select", "bands": [2], "name": "nir_only"})).unwrap();
     assert_eq!(sel["bands"], 1);
+    // Clusters: their statistics, labelled and merged into classes, and one split.
+    s.run("raster.classify", &json!({"layer": "img", "classes": 3, "bands": [1, 2], "name": "km"})).unwrap();
+    let st = s.run("raster.clusterStats", &json!({"layer": "km", "image": "img", "examples": 4})).unwrap();
+    let cl = st["clusters"].as_array().unwrap();
+    assert_eq!(cl.len(), 3, "{st}");
+    assert_eq!(cl.iter().map(|c| c["pixels"].as_u64().unwrap()).sum::<u64>(), 400);
+    assert!((cl.iter().map(|c| c["percent"].as_f64().unwrap()).sum::<f64>() - 100.0).abs() < 1e-6);
+    assert_eq!(cl[0]["means"].as_array().unwrap().len(), 2);
+    assert!(!cl[0]["examples"].as_array().unwrap().is_empty());
+    // Clusters bright in NIR are fields (k = 3 splits one group in two); the others water.
+    let mut map = serde_json::Map::new();
+    for c in cl {
+        let v = c["value"].as_f64().unwrap();
+        map.insert(format!("{v}"), json!(if c["means"][1].as_f64().unwrap() > 30.0 { 2 } else { 1 }));
+    }
+    let rec = s
+        .run("raster.recode", &json!({"layer": "km", "map": map, "names": {"1": "Water", "2": "Field"}, "colors": {"1": "#2b83ba", "2": "#f2e35b"}, "name": "lc"}))
+        .unwrap();
+    assert_eq!(rec["name"], "lc");
+    let lc = s.run("raster.classAreas", &json!({"layer": "lc"})).unwrap();
+    let names: Vec<&str> = lc["classes"].as_array().unwrap().iter().map(|c| c["class"].as_str().unwrap()).collect();
+    assert_eq!(names, ["Water", "Field"]);
+    assert_eq!(lc["classes"][1]["pixels"], 200);
+    match &s.map().layer_by_name("lc").unwrap().raster.as_ref().unwrap().style.renderer {
+        rustgis_map::raster::RasterRenderer::UniqueValues { values, .. } => assert!(values.iter().any(|(v, c)| *v == 2.0 && *c == rustgis_map::Rgba::rgb(0xf2, 0xe3, 0x5b))),
+        other => panic!("{other:?}"),
+    }
+    let sig = s.run("raster.signatures", &json!({"layer": "img", "training": "training", "classField": "class"})).unwrap();
+    let water = sig["classes"].as_array().unwrap().iter().find(|c| c["class"] == "water").unwrap().clone();
+    assert!(water["means"][1].as_f64().unwrap() < 10.0 && water["pixels"].as_u64().unwrap() > 10, "{sig}");
+    // Cochran: 1.96² × 0.85 × 0.15 / 0.05² × 1.1 = 216 points, by area, at least 20 a class.
+    let pts = s.run("raster.samplePoints", &json!({"layer": "lc", "design": "proportional", "name": "cochran"})).unwrap();
+    assert_eq!(pts["cochran"], 216);
+    // Two classes of 200 pixels each: 108 points apiece.
+    assert_eq!(pts["points"], 216, "{pts}");
+    let few = s.run("raster.samplePoints", &json!({"layer": "lc", "design": "proportional", "margin": 0.2, "minPerClass": 40, "name": "few"})).unwrap();
+    // 1.96² × 0.85 × 0.15 / 0.2² × 1.1 = 14 in all, but at least 40 a class.
+    assert_eq!((few["cochran"].as_u64(), few["points"].as_u64()), (Some(14), Some(80)), "{few}");
+    assert!(s.run("raster.samplePoints", &json!({"layer": "lc", "design": "random"})).is_err());
+    s.run("raster.classNames", &json!({"layer": "lc", "names": {}, "colorsByName": {"water": "#000080"}})).unwrap();
+    match &s.map().layer_by_name("lc").unwrap().raster.as_ref().unwrap().style.renderer {
+        rustgis_map::raster::RasterRenderer::UniqueValues { values, .. } => assert!(values.iter().any(|(v, c)| *v == 1.0 && *c == rustgis_map::Rgba::rgb(0, 0, 0x80))),
+        other => panic!("{other:?}"),
+    }
+    let sp = s.run("raster.splitCluster", &json!({"layer": "lc", "image": "img", "value": 2, "classes": 2, "name": "lc_split"})).unwrap();
+    assert_eq!(sp["newValues"], json!([3, 4]), "{sp}");
+    assert!(s.run("raster.clusterStats", &json!({"layer": "km", "image": "knn_polys"})).is_err());
     s.run("raster.classNames", &json!({"layer": "iso", "names": {"1": "Water", "2": "Field"}})).unwrap();
     let areas = s.run("raster.classAreas", &json!({"layer": "iso"})).unwrap();
     assert_eq!(areas["classes"][0]["class"], "Water");

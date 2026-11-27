@@ -1768,3 +1768,87 @@ Collapse All	បង្រួមទាំងអស់
 Remove Layer (pick a layer first)	លុបស្រទាប់ (ជ្រើសស្រទាប់ជាមុន)
 Scale	មាត្រដ្ឋាន
 Map rotation: the direction the top of the map faces, clockwise from north	ការបង្វិលផែនទី៖ ទិសដែលផ្នែកខាងលើនៃផែនទីបែរទៅ តាមទ្រនិចនាឡិកាពីទិសខាងជើង
+Classes (legend)	ថ្នាក់ (តារាងសម្គាល់)
+One class list for the whole tab: cluster labelling, training, classification, accuracy and change. Click a colour to change it.	បញ្ជីថ្នាក់តែមួយសម្រាប់ផ្ទាំងទាំងមូល៖ ការដាក់ឈ្មោះក្រុម ការបណ្តុះបណ្តាល ការចាត់ថ្នាក់ ភាពត្រឹមត្រូវ និងការប្រែប្រួល។ ចុចលើពណ៌ដើម្បីប្តូរវា។
+Use scheme	ប្រើគម្រោង
+Save…	រក្សាទុក…
+No classes in the file (id,name,colour per line).	គ្មានថ្នាក់ក្នុងឯកសារ (id,name,colour ក្នុងមួយបន្ទាត់)។
+Saved {file}	បានរក្សាទុក {file}
+Label the clusters: choose a class for each cluster — clusters with the same class are merged. Click a cluster to see an example of it on the map.	ដាក់ឈ្មោះក្រុម៖ ជ្រើសរើសថ្នាក់សម្រាប់ក្រុមនីមួយៗ — ក្រុមដែលមានថ្នាក់ដូចគ្នានឹងត្រូវបញ្ចូលគ្នា។ ចុចលើក្រុមដើម្បីមើលឧទាហរណ៍របស់វានៅលើផែនទី។
+Show an example pixel of this cluster on the map (click again for another)	បង្ហាញភីកសែលឧទាហរណ៍នៃក្រុមនេះនៅលើផែនទី (ចុចម្តងទៀតដើម្បីមើលមួយទៀត)
+Suggest classes from hints	ស្នើថ្នាក់តាមការណែនាំ
+Fills the empty → class boxes from the hints. Check them on the basemap.	បំពេញប្រអប់ → ថ្នាក់ ដែលនៅទទេ តាមការណែនាំ។ សូមពិនិត្យវានៅលើផែនទីមូលដ្ឋាន។
+{n} clusters filled from hints — check them on the basemap.	បានបំពេញ {n} ក្រុមតាមការណែនាំ — សូមពិនិត្យវានៅលើផែនទីមូលដ្ឋាន។
+Split selected cluster into	បំបែកក្រុមដែលបានជ្រើសជា
+Re-clusters a mixed cluster into 2–6 sub-clusters (click a cluster first).	ចាត់ក្រុមឡើងវិញនូវក្រុមចម្រុះជា ២–៦ ក្រុមរង (ចុចលើក្រុមជាមុនសិន)។
+Plot cluster spectra	គូសក្រាហ្វរលកពន្លឺនៃក្រុម
+Create labelled map	បង្កើតផែនទីដែលមានឈ្មោះថ្នាក់
+Cluster	ក្រុម
+No pixels in this cluster.	គ្មានភីកសែលក្នុងក្រុមនេះទេ។
+Cluster {c}: example {k} of {n}	ក្រុម {c}៖ ឧទាហរណ៍ទី {k} នៃ {n}
+Cluster {c} split into {n}.	ក្រុម {c} ត្រូវបានបំបែកជា {n}។
+Choose a class for each cluster first.	សូមជ្រើសរើសថ្នាក់សម្រាប់ក្រុមនីមួយៗជាមុនសិន។
+{name} made: the clusters merged into their classes.	បានបង្កើត {name}៖ ក្រុមត្រូវបានបញ្ចូលទៅក្នុងថ្នាក់របស់វា។
+{n} cluster(s) with no class are left out (no data).	{n} ក្រុមដែលគ្មានថ្នាក់ត្រូវបានទុកចោល (គ្មានទិន្នន័យ)។
+None of the map's classes is in the class list (by name or id).	គ្មានថ្នាក់ណាមួយនៃផែនទីនៅក្នុងបញ្ជីថ្នាក់ទេ (តាមឈ្មោះ ឬលេខ)។
+{n} classes coloured from the class list.	បានដាក់ពណ៌ {n} ថ្នាក់ពីបញ្ជីថ្នាក់។
+Training signatures	ហត្ថលេខារលកពន្លឺនៃការបណ្តុះបណ្តាល
+Each training class's mean spectrum: classes whose lines lie close together will be confused	រលកពន្លឺមធ្យមនៃថ្នាក់បណ្តុះបណ្តាលនីមួយៗ៖ ថ្នាក់ដែលខ្សែនៅជិតគ្នានឹងច្រឡំគ្នា
+Label the points	ដាក់ស្លាកចំណុច
+Point {i} / {n} · label: {label}	ចំណុច {i} / {n} · ស្លាក៖ {label}
+Look at each point on high-resolution imagery and press its class.	មើលចំណុចនីមួយៗលើរូបភាពគុណភាពខ្ពស់ ហើយចុចថ្នាក់របស់វា។
+map	ផែនទី
+done	រួច
+Next unlabelled	ចំណុចបន្ទាប់ដែលគ្មានស្លាក
+All points are labelled — compute the accuracy.	ចំណុចទាំងអស់មានស្លាកហើយ — សូមគណនាភាពត្រឹមត្រូវ។
+Clear label	លុបស្លាក
+Show the map class (hint) — off for blind labelling	បង្ហាញថ្នាក់ផែនទី (ការណែនាំ) — បិទសម្រាប់ការដាក់ស្លាកដោយមិនមើល
+{name} is ready: choose a class for each cluster below.	{name} រួចរាល់៖ សូមជ្រើសរើសថ្នាក់សម្រាប់ក្រុមនីមួយៗខាងក្រោម។
+Apply class colours	ដាក់ពណ៌ថ្នាក់
+Draws each class in its colour from the class list (matched by name, else by id)	គូរថ្នាក់នីមួយៗតាមពណ៌របស់វាពីបញ្ជីថ្នាក់ (ផ្គូផ្គងតាមឈ្មោះ ឬលេខ)
+Sample design	ការរចនាគំរូ
+Expected accuracy / margin	ភាពត្រឹមត្រូវរំពឹងទុក / កម្រិតកំហុស
+Expected overall accuracy p	ភាពត្រឹមត្រូវសរុបរំពឹងទុក p
+Margin of error e (± of the accuracy estimate)	កម្រិតកំហុស e (± នៃការប៉ាន់ស្មានភាពត្រឹមត្រូវ)
+Min. per class	អប្បបរមាក្នុងមួយថ្នាក់
+Minimum points per class (Olofsson et al. 2014 suggest 50–100 for validation)	ចំណុចអប្បបរមាក្នុងមួយថ្នាក់ (Olofsson et al. 2014 ណែនាំ ៥០–១០០ សម្រាប់ការផ្ទៀងផ្ទាត់)
+Cochran n = z²·p·(1−p)/e² + 10% = {n} points	Cochran n = z²·p·(1−p)/e² + 10% = {n} ចំណុច
+Stratified random points: label each one below (Label the points), then compute accuracy	ចំណុចចៃដន្យតាមស្រទាប់៖ ដាក់ស្លាកចំណុចនីមួយៗខាងក្រោម (ដាក់ស្លាកចំណុច) រួចគណនាភាពត្រឹមត្រូវ
+{n} validation points: label them below.	ចំណុចផ្ទៀងផ្ទាត់ {n}៖ សូមដាក់ស្លាកខាងក្រោម។
+Export CSV	នាំចេញ CSV
+The error matrix and the accuracy figures, as a table	ម៉ាទ្រីសកំហុស និងតួលេខភាពត្រឹមត្រូវ ជាតារាង
+Each from → to change and its area, as a table	ការប្រែប្រួលពី → ទៅ នីមួយៗ និងផ្ទៃដីរបស់វា ជាតារាង
+Save the script as a .py file	រក្សាទុកស្គ្រីបជាឯកសារ .py
+Open a .py script	បើកស្គ្រីប .py
+API: what scripts can use	API៖ អ្វីដែលស្គ្រីបអាចប្រើបាន
+Undo last	មិនធ្វើវិញចុងក្រោយ
+Removes the last training polygon	លុបពហុកោណបណ្តុះបណ្តាលចុងក្រោយ
+Draw training areas of this class with the magic wand	គូរតំបន់បណ្តុះបណ្តាលនៃថ្នាក់នេះដោយដំបងវេទមន្ត
+RS Lab default (6 classes)	លំនាំដើម RS Lab (៦ ថ្នាក់)
+LULC level 1 (8 classes)	LULC កម្រិត ១ (៨ ថ្នាក់)
+Auto 7 (from ESA WorldCover)	ស្វ័យប្រវត្តិ ៧ (ពី ESA WorldCover)
+ESA WorldCover (11 classes)	ESA WorldCover (១១ ថ្នាក់)
+Cochran total, proportional to class area (recommended)	សរុប Cochran សមាមាត្រនឹងផ្ទៃដីថ្នាក់ (ណែនាំ)
+Cochran total, equal per class	សរុប Cochran ស្មើគ្នាក្នុងមួយថ្នាក់
+Fixed number per class	ចំនួនថេរក្នុងមួយថ្នាក់
+Hint	ការណែនាំ
+→ class	→ ថ្នាក់
+Spectrum	រលកពន្លឺ
+Colour	ពណ៌
+ID	លេខ
+Built-up	តំបន់សំណង់
+Rice / cropland	ស្រូវ / ដីដំណាំ
+Forest	ព្រៃឈើ
+Shrub / grassland	ព្រៃគុម្ពោត / វាលស្មៅ
+water (open, all year)	ទឹក (បើកចំហ ពេញមួយឆ្នាំ)
+flooded in the wet season, green in the dry: flooded forest / recession rice?	លិចទឹកនៅរដូវវស្សា បៃតងនៅរដូវប្រាំង៖ ព្រៃលិចទឹក / ស្រូវប្រាំង?
+flooded after the rains: wetland / seasonal water?	លិចទឹកក្រោយភ្លៀង៖ ដីសើម / ទឹកតាមរដូវ?
+bright, rough: built-up?	ភ្លឺ គ្រើម៖ តំបន់សំណង់?
+no vegetation: bare soil / sand?	គ្មានរុក្ខជាតិ៖ ដីទទេ / ខ្សាច់?
+bare in the dry season, green after the rains: crop / rice?	ទទេនៅរដូវប្រាំង បៃតងក្រោយភ្លៀង៖ ដំណាំ / ស្រូវ?
+low greenness: grass / open land?	ភាពបៃតងទាប៖ ស្មៅ / ដីវាល?
+green all year: tree crop / evergreen?	បៃតងពេញមួយឆ្នាំ៖ ដំណាំឈើ / ព្រៃស្រោង?
+leafless in the dry season: deciduous forest?	ជ្រុះស្លឹកនៅរដូវប្រាំង៖ ព្រៃរបោះ?
+medium greenness: shrubland?	ភាពបៃតងមធ្យម៖ ព្រៃគុម្ពោត?
+dense vegetation: forest?	រុក្ខជាតិក្រាស់៖ ព្រៃឈើ?
+rice?	ស្រូវ?

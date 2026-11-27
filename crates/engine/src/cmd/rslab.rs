@@ -57,7 +57,7 @@ pub fn commands() -> Vec<C> {
             .inputs(one_input)
             .roles(&[])
             .effects(crate::policy::Effects::NONE)
-            .params(r#"{"layer": class raster, "perClass"?: n (default 30), "name"?: output layer} → a stratified random point layer: map_class (the map's), ref_class (empty, to fill in)"#),
+            .params(r#"{"layer": class raster, "design"?: "fixed" (perClass in each class, the default) | "proportional" (Cochran's total shared out by class area, each class at least minPerClass) | "equal" (Cochran's total shared out equally), "perClass"?: n (default 30), "expectedAccuracy"?: p (default 0.85), "margin"?: e (± the accuracy, default 0.05), "minPerClass"?: n (default 20), "name"?: output layer} → a stratified random point layer: map_class (the map's), ref_class (empty, to fill in)"#),
         // Runs here, not in the background: it stops at maxPixels (at most 500,000).
         C::new("raster.magicWand", "Magic Wand", "Analyze › Image Classification", magic_wand)
             .inputs(one_input)
@@ -74,12 +74,69 @@ pub fn commands() -> Vec<C> {
             .inputs(one_input)
             .roles(&[])
             .effects(crate::policy::Effects::NONE)
-            .params(r#"{"layer": class raster, "names": {"value": "name", …}}"#),
+            .params(r##"{"layer": class raster, "names": {"value": "name", …}, "colors"?: {"value": "#rrggbb", …} (each class drawn in its colour), "colorsByName"?: {"class name": "#rrggbb", …} (the same, for the classes of those names)}"##),
+        // Runs here: one pass over the class map, and the image's pixels a sample at most.
+        C::new("raster.clusterStats", "Cluster Statistics", "Analyze › Image Classification", cluster_stats)
+            .inputs(image_inputs)
+            .roles(&[])
+            .effects(crate::policy::Effects::NONE)
+            .params(r#"{"layer": class raster, "image": raster on its grid (the one classified), "bands"?: [1-based] (default all), "examples"?: n (default 10)} → each class's pixels, hectares, percent, mean of each band (its spectrum) and example pixels [lon, lat], and the bands' names"#),
+        // Runs here: the pixels under the training polygons, 5,000 a class at most.
+        C::new("raster.signatures", "Training Signatures", "Analyze › Image Classification", signatures)
+            .inputs(training_inputs)
+            .roles(&[])
+            .effects(crate::policy::Effects::NONE)
+            .params(r#"{"layer": raster, "training": polygon layer, "classField": field, "bands"?: [1-based] (default all)} → each training class's pixels, mean and standard deviation in each band (its spectral signature), and the bands' names"#),
+        // Runs here: one pass over the class map.
+        C::new("raster.recode", "Recode Classes", "Analyze › Image Classification", recode)
+            .inputs(one_input)
+            .roles(&[])
+            .effects(crate::policy::Effects::NONE)
+            .params(r##"{"layer": class raster, "map": {"value": new value, …} (values not given become no data), "names"?: {"new value": "name"}, "colors"?: {"new value": "#rrggbb"}, "name"?: output} → a class map (clusters merged into classes, say)"##),
+        // Runs here: k-means over one class's pixels (its centres from a sample of them).
+        C::new("raster.splitCluster", "Split Cluster", "Analyze › Image Classification", split_cluster)
+            .inputs(image_inputs)
+            .roles(&[])
+            .effects(crate::policy::Effects::NONE)
+            .params(r#"{"layer": class raster, "image": raster on its grid, "value": the class split, "classes"?: 2–6 (default 3), "bands"?: [1-based] (default all), "name"?: output} → the class map with that class's pixels in new classes numbered after its largest"#),
     ]
 }
 
 fn one_input(input: &super::InputContext<'_>, p: &Value) -> Result<super::Inputs, String> {
     super::Inputs::named(input.map(), [raster_name(p)?])
+}
+
+fn training_inputs(input: &super::InputContext<'_>, p: &Value) -> Result<super::Inputs, String> {
+    super::Inputs::named(input.map(), [raster_name(p)?, super::imagery::training_name(p)?])
+}
+
+fn signatures(s: &mut Session, p: &Value) -> CmdResult {
+    let r = raster(s, p)?;
+    r.require_coordinates()?;
+    let bands = all_bands(p, &r)?;
+    let polygons = training_polygons(s, p)?;
+    let samples = rslab::samples_from_polygons(&r, &bands, &polygons, 5_000)?;
+    if samples.is_empty() {
+        return Err("no pixel of the image is under the training polygons".into());
+    }
+    let classes: Vec<Value> = samples
+        .iter()
+        .map(|(name, px)| {
+            let n = px.len().max(1) as f64;
+            let mean: Vec<f64> = (0..bands.len()).map(|b| px.iter().filter_map(|p| p.get(b)).sum::<f64>() / n).collect();
+            let sd: Vec<f64> = (0..bands.len())
+                .map(|b| (px.iter().filter_map(|p| p.get(b)).map(|v| (v - mean[b]).powi(2)).sum::<f64>() / n).sqrt())
+                .collect();
+            let r5 = |v: &Vec<f64>| v.iter().map(|x| (x * 1e5).round() / 1e5).collect::<Vec<_>>();
+            json!({"class": name, "pixels": px.len(), "means": r5(&mean), "std": r5(&sd)})
+        })
+        .collect();
+    let names: Vec<String> = bands.iter().map(|b| r.bands.get(*b).map(|x| x.name.clone()).filter(|n| !n.is_empty()).unwrap_or_else(|| format!("b{}", b + 1))).collect();
+    Ok(json!({"classes": classes, "bands": names}))
+}
+
+fn image_inputs(input: &super::InputContext<'_>, p: &Value) -> Result<super::Inputs, String> {
+    super::Inputs::named(input.map(), [raster_name(p)?, ps(p, "image").ok_or("image is required")?])
 }
 
 fn cross_inputs(input: &super::InputContext<'_>, p: &Value) -> Result<super::Inputs, String> {
@@ -398,7 +455,19 @@ fn sample_points(s: &mut Session, p: &Value) -> CmdResult {
         None | Some(Value::Null) => 30,
         Some(_) => uint(p, "perClass").filter(|n| (1..=1000).contains(n)).ok_or("perClass is 1 to 1000")? as usize,
     };
-    let pts = rslab::sample_points(&r, 0, per, 0x5A3D)?;
+    // The design: a fixed number per class, or Cochran's total shared out equally or by area.
+    let design = ps(p, "design").unwrap_or("fixed");
+    let total = rslab::cochran_n(super::f(p, "expectedAccuracy").unwrap_or(0.85), super::f(p, "margin").unwrap_or(0.05));
+    let min = uint(p, "minPerClass").map_or(20, |n| n as usize).clamp(0, 1000);
+    let counts: Vec<(f32, usize)> = rslab::counts(&r, 0)?.into_iter().filter(|(v, _)| *v != 0.0).collect();
+    let all: usize = counts.iter().map(|c| c.1).sum::<usize>().max(1);
+    let k = counts.len().max(1);
+    let pts = match design {
+        "fixed" => rslab::sample_points(&r, 0, per, 0x5A3D)?,
+        "equal" => rslab::sample_points_by(&r, 0, |_, _| total.div_ceil(k).max(min), 0x5A3D)?,
+        "proportional" => rslab::sample_points_by(&r, 0, |_, n| ((total as f64 * n as f64 / all as f64).round() as usize).max(min), 0x5A3D)?,
+        other => return Err(format!("design is \"fixed\", \"equal\" or \"proportional\", not '{other}'")),
+    };
     let features: Vec<Value> = pts
         .iter()
         .filter(|(_, v)| *v != 0.0)
@@ -416,6 +485,7 @@ fn sample_points(s: &mut Session, p: &Value) -> CmdResult {
     let text = json!({"type": "FeatureCollection", "features": features}).to_string();
     let mut out = s.run("layer.addDataText", &json!({"fileName": format!("{layer}.geojson"), "text": text, "name": layer}))?;
     out["points"] = json!(n);
+    out["cochran"] = json!(total);
     Ok(out)
 }
 
@@ -441,7 +511,229 @@ fn class_names(s: &mut Session, p: &Value) -> CmdResult {
         b.classes = list;
     }
     let layer = raster_name(p)?.to_string();
-    super::imagery::replace(s, &layer, new)
+    let out = super::imagery::replace(s, &layer, new.clone())?;
+    let mut colors = p.get("colors").and_then(Value::as_object).cloned().unwrap_or_default();
+    // Colours by class name: for the classes the map has by those names.
+    if let Some(by_name) = p.get("colorsByName").and_then(Value::as_object) {
+        let names = new.bands.first().map(|b| b.classes.clone()).unwrap_or_default();
+        for (v, n) in names.iter().enumerate() {
+            if let Some(c) = by_name.iter().find(|(k, _)| !n.is_empty() && k.trim().eq_ignore_ascii_case(n.trim())).map(|(_, c)| c.clone()) {
+                colors.insert(v.to_string(), c);
+            }
+        }
+    }
+    if !colors.is_empty() {
+        set_class_colors(s, &layer, &colors)?;
+    }
+    Ok(out)
+}
+
+/// A `#rrggbb` colour.
+fn hex_color(t: &str) -> Option<rustgis_map::Rgba> {
+    let h = t.trim().trim_start_matches('#');
+    if h.len() != 6 {
+        return None;
+    }
+    let c = |i: usize| u8::from_str_radix(h.get(i..i + 2)?, 16).ok();
+    Some(rustgis_map::Rgba::rgb(c(0)?, c(2)?, c(4)?))
+}
+
+/// Draws a class raster's classes in the colours given ({"value": "#rrggbb"}); the others keep
+/// theirs (a ramp's, for a class with none yet).
+fn set_class_colors(s: &mut Session, layer: &str, colors: &serde_json::Map<String, Value>) -> Result<(), String> {
+    let mut given: Vec<(f64, rustgis_map::Rgba)> = Vec::new();
+    for (k, v) in colors {
+        let value = k.trim().parse::<f64>().map_err(|_| format!("'{k}' isn't a class value"))?;
+        let c = v.as_str().and_then(hex_color).ok_or_else(|| format!("'{v}' isn't a colour (#rrggbb)"))?;
+        given.push((value, c));
+    }
+    let id = s.map().layer_by_name(layer).map(|l| l.id).ok_or_else(|| format!("no raster layer '{layer}'"))?;
+    let l = s.map_mut().layer_mut(id).ok_or("no such layer")?;
+    let rl = l.raster.as_mut().ok_or("not a raster layer")?;
+    let Some(data) = rl.data.clone() else { return Err("its pixels aren't loaded".into()) };
+    let mut values = match &rl.style.renderer {
+        rustgis_map::raster::RasterRenderer::UniqueValues { values, .. } => values.clone(),
+        _ => match rustgis_map::raster::unique_values(&data, 0, rustgis_map::Ramp::Harbour) {
+            rustgis_map::raster::RasterRenderer::UniqueValues { values, .. } => values,
+            _ => Vec::new(),
+        },
+    };
+    for (v, c) in given {
+        match values.iter_mut().find(|x| x.0 == v) {
+            Some(x) => x.1 = c,
+            None => values.push((v, c)),
+        }
+    }
+    values.sort_by(|a, b| a.0.total_cmp(&b.0));
+    rl.style.renderer = rustgis_map::raster::RasterRenderer::UniqueValues { band: 0, ramp: rustgis_map::Ramp::Harbour, values };
+    Ok(())
+}
+
+/// The image read on the class map's grid (the one it was made from).
+fn same_grid(class: &Raster, image: &Raster) -> Result<(), String> {
+    if class.width != image.width || class.height != image.height {
+        return Err(format!(
+            "{} ({}×{}) and {} ({}×{}) aren't on the same grid: choose the image the classes were made from",
+            class.name, class.width, class.height, image.name, image.width, image.height
+        ));
+    }
+    Ok(())
+}
+
+fn cluster_stats(s: &mut Session, p: &Value) -> CmdResult {
+    let r = raster(s, p)?;
+    r.require_coordinates()?;
+    let image = raster_named(s, ps(p, "image").ok_or("image is required")?)?;
+    same_grid(&r, &image)?;
+    let bands = all_bands(p, &image)?;
+    let examples = uint(p, "examples").map_or(10, |n| n as usize).clamp(0, 50);
+    let classes = r.bands.first().ok_or("the class map has no band")?;
+    let n = r.width as usize * r.height as usize;
+    let counts = rslab::counts(&r, 0)?;
+    let total: usize = counts.iter().filter(|(v, _)| *v != 0.0).map(|(_, c)| c).sum();
+    let ha = rslab::pixel_hectares(&r);
+    // The means from at most some 2 million pixels.
+    let step = (n / 2_000_000).max(1);
+    let mut sums: std::collections::HashMap<i64, (Vec<f64>, usize)> = std::collections::HashMap::new();
+    for i in (0..n).step_by(step) {
+        let Some(v) = classes.data.get(i).copied().filter(|v| r.is_valid(*v) && *v != 0.0) else { continue };
+        let px: Option<Vec<f64>> = bands.iter().map(|b| image.bands.get(*b)?.data.get(i).copied().filter(|x| image.is_valid(*x)).map(f64::from)).collect();
+        let Some(px) = px else { continue };
+        let e = sums.entry(v as i64).or_insert_with(|| (vec![0.0; bands.len()], 0));
+        e.0.iter_mut().zip(&px).for_each(|(a, b)| *a += b);
+        e.1 += 1;
+    }
+    // Examples: pixels spread through each class (every so many of its pixels).
+    let mut seen: std::collections::HashMap<i64, usize> = std::collections::HashMap::new();
+    let mut picked: std::collections::HashMap<i64, Vec<[f64; 2]>> = std::collections::HashMap::new();
+    let tr = r.transformer();
+    for (i, v) in classes.data.iter().enumerate() {
+        if !r.is_valid(*v) || *v == 0.0 || examples == 0 {
+            continue;
+        }
+        let key = *v as i64;
+        let count = counts.iter().find(|(c, _)| *c as i64 == key).map_or(1, |x| x.1);
+        let every = (count / examples).max(1);
+        let k = seen.entry(key).or_insert(0);
+        // Offset half a stride, so the first isn't always a corner pixel.
+        if (*k + every / 2).is_multiple_of(every) && picked.get(&key).map_or(0, Vec::len) < examples {
+            let (col, row) = ((i % r.width as usize) as f64 + 0.5, (i / r.width as usize) as f64 + 0.5);
+            if let Some(ll) = tr.to_lonlat(r.transform.to_world(col, row)) {
+                picked.entry(key).or_default().push([(ll.x * 1e6).round() / 1e6, (ll.y * 1e6).round() / 1e6]);
+            }
+        }
+        *k += 1;
+    }
+    let rows: Vec<Value> = counts
+        .iter()
+        .filter(|(v, _)| *v != 0.0)
+        .map(|(v, c)| {
+            let key = *v as i64;
+            let means: Vec<Value> = match sums.get(&key) {
+                Some((sum, m)) if *m > 0 => sum.iter().map(|x| json!((x / *m as f64 * 1e5).round() / 1e5)).collect(),
+                _ => Vec::new(),
+            };
+            json!({
+                "value": v, "class": class_label(&r, 0, *v), "pixels": c, "hectares": *c as f64 * ha,
+                "percent": if total > 0 { *c as f64 * 100.0 / total as f64 } else { 0.0 },
+                "means": means, "examples": picked.remove(&key).unwrap_or_default(),
+            })
+        })
+        .collect();
+    let names: Vec<String> = bands.iter().map(|b| image.bands.get(*b).map(|x| x.name.clone()).filter(|n| !n.is_empty()).unwrap_or_else(|| format!("b{}", b + 1))).collect();
+    Ok(json!({"clusters": rows, "bands": names, "layer": r.name, "image": image.name}))
+}
+
+fn recode(s: &mut Session, p: &Value) -> CmdResult {
+    let r = raster(s, p)?;
+    r.require_coordinates()?;
+    let map = p.get("map").and_then(Value::as_object).ok_or("map is {\"value\": new value, …}")?;
+    let mut lut: std::collections::HashMap<i64, f32> = std::collections::HashMap::new();
+    for (k, v) in map {
+        let from = k.trim().parse::<f64>().map_err(|_| format!("'{k}' isn't a class value"))? as i64;
+        let to = v.as_f64().filter(|x| *x >= 0.0 && x.fract() == 0.0 && *x < 100_000.0).ok_or_else(|| format!("'{v}' isn't a class value (a whole number)"))?;
+        lut.insert(from, to as f32);
+    }
+    if lut.is_empty() {
+        return Err("map gives no class".into());
+    }
+    let src = r.bands.first().ok_or("the class map has no band")?;
+    let data: Vec<f32> = src.data.iter().map(|v| if r.is_valid(*v) { lut.get(&(*v as i64)).copied().unwrap_or(NODATA) } else { NODATA }).collect();
+    let out = name(p, format!("{}_recoded", r.name));
+    let mut res = rasterops::derive(&r, &out, vec![data])?;
+    if let (Some(names), Some(b)) = (p.get("names").and_then(Value::as_object), res.bands.get_mut(0)) {
+        for (k, v) in names {
+            let (Ok(i), Some(t)) = (k.trim().parse::<usize>(), v.as_str()) else { continue };
+            if i < 100_000 {
+                if b.classes.len() <= i {
+                    b.classes.resize(i + 1, String::new());
+                }
+                b.classes[i] = t.chars().take(80).collect();
+            }
+        }
+    }
+    let mut v = super::imagery::add(s, res, true)?;
+    if let Some(colors) = p.get("colors").and_then(Value::as_object) {
+        set_class_colors(s, &out, colors)?;
+    }
+    v["name"] = json!(out);
+    Ok(v)
+}
+
+fn split_cluster(s: &mut Session, p: &Value) -> CmdResult {
+    let r = raster(s, p)?;
+    r.require_coordinates()?;
+    let image = raster_named(s, ps(p, "image").ok_or("image is required")?)?;
+    same_grid(&r, &image)?;
+    let bands = all_bands(p, &image)?;
+    let value = super::f(p, "value").ok_or("value is required")? as i64;
+    let k = uint(p, "classes").map_or(3, |n| n as usize).clamp(2, 6);
+    let src = r.bands.first().ok_or("the class map has no band")?;
+    let inside: Vec<bool> = src.data.iter().map(|v| r.is_valid(*v) && *v as i64 == value).collect();
+    let n_in = inside.iter().filter(|x| **x).count();
+    if n_in < k * 10 {
+        return Err(format!("class {value} has {n_in} pixels: too few to split into {k}"));
+    }
+    // The image with only that class's pixels.
+    let mut part = (*image).clone();
+    for b in &mut part.bands {
+        for (x, keep) in b.data.iter_mut().zip(&inside) {
+            if !keep {
+                *x = f32::NAN;
+            }
+        }
+    }
+    let sub = rasterops::kmeans(&part, &bands, k, 20)?;
+    let largest = rslab::counts(&r, 0)?.iter().map(|(v, _)| *v as i64).max().unwrap_or(0);
+    let next = largest + 1;
+    let mut made: Vec<i64> = Vec::new();
+    let data: Vec<f32> = src
+        .data
+        .iter()
+        .zip(&inside)
+        .zip(&sub)
+        .map(|((v, inn), s)| {
+            if *inn && s.is_finite() && *s > 0.0 && *s < 1e30 {
+                let nv = next + *s as i64 - 1;
+                if !made.contains(&nv) {
+                    made.push(nv);
+                }
+                nv as f32
+            } else {
+                *v
+            }
+        })
+        .collect();
+    made.sort_unstable();
+    let out = name(p, format!("{}_split{value}", r.name));
+    let mut res = rasterops::derive(&r, &out, vec![data])?;
+    if let (Some(b), Some(srcb)) = (res.bands.get_mut(0), r.bands.first()) {
+        b.classes.clone_from(&srcb.classes);
+    }
+    let mut v = super::imagery::add(s, res, true)?;
+    v["name"] = json!(out);
+    v["newValues"] = json!(made);
+    Ok(v)
 }
 
 /// Training pixels from a class raster (`trainingRaster`), used by `raster.classifySupervised`.

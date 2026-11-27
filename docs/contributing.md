@@ -298,7 +298,7 @@ pip install -r requirements_docs.txt
 zensical serve        # http://localhost:8000
 ```
 
-Images live in [rustgis-assets](https://github.com/khgeo/KHGIS-assets) and are linked by
+Images live in [rustgis-assets](https://github.com/opengeos/rustgis-assets) and are linked by
 URL; don't commit images to this repository.
 
 For PR screenshots, GitHub web attachments are fine. The optional

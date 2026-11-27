@@ -252,6 +252,22 @@ pub struct State {
     /// The magic wand's tolerance and the class it draws; the spectral profiles picked.
     pub wand_tolerance: f64,
     pub wand_class: String,
+    /// The class list (id, name, colour) and the scheme it came from; the clusters being
+    /// labelled; how many parts a split makes; the cluster spectra shown; the validation point
+    /// being labelled and whether its map class shows (see `rsclasses`).
+    pub class_list: Vec<crate::rsclasses::ClassDef>,
+    pub scheme: usize,
+    pub clusters: Option<crate::rsclasses::Clusters>,
+    pub split_n: f64,
+    pub show_spectra: bool,
+    pub lb_row: Option<usize>,
+    /// Validation points: the design ("proportional", "equal" or "fixed"), the accuracy expected
+    /// and its margin (Cochran's total), and the fewest a class gets.
+    pub design: &'static str,
+    pub expected: f64,
+    pub margin: f64,
+    pub min_per_class: f64,
+    pub lb_hint: bool,
     pub profiles: Vec<(String, Vec<(String, f64)>)>,
     pub hist_band: usize,
     pub fs_x: usize,
@@ -324,6 +340,17 @@ impl Default for State {
             lee: Default::default(),
             wand_tolerance: 1.5,
             wand_class: String::new(),
+            class_list: crate::rsclasses::scheme(0),
+            scheme: 0,
+            clusters: None,
+            split_n: 3.0,
+            show_spectra: false,
+            lb_row: None,
+            design: "proportional",
+            expected: 0.85,
+            margin: 0.05,
+            min_per_class: 20.0,
+            lb_hint: false,
             profiles: Vec::new(),
             hist_band: 0,
             fs_x: 2,
@@ -958,6 +985,13 @@ pub(crate) fn run_one(app: &mut RustGisApp, title: &str, command: &str, mut p: V
     start_chain(app, tl!(title).to_string(), vec![s], done);
 }
 
+/// A step whose answer is kept under `key` (shown in the lab).
+pub(crate) fn keep_step(command: &str, params: Value, key: &'static str) -> Step {
+    let mut s = step(command, params);
+    s.keep = Some(key);
+    s
+}
+
 pub(crate) fn now(app: &mut RustGisApp, command: &str, p: Value) -> Option<Value> {
     match app.run(command, p) {
         Ok(v) => {
@@ -1435,6 +1469,7 @@ pub(crate) fn classify_step(app: &mut RustGisApp, ui: &mut Ui) {
     pick(ui, "rslab_cimg", "Image", &mut app.ui.rslab.image, &rs);
     let image = app.ui.rslab.image.clone();
     let bands: Vec<usize> = (1..=band_count(app, &image)).collect();
+    crate::rsclasses::classes_ui(app, ui);
     heading(ui, "Unsupervised (K-means, ISODATA)");
     ui.horizontal_wrapped(|ui| {
         let st = &mut app.ui.rslab;
@@ -1452,10 +1487,15 @@ pub(crate) fn classify_step(app: &mut RustGisApp, ui: &mut Ui) {
             let (k, m, method) = (st.classes.round() as u64, st.min_classes.round() as u64, st.unsupervised);
             let out = fresh(app, &format!("{image}_{method}{k}"));
             app.ui.rslab.class_map = out.clone();
+            app.ui.rslab.clusters = None;
             let p = json!({"layer": image, "method": method, "classes": k, "minClasses": m.min(k), "bands": bands, "name": out});
-            run_one(app, "Clustering", "raster.classify", p, &out, None);
+            // Then each cluster's area, spectrum and hint, for labelling them.
+            let steps = vec![makes("raster.classify", p, &out), crate::rsclasses::stats_step(&out, &image)];
+            let done = crate::i18n::fmt("{name} is ready: choose a class for each cluster below.", &[("name", &out)]);
+            start_chain(app, tl!("Clustering").to_string(), steps, done);
         }
     });
+    crate::rsclasses::clusters_ui(app, ui);
     heading(ui, "Supervised — classes & training");
     {
         let st = &mut app.ui.rslab;
@@ -1491,6 +1531,7 @@ pub(crate) fn classify_step(app: &mut RustGisApp, ui: &mut Ui) {
             pick(ui, "rslab_train", "Training layer", &mut app.ui.rslab.training, &polys);
             let fs = fields(app, &app.ui.rslab.training.clone());
             pick(ui, "rslab_field", "Class field", &mut app.ui.rslab.class_field, &fs);
+            crate::rsclasses::signatures_ui(app, ui, &image);
         }
     }
     heading(ui, "Supervised — classify");
@@ -1536,7 +1577,14 @@ pub(crate) fn classify_step(app: &mut RustGisApp, ui: &mut Ui) {
             p["classField"] = json!(st.class_field);
         }
         app.ui.rslab.class_map = out.clone();
-        run_one(app, "Classifying", "raster.classifySupervised", p, &out, Some("training"));
+        // Then the classes drawn in the class list's colours (by name).
+        let by_name: serde_json::Map<String, Value> =
+            app.ui.rslab.class_list.iter().map(|c| (c.name.clone(), json!(crate::rsclasses::hex(c.color)))).collect();
+        let mut first = makes("raster.classifySupervised", p, &out);
+        first.keep = Some("training");
+        let steps = vec![first, step("raster.classNames", json!({"layer": out, "names": {}, "colorsByName": by_name}))];
+        let done = crate::i18n::fmt("{name} is ready.", &[("name", &out)]);
+        start_chain(app, tl!("Classifying").to_string(), steps, done);
     }
     if let Some(v) = result(app, "training").cloned() {
         training_result(ui, &v);
@@ -1606,9 +1654,9 @@ pub(crate) fn accuracy_section(app: &mut RustGisApp, ui: &mut Ui, rs: &[String])
             ui.end_row();
             let rows = v["classes"].as_array().cloned().unwrap_or_default();
             for (i, c) in rows.iter().enumerate() {
-                ui.label(c["value"].to_string());
+                ui.label(c["value"].as_f64().map_or_else(|| c["value"].to_string(), |v| format!("{v}")));
                 if let Some(l) = app.ui.rslab.class_labels.get_mut(i) {
-                    ui.add(egui::TextEdit::singleline(&mut l.1).desired_width(130.0));
+                    ui.add_sized([130.0, 18.0], egui::TextEdit::singleline(&mut l.1));
                 } else {
                     ui.label(c["class"].as_str().unwrap_or(""));
                 }
@@ -1616,6 +1664,15 @@ pub(crate) fn accuracy_section(app: &mut RustGisApp, ui: &mut Ui, rs: &[String])
                 ui.end_row();
             }
         });
+        let rows = v["classes"].as_array().cloned().unwrap_or_default();
+        crate::rsclasses::area_bars(app, ui, &map, &rows);
+        if ui
+            .button(tl!("Apply class colours"))
+            .on_hover_text(tl!("Draws each class in its colour from the class list (matched by name, else by id)"))
+            .clicked()
+        {
+            crate::rsclasses::apply_colours(app, &map);
+        }
         if ui.button(tl!("Save class names")).clicked() {
             let names: serde_json::Map<String, Value> = app.ui.rslab.class_labels.iter().map(|(v, n)| (format!("{v}"), json!(n))).collect();
             if now(app, "raster.classNames", json!({"layer": map, "names": names})).is_some() {
@@ -1645,28 +1702,67 @@ pub(crate) fn accuracy_section(app: &mut RustGisApp, ui: &mut Ui, rs: &[String])
     if let Some(n) = result(app, "sieve").and_then(|v| v["changed"].as_u64()) {
         ui.label(egui::RichText::new(crate::i18n::fmt("Sieve: {n} pixels changed.", &[("n", &n.to_string())])).weak());
     }
-    ui.horizontal(|ui| {
-        ui.label(tl!("Points per class"));
-        ui.add(egui::DragValue::new(&mut app.ui.rslab.points).range(5.0..=500.0).speed(0.5).fixed_decimals(0));
-        if ui
-            .button(tl!("Generate validation points"))
-            .on_hover_text(tl!("Stratified random points: fill ref_class with the true class (attribute table), then compute accuracy"))
-            .clicked()
-        {
-            let per = app.ui.rslab.points.round() as u64;
-            let name = format!("{map}_validation");
-            if now(app, "raster.samplePoints", json!({"layer": map, "perClass": per, "name": name})).is_some() {
-                app.ui.rslab.reference = name;
-                app.ui.rslab.ref_field = "ref_class".into();
-                let _ = app.run("table.open", json!({}));
+    {
+        const DESIGNS: [(&str, &str); 3] = [
+            ("proportional", "Cochran total, proportional to class area (recommended)"),
+            ("equal", "Cochran total, equal per class"),
+            ("fixed", "Fixed number per class"),
+        ];
+        let st = &mut app.ui.rslab;
+        let current = DESIGNS.iter().find(|d| d.0 == st.design).map_or("", |d| d.1);
+        egui::ComboBox::from_label(tl!("Sample design")).selected_text(tl!(current)).width(260.0).truncate().show_ui(ui, |ui| {
+            for (id, label) in DESIGNS {
+                ui.selectable_value(&mut st.design, id, tl!(label));
             }
+        });
+        ui.horizontal_wrapped(|ui| {
+            if st.design == "fixed" {
+                ui.label(tl!("Points per class"));
+                ui.add(egui::DragValue::new(&mut st.points).range(5.0..=500.0).speed(0.5).fixed_decimals(0));
+            } else {
+                ui.label(tl!("Expected accuracy / margin"));
+                ui.add(egui::DragValue::new(&mut st.expected).range(0.5..=0.99).speed(0.005).fixed_decimals(2))
+                    .on_hover_text(tl!("Expected overall accuracy p"));
+                ui.add(egui::DragValue::new(&mut st.margin).range(0.01..=0.2).speed(0.001).fixed_decimals(3))
+                    .on_hover_text(tl!("Margin of error e (± of the accuracy estimate)"));
+                if st.design == "proportional" {
+                    ui.label(tl!("Min. per class"));
+                    ui.add(egui::DragValue::new(&mut st.min_per_class).range(0.0..=500.0).speed(0.5).fixed_decimals(0))
+                        .on_hover_text(tl!("Minimum points per class (Olofsson et al. 2014 suggest 50–100 for validation)"));
+                }
+            }
+        });
+        if st.design != "fixed" {
+            let n = rustgis_engine::analysis::rslab::cochran_n(st.expected, st.margin);
+            ui.label(
+                egui::RichText::new(crate::i18n::fmt("Cochran n = z²·p·(1−p)/e² + 10% = {n} points", &[("n", &n.to_string())]))
+                    .small()
+                    .weak(),
+            );
         }
-    });
+    }
+    if ui
+        .button(tl!("Generate validation points"))
+        .on_hover_text(tl!("Stratified random points: label each one below (Label the points), then compute accuracy"))
+        .clicked()
+    {
+        let st = &app.ui.rslab;
+        let p = json!({"layer": map, "design": st.design, "perClass": st.points.round() as u64, "expectedAccuracy": st.expected,
+            "margin": st.margin, "minPerClass": st.min_per_class.round() as u64, "name": format!("{map}_validation")});
+        let name = format!("{map}_validation");
+        if let Some(v) = now(app, "raster.samplePoints", p) {
+            app.ui.rslab.reference = name;
+            app.ui.rslab.ref_field = "ref_class".into();
+            app.ui.rslab.lb_row = None;
+            say(app, true, crate::i18n::fmt("{n} validation points: label them below.", &[("n", &v["points"].to_string())]));
+        }
+    }
     let refs = vectors(app, false);
     if !refs.is_empty() {
         pick(ui, "rslab_ref", "Reference layer", &mut app.ui.rslab.reference, &refs);
         let fs = fields(app, &app.ui.rslab.reference.clone());
         pick(ui, "rslab_reff", "Reference class field", &mut app.ui.rslab.ref_field, &fs);
+        crate::rsclasses::label_points_ui(app, ui, &map);
         if ui.button(egui::RichText::new(tl!("Compute accuracy")).strong()).clicked() {
             let (r, f) = (app.ui.rslab.reference.clone(), app.ui.rslab.ref_field.clone());
             if let Some(v) = now(app, "raster.accuracy", json!({"layer": map, "reference": r, "classField": f})) {
@@ -1676,6 +1772,9 @@ pub(crate) fn accuracy_section(app: &mut RustGisApp, ui: &mut Ui, rs: &[String])
     }
     if let Some(v) = result(app, "accuracy").cloned() {
         accuracy_tables(ui, &v);
+        if ui.button(tl!("Export CSV")).on_hover_text(tl!("The error matrix and the accuracy figures, as a table")).clicked() {
+            crate::rsclasses::export_accuracy(app);
+        }
     }
 }
 
@@ -1850,6 +1949,9 @@ pub(crate) fn change_step(app: &mut RustGisApp, ui: &mut Ui) {
     }
     if let Some(v) = result(app, "crossTab").cloned() {
         change_result(ui, &v);
+        if ui.button(tl!("Export CSV")).on_hover_text(tl!("Each from → to change and its area, as a table")).clicked() {
+            crate::rsclasses::export_change(app, &v);
+        }
     }
     heading(ui, "Image differencing (index or band)");
     let st = &mut app.ui.rslab;
