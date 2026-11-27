@@ -1755,6 +1755,23 @@ impl RustGisApp {
             }
             return self.run("layer.addDataBytes", p);
         }
+        // A Shapefile's .shp on its own (its .dbf didn't come with it): read as a zipped Shapefile,
+        // its shapes alone; one of its other parts on its own says what to pick.
+        if lower.ends_with(".shp") {
+            let (files, problems) = rustgis_engine::data::io::gather_shapefiles(vec![(name.to_string(), bytes.to_vec())]);
+            for p in problems {
+                self.session.notify(p, true);
+            }
+            if let Some((zip_name, zip)) = files.into_iter().find(|(n, _)| n.to_ascii_lowercase().ends_with(".zip")) {
+                use base64::Engine;
+                return self.run("layer.addDataBytes", json!({"fileName": zip_name, "data": base64::engine::general_purpose::STANDARD.encode(zip)}));
+            }
+        }
+        if rustgis_engine::data::io::is_shapefile_sidecar(name) {
+            let e = rustgis_engine::data::io::stray_part_note(name);
+            self.session.notify(e.clone(), true);
+            return Err(e);
+        }
         let Ok(text) = std::str::from_utf8(bytes) else {
             let e = crate::i18n::fmt("{name} is not a text file: KHGIS opens GeoJSON, CSV, GeoTIFF and .kgis here", &[("name", name)]);
             self.session.notify(e.clone(), true);

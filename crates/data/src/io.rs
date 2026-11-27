@@ -1805,19 +1805,27 @@ fn read_shapefile(path: &Path, name: &str) -> Result<(Dataset, ReadReport)> {
 pub fn read_shapefile_in(path: &Path, name: &str, crs: Option<Crs>) -> Result<(Dataset, ReadReport)> {
     check_size(path)?;
     let dbf = path.with_extension("dbf");
-    if !dbf.is_file() {
-        return Err(DataError::Format(format!("Shapefile: {} is missing", dbf.display())));
+    let has_dbf = dbf.is_file();
+    if has_dbf {
+        check_size(&dbf)?;
     }
-    check_size(&dbf)?;
     let shx = path.with_extension("shx");
     if shx.is_file() {
         check_size(&shx)?;
     }
     let mut notes = Vec::new();
+    let shp = std::fs::read(path)?;
+    // No .dbf beside it: the shapes alone, numbered (as GDAL reads one).
+    let dbf = if has_dbf {
+        std::fs::read(dbf)?
+    } else {
+        notes.push(no_dbf_note(name));
+        numbered_dbf(&shp)?
+    };
     let parts = ShapefileParts {
-        shp: std::fs::read(path)?,
+        shp,
         shx: if shx.is_file() { Some(std::fs::read(shx)?) } else { None },
-        dbf: std::fs::read(dbf)?,
+        dbf,
         prj: crate::raster::read_prj(path),
         cpg: crate::dbf::read_cpg(path, &mut notes),
     };
@@ -1826,14 +1834,73 @@ pub fn read_shapefile_in(path: &Path, name: &str, crs: Option<Crs>) -> Result<(D
     Ok((ds, report))
 }
 
+/// What a Shapefile read without its `.dbf` says.
+fn no_dbf_note(name: &str) -> String {
+    format!("{name}: its .dbf wasn't with it, so it has no attributes: its shapes are numbered in an id field (pick the .shp with its .dbf, .shx and .prj, or a .zip of them, for its attributes)")
+}
+
+/// What a `.dbf`, `.shx`, `.prj` or `.cpg` given without its `.shp` says.
+pub fn stray_part_note(name: &str) -> String {
+    format!("{name} is a part of a Shapefile: pick it together with its .shp (and .dbf, .shx, .prj), or a .zip of them")
+}
+
+/// Whether a file name is one of a Shapefile's parts besides its `.shp`.
+pub fn is_shapefile_sidecar(name: &str) -> bool {
+    let e = Path::new(name).extension().and_then(|e| e.to_str()).map(str::to_ascii_lowercase).unwrap_or_default();
+    SHAPEFILE_SIDECARS.contains(&e.as_str())
+}
+
+/// A `.dbf` for a `.shp` that came without one: an `id` field numbering its records 1, 2, …
+fn numbered_dbf(shp: &[u8]) -> Result<Vec<u8>> {
+    // The records: each a header of its number and its length (16-bit words, big-endian).
+    let mut n: u32 = 0;
+    let mut at = 100usize;
+    while at + 8 <= shp.len() {
+        let words = shp.get(at + 4..at + 8).map_or(0, |b| i32::from_be_bytes([b[0], b[1], b[2], b[3]]));
+        if words < 0 {
+            break;
+        }
+        at = at.saturating_add(8).saturating_add(words as usize * 2);
+        n = n.saturating_add(1);
+        if n >= 100_000_000 {
+            return Err(DataError::Format("Shapefile: too many records".into()));
+        }
+    }
+    if shp.len() < 100 {
+        return Err(DataError::Format("Shapefile: the .shp is too short to be one".into()));
+    }
+    const WIDTH: usize = 10;
+    let mut out = Vec::with_capacity(66 + n as usize * (WIDTH + 1));
+    // Header: dBASE III, a date, the records, the header's and a record's sizes.
+    out.extend_from_slice(&[0x03, 126, 1, 1]);
+    out.extend_from_slice(&n.to_le_bytes());
+    out.extend_from_slice(&(32u16 + 32 + 1).to_le_bytes());
+    out.extend_from_slice(&(1u16 + WIDTH as u16).to_le_bytes());
+    out.extend_from_slice(&[0u8; 20]);
+    // The field: id, numeric, 10 digits.
+    let mut field = [0u8; 32];
+    field[..2].copy_from_slice(b"id");
+    field[11] = b'N';
+    field[16] = WIDTH as u8;
+    out.extend_from_slice(&field);
+    out.push(0x0D);
+    for i in 1..=n {
+        out.push(b' ');
+        out.extend_from_slice(format!("{i:>WIDTH$}").as_bytes());
+    }
+    out.push(0x1A);
+    Ok(out)
+}
+
 /// The files of a Shapefile besides its `.shp` that [`gather_shapefiles`] zips with it.
 const SHAPEFILE_SIDECARS: [&str; 4] = ["dbf", "shx", "prj", "cpg"];
 
 /// Gathers each Shapefile among files given together (several picked at once in the browser, or
-/// dropped at once) into a zip that reads as a zipped Shapefile: a `.shp` with the `.dbf` of the
-/// same base name, ignoring case, and its `.shx`, `.prj` and `.cpg` when they are there. The zip,
-/// named after the `.shp`, takes its place; its parts go. Other files, and a `.shp` without its
-/// `.dbf`, pass through as they came. A Shapefile whose parts are too large to read together (more
+/// dropped at once) into a zip that reads as a zipped Shapefile: a `.shp` with the `.dbf`, `.shx`,
+/// `.prj` and `.cpg` of the same base name (ignoring case) that are there — one without its `.dbf`
+/// is read with its shapes alone, numbered. The zip, named after the `.shp`, takes its place; its
+/// parts go. A `.dbf`, `.shx`, `.prj` or `.cpg` without its `.shp` is left out and said in the
+/// messages; other files pass through as they came. A Shapefile whose parts are too large to read together (more
 /// than [`MAX_BYTES`], or the zip reader's limit) is left out, and said why in the messages
 /// returned with the files.
 pub fn gather_shapefiles(files: Vec<(String, Vec<u8>)>) -> (Vec<(String, Vec<u8>)>, Vec<String>) {
@@ -1850,9 +1917,6 @@ pub fn gather_shapefiles(files: Vec<(String, Vec<u8>)>) -> (Vec<(String, Vec<u8>
         let Some(base) = files.get(i).and_then(Option::as_ref).filter(|(n, _)| ext_of(n) == "shp").map(|(n, _)| stem(n)) else {
             continue;
         };
-        if sidecar(&files, &base, "dbf").is_none() {
-            continue;
-        }
         let mut parts: Vec<(String, Vec<u8>)> = files.get_mut(i).and_then(Option::take).into_iter().collect();
         for ext in SHAPEFILE_SIDECARS {
             if let Some(part) = sidecar(&files, &base, ext).and_then(|j| files.get_mut(j)).and_then(Option::take) {
@@ -1867,6 +1931,11 @@ pub fn gather_shapefiles(files: Vec<(String, Vec<u8>)>) -> (Vec<(String, Vec<u8>
     let limit = crate::zip::MAX_TOTAL.min(usize::try_from(MAX_BYTES).unwrap_or(usize::MAX));
     let (mut out, mut problems) = (Vec::new(), Vec::new());
     for (file, parts) in files.into_iter().zip(zips) {
+        // A part of a Shapefile whose .shp didn't come with it: said, not read as something else.
+        if let Some((n, _)) = file.as_ref().filter(|(n, _)| SHAPEFILE_SIDECARS.contains(&ext_of(n).as_str())) {
+            problems.push(stray_part_note(n));
+            continue;
+        }
         out.extend(file);
         let Some(parts) = parts else {
             continue;
@@ -2031,12 +2100,21 @@ pub fn read_zip_in(file_name: &str, bytes: &[u8], crs: Option<Crs>) -> Result<Ve
         let shx = take(&mut entries, &base, "shx").map(|(_, b)| b);
         let prj = take(&mut entries, &base, "prj").map(|(_, b)| String::from_utf8_lossy(&b).into_owned());
         let cpg = take(&mut entries, &base, "cpg").map(|(_, b)| b);
-        let Some((_, dbf)) = take(&mut entries, &base, "dbf") else {
-            skipped.push(format!("{n} (no .dbf beside it)"));
-            continue;
+        let (dbf, missing) = match take(&mut entries, &base, "dbf") {
+            Some((_, dbf)) => (dbf, false),
+            None => match numbered_dbf(&shp) {
+                Ok(dbf) => (dbf, true),
+                Err(e) => {
+                    skipped.push(format!("{n} ({e})"));
+                    continue;
+                }
+            },
         };
         match read_shapefile_parts(ShapefileParts { shp, shx, dbf, prj, cpg }, &name, crs) {
             Ok(mut read) => {
+                if missing {
+                    read.1.messages.push(no_dbf_note(&name));
+                }
                 read.0.source = Some(format!("{file_name}/{n}"));
                 out.push(read);
             }
@@ -3438,6 +3516,26 @@ mod tests {
         assert!(report.messages.is_empty(), "{:?}", report.messages);
     }
 
+    /// A .shp on disk without its .dbf reads with its shapes alone, numbered, and says so.
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn shapefile_without_dbf_on_disk() {
+        use shapefile::dbase::{Record, TableWriterBuilder};
+        let dir = tempfile::tempdir().unwrap();
+        let shp = dir.path().join("wells.shp");
+        {
+            let mut w = shapefile::Writer::from_path(&shp, TableWriterBuilder::new()).unwrap();
+            for x in [104.9, 105.0, 105.1] {
+                w.write_shape_and_record(&shapefile::Point::new(x, 11.5), &Record::default()).unwrap();
+            }
+        }
+        std::fs::remove_file(shp.with_extension("dbf")).unwrap();
+        let (ds, rep) = read_path(&shp).unwrap();
+        assert_eq!(ds.features.len(), 3);
+        assert_eq!(ds.value(2, 0), &Value::Int(3));
+        assert!(rep.messages.iter().any(|m| m.contains("wells") && m.contains(".dbf")), "{:?}", rep.messages);
+    }
+
     /// Zipped Shapefiles are read from memory (the web app's way to open them), with their `.prj`,
     /// from folders inside the archive, beside other vector files; truncations are errors.
     #[test]
@@ -3475,11 +3573,16 @@ mod tests {
         assert_eq!(layers[1].0.name, "points");
         // read_bytes takes the first layer.
         assert_eq!(read_bytes("upload.zip", &zip).unwrap().0.name, "Paris");
-        // Without its .dbf the Shapefile is skipped (and said); the rest of the archive is read.
+        // Without its .dbf the Shapefile is read with its shapes alone, numbered, and said.
         let no_dbf: Vec<_> = entries.iter().filter(|(n, _)| !n.ends_with(".dbf")).cloned().collect();
         let layers = read_zip("x.zip", &crate::zip::write(&no_dbf).unwrap()).unwrap();
-        assert_eq!(layers.len(), 1);
-        assert!(layers[0].1.messages.iter().any(|m| m.contains("no .dbf")), "{:?}", layers[0].1.messages);
+        assert_eq!(layers.len(), 2);
+        let (ds, rep) = &layers[0];
+        assert_eq!((ds.name.as_str(), ds.features.len()), ("Paris", 1));
+        assert_eq!(ds.value(0, 0), &Value::Int(1));
+        let c = ds.features[0].geometry.as_ref().and_then(Geometry::label_point).unwrap();
+        assert!((c.x - 2.335).abs() < 1e-6, "{c:?}");
+        assert!(rep.messages.iter().any(|m| m.contains(".dbf wasn't with it")), "{:?}", rep.messages);
         // A metadata file that isn't GeoJSON doesn't keep the Shapefile out.
         let mut with_meta = entries.clone();
         with_meta.push(("data/metadata.json".to_string(), br#"{"title": "not GeoJSON"}"#.to_vec()));
@@ -3492,9 +3595,11 @@ mod tests {
         let layers = read_zip("x.zip", &crate::zip::write(&with_tiles).unwrap()).unwrap();
         assert_eq!(layers.len(), 2);
         assert!(layers[0].1.messages.is_empty(), "{:?}", layers[0].1.messages);
-        // Nothing readable at all is an error.
+        // A .shp alone in a zip reads too, its shapes numbered.
         let only_shp: Vec<_> = entries.iter().filter(|(n, _)| n.ends_with(".SHP")).cloned().collect();
-        assert!(read_zip("x.zip", &crate::zip::write(&only_shp).unwrap()).is_err());
+        assert_eq!(read_zip("x.zip", &crate::zip::write(&only_shp).unwrap()).unwrap()[0].0.features.len(), 1);
+        // A broken one is skipped and said.
+        assert!(read_zip("x.zip", &crate::zip::write(&[("a.shp".to_string(), vec![1, 2])]).unwrap()).is_err());
         // Nothing to read.
         assert!(read_zip("x.zip", &crate::zip::write(&[("a.txt.bak".to_string(), vec![1])]).unwrap()).is_err());
         for n in (0..zip.len()).step_by(37) {
@@ -3574,17 +3679,28 @@ mod tests {
         let out = gather_shapefiles(loose("rivers", true)).0;
         assert_eq!(names(&out), ["RIVERS.zip"]);
         assert_eq!(read_bytes(&out[0].0, &out[0].1).unwrap().0.features.len(), 1);
-        // A .shp without its .dbf is left as it is, and explained when read.
+        // A .shp without its .dbf is zipped with what came, and reads with its shapes numbered.
         let no_dbf: Vec<_> = rivers.iter().filter(|(n, _)| !n.ends_with(".dbf")).cloned().collect();
         let out = gather_shapefiles(no_dbf.clone()).0;
-        assert_eq!(names(&out), names(&no_dbf));
-        let shp = out.iter().find(|(n, _)| n.ends_with(".shp")).unwrap();
-        assert!(read_bytes(&shp.0, &shp.1).unwrap_err().to_string().contains("together with its .dbf"));
+        assert_eq!(names(&out), ["rivers.zip"]);
+        let (read, rep) = read_bytes(&out[0].0, &out[0].1).unwrap();
+        assert_eq!(read.features.len(), 1);
+        assert!(rep.messages.iter().any(|m| m.contains("numbered in an id field")), "{:?}", rep.messages);
+        // A .shp picked on its own, too.
+        let lone: Vec<_> = rivers.iter().filter(|(n, _)| n.ends_with(".shp")).cloned().collect();
+        let out = gather_shapefiles(lone).0;
+        assert_eq!(names(&out), ["rivers.zip"]);
+        assert_eq!(read_bytes(&out[0].0, &out[0].1).unwrap().0.features.len(), 1);
+        // Its other parts without it are left out and said.
+        let (out, problems) = gather_shapefiles(vec![("lakes.dbf".to_string(), vec![3]), ("a.geojson".to_string(), b"{}".to_vec())]);
+        assert_eq!(names(&out), ["a.geojson"]);
+        assert!(problems[0].starts_with("lakes.dbf is a part of a Shapefile"), "{problems:?}");
         assert!(read_bytes("rivers.prj", b"").unwrap_err().to_string().contains("together with its .shp"));
-        // Parts of another Shapefile aren't taken in.
+        // Parts of another Shapefile aren't taken in (and are said).
         let mut mixed = rivers.clone();
         mixed.push(("lakes.prj".to_string(), b"x".to_vec()));
-        assert_eq!(names(&gather_shapefiles(mixed).0), ["rivers.zip", "lakes.prj"]);
+        let (out, problems) = gather_shapefiles(mixed);
+        assert_eq!((names(&out), problems.len()), (vec!["rivers.zip".to_string()], 1));
         assert!(gather_shapefiles(Vec::new()).0.is_empty());
         // One too large to read together is left out and said why; the others still come.
         let mut big = rivers.clone();
@@ -3592,7 +3708,7 @@ mod tests {
         big.push(("huge.dbf".to_string(), vec![0; MAX_BYTES as usize]));
         let (out, problems) = gather_shapefiles(big);
         assert_eq!(names(&out), ["rivers.zip"]);
-        assert_eq!(problems.len(), 1);
+        assert_eq!(problems.len(), 1, "{problems:?}");
         assert!(problems[0].starts_with("huge.shp:") && problems[0].contains("MB"), "{problems:?}");
     }
 
