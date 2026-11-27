@@ -20,6 +20,7 @@ pub use peer::Peer;
 pub(crate) use roles::{Document, ParamRole, Role};
 mod parameters;
 pub mod project_log;
+pub mod qgislayouts;
 pub mod qgispkg;
 pub use parameters::{params_envelope, script_line};
 pub use project_log::{LogCopy, log_identifier, log_params};

@@ -698,6 +698,9 @@ pub(crate) fn catalog_in(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
 fn contents(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
     // The name filter (#300), above the list so it stays in view.
     let map_name = app.session.map().name.clone();
+    if app.ui.qgis_layout {
+        layers_toolbar(app, ui, t);
+    }
     ui.add_space(8.0);
     filter_box(app, ui);
     // (Which layer is active as the filter changes: `follow_layer_filter`, every frame.)
@@ -876,11 +879,13 @@ fn contents(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
                 ui.add_space(30.0);
                 let (r, _) = ui.allocate_exact_size(vec2(18.0, 18.0), Sense::hover());
                 icons::paint(ui.painter(), r, "basemap", t.icon, t.accent);
-                ui.label(
-                    egui::RichText::new(format!("{} · {}", tl!("Basemap"), tl!(app.session.map().basemap.label())))
-                        .size(12.0)
-                        .color(t.text_dim),
-                );
+                // Click: another basemap (a web one, or one KHGIS draws).
+                let current = basemap_name(app);
+                ui.menu_button(egui::RichText::new(format!("{} · {} ▾", tl!("Basemap"), current)).size(12.0).color(t.text_dim), |ui| {
+                    basemap_menu(app, ui, &current);
+                })
+                .response
+                .on_hover_text(tl!("Choose the basemap"));
             });
         }
         if layers.is_empty() && groups.is_empty() && layer_groups.is_empty() {
@@ -955,6 +960,43 @@ fn paste_label(app: &RustGisApp) -> &'static str {
     }
 }
 
+/// The basemap's name: the web basemap at the bottom of the map's tile layers, else the drawn one.
+fn basemap_name(app: &RustGisApp) -> String {
+    let m = app.session.map();
+    match m.tiles.iter().rev().find(|x| !x.overlay) {
+        Some(x) => x.name.clone(),
+        None => tl!(m.basemap.label()).to_string(),
+    }
+}
+
+/// The basemaps to choose from: web basemaps, then those KHGIS draws.
+fn basemap_menu(app: &mut RustGisApp, ui: &mut Ui, current: &str) {
+    ui.label(egui::RichText::new(tl!("Web basemaps")).small().weak());
+    for (name, url, attribution, max_zoom) in rustgis_engine::sample::WEB_BASEMAPS {
+        if ui.selectable_label(current == name, name).clicked() {
+            let id = name.to_ascii_lowercase().replace(' ', "-");
+            let p = json!({"url": url, "name": name, "attribution": attribution, "maxZoom": max_zoom, "replace": true, "id": id, "kind": "raster"});
+            if let Err(e) = app.run("map.addTiles", p) {
+                app.session.notify(e, true);
+            } else {
+                // A web basemap takes the drawn one's place.
+                let _ = app.run("map.basemap", json!({"name": "blank", "keepTiles": true}));
+            }
+            ui.close();
+        }
+    }
+    ui.separator();
+    ui.label(egui::RichText::new(tl!("Drawn by KHGIS (no internet needed)")).small().weak());
+    for b in rustgis_engine::map::Basemap::ALL {
+        let label = tl!(b.label());
+        let on = app.session.map().tiles.iter().all(|x| x.overlay) && app.session.map().basemap == b;
+        if ui.selectable_label(on, label).clicked() {
+            let _ = app.run("map.basemap", json!({"name": b.code()}));
+            ui.close();
+        }
+    }
+}
+
 /// A button pasting the copied layers (#491) on top of the map in view, off while none are;
 /// returns whether it was clicked.
 fn paste_layers_button(app: &mut RustGisApp, ui: &mut Ui) -> bool {
@@ -982,6 +1024,57 @@ const LAYERS_VIEWS: [(LayersView, &str, &str); 3] = [
 ];
 
 /// A small icon button that picks a Layers view; `on` marks the view shown.
+/// The Layers panel's toolbar, as QGIS has it: Layer Styling, Add Group, Expand All, Collapse
+/// All and Remove Layer (the layers picked).
+fn layers_toolbar(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
+    let picked = app.session.selected_layers();
+    ui.add_space(4.0);
+    ui.horizontal(|ui| {
+        ui.add_space(8.0);
+        ui.spacing_mut().item_spacing.x = 2.0;
+        let styling = app.ui.right == Some(crate::RightPane::Symbology);
+        if view_button(ui, "symbology", tl!("Open the Layer Styling Panel"), styling, t).clicked() {
+            let _ = app.run("ui.pane.symbology", Value::Null);
+        }
+        if view_button(ui, "add_group", tl!("Add Group (with the layers picked)"), false, t).clicked() {
+            let p = if picked.is_empty() { json!({}) } else { json!({"layers": picked}) };
+            if let Err(e) = app.run("group.add", p) {
+                app.session.notify(e, true);
+            }
+        }
+        if view_button(ui, "add_data", tl!("Add Layer…"), false, t).clicked() {
+            let _ = app.run("ui.addData", Value::Null);
+        }
+        if view_button(ui, "table", tl!("Open Attribute Table"), false, t).clicked() {
+            let _ = app.run("table.open", Value::Null);
+        }
+        ui.add_space(6.0);
+        for (icon, tip, on) in [("expand_all", "Expand All", true), ("collapse_all", "Collapse All", false)] {
+            if view_button(ui, icon, tl!(tip), false, t).clicked() {
+                let layers: Vec<u32> = app.session.map().layers.iter().map(|l| l.id).collect();
+                for id in layers {
+                    let _ = app.run("layer.expand", json!({"layer": id, "on": on}));
+                }
+                let groups: Vec<u32> = app.session.map().groups.iter().map(|g| g.id).collect();
+                for id in groups {
+                    let _ = app.run("group.expand", json!({"group": id, "on": on}));
+                }
+            }
+        }
+        ui.add_space(6.0);
+        let tip = if picked.is_empty() { tl!("Remove Layer (pick a layer first)").to_string() } else { tl!("Remove Layer").to_string() };
+        let resp = ui.add_enabled_ui(!picked.is_empty(), |ui| view_button(ui, "remove_layer", &tip, false, t)).inner;
+        if resp.clicked()
+            && let Err(e) = app.run("layer.remove", json!({"layer": picked}))
+        {
+            app.session.notify(e, true);
+        }
+    });
+    let r = ui.min_rect();
+    ui.painter().line_segment([pos2(r.min.x, r.max.y + 3.0), pos2(r.max.x, r.max.y + 3.0)], egui::Stroke::new(1.0, t.border));
+    ui.add_space(4.0);
+}
+
 fn view_button(ui: &mut Ui, icon: &str, hover: &str, on: bool, t: &Tokens) -> egui::Response {
     let (r, resp) = ui.allocate_exact_size(vec2(22.0, 22.0), Sense::click());
     resp.widget_info(|| egui::WidgetInfo::selected(egui::Role::Button, true, on, hover));

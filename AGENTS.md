@@ -1,6 +1,6 @@
-# RustGIS — instructions for agents
+# KHGIS — instructions for agents
 
-RustGIS is a fast, free and open-source GIS in pure Rust for mapping, analyzing and sharing
+KHGIS is a fast, free and open-source GIS in pure Rust for mapping, analyzing and sharing
 geospatial data, on the desktop and in the browser. Its architecture: layered crates, everything
 is a command, a thin egui front end, headless screenshots for UI work.
 
@@ -21,7 +21,7 @@ Before picking work, read [ROADMAP.md](ROADMAP.md) (check Underway) and
 - Report through `Session::notify` (app, CLI, Python `take_notices`) or `ToolResult::messages`,
   one notice per kind with a count; `eprintln!` alone doesn't count. Unusable results are errors.
 - Test both ways: lossy input gives the notice, clean input none. Existing silent losses are bugs.
-- A file or setting from a newer RustGIS is refused or kept unchanged, never saved again without
+- A file or setting from a newer KHGIS is refused or kept unchanged, never saved again without
   what this version couldn't read; a reader checks the version it is given
   ([saved files](docs/maintaining.md#saved-files-and-settings)).
 
@@ -95,11 +95,11 @@ is out of scope.
 - No third-party vendor icons, images, styles, fonts, help text or code. Icons are drawn in
   code (`icons.rs`). Every asset file has a row in `ATTRIBUTION.md`.
 - Never copy or translate code from GPL, LGPL or other copyleft projects (such as GRASS, QGIS or
-  GEOS) into RustGIS, by hand or with an AI tool. Implementing a published algorithm is fine: cite
+  GEOS) into KHGIS, by hand or with an AI tool. Implementing a published algorithm is fine: cite
   the paper or standard. Name in the pull request any project whose code you followed (see
   [CONTRIBUTING.md](CONTRIBUTING.md#where-code-comes-from)).
 - Screenshots and other images are not committed here: they live in
-  [opengeos/rustgis-assets](https://github.com/opengeos/rustgis-assets) (WebP, served at
+  [opengeos/rustgis-assets](https://github.com/khgeo/KHGIS-assets) (WebP, served at
   `https://assets.rustgis.app/images/…`) and docs link to them by URL.
 
 ## Quality gates

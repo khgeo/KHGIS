@@ -3,7 +3,7 @@
 ## Open the app
 
 - **In the browser**: open [web.rustgis.app](https://web.rustgis.app). Nothing to install.
-- **On the desktop**: [install](installation.md) RustGIS and start it. On first launch it opens
+- **On the desktop**: [install](installation.md) KHGIS and start it. On first launch it opens
   the World Atlas sample: countries, cities, rivers and lakes from Natural Earth.
 - **From source**:
 
@@ -67,7 +67,7 @@ project changes, not files already written. See [AI Assistant](user-guide/assist
 ## Next steps
 
 - The [User Guide](user-guide/index.md) walks through every part of the app.
-- [Command Line](cli.md) shows how to script RustGIS with `rustgis-cli`.
+- [Command Line](cli.md) shows how to script KHGIS with `rustgis-cli`.
 - [Plugins](plugins.md) shows how to add tools from the plugin registry, or write your own.
 - [Python](python.md) covers sessions, rendering and the interactive notebook map.
-- [MCP](mcp.md) connects external AI agents to RustGIS.
+- [MCP](mcp.md) connects external AI agents to KHGIS.

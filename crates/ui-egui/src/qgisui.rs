@@ -1017,7 +1017,10 @@ fn toolbars(app: &mut RustGisApp, ui: &mut Ui) {
                         for id in shown.get(k..end).unwrap_or_default() {
                             let left = room - (ui.cursor().min.x - full.min.x);
                             let (r, g) = toolbar(ui, app, id, left);
-                            app.ui.qgis.toolbar_widths.insert(id.to_string(), r.width());
+                            // Its width on one line; wrapped (no room left on this line), as wide as the
+                            // line, so the next frame starts it on a line of its own.
+                            let w = if r.height() <= 30.0 { r.width() } else { room + 1.0 };
+                            app.ui.qgis.toolbar_widths.insert(id.to_string(), w);
                             if g.drag_started() {
                                 app.ui.qgis.dragging = Some(id.to_string());
                             }
@@ -1292,6 +1295,7 @@ pub fn swap_staged(app: &mut RustGisApp) {
 /// where; the browser downloads it.
 pub fn save_gpkg(app: &mut RustGisApp) -> Result<Value, String> {
     let stem = rustgis_engine::qgispkg::title_file(&app.session.project.name);
+    #[cfg(not(target_arch = "wasm32"))]
     let suggested = format!("{stem}.gpkg");
     #[cfg(not(target_arch = "wasm32"))]
     let (path, file) = {
@@ -1299,8 +1303,14 @@ pub fn save_gpkg(app: &mut RustGisApp) -> Result<Value, String> {
         let file = std::path::Path::new(&path).file_name().map(|f| f.to_string_lossy().into_owned()).unwrap_or(suggested.clone());
         (path, file)
     };
+    // The browser names a second download of the same name "name (1).gpkg", which the project
+    // inside wouldn't find: each save gets a name of its own, with the date and time.
     #[cfg(target_arch = "wasm32")]
-    let file = suggested.clone();
+    let file = {
+        let now = rustgis_engine::qgispkg::now_iso();
+        let stamp: String = now.chars().filter(|c| c.is_ascii_digit()).take(12).collect();
+        format!("{stem}_{}-{}.gpkg", &stamp[..8.min(stamp.len())], stamp.get(8..).unwrap_or_default())
+    };
     let pkg = rustgis_engine::qgispkg::save(&app.session, &file)?;
     #[cfg(not(target_arch = "wasm32"))]
     std::fs::write(&path, &pkg.bytes).map_err(|e| format!("{path}: {e}"))?;
@@ -1314,7 +1324,7 @@ pub fn save_gpkg(app: &mut RustGisApp) -> Result<Value, String> {
     }
     app.session.notify(
         crate::i18n::fmt(
-            "Saved {file} for QGIS. In QGIS open it with Project › Open From › GeoPackage (or drag it into QGIS): the layers keep their styles. Keep the file's name, as the project refers to it.",
+            "Saved {file} for QGIS: its layers (images too), styles and print layouts. In QGIS open it with Project › Open From › GeoPackage (or drag it into QGIS). Keep the file's name, as the project refers to it; if it was renamed, press Auto-Find in QGIS's Handle Unavailable Layers.",
             &[("file", &file)],
         ),
         false,

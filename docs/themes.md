@@ -1,7 +1,7 @@
 # Interface themes
 
 A theme is a JSON file that sets every colour the interface draws, plus its spacing and text
-sizes. Light and Dark ship with RustGIS; users add their own to the themes folder. The map is
+sizes. Light and Dark ship with KHGIS; users add their own to the themes folder. The map is
 drawn by the renderer, which takes its light or dark defaults from the theme's `dark` flag.
 
 ## Where themes live
@@ -11,7 +11,7 @@ drawn by the renderer, which takes its light or dark defaults from the theme's `
 | Built in | `crates/ui-egui/themes/*.json`, compiled into the app |
 | User | `<config>/themes/*.json`, read at startup, when a file changes, and by Reload Themes |
 
-The config folder is `%APPDATA%\RustGIS` on Windows, `~/Library/Application Support/RustGIS` on
+The config folder is `%APPDATA%\KHGIS` on Windows, `~/Library/Application Support/RustGIS` on
 macOS and `$XDG_CONFIG_HOME/rustgis`, which is `~/.config/rustgis` when the variable is unset,
 elsewhere. The default Linux themes folder is `~/.config/rustgis/themes`.
 `RUSTGIS_CONFIG_DIR` overrides the config folder.

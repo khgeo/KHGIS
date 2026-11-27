@@ -1,6 +1,6 @@
 # Command Line
 
-`rustgis-cli` runs RustGIS engine commands headlessly, using the same ids as the app.
+`rustgis-cli` runs KHGIS engine commands headlessly, using the same ids as the app.
 Window and pane commands (`ui.*`) belong to the app and are not available in a private CLI session.
 
 ```sh
@@ -140,7 +140,7 @@ and `--logout` signs out. Without `--use-saved-secrets`, the command line has no
 it uses a sign-in an earlier version saved in the settings folder, but not one the desktop app
 keeps in the keychain, and its own sign-ins last for the command only. A later `--logout` or
 `--remove-account` of such a sign-in clears it on this computer but can't end its session at
-OpenAI (its token is gone); disconnect RustGIS in ChatGPT's settings for that. Without the flag,
+OpenAI (its token is gone); disconnect KHGIS in ChatGPT's settings for that. Without the flag,
 those commands refuse an account whose token is in the keychain, and `--login` never replaces
 such a sign-in. With `--use-saved-secrets`, the CLI uses, remembers, signs out and removes
 keychain sign-ins as the app does. See
@@ -148,7 +148,7 @@ keychain sign-ins as the app does. See
 
 ## Serving AI agents
 
-`mcp` runs RustGIS as a Model Context Protocol server for agents such as Claude Code, Cursor and
+`mcp` runs KHGIS as a Model Context Protocol server for agents such as Claude Code, Cursor and
 VS Code, which then run commands, look at the map and search the documentation themselves:
 
 ```sh

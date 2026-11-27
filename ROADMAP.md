@@ -3,12 +3,12 @@
 _Last reviewed: 2026-11-08 (v0.6.0). Reviewed weekly; if this date is old, trust the linked issues
 over this page._
 
-This page says where RustGIS is heading and where help is most useful. Details live in the linked
-issues. RustGIS and GeoLibre complement each other
-([#951](https://github.com/opengeos/RustGIS/discussions/951)): GeoLibre is web and mobile first,
-RustGIS desktop first and built for automation and AI agents.
+This page says where KHGIS is heading and where help is most useful. Details live in the linked
+issues. KHGIS and GeoLibre complement each other
+([#951](https://github.com/khgeo/KHGIS/discussions/951)): GeoLibre is web and mobile first,
+KHGIS desktop first and built for automation and AI agents.
 [GEOLIBRE_PARITY.md](GEOLIBRE_PARITY.md) compares the two feature by feature as a reference, not a
-plan: not every GeoLibre feature suits RustGIS.
+plan: not every GeoLibre feature suits KHGIS.
 
 ## Goals
 - **What exists works.** A feature that crashes, misreads data or is undocumented costs more
@@ -31,21 +31,21 @@ needs another first, it says so.
 ## Underway
 An item is underway when it has an open pull request, or someone said on its issue in the last
 week that they are working on it. Check here and the
-[open pull requests](https://github.com/opengeos/RustGIS/pulls) before starting; to take an item,
+[open pull requests](https://github.com/khgeo/KHGIS/pulls) before starting; to take an item,
 comment on its issue or pull request and open a draft pull request early.
 - GPU map: vector tiles and labels on the GPU tile layer
-  ([#635](https://github.com/opengeos/RustGIS/issues/635),
-  [#596](https://github.com/opengeos/RustGIS/issues/596)).
+  ([#635](https://github.com/khgeo/KHGIS/issues/635),
+  [#596](https://github.com/khgeo/KHGIS/issues/596)).
 - Georeferencer: side-by-side window, transform picker, more formats
-  ([#609](https://github.com/opengeos/RustGIS/issues/609)).
+  ([#609](https://github.com/khgeo/KHGIS/issues/609)).
 
 ## Next
 
 ### Fixes and quick wins
 The bugs users hit, the docs and a few quick wins: good first pull requests.
 - Robustness: Control-click menus on macOS
-  ([#707](https://github.com/opengeos/RustGIS/issues/707)), Load Off-Map Data
-  ([#661](https://github.com/opengeos/RustGIS/issues/661)).
+  ([#707](https://github.com/khgeo/KHGIS/issues/707)), Load Off-Map Data
+  ([#661](https://github.com/khgeo/KHGIS/issues/661)).
 - A pass over the user guide, the comparison pages and the README against what the app does
   today, and short
   task tutorials for newcomers: buffer, select and export a list; edit a layer and save the
@@ -55,13 +55,13 @@ The bugs users hit, the docs and a few quick wins: good first pull requests.
 Correct, robust and recoverable, with the foundations other themes stand on.
 - Correct coordinates: grid datum shifts (NTv2 and GeoTIFF grids) for NAD27, NAD83(HARN),
   GDA94↔GDA2020 and OSGB36, and a notice whenever a layer is read without its shift; GDA94
-  ([#730](https://github.com/opengeos/RustGIS/issues/730)) is one case. _Coordinate first._
+  ([#730](https://github.com/khgeo/KHGIS/issues/730)) is one case. _Coordinate first._
 - Reloading files changed on disk.
 - Autosave and crash recovery in the browser: reopen unsaved work after a crash. The desktop app
-  has them ([#873](https://github.com/opengeos/RustGIS/issues/873)).
+  has them ([#873](https://github.com/khgeo/KHGIS/issues/873)).
 - Signed Windows builds (no SmartScreen warning), then a signature check, by publisher name, in
   Check for Updates' Download and Install, which updates a `setup.exe` install in place
-  ([#1290](https://github.com/opengeos/RustGIS/issues/1290)); in-place updates for the macOS app;
+  ([#1290](https://github.com/khgeo/KHGIS/issues/1290)); in-place updates for the macOS app;
   settings an administrator can fix for a managed install (no AI Assistant, plugins or web
   services).
 - Extend the OS keychain secret store to service connections (database passwords, S3 keys,
@@ -86,11 +86,11 @@ And alongside it:
 - A histogram for raster stretches; raster attribute tables.
 
 ### Data at the source
-- GeoLibre opening RustGIS `.rgis` projects, once RustGIS's project format and supported
-  data types settle. RustGIS imports GeoLibre projects; combined colour and size rendering
-  is tracked in [#1017](https://github.com/opengeos/RustGIS/issues/1017).
+- GeoLibre opening KHGIS `.rgis` projects, once KHGIS's project format and supported
+  data types settle. KHGIS imports GeoLibre projects; combined colour and size rendering
+  is tracked in [#1017](https://github.com/khgeo/KHGIS/issues/1017).
 - A date and date-time field type, read and written as dates (they are text today)
-  ([#853](https://github.com/opengeos/RustGIS/issues/853)). _Coordinate first_ (it changes
+  ([#853](https://github.com/khgeo/KHGIS/issues/853)). _Coordinate first_ (it changes
   `FieldType`).
 - Editable standalone tables (they are read-only today).
 - Polygon editing: shared edges, where moving one boundary moves its neighbour's too.
@@ -115,7 +115,7 @@ And alongside it:
   viewshed works without a loaded elevation raster _(open)_.
 
 ### 3D scenes, first steps
-- Phases 1–2 of [#726](https://github.com/opengeos/RustGIS/issues/726): Z coordinates kept from
+- Phases 1–2 of [#726](https://github.com/khgeo/KHGIS/issues/726): Z coordinates kept from
   the data and written back; a scene with a free camera and each layer's elevation mode (on the
   ground, relative, absolute).
 - LiDAR point layers (LAS/LAZ/COPC, read today as points) drawn at their heights in the scene.
@@ -137,9 +137,9 @@ Open questions rather than plans; discuss before building.
 - Layers kept in their own coordinate system rather than WGS 84.
 - Integrating [opengeos/terrio](https://github.com/opengeos/terrio), the pure-Rust raster, vector
   and point cloud I/O library: which of its drivers, coordinate transformations and GDAL-style
-  operations could back or replace RustGIS's own readers, or stand in for the GDAL program, and
+  operations could back or replace KHGIS's own readers, or stand in for the GDAL program, and
   which of them build for the web app.
-- Native NetCDF-4/HDF5 without GDAL ([#396](https://github.com/opengeos/RustGIS/issues/396)),
+- Native NetCDF-4/HDF5 without GDAL ([#396](https://github.com/khgeo/KHGIS/issues/396)),
   kerchunk and Icechunk.
 - Broader QGIS project compatibility and opening ArcGIS Pro projects (supported QGIS projects
   already open as maps).
@@ -148,12 +148,12 @@ Open questions rather than plans; discuss before building.
 ## Done
 
 - Customizable keyboard shortcuts with portable JSON import/export
-  ([#562](https://github.com/opengeos/RustGIS/issues/562)).
+  ([#562](https://github.com/khgeo/KHGIS/issues/562)).
 - Save edits back to existing GeoPackage and PostGIS tables on desktop, with atomic saves,
   conflict detection and discard/reload
-  ([#1041](https://github.com/opengeos/RustGIS/issues/1041)).
+  ([#1041](https://github.com/khgeo/KHGIS/issues/1041)).
 - Projects that survive a move: local data paths relative to the project and undoable Repair Data
-  Source for layers and tile archives ([#879](https://github.com/opengeos/RustGIS/issues/879)).
+  Source for layers and tile archives ([#879](https://github.com/khgeo/KHGIS/issues/879)).
 - Layered workspace, command registry with undo, project files (`.rgis`), `rustgis-cli`, the web
   app (WebAssembly, installable with offline start, opened with a project or data by its web
   address, self-hostable with the `Dockerfile`), 21 interface languages, custom themes as JSON
@@ -220,7 +220,7 @@ Open questions rather than plans; discuss before building.
   GMT palette files); masking, display filters, blend modes, aggregation, extrusion; graphics.
 - Merge vector layers: append matching geometry types, union attributes without type conversion,
   honor selections and complete streamed inputs
-  ([#1061](https://github.com/opengeos/RustGIS/issues/1061)).
+  ([#1061](https://github.com/khgeo/KHGIS/issues/1061)).
 - Editing: create, move, rotate, scale, merge, split, explode, vertex editing, cut polygons,
   reshape and trace along an edge while drawing; snapping, templates, elevation, topology,
   coincident polygon vertices moved together; domains, subtypes, attribute rules, contingent
@@ -258,7 +258,7 @@ Open questions rather than plans; discuss before building.
   provider keys and the Earthdata Login token optionally remembered in the desktop OS keychain,
   where the ChatGPT sign-in keeps its tokens.
 - Sandboxed WebAssembly plugins with a registry at plugins.rustgis.app; process plugins that run
-  as programs (with Python environments RustGIS makes), in the background with progress and
+  as programs (with Python environments KHGIS makes), in the background with progress and
   Cancel; panels with tree widgets, and compact ribbon columns and nested menus.
 - The `rustgis` Python package on PyPI: the engine in-process, `rustgis.Map` in Jupyter and
   `rustgis.qt.MapWidget` in Qt applications.

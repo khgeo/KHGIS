@@ -1,6 +1,6 @@
 # Architecture
 
-RustGIS is a layered Cargo workspace. Lower layers never depend on the UI, which keeps the
+KHGIS is a layered Cargo workspace. Lower layers never depend on the UI, which keeps the
 engine scriptable and the front end swappable.
 
 | Layer | Crate | Job |
@@ -82,9 +82,9 @@ found is treated as a bug.
 
 ## Pure Rust
 
-RustGIS's engine and apps are written in Rust and run without GDAL, PROJ or any other GIS
+KHGIS's engine and apps are written in Rust and run without GDAL, PROJ or any other GIS
 library installed. GDAL, DuckDB and the `geolibre` program are optional extras: on the desktop,
-when they are installed, RustGIS calls them to read [more formats](user-guide/data-formats.md#formats-read-through-gdal),
+when they are installed, KHGIS calls them to read [more formats](user-guide/data-formats.md#formats-read-through-gdal),
 run DuckDB queries and run the [GeoLibre tools](user-guide/analysis.md#geolibre-tools). In the web
 app the GeoLibre tools run in the browser instead, through geolibre-rust's WASI runner. Some
 dependencies do compile C code into the build: the Zstandard decoder (`zstd-sys`,
@@ -110,7 +110,7 @@ preference and matching provider/address; an environment key wins. The CLI uses 
 preference names and only reads a saved API key for a prompt, never for account management or
 model listing.
 
-- **Keys.** The service is `RustGIS`. The account is `owner/name` with a lowercase owner (for
+- **Keys.** The service is `KHGIS`. The account is `owner/name` with a lowercase owner (for
   example `assistant/<provider>` or `connection/<id>`); each feature defines its own. Values are
   opaque strings in `Secret`.
 - **Errors, not fallbacks.** A missing or locked store, or a refused prompt, returns a

@@ -1,9 +1,9 @@
-# Maintaining RustGIS
+# Maintaining KHGIS
 
 This page is for the [maintainers](https://github.com/orgs/opengeos/teams/rustgis-maintainers):
 who approves a coordinate-first change, what happens when a proposal gets no reply, and what
 reviewers check on saved files and dependencies. Contributors need only
-[CONTRIBUTING.md](https://github.com/opengeos/RustGIS/blob/main/CONTRIBUTING.md).
+[CONTRIBUTING.md](https://github.com/khgeo/KHGIS/blob/main/CONTRIBUTING.md).
 
 ## Who approves a coordinate-first change
 
@@ -17,7 +17,7 @@ big enough that a "no" would waste it. Say in the pull request which kind it is.
 - an optional command parameter, whose default keeps today's behaviour;
 - a field in a command's output;
 - an optional field in the project file or another saved file, whose absence means today's
-  behaviour, and whose loss when an older RustGIS saves the file costs a setting rather than data
+  behaviour, and whose loss when an older KHGIS saves the file costs a setting rather than data
   or a different result;
 - a feature of an existing dependency, a dev-dependency or an xtask-only crate, unless it brings in
   a large set of new dependencies.
@@ -36,11 +36,11 @@ new dependencies. A maintainer who proposes the change counts as one of them.
 - the shape of the core types: `Coord`, `Feature`, geometries and field types;
 - how a project stores its data;
 - a dependency that is a C, C++ or system library, brings in a large tree such as `tokio`, or
-  replaces or overlaps code RustGIS already has;
+  replaces or overlaps code KHGIS already has;
 - a new crate in the workspace;
 - a plugin ABI change, or removing something from the plugin interface;
 - a new top-level ribbon tab;
-- _Exploratory_ roadmap items, and anything that changes what RustGIS is for.
+- _Exploratory_ roadmap items, and anything that changes what KHGIS is for.
 
 The lead also settles a disagreement between maintainers. When you approve, say which kind of
 change it is, so the reply can be found later.
@@ -60,19 +60,19 @@ your recommendation. Link that comment from other threads rather than asking aga
 ## Saved files and settings
 
 Projects, map, layer and style files, models, saved connections and sources, plugin state and
-preferences outlive the release that wrote them, and people run an older and a newer RustGIS on the
+preferences outlive the release that wrote them, and people run an older and a newer KHGIS on the
 same files. New and changed code follows these rules; not every existing reader does yet.
 
 - A reader checks the version it is given.
-- An older RustGIS refuses a file or setting newer than it understands, or keeps it unchanged. It
+- An older KHGIS refuses a file or setting newer than it understands, or keeps it unchanged. It
   doesn't save it again without what it couldn't read.
 - A format's version goes up only when a file uses something an older reader would lose or
   misread.
 - Where a change allows it, reading a new version ships at least one release before anything
   writes it.
-- RustGIS releases, file formats, the plugin ABI and the GeoLibre runner protocol are versioned
+- KHGIS releases, file formats, the plugin ABI and the GeoLibre runner protocol are versioned
   separately.
-- A program RustGIS installs from elsewhere, such as the native GeoLibre runner, is pinned to a
+- A program KHGIS installs from elsewhere, such as the native GeoLibre runner, is pinned to a
   known release and moved forward by a pull request.
 
 ## New dependencies

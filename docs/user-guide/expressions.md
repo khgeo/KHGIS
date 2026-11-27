@@ -168,7 +168,7 @@ zero (`2.7` is 2, `-2.7` is -2), and one past the 64-bit integer range, or not a
 left empty. Calculate Field, and a calculation attribute rule on each edit it applies to, says how
 many results lost their fraction, how many were past the range and how many weren't numbers. Text
 that doesn't read as a number at all (`n/a`) is left empty too, for now without a notice. A
-number into a text field is written as RustGIS shows it, to six decimal places.
+number into a text field is written as KHGIS shows it, to six decimal places.
 
 Calculate Field also takes the forms its earlier calculator took: a field name with spaces
 written bare (`Pop Est * 2`) still works when the text isn't a valid expression, and on a layer

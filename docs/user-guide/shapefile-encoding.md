@@ -1,7 +1,7 @@
 # Shapefile DBF language drivers
 
 A valid `.cpg` takes precedence over the language driver ID (LDID, byte 29 of the `.dbf`
-header). Without a usable `.cpg`, the following inventory describes RustGIS's LDID decoding.
+header). Without a usable `.cpg`, the following inventory describes KHGIS's LDID decoding.
 All numbers in the marker column are hexadecimal. These are language-driver identifiers,
 not the numeric code-page labels accepted in a `.cpg`.
 
@@ -33,7 +33,7 @@ not the numeric code-page labels accepted in a `.cpg`.
 | UTF-8 (65001) | `F0` |
 | No encoding metadata: UTF-8 default | `00` |
 
-`57` deliberately means Windows-1252 in RustGIS. GDAL interprets it as ISO-8859-1;
+`57` deliberately means Windows-1252 in KHGIS. GDAL interprets it as ISO-8859-1;
 changing to that interpretation would change bytes `80`–`9F`, such as the euro sign and
 an en dash, into control characters. The regression test uses `80 96 9F` → `€–Ÿ`.
 
@@ -60,7 +60,7 @@ adds its own diagnostic before falling back to the LDID. Supplying a valid `.cpg
 the LDID and its unsupported-code-page diagnostic.
 
 The existing transitive `yore` 1.4.0 package has CP737, CP857, CP860 and CP863 decoders,
-but RustGIS's current `dbase` adapter does not expose them. Making these available would
+but KHGIS's current `dbase` adapter does not expose them. Making these available would
 require decoder integration and a coordinated direct dependency declaration; their presence
 in the lockfile does not make the corresponding LDIDs supported today. No local conversion
 tables or system programs are needed for the supported decoders above.
@@ -80,7 +80,7 @@ tables or system programs are needed for the supported decoders above.
   list the available legacy decoders and lossy decoding API.
 
 `crates/data/tests/shapefile_encoding.rs` specifies fixed bytes and Unicode expectations
-independently of RustGIS's mapping. Its matrix covers every marker above, names and values,
+independently of KHGIS's mapping. Its matrix covers every marker above, names and values,
 ZIP and loose-file imports, a genuinely sampled streamed read, a complete read, and ordered
 chunk traversal. It also checks `.cpg` precedence, fallback diagnostics, and malformed
 multibyte text without discarding records. Test files are generated locally; the tests do

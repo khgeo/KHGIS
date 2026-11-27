@@ -156,11 +156,11 @@ in plain UTM a letter after the zone is commonly read as the hemisphere, so `38S
 to 40° N) would be taken for the southern hemisphere, 10,000 km away. Latitude bands are MGRS's.
 UTM and MGRS are on WGS 84, with the zone exceptions for southern Norway (32V) and Svalbard (31X,
 33X, 35X and 37X), and cover 80° S to 84° N. Nearer the poles they would need the Universal Polar
-Stereographic grid, which RustGIS doesn't have: there the readout shows *No UTM here* (or
+Stereographic grid, which KHGIS doesn't have: there the readout shows *No UTM here* (or
 *No MGRS here*) rather than a wrong reference, and so it does on the map of another body than
 the Earth, where degrees still read. Scripts set the format with
 `ui.coordinateFormat={"format":"utm"}` (`decimal`, `dms`, `utm` or `mgrs`); without `format`
-it steps to the next one. A saved format this version doesn't know, say from a newer RustGIS,
+it steps to the next one. A saved format this version doesn't know, say from a newer KHGIS,
 reads as decimal degrees with a notice, and stays saved until you pick a format.
 
 The [search box](#navigating) takes the same grid references, in any case:
@@ -251,12 +251,12 @@ Ocean, Atlas, Blank), which need no network, and web tile layers over them:
   the layer, and asks for the file again).
 - **Map styles**: a MapLibre style document (`style.json`), with its vector, raster and
   elevation (`raster-dem`: Terrarium, Mapbox or custom encoding) sources.
-  RustGIS draws background, fill, line, circle and raster layers, labels with their icons from
+  KHGIS draws background, fill, line, circle and raster layers, labels with their icons from
   the style's sprites (SDF icons in their `icon-color`; the icons of a sprite in the style's
   list are named `<sprite id>:<name>`, those of a sprite with the id `default` just `<name>`), and
   fill patterns; it evaluates the style's expressions and zoom functions, `image` among them (an
   icon's name when a sprite has it, so `coalesce` falls back to the next). When the style draws
-  images, a notice says why any are missing: a sprite at an address RustGIS won't fetch, an entry
+  images, a notice says why any are missing: a sprite at an address KHGIS won't fetch, an entry
   of the list that can't be read, or a sprite whose download failed, which loses only its own
   icons and patterns and is tried again. From elevation it draws `color-relief` layers (a
   `color-relief-color` that is an `interpolate` or `step` on `["elevation"]`) and `hillshade`
@@ -413,7 +413,7 @@ taking other bodies' basemaps off) and `map.bodies`.
 
 The world outline and the World Atlas sample's countries come in two worldviews: Natural
 Earth's default borders, and China's (Natural Earth's China point of view: Taiwan, Aksai Chin
-and South Tibet are part of China). RustGIS picks China's when the system's time zone is
+and South Tibet are part of China). KHGIS picks China's when the system's time zone is
 mainland China's (such as `Asia/Shanghai`) or its first locale is `zh-CN`; nothing is looked up
 over the network. Choose one in **Settings › Language › Worldview**, set `RUSTGIS_WORLDVIEW`
 (`default` or `china`), or pass `--worldview` to `rustgis-cli`. An untouched sample project
@@ -426,9 +426,9 @@ projection, and clicking the coordinate system in the status bar opens the **Coo
 System** dialog, which also takes a projected EPSG code (such as `3035`, `32633` for UTM zone
 33N or `2056` for Switzerland) or an ESRI code, the one `.prj` files and ArcGIS name (such as
 `ESRI:102033` for South America Albers Equal Area Conic, or `ESRI:54030` for World Robinson). A
-code whose projection method or datum grid RustGIS can't use (Laborde such as `8441`, or a NAD27
+code whose projection method or datum grid KHGIS can't use (Laborde such as `8441`, or a NAD27
 code that needs a grid) is refused with the reason, rather than drawn in another projection.
-RustGIS supports a subset of Esri's projected systems, checked against
+KHGIS supports a subset of Esri's projected systems, checked against
 PROJ at representative points; unsupported codes such as World Miller (`ESRI:54003`) and the
 two-point oblique Mercators (`ESRI:53025`, `ESRI:54025`) are refused as unknown codes. The presets:
 
@@ -471,7 +471,7 @@ their hemisphere poleward of 30°, regional ones their region, transverse Mercat
 and scale, and the choice is saved with the map (`map.projection` from the command line). A
 raster already in the map's coordinate system draws without being reprojected. To open every new
 session in a projection, set it in **Settings › Start-up › Projection**. Robinson, Equal
-Earth, Natural Earth, Winkel Tripel and Eckert IV are computed by RustGIS itself on a sphere,
+Earth, Natural Earth, Winkel Tripel and Eckert IV are computed by KHGIS itself on a sphere,
 so EPSG:8857 (Equal Earth) works too. So is the sinusoidal projection, on a sphere or an
 ellipsoid: MODIS rasters, whose GeoTIFFs give it as their own projection, open and draw, and
 World, Sphere and Africa Sinusoidal (`ESRI:54008`, `53008`, `102011`) can be the map's.

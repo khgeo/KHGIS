@@ -1,4 +1,4 @@
-# Install RustGIS for the user and connect an agent
+# Install KHGIS for the user and connect an agent
 
 Run these steps on the **user's desktop machine**, not an unrelated agent host.
 Install the desktop app and `rustgis-cli`; registering MCP alone installs neither.
@@ -64,7 +64,7 @@ manifest; it is not an independent publisher signature.
 
 ### Checked release downloads: Linux and macOS
 
-Use the current release at <https://github.com/opengeos/RustGIS/releases/latest>,
+Use the current release at <https://github.com/khgeo/KHGIS/releases/latest>,
 or its mirror <https://downloads.rustgis.app>. Discover the version instead of
 pinning an old release. The following Bash setup requires `curl` and `jq`; if
 those are unavailable, use the agent's HTTP/JSON tools to obtain the same
@@ -210,7 +210,7 @@ Expand-Archive $zip -DestinationPath $destination
 $bin = Join-Path $destination "RustGIS-$version-windows-$arch"
 $env:Path = "$bin;$env:Path"
 & (Join-Path $bin 'rustgis-cli.exe') commands
-if ($LASTEXITCODE -ne 0) { throw 'RustGIS CLI failed' }
+if ($LASTEXITCODE -ne 0) { throw 'KHGIS CLI failed' }
 Start-Process (Join-Path $bin 'rustgis.exe')
 ```
 
@@ -218,7 +218,7 @@ Use `$bin\rustgis-cli.exe` as the MCP command if the client does not inherit the
 updated PATH. For a permanent per-user PATH entry, preserve the existing value
 and avoid duplicates, or let the per-user installer manage it. The alternative
 `RustGIS-<version>-windows-<arch>-setup.exe` installs into
-`%LOCALAPPDATA%\Programs\RustGIS`. Verify its checksum before launching its
+`%LOCALAPPDATA%\Programs\KHGIS`. Verify its checksum before launching its
 installer. For authorized all-user deployment, the verified MSI uses
 `msiexec /i RustGIS-<version>-windows-<arch>.msi /qn` (`<arch>` is `x86_64` or
 `aarch64`).
@@ -234,8 +234,8 @@ is not present in the installed app/CLI. Use a checkout that includes the
 later. In a user-chosen source directory:
 
 ```sh
-git clone https://github.com/opengeos/RustGIS.git
-cd RustGIS
+git clone https://github.com/khgeo/KHGIS.git
+cd KHGIS
 cargo build --release -p rustgis-cli
 cargo run --release -p rustgis
 ```
@@ -332,10 +332,10 @@ MCP configuration or start a new session, as that client requires.
 
 ## 4. Manage the already-open desktop app
 
-1. Launch the installed RustGIS desktop app in the user's graphical session,
+1. Launch the installed KHGIS desktop app in the user's graphical session,
    or keep the existing window and project. On Linux use `rustgis`; on macOS
-   open RustGIS.app; on Windows use its Start menu entry or `rustgis.exe`.
-2. In RustGIS, open **Command Search (Ctrl+K)** and run **MCP Relay**
+   open KHGIS.app; on Windows use its Start menu entry or `rustgis.exe`.
+2. In KHGIS, open **Command Search (Ctrl+K)** and run **MCP Relay**
    (`ui.mcpRelay`). If the agent cannot operate the UI, ask the user to perform
    this one action; an unattached MCP server cannot start the app's listener.
    Confirm the status bar says `MCP relay listening on 127.0.0.1:8767`.

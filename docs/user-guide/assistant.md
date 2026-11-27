@@ -7,7 +7,7 @@
 
 **Analyze › AI Assistant** (also View › Windows, or Command Search) opens a chat pane. Ask a
 question about your data or say what to do with the map, and the assistant answers by running
-RustGIS commands and geoprocessing tools for you:
+KHGIS commands and geoprocessing tools for you:
 
 - "Which 5 countries have the largest GDP?" reads the Countries table and answers.
 - "Label the cities with their names, and zoom to Tokyo."
@@ -76,12 +76,12 @@ small local models may stop early or skip steps.
 With a ChatGPT plan you can use the assistant without an API key, through OpenAI's
 [Sign in with ChatGPT for open-source apps](https://developers.openai.com/siwc/token-sharing-open-source).
 Choose **ChatGPT (sign in)** and click **Continue with ChatGPT**: your browser opens OpenAI's
-sign-in page, where you approve RustGIS using your plan (the first time, OpenAI registers RustGIS
+sign-in page, where you approve KHGIS using your plan (the first time, OpenAI registers KHGIS
 as an app of your account; you can rename it there). Afterwards the settings show the account's
 email, **Using ChatGPT plan**, and a **Weekly usage** link to
 [your ChatGPT usage settings](https://chatgpt.com/settings/usage?tab=overview), where you can see and limit
-what RustGIS uses or disconnect it. **Sign out** clears local tokens and attempts to revoke the
-remote session. If OpenAI does not confirm revocation, RustGIS says so; disconnect RustGIS in
+what KHGIS uses or disconnect it. **Sign out** clears local tokens and attempts to revoke the
+remote session. If OpenAI does not confirm revocation, KHGIS says so; disconnect KHGIS in
 ChatGPT settings to ensure that remote access ends. The registration remains for signing in again.
 The account picker retains separate registrations, even when their emails match. **Use another
 account** adds a registration; choose an existing one to reuse its issued client ID. **Remove
@@ -89,7 +89,7 @@ account** signs the selected one out and forgets it. From the command line:
 
 ```sh
 rustgis-cli ask --login                 # continue with ChatGPT in the browser
-rustgis-cli ask --login --another-account  # or register RustGIS for another account
+rustgis-cli ask --login --another-account  # or register KHGIS for another account
 rustgis-cli ask --sample --provider chatgpt "Zoom to Tokyo"
 rustgis-cli ask --accounts              # list saved registrations
 rustgis-cli ask --account oaiapp_...      # select one by its issued client id
@@ -112,12 +112,12 @@ Plus, Team/Business, Enterprise and Edu accounts, macOS and Linux have not been 
 Plan usage limits and model catalogs depend on the selected account and workspace.
 Team/Business, Enterprise and Edu workspace policy may block plan usage.
 
-Weekly usage opens ChatGPT's settings page. RustGIS does not show a live percentage: there is
+Weekly usage opens ChatGPT's settings page. KHGIS does not show a live percentage: there is
 no documented usage endpoint, and the tested live responses supplied no rate-limit headers.
 
 ## Tool output limits
 
-The assistant can `search_docs` and `read_doc` to look up RustGIS features and commands.
+The assistant can `search_docs` and `read_doc` to look up KHGIS features and commands.
 Each tool result defaults to an estimated **10,000 tokens**, following
 [Codex's default output budget](https://github.com/openai/codex/blob/main/codex-rs/core/src/tools/handlers/shell_spec.rs).
 A result is capped at an absolute **24,000 tokens**. Like
@@ -151,7 +151,7 @@ Skills are instructions for a kind of task. The assistant sees only each skill's
 line on when to use it, and reads its instructions on demand, so skills cost little until used.
 Loaded instructions share the configured tool-output budget; oversized results are explicitly
 marked as truncated. Split long skills or raise that limit (up to its existing ceiling) when
-complete instructions do not fit. RustGIS comes with these:
+complete instructions do not fit. KHGIS comes with these:
 
 | Skill | For |
 | --- | --- |
@@ -244,10 +244,10 @@ it is distinct from the background threads below.
 ## Agents on this computer
 
 On the desktop, the assistant can hand a task to a coding agent you already have, such as Claude
-Code, Codex, Gemini CLI, GitHub Copilot CLI, Cursor, OpenCode or goose. RustGIS talks to it through the
+Code, Codex, Gemini CLI, GitHub Copilot CLI, Cursor, OpenCode or goose. KHGIS talks to it through the
 [Agent Client Protocol](https://agentclientprotocol.com) (ACP), as code editors do. The agent
-works on the map open here through RustGIS's tools, and with its own: calling a web API RustGIS
-doesn't have, running a script, writing files. It suits tasks RustGIS's own tools can't do.
+works on the map open here through KHGIS's tools, and with its own: calling a web API KHGIS
+doesn't have, running a script, writing files. It suits tasks KHGIS's own tools can't do.
 
 It is off until you turn it on: in the settings, tick **Let the assistant hand tasks to agents on
 this computer**. The settings list the agents found. Starting a task or sending a follow-up waits for your approval in the assistant, unless automatic approval is enabled. Then ask, for example: "Have Claude Code
@@ -265,12 +265,12 @@ fetch the USGS stream gauges in Texas and add them to the map."
   file it writes) waits for **Allow**, **Always allow** (when the agent offers it) or
   **Decline** in its window. **Allow** never becomes a persistent approval: if no once-only
   option exists, use the explicitly labelled **Always allow** or decline. **Approve agents' actions without asking** lets them through
-  instead. Turn it on only if you trust the agent with your computer. With it off, RustGIS
+  instead. Turn it on only if you trust the agent with your computer. With it off, KHGIS
   sends a task only after confirming an asking or read-only mode; an agent with unknown or
   missing modes must first report a compatible mode. Turning the setting off during a turn
   that bypasses approval cancels that turn and requests an asking mode where available.
   Cancellation cannot recall actions the agent already performed.
-- **RustGIS checks its own tools.** File, network, plugin-command and project-replacement
+- **KHGIS checks its own tools.** File, network, plugin-command and project-replacement
   requests from a local agent wait for a separate **Allow** or **Decline** in its window.
   Approval applies only to that exact MCP message and that agent's run; a batch is approved or
   declined as a whole. The agent's `--yes` and the general relay checkbox cannot bypass this
@@ -282,16 +282,16 @@ fetch the USGS stream gauges in Texas and add them to the map."
 - **Its work is kept.** Each task gets a folder in `Documents/RustGIS/Agent work`, and what the
   agent adds to the map comes from there. The assistant's reply names the folder.
 - **Its relay token carries its thread's permission.** It reaches the map through the MCP relay
-  with a token of its own, which RustGIS revokes when the thread ends. **Stop** in its window, or
+  with a token of its own, which KHGIS revokes when the thread ends. **Stop** in its window, or
   **×** in the list, revokes its token immediately and terminates its live process tree on a
   background thread. A reaped leader's old process ID is never signalled.
 - **No console windows.** On Windows, agents start without a terminal window; their window in
-  RustGIS shows what they do.
+  KHGIS shows what they do.
 - **Signing in is the agent's.** The agent uses its own account and sign-in. If it isn't
   signed in, sign in with it once (for example, `codex login`).
 - **Claude Code and Codex need Node.js.** They speak ACP through an adapter
   (`@agentclientprotocol/claude-agent-acp`, `@agentclientprotocol/codex-acp`), which `npx`
-  downloads from npm the first time, at the version RustGIS names. Agents with ACP built in
+  downloads from npm the first time, at the version KHGIS names. Agents with ACP built in
   need nothing more. The web app doesn't offer agents.
 
 ## Privacy
@@ -313,14 +313,14 @@ warning stays visible. In the web app, **Remember** still saves the key unencryp
 browser's storage, with a note in settings.
 A ChatGPT sign-in's refresh token is kept in the system keychain, never in the preferences or a
 project file, and no token is ever logged. The short-lived access token stays in the memory of the
-RustGIS window that got it, so each time RustGIS starts it renews the sign-in once before its first
+KHGIS window that got it, so each time KHGIS starts it renews the sign-in once before its first
 request; after a restart, the browser may ask you to choose the account again when you sign in.
 `chatgpt-auth.json` in the app's settings folder keeps only the saved accounts (their client id,
 account, email, permissions, when the tokens expire, and which one is selected), no token. A
 sign-in from an earlier version, whose tokens are in that file, keeps working: they move to the
 keychain the first time they are used, and leave the file only once the keychain has taken them.
 If the keychain is unavailable, they stay in the file until it is, and the settings say so. A new
-sign-in the keychain can't take lasts until RustGIS closes and is never written to the file; the
+sign-in the keychain can't take lasts until KHGIS closes and is never written to the file; the
 settings say it won't be remembered, and it never replaces a sign-in the keychain still holds for
 that account. **Sign out** revokes the session at OpenAI and deletes its token; if the keychain
 can't be read, you are still signed out on this computer, and the settings say the session
@@ -332,7 +332,7 @@ and it can't use, sign out or remove an account whose token is in the keychain. 
 it uses the keychain as the app does. Python's `Session(use_saved_secrets=True)` similarly opts
 connection commands into the system store; it does not add an assistant API. The ChatGPT
 provider's address is fixed, so only the
-OpenAI API receives the tokens. Renewals are serialized across RustGIS processes (a refresh token
+OpenAI API receives the tokens. Renewals are serialized across KHGIS processes (a refresh token
 can be used only once), and the keychain is read under the same lock.
 Plain HTTP is only used for servers on your computer or local network.
 
@@ -345,7 +345,7 @@ OpenRouter, Requesty and TrustedRouter accept that; a local Ollama server must a
 The assistant stops after 16 rounds of tool use per message, shared with subagents. Provider
 retries and conversation summaries are separate. Reply "continue" to go on.
 
-RustGIS first trims older tool results and reasoning when the conversation grows too large.
+KHGIS first trims older tool results and reasoning when the conversation grows too large.
 If that is not enough, or the provider rejects the context length, it asks the same model to
 summarize earlier turns. **Compact** requests this explicitly while the assistant is idle;
 **New conversation** clears the chat and its remembered approvals and ends local-agent
@@ -368,7 +368,7 @@ without an explicit retryable provider error stop without
 replay. Stop cancels a pending retry.
 
 Summary requests have a total input bound, retaining the newest history if older text must be
-omitted. If the provider rejects a summary as too long, RustGIS halves that bound and tries again,
+omitted. If the provider rejects a summary as too long, KHGIS halves that bound and tries again,
 down to 1,024 bytes; further failure stops and preserves the original conversation. This learned
 bound lasts for the conversation. A cut, refused or failed summary never replaces history.
 The summariser treats retrieved text as data, not instructions. Internal summary markers in user messages are escaped in model

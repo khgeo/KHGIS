@@ -1,9 +1,9 @@
-# RustGIS
+# KHGIS
 
 **A fast, free and open-source GIS written in Rust for mapping, analyzing and sharing geospatial
 data.**
 
-RustGIS runs natively on Windows, macOS and Linux, and in your web browser. Local files are
+KHGIS runs natively on Windows, macOS and Linux, and in your web browser. Local files are
 processed on your machine; web data sources, AI providers and plugins can use the network.
 Map operations are commands you can script from the command line, Python or the AI Assistant.
 
@@ -18,8 +18,8 @@ Map operations are commands you can script from the command line, Python or the 
 </div>
 
 <figure markdown="span">
-  [![RustGIS with the Home tab of the ribbon open over a world map in the Equal Earth projection, countries shaded by population](https://assets.rustgis.app/images/hero.webp)](https://assets.rustgis.app/images/hero.webp){ target="_blank" rel="noopener" title="Open the full-size image" }
-  <figcaption>RustGIS with the World Atlas sample in the Equal Earth projection.</figcaption>
+  [![KHGIS with the Home tab of the ribbon open over a world map in the Equal Earth projection, countries shaded by population](https://assets.rustgis.app/images/hero.webp)](https://assets.rustgis.app/images/hero.webp){ target="_blank" rel="noopener" title="Open the full-size image" }
+  <figcaption>KHGIS with the World Atlas sample in the Equal Earth projection.</figcaption>
 </figure>
 
 ## Highlights

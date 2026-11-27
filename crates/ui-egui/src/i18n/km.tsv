@@ -1476,7 +1476,7 @@ On: the map shows each change at once. Off: change the style, then press Apply.	
 A raster's style always shows at once	រចនាប័ទ្មរ៉ាស្ទ័របង្ហាញភ្លាមៗជានិច្ច
 Save As GeoPackage for QGIS…	រក្សាទុកជា GeoPackage សម្រាប់ QGIS…
 GeoPackage for QGIS	GeoPackage សម្រាប់ QGIS
-Saved {file} for QGIS. In QGIS open it with Project › Open From › GeoPackage (or drag it into QGIS): the layers keep their styles. Keep the file's name, as the project refers to it.	បានរក្សាទុក {file} សម្រាប់ QGIS។ ក្នុង QGIS បើកវាដោយ គម្រោង › បើកពី › GeoPackage (ឬអូសវាចូល QGIS)៖ ស្រទាប់រក្សារចនាប័ទ្មរបស់វា។ សូមរក្សាឈ្មោះឯកសារដដែល ព្រោះគម្រោងយោងទៅវា។
+Saved {file} for QGIS: its layers (images too), styles and print layouts. In QGIS open it with Project › Open From › GeoPackage (or drag it into QGIS). Keep the file's name, as the project refers to it; if it was renamed, press Auto-Find in QGIS's Handle Unavailable Layers.	បានរក្សាទុក {file} សម្រាប់ QGIS៖ ស្រទាប់ (រួមទាំងរូបភាព) រចនាប័ទ្ម និងប្លង់បោះពុម្ព។ នៅក្នុង QGIS បើកវាតាម Project › Open From › GeoPackage (ឬអូសវាចូល QGIS)។ សូមរក្សាឈ្មោះឯកសារ ព្រោះគម្រោងយោងទៅវា។ បើបានប្តូរឈ្មោះ សូមចុច Auto-Find ក្នុងផ្ទាំង Handle Unavailable Layers របស់ QGIS។
 Renderer	កម្មវិធីគូរ
 1 Data	1 ទិន្នន័យ
 2 Enhance	2 កែលម្អ
@@ -1757,3 +1757,14 @@ A one-band image (an index, a class map) shows with a colour ramp: change it in 
 Click to add vertices · double-click, right-click or Enter to finish the line	ចុចដើម្បីបន្ថែមចំណុចកំពូល · ចុចពីរដង ចុចខាងស្តាំ ឬ Enter ដើម្បីបញ្ចប់បន្ទាត់
 Click to add vertices · double-click, right-click or Enter to close the polygon	ចុចដើម្បីបន្ថែមចំណុចកំពូល · ចុចពីរដង ចុចខាងស្តាំ ឬ Enter ដើម្បីបិទពហុកោណ
 Then draw a polygon round each training area: when it's closed, type its class in the form	បន្ទាប់មកគូរពហុកោណជុំវិញតំបន់បណ្តុះបណ្តាលនីមួយៗ៖ ពេលបិទរួច វាយថ្នាក់របស់វានៅក្នុងទម្រង់
+Choose the basemap	ជ្រើសរើសផែនទីមូលដ្ឋាន
+Web basemaps	ផែនទីមូលដ្ឋានលើបណ្តាញ
+Drawn by KHGIS (no internet needed)	គូរដោយ KHGIS (មិនត្រូវការអ៊ីនធឺណិត)
+Open the Layer Styling Panel	បើកផ្ទាំងរចនាស្រទាប់
+Add Group (with the layers picked)	បន្ថែមក្រុម (ជាមួយស្រទាប់ដែលបានជ្រើស)
+Add Layer…	បន្ថែមស្រទាប់…
+Expand All	ពង្រីកទាំងអស់
+Collapse All	បង្រួមទាំងអស់
+Remove Layer (pick a layer first)	លុបស្រទាប់ (ជ្រើសស្រទាប់ជាមុន)
+Scale	មាត្រដ្ឋាន
+Map rotation: the direction the top of the map faces, clockwise from north	ការបង្វិលផែនទី៖ ទិសដែលផ្នែកខាងលើនៃផែនទីបែរទៅ តាមទ្រនិចនាឡិកាពីទិសខាងជើង

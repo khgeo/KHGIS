@@ -1,12 +1,12 @@
 # User Guide
 
-This guide walks through RustGIS by task. Each page covers one part of the app:
+This guide walks through KHGIS by task. Each page covers one part of the app:
 
 | Page | What it covers |
 | --- | --- |
 | [Data](data.md) | Adding files, databases, saved connections, Data Sources, large files, rasters, Zarr and project items |
 | [Web Data](web-data.md) | Public web services and catalogs: STAC, Overture Maps, OpenStreetMap, NASA, open-data portals, satellite embeddings |
-| [Supported Data Formats](data-formats.md) | Every format RustGIS reads and writes, how to add it, and its limits |
+| [Supported Data Formats](data-formats.md) | Every format KHGIS reads and writes, how to add it, and its limits |
 | [Maps and Basemaps](maps.md) | Basemaps and web tile layers, projections, the 3D globe, view effects and navigation |
 | [Cartography](cartography.md) | Symbology, labeling, layer effects and graphics |
 | [Editing](editing.md) | Creating and modifying features, data design, the clipboard and pop-ups |
@@ -18,8 +18,8 @@ This guide walks through RustGIS by task. Each page covers one part of the app:
 | [AI Assistant](assistant.md) | A chat pane that answers questions and acts on the map through commands |
 
 <figure markdown="span">
-  [![RustGIS with the Home tab of the ribbon open over a world map in the Equal Earth projection, countries shaded by population](https://assets.rustgis.app/images/hero.webp)](https://assets.rustgis.app/images/hero.webp){ target="_blank" rel="noopener" title="Open the full-size image" }
-  <figcaption>RustGIS with the World Atlas sample in the Equal Earth projection.</figcaption>
+  [![KHGIS with the Home tab of the ribbon open over a world map in the Equal Earth projection, countries shaded by population](https://assets.rustgis.app/images/hero.webp)](https://assets.rustgis.app/images/hero.webp){ target="_blank" rel="noopener" title="Open the full-size image" }
+  <figcaption>KHGIS with the World Atlas sample in the Equal Earth projection.</figcaption>
 </figure>
 
 ## The window
@@ -193,7 +193,7 @@ data location instead.
 On the backstage's **Start** or **New** page, choose a blank **Map**, the **World Atlas** sample or
 **Open…**. **Save** and **Save As** write the project, named after its file; a project opened
 from a file is named after that file too. See [Project items](data.md#project-items) for the
-other files RustGIS reads and writes.
+other files KHGIS reads and writes.
 
 Changes to the project are commands, and each can be undone (++ctrl+z++) and redone
 (++ctrl+y++). Undo keeps the last 40 changes; starting or opening another project clears it.

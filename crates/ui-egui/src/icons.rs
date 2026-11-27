@@ -651,6 +651,25 @@ pub fn paint(painter: &Painter, r: Rect, name: &str, ink: Color32, accent: Color
                 p.rect(6.5 + i as f32 * 4.0, 12.0 + j as f32 * 4.5, 3.0, 3.0, Some(ink), None, 0.5);
             }
         }
+        "add_group" => {
+            // A folder with a plus, as QGIS's Add Group.
+            let folder = [(2.0, 6.0), (9.0, 6.0), (11.0, 8.5), (20.0, 8.5), (20.0, 19.0), (2.0, 19.0)];
+            p.fill(&folder, p.tint(110));
+            p.closed(&folder, 1.3, ink);
+            p.plus_badge(19.0, 18.5);
+        }
+        "expand_all" | "collapse_all" => {
+            p.rect(4.0, 4.0, 16.0, 16.0, Some(Color32::WHITE), Some((1.3, ink)), 2.0);
+            p.line(&[(8.0, 12.0), (16.0, 12.0)], 1.7, ink);
+            if name == "expand_all" {
+                p.line(&[(12.0, 8.0), (12.0, 16.0)], 1.7, ink);
+            }
+        }
+        "remove_layer" => {
+            p.layers(1.0, 2.0, 0.8);
+            p.line(&[(14.0, 14.0), (21.0, 21.0)], 2.3, red);
+            p.line(&[(21.0, 14.0), (14.0, 21.0)], 2.3, red);
+        }
         "def_query" | "filter" => {
             p.fill(&[(3.0, 4.0), (21.0, 4.0), (14.0, 12.0), (10.0, 12.0)], accent);
             p.rect(10.0, 11.5, 4.0, 8.5, Some(accent), None, 0.0);
@@ -1313,6 +1332,10 @@ pub const ALL: &[&str] = &[
     "calculate",
     "def_query",
     "filter",
+    "add_group",
+    "expand_all",
+    "collapse_all",
+    "remove_layer",
     "export_map",
     "export",
     "export_layer",

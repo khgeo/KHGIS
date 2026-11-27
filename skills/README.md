@@ -1,11 +1,11 @@
 # Agent skills
 
-Skills that teach an external AI agent to **use** RustGIS, rather than change
-RustGIS's source code (see the repository's `AGENTS.md` for that).
+Skills that teach an external AI agent to **use** KHGIS, rather than change
+KHGIS's source code (see the repository's `AGENTS.md` for that).
 
 | Skill | What it teaches |
 | --- | --- |
-| [`rustgis/`](rustgis/SKILL.md) | Install RustGIS for the user, register `rustgis-cli` as an MCP server, and manage the project already open in the desktop app through its MCP Relay. |
+| [`rustgis/`](rustgis/SKILL.md) | Install KHGIS for the user, register `rustgis-cli` as an MCP server, and manage the project already open in the desktop app through its MCP Relay. |
 
 ## Install the skill
 
@@ -22,7 +22,7 @@ use its documented skills directory. Start a new agent session so the skill's
 frontmatter description can trigger it. If the runtime has no skill loader,
 provide `SKILL.md` as instructions and make the reference document available.
 
-Installing the skill does not install RustGIS or start MCP. The companion
+Installing the skill does not install KHGIS or start MCP. The companion
 [install-from-agent guide](rustgis/references/install-from-agent.md) teaches the
 agent to do those steps on the user's machine, including the open-app relay.
 

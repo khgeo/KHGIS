@@ -72,7 +72,7 @@ Layouts open as tabs next to the maps; while one is open, its groups lead the Pu
     and each box grows to hold them. `{projection}`, `{datum}` and
     `{grid}` are filled from the map when the layout is made. `{date}` and the other dynamic text
     tokens stay live. The reference defaults to the projection, datum and graticule, and the
-    authorship to "Made with RustGIS · {date}" (`"author": ""` leaves it out). `headings` renames the two columns.
+    authorship to "Made with KHGIS · {date}" (`"author": ""` leaves it out). `headings` renames the two columns.
   - **The locator** (at the frame's top left unless the data is there): `"locator": "globe"` (a
     sheet's default) adds a separate globe map with simplified copies of the map's visible polygon
     layers held in the project. Streamed layers, rasters, points, lines and labels are left out.
@@ -242,7 +242,7 @@ Layouts open as tabs next to the maps; while one is open, its groups lead the Pu
   on the computer (Georgia or Times New Roman on Windows and macOS, Noto, DejaVu or Liberation Serif
   on Linux), with its own bold and italic faces, so italic there is a true italic rather than
   slanted letters (a family with no bold or italic file draws that style from its regular face:
-  italic slanted, bold as the regular); RustGIS bundles no font. The project saves only the family,
+  italic slanted, bold as the regular); KHGIS bundles no font. The project saves only the family,
   so it opens anywhere. Where no serif is installed (the web app, a minimal Linux), the text is
   drawn in the sans-serif and the pane says so, as `layout.addElement` and `layout.update` do in a
   `warning`. Scripts set it with `"font": "serif"` or `"font": "sans"`.
@@ -354,16 +354,16 @@ previews, edits and plays it.
   **Save As Presentation File** in the same menu keeps it to import into other projects (`.rgispres`).
 
 **Analyze › New Notebook** starts a notebook of text and command cells; **Add and Open** opens a
-RustGIS (`.rgisnb`) or Jupyter (`.ipynb`) notebook. A command cell runs one command per line
+KHGIS (`.rgisnb`) or Jupyter (`.ipynb`) notebook. A command cell runs one command per line
 (`id {json}`, as in scripts) and shows each command's result beneath it. Notebooks save in
 either format. The Notebook pane opens beside the map, on half of the room right of the left
 pane (at least 320 points where the window allows); drag its edge to give the notebook or the
 map more room.
-The cells of a RustGIS notebook contain RustGIS commands, not Python, even in an `.ipynb` file.
+The cells of a KHGIS notebook contain KHGIS commands, not Python, even in an `.ipynb` file.
 A Jupyter notebook in another language, such as Python, or one that names no language, opens with
 its cells and outputs (text, results, errors and PNG images) but its code cells don't run here;
 saving it as `.ipynb` keeps its kernel, metadata, cell ids and outputs, so it still opens and runs
-in Jupyter. RustGIS marks the `.ipynb` files it saves with the `rustgis` language, so their command
+in Jupyter. KHGIS marks the `.ipynb` files it saves with the `rustgis` language, so their command
 cells run when opened again. A notebook holds up to 1,000 cells of up to 200,000 characters each;
 a larger one is refused rather than opened in part. Notebooks opened from a file or an existing
 project cannot run commands that read or write files or run other scripts.

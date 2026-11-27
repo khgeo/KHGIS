@@ -25,6 +25,48 @@ fn tile_range(start: f64, end: f64, n: u32) -> (u32, u32) {
 
 /// Raster pixels are rendered with the same style and resampling as the map.
 pub fn export(layer: &RasterLayer, min_zoom: u8, max_zoom: u8, opacity: f32) -> Result<Vec<u8>, String> {
+    let r = layer.data.as_deref().ok_or("the raster's pixels are not loaded")?;
+    let e = r.extent();
+    let tiles = tiles(layer, min_zoom, max_zoom, opacity, MAX_TILES, MAX_BYTES)?;
+    pmtiles::write(
+        tiles,
+        &NewArchive {
+            tile_type: TileType::Png,
+            gzipped_tiles: false,
+            bounds: [e.min_x, e.min_y, e.max_x, e.max_y],
+            metadata: json!({"name": r.name}),
+        },
+    )
+}
+
+/// The zooms a raster's tiles go between: the one whose pixels are about the raster's own (finer
+/// by a level when between two), and the one where the whole raster fits a tile or two.
+pub fn zooms(layer: &RasterLayer) -> Result<(u8, u8), String> {
+    let r = layer.data.as_deref().ok_or("the raster's pixels are not loaded")?;
+    let e = r.extent();
+    let m = extent_to_merc(&rustgis_geom::Extent::new(e.min_x, e.min_y.max(-MAX_LAT), e.max_x, e.max_y.min(MAX_LAT)));
+    let across = f64::from(r.width.max(1));
+    let res = (m.max_x - m.min_x) / across;
+    if !res.is_finite() || res <= 0.0 {
+        return Err("the raster has no size on the map".into());
+    }
+    let world = 2.0 * std::f64::consts::PI * MERCATOR_R;
+    let max = (world / (f64::from(TILE_SIZE) * res)).log2().ceil().clamp(0.0, 16.0) as u8;
+    let span = (m.max_x - m.min_x).max(m.max_y - m.min_y);
+    let min = (world / span).log2().floor().clamp(0.0, f64::from(max)) as u8;
+    Ok((min, max))
+}
+
+/// The raster as Web Mercator PNG tiles `(zoom, column, row from the top, png)`, drawn as the map
+/// draws it, from `min_zoom` to `max_zoom`; at most `max_tiles` tiles and `max_bytes` of them.
+pub fn tiles(
+    layer: &RasterLayer,
+    min_zoom: u8,
+    max_zoom: u8,
+    opacity: f32,
+    max_tiles: u64,
+    max_bytes: usize,
+) -> Result<Vec<(u8, u32, u32, Vec<u8>)>, String> {
     if min_zoom > max_zoom || max_zoom > 16 {
         return Err("zoom range must satisfy 0 <= minZoom <= maxZoom <= 16".into());
     }
@@ -53,8 +95,8 @@ pub fn export(layer: &RasterLayer, min_zoom: u8, max_zoom: u8, opacity: f32) -> 
         let (x0, x1) = tile_range((m.min_x + half) / (2.0 * half), (m.max_x + half) / (2.0 * half), n);
         let (y0, y1) = tile_range((half - m.max_y) / (2.0 * half), (half - m.min_y) / (2.0 * half), n);
         count = count.saturating_add(u64::from(x1 - x0 + 1) * u64::from(y1 - y0 + 1));
-        if count > MAX_TILES {
-            return Err(format!("raster export exceeds {MAX_TILES} tiles; reduce the zoom range or raster extent"));
+        if count > max_tiles {
+            return Err(format!("raster export exceeds {max_tiles} tiles; reduce the zoom range or raster extent"));
         }
         ranges.push((z, x0, x1, y0, y1));
     }
@@ -113,8 +155,11 @@ pub fn export(layer: &RasterLayer, min_zoom: u8, max_zoom: u8, opacity: f32) -> 
                 }
                 let png = image.encode_png().map_err(|e| format!("couldn't encode a raster tile: {e}"))?;
                 bytes = bytes.checked_add(png.len()).ok_or("raster tile data is too large")?;
-                if bytes > MAX_BYTES {
-                    return Err("raster export exceeds 64 MiB of tile data; reduce the zoom range or raster extent".into());
+                if bytes > max_bytes {
+                    return Err(format!(
+                        "raster export exceeds {} MiB of tile data; reduce the zoom range or raster extent",
+                        max_bytes >> 20
+                    ));
                 }
                 tiles.push((z, x, y, png));
             }
@@ -123,15 +168,7 @@ pub fn export(layer: &RasterLayer, min_zoom: u8, max_zoom: u8, opacity: f32) -> 
     if tiles.is_empty() {
         return Err("the raster has no visible pixels in the requested tiles".into());
     }
-    pmtiles::write(
-        tiles,
-        &NewArchive {
-            tile_type: TileType::Png,
-            gzipped_tiles: false,
-            bounds: [e.min_x, e.min_y, e.max_x, e.max_y],
-            metadata: json!({"name": r.name}),
-        },
-    )
+    Ok(tiles)
 }
 
 #[cfg(test)]

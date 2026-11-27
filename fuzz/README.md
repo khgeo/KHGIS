@@ -1,6 +1,6 @@
 # Fuzzing the file readers
 
-Coverage-guided fuzz targets for the readers that take files RustGIS doesn't control (#779). They
+Coverage-guided fuzz targets for the readers that take files KHGIS doesn't control (#779). They
 feed malformed bytes to each reader and the crates beneath it, looking for panics, out-of-memory
 allocations and hangs that hand-written hostile-input tests don't anticipate.
 
@@ -16,7 +16,7 @@ allocations and hangs that hand-written hostile-input tests don't anticipate.
 | `project` | `Project::from_json` | `.rgis` projects |
 | `sheets` | `sheets::sheet_names`, `sheets::columns`, `sheets::read` | Excel and OpenDocument workbooks, calamine, the `.xls` sector-table check |
 
-This crate is its own workspace, outside RustGIS's: `cargo build`, `cargo xtask ci`, the wasm
+This crate is its own workspace, outside KHGIS's: `cargo build`, `cargo xtask ci`, the wasm
 build and the workspace's `cargo deny` never build it. It needs nightly Rust and
 [cargo-fuzz](https://github.com/rust-fuzz/cargo-fuzz). `libfuzzer-sys` compiles libFuzzer (C++,
 NCSA licence), which `deny.toml` here allows; nothing in this crate is shipped.
@@ -33,7 +33,7 @@ ${CARGO_TARGET_DIR:-target}/x86_64-unknown-linux-gnu/release/seeds   # writes co
 cargo +nightly fuzz run -O read_layers -- -max_total_time=600 -rss_limit_mb=2048 -timeout=10
 ```
 
-The seeds are well-formed files written by RustGIS's own writers from the sample project, so
+The seeds are well-formed files written by KHGIS's own writers from the sample project, so
 fuzzing starts from real files; the repository commits no data. `corpus/` and `artifacts/` are
 ignored. Put `CARGO_TARGET_DIR` somewhere roomy: a sanitizer build of the engine is several GB.
 
@@ -48,9 +48,9 @@ and at night open a "Fuzzing found a crash" issue.
 
 libFuzzer writes the input to `artifacts/<target>/` (`crash-…`, `oom-…` or `timeout-…`).
 Reproduce it with `cargo +nightly fuzz run -O <target> artifacts/<target>/<file>`, and shrink it
-with `cargo +nightly fuzz tmin -O <target> artifacts/<target>/<file>`. Fix the reader in RustGIS's
+with `cargo +nightly fuzz tmin -O <target> artifacts/<target>/<file>`. Fix the reader in KHGIS's
 own code, then add the input as a regression test that runs in plain `cargo test`, next to the
 reader's other hostile-input tests: generate it in the test when it's small, as those tests do.
 
-When a dependency is at fault and its fix isn't released yet, guard the call in RustGIS if that
+When a dependency is at fault and its fix isn't released yet, guard the call in KHGIS if that
 can be done cheaply. Otherwise leave the issue open, pointing at the dependency's fix.

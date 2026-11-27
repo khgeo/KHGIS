@@ -168,6 +168,15 @@ pub fn cambodia_communes() -> &'static str {
             .unwrap_or_default()
     })
 }
+/// The web basemaps the Layers panel offers: (name, tile address, credit, most detailed zoom).
+pub const WEB_BASEMAPS: [(&str, &str, &str, u8); 5] = [
+    ("Esri Shaded Relief", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}", "Esri, USGS, NOAA", 13),
+    ("Esri World Imagery", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", "Esri, Maxar, Earthstar Geographics, and the GIS User Community", 19),
+    ("Esri World Topographic", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", "Esri, HERE, Garmin, FAO, NOAA, USGS, OpenStreetMap contributors", 19),
+    ("Esri Light Gray Canvas", "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", "Esri, HERE, Garmin, OpenStreetMap contributors", 16),
+    ("OpenStreetMap", "https://tile.openstreetmap.org/{z}/{x}/{y}.png", "© OpenStreetMap contributors", 19),
+];
+
 /// Tonle Sap, which the administrative boundaries leave as a gap between provinces.
 pub const CAMBODIA_TONLESAP: &str = include_str!("../data/cambodia_tonlesap.geojson");
 
@@ -177,16 +186,15 @@ pub fn cambodia_project(khmer: bool) -> Project {
     let mut p = Project::new(if khmer { "កម្ពុជា" } else { "Cambodia" });
     let map = p.map_mut();
     map.name = if khmer { "កម្ពុជា".into() } else { "Cambodia".into() };
-    map.basemap = rustgis_map::Basemap::Midnight;
-    let mut imagery = rustgis_map::tiles::TileLayer::new(
-        "Satellite (Esri World Imagery)",
-        rustgis_map::tiles::TileKind::Raster,
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    );
-    imagery.attribution = "Esri, Maxar, Earthstar Geographics, and the GIS User Community".into();
-    imagery.max_zoom = 19;
-    imagery.id = "esri-imagery".into();
-    map.tiles.push(imagery);
+    // The basemap: Esri's shaded relief, the land's shape in soft grey (the Layers panel's
+    // Basemap row switches it to imagery, topographic, OpenStreetMap or a drawn one).
+    map.basemap = rustgis_map::Basemap::Blank;
+    let (name, url, attribution, max_zoom) = WEB_BASEMAPS[0];
+    let mut relief = rustgis_map::tiles::TileLayer::new(name, rustgis_map::tiles::TileKind::Raster, url);
+    relief.attribution = attribution.into();
+    relief.max_zoom = max_zoom;
+    relief.id = "esri-relief".into();
+    map.tiles.push(relief);
 
     let mut add = |name: &str, text: &str| read_geojson(text, name).ok().map(|(ds, _)| map.add_dataset(ds));
     // Bottom to top: the lake sits in the gap the provinces leave, then districts, provinces, and
@@ -234,10 +242,15 @@ mod cambodia_tests {
         for khmer in [false, true] {
             let p = super::cambodia_project(khmer);
             let m = &p.maps[0];
-            assert_eq!(m.layers.len(), 2);
+            // Tonle Sap, districts, provinces and the national boundary, on Esri's shaded relief.
+            assert_eq!(m.layers.len(), 4);
             assert_eq!(m.tiles.len(), 1);
+            assert_eq!(m.tiles[0].id, "esri-relief");
+            assert!(!m.tiles[0].overlay);
             let provinces = m.layers.iter().find(|l| l.labels.enabled).unwrap();
             assert_eq!(provinces.dataset.features.len(), 25);
+            // Every district too (a shape the reader skipped would be a hole in the map).
+            assert!(m.layers.iter().any(|l| l.dataset.features.len() == 209), "a district is missing");
         }
     }
 }

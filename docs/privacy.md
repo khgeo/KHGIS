@@ -1,6 +1,6 @@
 # Privacy
 
-The RustGIS desktop app and command line collect no analytics, telemetry or usage data.
+The KHGIS desktop app and command line collect no analytics, telemetry or usage data.
 Local files and projects are processed on your device. Features that use remote services can
 send searches, coordinates, data or assistant context to those services, as described below.
 
@@ -45,7 +45,7 @@ still identify private data, so review copied diagnostics before sharing them.
 
 Servers receive ordinary connection information, including your IP address and request headers.
 Their own privacy and retention policies apply. Working with local files does not itself
-upload their contents to RustGIS.
+upload their contents to KHGIS.
 
 ## AI Assistant and connected agents
 
@@ -69,7 +69,7 @@ checks the registry's blocklist at startup and may download packages saved by UR
 visit. Preparing a Python process plugin can download uv from PyPI, Python and the plugin's
 dependencies.
 
-WebAssembly plugins need the `network` permission to make web requests through RustGIS. A
+WebAssembly plugins need the `network` permission to make web requests through KHGIS. A
 plugin with that permission can send information it can read to addresses it chooses.
 Desktop process plugins are not sandboxed and can access files and the network as ordinary
 programs. Review the permissions and publisher before installing; see [Plugins](plugins.md).
@@ -90,7 +90,7 @@ which pages are used. Google receives your IP address, the page you are on, the 
 general device and browser information, and sets its own cookies in your browser. It is governed
 by [Google's privacy policy](https://policies.google.com/privacy).
 
-RustGIS does not send layer contents, files or projects to Google Analytics. The web app's
+KHGIS does not send layer contents, files or projects to Google Analytics. The web app's
 page-view event reports its address trimmed to the site and path (`https://web.rustgis.app/`),
 without the query string or map hash; its referring address is trimmed the same way. The
 documentation reports the standard page address, which can include a query string, such as the

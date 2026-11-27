@@ -19,7 +19,7 @@ Formats](data-formats.md).
 | LiDAR point clouds: LAS, LAZ, COPC (an evenly spread sample) | Yes | No |
 | Geotagged photos (JPEG with EXIF GPS): points with their thumbnails | Yes | No |
 | Esri File Geodatabase (`.gdb` folder; 3D multipatches as footprints) | Yes (desktop) | No |
-| Through GDAL: AutoCAD DWG, MapInfo TAB, OpenStreetMap XML, File Geodatabases RustGIS can't read itself… | Yes (desktop, when GDAL is installed) | No |
+| Through GDAL: AutoCAD DWG, MapInfo TAB, OpenStreetMap XML, File Geodatabases KHGIS can't read itself… | Yes (desktop, when GDAL is installed) | No |
 | PostgreSQL/PostGIS databases, read live (large tables a view at a time) | Yes (desktop) | No |
 | MySQL and MariaDB databases, read live (large tables a view at a time) | Yes (desktop) | No |
 | SQL Server and Azure SQL databases, read live (large tables a view at a time) | Yes (desktop) | No |
@@ -29,7 +29,7 @@ Formats](data-formats.md).
 | Unreferenced TIFF and PNG scans; JPEG with `"as": "scan"` | Yes | GeoTIFF after georeferencing |
 | Through GDAL: JPEG 2000, ERDAS Imagine, SRTM HGT, DTED, NetCDF, HDF, ENVI, SAGA… | Yes (desktop, when GDAL is installed) | No |
 | Web tiles: XYZ/TMS/WMS rasters, Mapbox Vector Tiles, MapLibre styles, PMTiles and MBTiles archives | Yes | Yes (Analyze › Create Hosted Imagery) |
-| RustGIS project (`.rgis`; older `.rgisx` files open too) | Yes | Yes |
+| KHGIS project (`.rgis`; older `.rgisx` files open too) | Yes | Yes |
 
 Add data with **Home › Add › Add Data**: its main button opens the file picker, and its menu offers
 other ways to add data, including **Delimited Text…**, **From URL…** and **From Service…**. Files
@@ -45,7 +45,7 @@ double-clicked in the Browser: **Choose Layers** lists them, all ticked, with **
 menu to add every layer, as before. Scripts pick one with `layer.addData`'s `"layer"`;
 `info.fileLayers` lists them.
 A KML, KMZ, GPX, OpenStreetMap, DXF, LandXML or GeoRSS file, a zip of Shapefiles or a File
-Geodatabase that RustGIS reads itself, with layers of several geometry types, adds its polygons
+Geodatabase that KHGIS reads itself, with layers of several geometry types, adds its polygons
 first and its points last, so its points are drawn on top, and a KML's ground overlays go under
 them. A name given goes to the first map layer added, the bottom one (a standalone table only gets
 it when the file has no map layer). A GeoPackage adds its tables in name order, and a file read
@@ -135,12 +135,12 @@ Features**.
 
 When [GDAL](https://gdal.org) is installed (its `ogr2ogr` and `ogrinfo` programs on the `PATH`,
 or the folder holding them in `RUSTGIS_GDAL_BIN`; GDAL 3.8 or later), the desktop app also opens
-the vector formats GDAL reads: DWG, MapInfo TAB, OpenStreetMap XML, File Geodatabases RustGIS
+the vector formats GDAL reads: DWG, MapInfo TAB, OpenStreetMap XML, File Geodatabases KHGIS
 can't read itself (compressed ones, or ones with raster fields)
-and more. RustGIS doesn't link to GDAL: each layer is converted once, by `ogr2ogr`, into a
+and more. KHGIS doesn't link to GDAL: each layer is converted once, by `ogr2ogr`, into a
 FlatGeobuf with a spatial index in WGS 84 (GDAL reprojects it), kept in the cache folder
 (`~/.cache/rustgis/gdal` on Linux, `~/Library/Caches/RustGIS/gdal` on macOS,
-`%LOCALAPPDATA%\RustGIS\cache\gdal` on Windows, or `RUSTGIS_GDAL_CACHE`). Adding the file again
+`%LOCALAPPDATA%\KHGIS\cache\gdal` on Windows, or `RUSTGIS_GDAL_CACHE`). Adding the file again
 reuses the conversion until the file changes, and large layers stream like any large FlatGeobuf
 (below). Every layer of the file is added; a layer mixing geometry types is added as one layer
 per type, its points on top and its polygons at the bottom. Curves become straight segments, and
@@ -180,7 +180,7 @@ WHERE bbox.xmin BETWEEN -83.95 AND -83.89 AND bbox.ymin BETWEEN 35.94 AND 35.98
 ```
 
 The first geometry column becomes the layer's geometry; other columns become its attributes (types
-RustGIS doesn't read, such as dates and lists, as text). A geometry that says its coordinate system
+KHGIS doesn't read, such as dates and lists, as text). A geometry that says its coordinate system
 is converted to longitude/latitude; give `"crs"` (such as `EPSG:2263`) for one that doesn't. A
 result mixing geometry types becomes a layer per type (points on top, polygons at the bottom), and
 rows without a geometry are left out.
@@ -195,7 +195,7 @@ column becomes a layer (`"layer"` picks one).
 **Home › Add › Add Data › Database…** (`layer.addDatabase`, desktop) connects to a PostgreSQL database with
 PostGIS and reads its tables live. The dialog takes a saved connection or a typed one, a password,
 a table (**List Tables**, or all tables with geometry) and a coordinate system for geometry that
-doesn't say its own. RustGIS talks to the server itself (nothing else to install;
+doesn't say its own. KHGIS talks to the server itself (nothing else to install;
 TLS as libpq does it). `sslmode=prefer` (the default) uses TLS only when the server offers it, and otherwise connects
 without encryption, so a server in the middle can force a plaintext connection. `require` always
 uses TLS but doesn't check the server's certificate. On networks you don't trust, use
@@ -221,7 +221,7 @@ rows of a view or a partitioned table without a key are numbered as read, so the
 between views).
 
 Passwords are never written to the project. By default, an entered password lasts until
-RustGIS closes. For a named desktop connection, **Remember on this computer** is an unchecked
+KHGIS closes. For a named desktop connection, **Remember on this computer** is an unchecked
 opt-in to the operating system's password store; see [Named connections](#named-connections)
 for reconnect, selection and forgetting rules. Opening a project can use a remembered password
 only for a unique, exact saved-address match, or an explicit session selection. Otherwise a
@@ -240,9 +240,9 @@ reaches DuckDB in its environment (`PGPASSWORD`), never on its command line:
 rustgis-cli run --cmd 'layer.addSql={"sql":"SELECT name, geom FROM roads WHERE lanes > 2","database":"postgres:host=localhost dbname=gis user=postgres","password":"…"}'
 ```
 
-RustGIS doesn't link to DuckDB: it runs `duckdb`, which writes the result as GeoParquet in the
+KHGIS doesn't link to DuckDB: it runs `duckdb`, which writes the result as GeoParquet in the
 cache folder (`~/.cache/rustgis/duckdb` on Linux, `~/Library/Caches/RustGIS/duckdb` on macOS,
-`%LOCALAPPDATA%\RustGIS\cache\duckdb` on Windows, or `RUSTGIS_DUCKDB_CACHE`), sorted along a
+`%LOCALAPPDATA%\KHGIS\cache\duckdb` on Windows, or `RUSTGIS_DUCKDB_CACHE`), sorted along a
 Hilbert curve with a bounding-box covering, so large results stream like any large GeoParquet
 (below). DuckDB Spatial is installed the first time (a download from DuckDB's extension
 repository). A database table is converted once and reused until the file changes; a query runs
@@ -260,7 +260,7 @@ On the desktop, a PostgreSQL table with PostGIS can be loaded to be edited and i
 back to it. In **Home › Add › Add Data › Database…**, give a PostgreSQL connection, choose a table
 (**List Tables**) and tick **Load for editing**.
 
-- The connection (`pg.connect`) lasts until RustGIS closes, or until **Disconnect** in the same
+- The connection (`pg.connect`) lasts until KHGIS closes, or until **Disconnect** in the same
   form (`pg.disconnect`). It isn't saved with the project, and neither is the password. Without a
   password, `PGPASSWORD` or libpq's password file serve.
 - The table (`pg.addLayer`; `pg.tables` lists those with a geometry or geography column) loads
@@ -311,7 +311,7 @@ On the desktop, **Home › Add › Add Data › Edit GeoPackage Table…** (`gpk
 feature table of an existing local `.gpkg` for editing. Choose its table with **List Tables**
 when the file has several. The table needs one `INTEGER PRIMARY KEY`. At most 100,000 rows
 are loaded; **Most rows** can lower that limit. Whole numbers may use comma-grouped thousands
-(for example, `1,000`); fractional values are rejected. RustGIS does not
+(for example, `1,000`); fractional values are rejected. KHGIS does not
 directly edit rows outside that load, including rows with unreadable geometry. File-owned
 triggers can change other rows.
 
@@ -378,7 +378,7 @@ need file permission to load or discard rows and cannot save edits back to the t
 
 **Home › Add › Add Data › Database…** (`layer.addDatabase`) also connects to a MySQL (8 or later) or
 MariaDB (10.2 or later) database and reads its spatial columns live, as it does PostGIS tables:
-RustGIS talks to the server itself, with nothing else to install. The connection is an address,
+KHGIS talks to the server itself, with nothing else to install. The connection is an address,
 `mysql://user@host:3306/database` (or `mariadb://…`); what it leaves out is, as with the
 `mysql` client, `localhost`, port 3306 and your login name. **List Tables**
 (`info.databaseTables`) shows the database's tables and views with a geometry column, and every
@@ -402,7 +402,7 @@ rustgis-cli run --cmd 'layer.addDatabase={"database":"mysql://gis@db.example:330
 
 Large tables are read a view at a time through the column's spatial index (`MBRIntersects`), and
 a capped view is an evenly spread sample numbered on the server; smaller ones are loaded whole.
-RustGIS converts the geometry to longitude/latitude itself (MariaDB has no `ST_Transform`), from
+KHGIS converts the geometry to longitude/latitude itself (MariaDB has no `ST_Transform`), from
 the column's SRID (MySQL's per-column SRID, MariaDB's `REF_SYSTEM_ID`) or else its rows'; give
 `"crs"` (such as `EPSG:2263`) for a column whose SRID is 0. A `GEOMETRY` column of mixed types
 becomes a layer per type, points on top. Features keep their ids between views from the table's
@@ -484,7 +484,7 @@ without a point.
 
 The geocoder is OpenStreetMap's public [Nominatim](https://nominatim.org) by default, or
 [Photon](https://photon.komoot.io) (`"provider": "photon"`). Their usage policies allow light
-use, so RustGIS sends them at most one request a second and 100 addresses a run; give `"url"` of
+use, so KHGIS sends them at most one request a second and 100 addresses a run; give `"url"` of
 a Nominatim or Photon server of your own for more (up to 10,000, with no wait between requests).
 
 For addresses in the Netherlands, `"provider": "locatieserver"` (**Locatieserver (the
@@ -493,7 +493,7 @@ Netherlands)** in the dialog) uses PDOK's
 geocoder built on the Dutch government's address and place registers (BAG and others): it finds
 addresses, postcodes, streets, towns, municipalities and provinces. Its answers are open data from
 those registers; Find Place credits PDOK Locatieserver (Kadaster) under the results. PDOK
-publishes no request limit for it, so RustGIS sends it four requests a second and up to 10,000
+publishes no request limit for it, so KHGIS sends it four requests a second and up to 10,000
 addresses a run. An address is matched to the house before its street (`Damrak 1, Amsterdam` is
 the building, not the middle of Damrak). Its places have a point but no extent, so Find Place
 zooms in close around them.
@@ -536,7 +536,7 @@ rustgis-cli run --cmd 's3.connect={"name":"minio","endpoint":"https://minio.exam
   --cmd 's3.list={"url":"s3://my-bucket/rasters/"}' --cmd 'layer.addUrl={"url":"s3://my-bucket/rasters/dem.tif"}'
 ```
 
-Keys are kept until RustGIS closes unless you ask otherwise: never in a project (which keeps the
+Keys are kept until KHGIS closes unless you ask otherwise: never in a project (which keeps the
 address), a command's result, a notice or the log. After **Connect**, **Save as Connection** keeps
 its name, endpoint, region and credential source under **Data Sources › Connections**, never its
 keys. Use **Saved connection** to pick it again.
@@ -640,7 +640,7 @@ On desktop and the command line, web tiles, service documents and file downloads
 **From URL…** connect directly, including `layer.addUrl`. These requests do not use
 `HTTP_PROXY`, `HTTPS_PROXY` or `ALL_PROXY`: a proxy could resolve a destination beyond the
 app's IP checks. There is no proxy override for these requests. If your network requires a
-proxy, download a file with a trusted external tool and open the local copy in RustGIS.
+proxy, download a file with a trusted external tool and open the local copy in KHGIS.
 Live tile and service access requires direct connectivity. The web app uses the browser's
 network settings. Browser GET and HEAD requests refuse redirects, including HTTP-to-HTTPS upgrades
 and CDN hops, because the app cannot inspect their destinations. This includes **From URL…**
@@ -651,17 +651,17 @@ see [tile request limits](maps.md#basemaps).
 
 ### HTTPS certificates
 
-On desktop and the command line, RustGIS's HTTPS clients use platform certificate verification:
+On desktop and the command line, KHGIS's HTTPS clients use platform certificate verification:
 OGC services (WMS, WMTS, WFS and WCS), web tiles and downloads, ArcGIS portal sign-in's token
 requests, the AI Assistant's model requests, the plugin registry, the uv download that makes
 Python environments, and the GeoLibre runner installer. A private or enterprise CA (or a TLS
-inspection proxy's) must be trusted by the operating system for the account running RustGIS:
+inspection proxy's) must be trusted by the operating system for the account running KHGIS:
 
 - **Windows:** install the CA in the appropriate Windows Trusted Root Certification
   Authorities store. Windows evaluates the certificate chain and its trust/distrust policies.
 - **macOS:** install and trust the CA for SSL in Keychain Access.
 - **Linux and the BSDs:** install the CA in the system CA bundle, or set `SSL_CERT_FILE` to a PEM
-  CA bundle and/or `SSL_CERT_DIR` to CA certificate directories before starting RustGIS. These
+  CA bundle and/or `SSL_CERT_DIR` to CA certificate directories before starting KHGIS. These
   variables select the trust sources instead of the default system locations (an empty
   `SSL_CERT_DIR` counts as unset).
   If no default system roots are found and neither variable is set, this client falls back to
@@ -670,7 +670,7 @@ inspection proxy's) must be trusted by the operating system for the account runn
   add Mozilla roots to an existing CA store (even one it can't read) or an explicitly configured one.
 
 `SSL_CERT_FILE` and `SSL_CERT_DIR` do **not** override Windows or macOS trust for this client.
-Restart RustGIS after changing certificate trust. The service must still send a valid chain,
+Restart KHGIS after changing certificate trust. The service must still send a valid chain,
 use a certificate matching its hostname, and have unexpired certificates; there is no option
 to skip verification. Database connections (PostgreSQL/PostGIS, MySQL, SQL Server) have their
 own TLS settings; PostGIS with verification on and no root certificate given still trusts only
@@ -680,10 +680,10 @@ Two steps use other trust:
 
 - **ArcGIS sign-in** opens the portal's page in your browser, which checks the portal's
   certificate with its own trust (some browsers keep their own certificate store). If it doesn't
-  trust the CA, sign-in stops before RustGIS gets a token.
+  trust the CA, sign-in stops before KHGIS gets a token.
 - **uv**, making a plugin's Python environment, downloads Python and packages with its bundled
   Mozilla roots. To have it use the operating system's trust, set `UV_SYSTEM_CERTS=true` in the
-  environment (or `system-certs = true` in a `uv.toml`) before starting RustGIS. A non-empty
+  environment (or `system-certs = true` in a `uv.toml`) before starting KHGIS. A non-empty
   `SSL_CERT_FILE` or `SSL_CERT_DIR` replaces uv's roots on every platform.
 
 The web app continues to use the browser's certificate verification and fetch behavior; its
@@ -871,7 +871,7 @@ at the same origin does not. **Log Out**
 
 Creating a login requires secure random numbers: the operating system's generator on desktop,
 or the browser's `crypto.getRandomValues` in the web app. If that source is missing or fails,
-RustGIS refuses the login rather than using a predictable fallback. A failed replacement leaves
+KHGIS refuses the login rather than using a predictable fallback. A failed replacement leaves
 the previous active login usable.
 
 A login is sent only to the connection's origin: the same scheme, host and port, for its
@@ -880,7 +880,7 @@ origin keeps the login, and a redirect to another origin is followed without it,
 another connection's login either. In the web app a request carrying a login isn't redirected at
 all, since the browser can't take the login off on the way: a service that redirects (to
 `https://` or to another path) fails there, so save the connection with the address it ends at.
-Service documents cannot supply a login binding. While resolving their links, RustGIS inherits
+Service documents cannot supply a login binding. While resolving their links, KHGIS inherits
 only the login used to read the document, and only at that same origin. A runtime wrapper in a
 document link contributes its ordinary URL, never its login.
 Relative links, including parent paths, resolve against the document's address without rewriting
@@ -906,7 +906,7 @@ embedded in text, when saving, recovering or exporting them. The live session ke
 A project's layers use the connection they record; layers recording none use an explicit session
 choice or the only saved connection for their origin. Different connections and sessions can use
 different logins at the same origin without sharing credentials or authenticated cached responses.
-When several saved connections match the address, RustGIS asks which one to use (**Choose
+When several saved connections match the address, KHGIS asks which one to use (**Choose
 Connection…**, `connection.login {id}` for the one chosen) and never picks one itself.
 When an origin has exactly one saved connection and it has a login method, an address at that
 origin is read through that connection, so it needs that login: log in, or save a public
@@ -950,9 +950,9 @@ The record directory and R-tree stay on disk, with an 8 MiB SQLite page-cache ta
 index and memory mapping disabled. Query results retain file order and the same sampling
 rules. Attributes and the `.prj` are still read from the source files.
 
-The indexes are kept in the `shp-index` folder of the RustGIS cache directory:
+The indexes are kept in the `shp-index` folder of the KHGIS cache directory:
 `~/Library/Caches/RustGIS/shp-index` on macOS, `~/.cache/rustgis/shp-index` on Linux
-(`$XDG_CACHE_HOME`), `%LOCALAPPDATA%\RustGIS\cache\shp-index` on Windows, or under
+(`$XDG_CACHE_HOME`), `%LOCALAPPDATA%\KHGIS\cache\shp-index` on Windows, or under
 `RUSTGIS_CACHE_DIR` when it is set. Set
 `RUSTGIS_SHP_CACHE` to choose another directory, `RUSTGIS_SHP_CACHE_MIB` to choose the
 retained index budget (2048 MiB by default, clamped to 64–65536 MiB), and
@@ -961,8 +961,8 @@ clamped to 1–3650). The cache is disposable: each index is rebuilt the next ti
 is opened. **Empty Index Cache** (`cache.emptyIndexes`, from command search, a script or the
 CLI) removes every index not in use, in the cache folder and its fallback, and reports how many
 indexes and bytes it freed. A notice names what it kept: the indexes of open layers, here or in
-another RustGIS window, and files it couldn't remove, without a readable lease or refused by the
-system; and a folder it couldn't empty, without stopping at it. With RustGIS closed, the folder
+another KHGIS window, and files it couldn't remove, without a readable lease or refused by the
+system; and a folder it couldn't empty, without stopping at it. With KHGIS closed, the folder
 can also be deleted by hand.
 
 Idle indexes are evicted in least-recently-used order. Open readers and builders hold
@@ -1229,7 +1229,7 @@ opens the dialog on a store.
 
 ## Project items
 
-RustGIS saves pieces of a project as files you can share and reuse:
+KHGIS saves pieces of a project as files you can share and reuse:
 
 | Item | Extension | Made with | Opened with |
 | --- | --- | --- | --- |
@@ -1261,11 +1261,11 @@ notices describe what a shared workflow or video will need again; an unchecked-c
 means opaque content was kept and needs your review. Unrecognized credentials can remain in
 addresses without a notice, so review addresses and preserved content before sharing.
 
-RustGIS remembers up to 32 distinct saved snapshots for explicit project reopening, with at most
+KHGIS remembers up to 32 distinct saved snapshots for explicit project reopening, with at most
 1 MiB of restoration data per snapshot and 8 MiB in total. A snapshot must match, and only its
 recorded, unchanged fields can regain credentials. Larger restoration records are not remembered;
 a notice says so. Imports, packages and peer exchanges do not use this memory. After eviction or
-closing RustGIS, sign in again or add the protected sources with their credentials. Feature data
+closing KHGIS, sign in again or add the protected sources with their credentials. Feature data
 and user text remain data, so review them before sharing.
 
 A layer added from a saved web-service connection records the connection's id (`"connection"`

@@ -1,4 +1,4 @@
-# Contributing to RustGIS
+# Contributing to KHGIS
 
 Contributions are welcome. This page covers what to work on and how to propose it. For build,
 test, docs and release mechanics see [docs/contributing.md](docs/contributing.md); for code
@@ -6,14 +6,14 @@ conventions see [AGENTS.md](AGENTS.md).
 
 ## Most roadmap items have no issue
 
-[ROADMAP.md](ROADMAP.md) lists where RustGIS is heading. Only a few of its items link to an
+[ROADMAP.md](ROADMAP.md) lists where KHGIS is heading. Only a few of its items link to an
 issue; **most features have no issue yet**. Don't wait for one to appear before starting. If
 something on the roadmap (or not on it) interests you, propose it and open a pull request.
 
 ## How to contribute a feature
 
 1. **Check for an existing issue.** Search the
-   [issues](https://github.com/opengeos/RustGIS/issues) and the roadmap. If there is an issue,
+   [issues](https://github.com/khgeo/KHGIS/issues) and the roadmap. If there is an issue,
    comment on it to say you're taking it.
 2. **Write a short proposal** if there is no issue. It covers:
    - the problem or workflow it serves;
@@ -25,7 +25,7 @@ something on the roadmap (or not on it) interests you, propose it and open a pul
    - how you will test it.
 
    Put it in an issue with the
-   [feature request](https://github.com/opengeos/RustGIS/issues/new?template=feature_request.yml)
+   [feature request](https://github.com/khgeo/KHGIS/issues/new?template=feature_request.yml)
    form, or in the description of a draft pull request. For changes that need coordination (see
    below) use an issue and wait for a maintainer's reply; otherwise either works.
 3. **Open a pull request.** Draft pull requests are welcome early, to get feedback on the
@@ -48,7 +48,7 @@ something on the roadmap (or not on it) interests you, propose it and open a pul
   - changes the plugin interface;
   - falls under _Exploratory_ in the roadmap.
 
-[Maintaining RustGIS](docs/maintaining.md) says who approves each of these and what happens when a
+[Maintaining KHGIS](docs/maintaining.md) says who approves each of these and what happens when a
 proposal gets no reply.
 
 Roadmap themes are not releases or an order; an item moves to Done when it lands. A
@@ -58,7 +58,7 @@ updates that file in the same change.
 ## AI-assisted contributions
 
 Code written with AI tools is welcome, from anyone, whatever their programming experience
-([#203](https://github.com/opengeos/RustGIS/discussions/203)). A contribution is judged by its
+([#203](https://github.com/khgeo/KHGIS/discussions/203)). A contribution is judged by its
 quality, not by who or what wrote it.
 
 Whoever opens a pull request is responsible for it, however it was written:
@@ -71,7 +71,7 @@ Whoever opens a pull request is responsible for it, however it was written:
 
 ## Where code comes from
 
-RustGIS is licensed under Apache-2.0, so everything in it must be your own work or come from a
+KHGIS is licensed under Apache-2.0, so everything in it must be your own work or come from a
 source whose licence allows that.
 
 - Don't copy code from GPL, LGPL, AGPL or other copyleft projects (such as GRASS, QGIS or GEOS),

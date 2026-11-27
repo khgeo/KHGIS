@@ -349,7 +349,7 @@ twice as large; zoomed out to twice it, half as large (within 1/100 and 32 times
 layer.referenceScale={"layer":"Roads","scale":25000}
 ```
 
-Scales in RustGIS take a screen pixel to be 0.28 mm (the OGC standard pixel). Programs that take
+Scales in KHGIS take a screen pixel to be 0.28 mm (the OGC standard pixel). Programs that take
 96 pixels to the inch (0.2646 mm) call the same view a larger scale; to match their sizes,
 multiply their reference scale by 0.2646 / 0.28 (about 0.945).
 
@@ -389,7 +389,7 @@ ramps with the `ramp.add` command (`{"path": "ramps.rgisramp"}`, or the JSON its
 **Add Color Ramp File** also reads the color ramp files other tools write, so a palette from
 QGIS, GDAL, GMT or a tool like Phosphor can be added without converting it first:
 
-| Format | Extension | What RustGIS reads |
+| Format | Extension | What KHGIS reads |
 | --- | --- | --- |
 | QGIS style | `.xml` | Every gradient ramp (discrete ones as steps) and preset ramp (as a qualitative ramp) in a Style Manager export, with its name. ColorBrewer, cpt-city and random ramps hold no colors and are skipped. |
 | QGIS layer style | `.qml` | The layer's color ramp, or a raster's color map. |

@@ -743,6 +743,8 @@ fn new_map(s: &mut Session, p: &Value) -> CmdResult {
     }
     let mut m = Map::new(name.clone());
     m.basemap = s.map().basemap;
+    // The web basemap too (not the overlays): a new map starts on the same ground.
+    m.tiles = s.map().tiles.iter().filter(|t| !t.overlay).cloned().collect();
     s.project.maps.push(m);
     s.project.active_map = s.project.maps.len() - 1;
     s.active_layer = None;

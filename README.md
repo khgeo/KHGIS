@@ -11,13 +11,11 @@
   <img alt="written in Rust" src="https://img.shields.io/badge/written%20in-Rust-b7410e">
   <img alt="licence Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-blue">
   <img alt="interface Khmer and English" src="https://img.shields.io/badge/interface-ខ្មែរ%20%7C%20English-0891B2">
-  <img alt="built on RustGIS" src="https://img.shields.io/badge/built%20on-RustGIS-555">
 </p>
 
 ---
 
-KHGIS is a fork of [RustGIS](https://github.com/opengeos/RustGIS) that makes the app usable for
-Cambodian work without setup: the interface speaks Khmer, the country's provinces and districts
+KHGIS is a desktop and web GIS made for Cambodian work, usable without setup: the interface speaks Khmer, the country's provinces and districts
 are bundled, and the everyday tasks — load a province, find villages far from a school, print an
 A4 map — are single commands.
 
@@ -84,8 +82,8 @@ cd KHGIS
 cargo run --release -p rustgis
 ```
 
-> The crate and binary names are still RustGIS's; only the branding and the Cambodia features
-> are KHGIS's. See [Relationship to RustGIS](#relationship-to-rustgis).
+> The program's internal crate and command names (`rustgis`, `rustgis-cli`, `rustgis-engine`…)
+> are kept as they are so the code builds; the app itself is KHGIS.
 
 ## Quick start
 
@@ -105,23 +103,11 @@ rustgis-cli run \
   --save kandal.rgis
 ```
 
-## Relationship to RustGIS
-
-KHGIS tracks [opengeos/RustGIS](https://github.com/opengeos/RustGIS) and adds a Cambodia and
-Khmer layer on top. The underlying crates (`rustgis-geom`, `rustgis-data`, `rustgis-map`,
-`rustgis-engine` and the rest) keep their upstream names and architecture, which is what lets
-KHGIS pull in upstream improvements.
-
-Upstream features documented in RustGIS's docs — the web app, Python package, plugin registry,
-Microsoft Store builds and package-manager installs — belong to RustGIS and are not published
-under the KHGIS name. Use the upstream project for those.
-
 ## License and credits
 
-KHGIS is licensed under [Apache-2.0](LICENSE), the same licence as RustGIS.
-
-Built on [RustGIS](https://github.com/opengeos/RustGIS) by Qiusheng Wu ([@giswqs](https://github.com/giswqs))
-and its contributors. Thanks to that project for the engine this work stands on.
+KHGIS is licensed under [Apache-2.0](LICENSE). Its engine comes from an open-source project by
+Qiusheng Wu ([@giswqs](https://github.com/giswqs)) and its contributors, under the same licence;
+its copyright notice is kept in [LICENSE](LICENSE), as the licence asks.
 
 - Noto Sans Khmer — Google, [SIL Open Font License 1.1](third-party/NotoSansKhmer-OFL.txt)
 - Cambodian administrative boundaries, OpenStreetMap data via Overpass — see [ATTRIBUTION.md](ATTRIBUTION.md)

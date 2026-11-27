@@ -11,7 +11,9 @@ installed QGIS plugin that adds Processing algorithms — on KHGIS's layers.
 |---|---|
 | Project, Edit, View, Layer, Settings, Plugins, Vector, Raster, Web, Processing, Help menus | the same menus, plus **Cambodia** (load a province or district, one-click workflows, A4 map) |
 | Project, Map Navigation, Attributes, Digitizing, Data Source Manager and Plugins toolbars | the same toolbars, moved as in QGIS: drag a toolbar by its grip (the dots at its start) between two others, onto another row, or above or below the rows for a row of its own. A row too long for the window goes on over another line, so no button is hidden. Right-click the toolbars (or **View › Toolbars**) to show or hide each, or **Reset Toolbar Positions**. KHGIS remembers where they are |
-| Browser and Layers panels | docked on the left; drag the bar between panels to resize |
+| Browser and Layers panels | docked on the left; drag the bar between panels to resize. The Layers panel has QGIS's toolbar: Layer Styling, Add Group (with the layers picked), Add Layer, Attribute Table, Expand All, Collapse All and **Remove Layer** |
+| Basemap | the **Basemap** row at the bottom of the Layers panel: click it to switch between Esri Shaded Relief (the default), Esri World Imagery, Esri World Topographic, Esri Light Gray Canvas, OpenStreetMap and the basemaps KHGIS draws without internet |
+| Status bar: Coordinate, Scale, Rotation, CRS | the same, in that order: the pointer's coordinates (click to change their format), the scale (type one or pick it), the rotation in degrees, and the coordinate system (click to change it) |
 | Dock panels: drag a panel's title to tab it with another, stack it, or move it to the other side | the same: drag a panel's tab onto another panel's tabs or middle to tab them, onto its top or bottom edge to stack, or to the window's left or right edge; right-click a tab to move it without dragging. KHGIS remembers the arrangement |
 | Processing Toolbox | the Tools pane on the right (**Processing › Toolbox**) |
 | Locator bar | **Command Search** (Ctrl+K), top right |
@@ -43,13 +45,22 @@ keeps working with — on the desktop and in the browser (where it downloads):
 - each layer's style (single symbol, categories, graduated classes, proportional symbols, labels,
   transparency, scale range) as the table's default style, so the style comes with a layer
   however it is added in QGIS;
+- every raster layer (a downloaded image, an index, a class map) as GeoPackage tiles, drawn as
+  KHGIS shows it, so a false-colour composite or a class map looks the same in QGIS; its values
+  stay in KHGIS (export a GeoTIFF with **Layer › Save As** for analysis in QGIS);
+- the print layouts, as QGIS print layouts (**Project › Layout Manager** in QGIS): map frames
+  with their extent, grid and extent indicator, text, legend, scale bar, north arrow, pictures,
+  rectangles, ellipses and lines, where they were on the page; tables, charts and colourbars are
+  named in a message, as QGIS has no matching item here;
 - a QGIS project inside the GeoPackage with the layers in their order, the XYZ web tile layers
   (satellite imagery, OpenStreetMap…) and the view.
 
 In QGIS: **Project › Open From › GeoPackage**, or drag the file into QGIS and open the project
 listed under it in the Browser. QGIS can edit the layers and save the project back into the same
-file. Keep the file's name: the project refers to it. Raster layers aren't included (export them
-as GeoTIFF with **Layer › Save As**); what isn't saved is listed in the messages.
+file. Keep the file's name: the project refers to it. In the browser each save gets a name of its
+own with the date and time (a second download of the same name would become `name (1).gpkg`,
+which the project couldn't find). If the file was renamed, QGIS shows **Handle Unavailable
+Layers**: press **Auto-Find**, then **Apply Changes**. What isn't saved is listed in the messages.
 
 KHGIS projects themselves save as `.kgis` (older `.rgis` projects still open).
 

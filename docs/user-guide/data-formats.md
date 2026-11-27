@@ -1,6 +1,6 @@
 # Supported Data Formats
 
-This page lists the data formats RustGIS reads and writes, how to add each one, and the main
+This page lists the data formats KHGIS reads and writes, how to add each one, and the main
 limits. [Data](data.md) covers adding data, large files and rasters in more detail; [Maps and
 Basemaps](maps.md#basemaps) covers web tile layers.
 
@@ -8,7 +8,7 @@ Most native readers work in the desktop app and the [web app](https://web.rustgi
 Formats read through external GDAL or DuckDB programs need the desktop app or `rustgis-cli`;
 they aren't available in the web app. Database connections and folder-based File Geodatabases
 are desktop-only too. Browser files are uploaded rather than opened by path; GeoPackages use a
-pure-Rust SQLite file reader there. Reprojection supports the coordinate systems RustGIS knows,
+pure-Rust SQLite file reader there. Reprojection supports the coordinate systems KHGIS knows,
 not every EPSG code; azimuthal equidistant systems such as Equi7 need the desktop app.
 
 ## Vector and tabular files
@@ -29,11 +29,11 @@ not every EPSG code; azimuthal equidistant systems such as Equi7 need the deskto
 | OpenStreetMap PBF | `.osm.pbf`, or `.pbf` containing OSM data | Add Data, drop the file, or upload | Points (tagged nodes), lines and multipolygons (closed ways that are areas, and multipolygon and boundary relations), with common tags as fields and the rest in `other_tags`, as GDAL gives them. Up to 40 million nodes (4 million in the web app); on the desktop, extracts over 256 MiB open through GDAL when it is installed. Vector-tile `.pbf` files use Add Tile Layer instead. |
 | ArcGIS feature-service answers (protocol buffer) | `.pbf` holding an answer to an ArcGIS query with `f=pbf`, or the query's address | Add Data, drop the file, upload, or From URL… with the query's address (`…/FeatureServer/0/query?…&f=pbf`) | One page of the layer: the fields and values the same query gives as GeoJSON, with the fields' aliases as their display names (dates as milliseconds since 1970, date-only and time values as text), points, lines or polygons converted to longitude/latitude from the answer's coordinate system. Z and M values, geometry, blob and raster fields are left out, with a notice. A page that stopped at the service's record limit keeps its features, with a notice that the rest aren't in it. A query the service refuses (an empty answer), a count, ids or an extent, curves, multipatches and envelopes give an error. Told from OpenStreetMap data by its content. |
 | TopoJSON | `.topojson`, or `.json` | Add Data, drop the file, or upload | Shared arcs (quantized or not) are rebuilt into geometries. A `.topojson` adds a layer per object, up to 64; a topology named `.json` adds its first object and names the others in a notice. Use `.topojson` to add them all. |
-| CityJSON | `.city.json`, or `.json` | Add Data, drop the file, upload, or From URL… | CityJSON 1.1 and 2.0, read in 2D: a layer per City Object type and geometry family (a name two layers would share, such as two long types cut to their first 64 characters, or two that differ only in ASCII case, gets ` (2)`, ` (3)`… on the later ones: the first number no other layer's name uses). Surfaces and solids become footprints (LoD 0, else the `GroundSurface` surfaces, else the union of the faces of the highest LoD, each tried when the one before gives no area, else the outline of the points; lines and points come from their highest level of detail that draws; a level passed over because its X or Y isn't a finite number, or is too large, is named in a notice; a geometry of more than 200,000 faces is the outline of its points (of its ground's, for a footprint from the ground), with a notice, unless its footprint is its ground and all of its ground faces are within the cap), with `z_min`, `z_max` and `height` fields, from every level of detail and the children's heights included, so Style › Extrusion stands them up. Also `id`, `type`, `parent`, `lod` and the object's attributes; one named as one of these fields, or as another attribute of its layer but for case, takes a number (`height_1`), the same in every row, and a notice lists them. A `.city.json`, or a model from an address, adds every layer, up to 64; a file named `.json` adds its first layer with something to draw and names the others in a notice. A file that names no coordinate system and isn't longitude/latitude is refused: for now the way to add it is the `"crs"` parameter of `layer.addData`, from the command line, Python or the AI Assistant. Geometry instances are drawn as a point at their reference point, with no height, and `TINRelief` objects aren't drawn; a notice says so, as it does for addresses. Appearance (materials and textures) isn't read, and a notice says how much is left out. Heights are kept in the file's unit: in a coordinate system that doesn't measure in metres, a notice says so, as Style › Extrusion reads metres. In a zip, a `"crs"` applies only to a model that names no coordinate system RustGIS knows. In the browser a footprint that needs a union is the outline of the object's points; a notice says so. Extrusions have no base height yet, so a part above the ground stands on the ground. |
+| CityJSON | `.city.json`, or `.json` | Add Data, drop the file, upload, or From URL… | CityJSON 1.1 and 2.0, read in 2D: a layer per City Object type and geometry family (a name two layers would share, such as two long types cut to their first 64 characters, or two that differ only in ASCII case, gets ` (2)`, ` (3)`… on the later ones: the first number no other layer's name uses). Surfaces and solids become footprints (LoD 0, else the `GroundSurface` surfaces, else the union of the faces of the highest LoD, each tried when the one before gives no area, else the outline of the points; lines and points come from their highest level of detail that draws; a level passed over because its X or Y isn't a finite number, or is too large, is named in a notice; a geometry of more than 200,000 faces is the outline of its points (of its ground's, for a footprint from the ground), with a notice, unless its footprint is its ground and all of its ground faces are within the cap), with `z_min`, `z_max` and `height` fields, from every level of detail and the children's heights included, so Style › Extrusion stands them up. Also `id`, `type`, `parent`, `lod` and the object's attributes; one named as one of these fields, or as another attribute of its layer but for case, takes a number (`height_1`), the same in every row, and a notice lists them. A `.city.json`, or a model from an address, adds every layer, up to 64; a file named `.json` adds its first layer with something to draw and names the others in a notice. A file that names no coordinate system and isn't longitude/latitude is refused: for now the way to add it is the `"crs"` parameter of `layer.addData`, from the command line, Python or the AI Assistant. Geometry instances are drawn as a point at their reference point, with no height, and `TINRelief` objects aren't drawn; a notice says so, as it does for addresses. Appearance (materials and textures) isn't read, and a notice says how much is left out. Heights are kept in the file's unit: in a coordinate system that doesn't measure in metres, a notice says so, as Style › Extrusion reads metres. In a zip, a `"crs"` applies only to a model that names no coordinate system KHGIS knows. In the browser a footprint that needs a union is the outline of the object's points; a notice says so. Extrusions have no base height yet, so a part above the ground stands on the ground. |
 | AutoCAD DXF | `.dxf` (ASCII) | Add Data, drop the file, or upload | Points, lines and polygons layers from the drawing's entities: POINT, LINE, LWPOLYLINE and POLYLINE (bulges drawn as arcs; closed ones stay lines; polyface meshes become polygons), CIRCLE, ARC, ELLIPSE, SPLINE, HELIX, LEADER, MLINE (its centre line), TEXT, MTEXT, ATTRIB and constant ATTDEF (points with their text, at the alignment point of justified text), HATCH boundaries (holes found by nesting), SOLID, TRACE and 3DFACE (polygons). Blocks (named in any case) are drawn where INSERTs place them (scaled, rotated, in arrays, nested up to 8 deep), and so are DIMENSIONs' blocks (a linear dimension without one draws its lines and measured text). Entities in an object's own coordinate system are turned into the drawing's. Fields: `layer`, `entity`, `color` (ACI, BYLAYER and BYBLOCK resolved), `linetype`, `text`, `height`, `rotation`, `block`, `elevation` and `paperspace`. The drawing's layouts (paper space: title blocks, viewport frames) are left out, with a notice, unless `"paperSpace": true`. A drawing never says its coordinate system: give `"crs"` (such as `EPSG:2263`), or its coordinates are kept as they are, with a notice. `"layer"` picks one of the drawing's own layers, and `info.fileLayers` lists them. Up to 2 million features (500,000 in the web app). Not read: binary DXF, MULTILEADER, WIPEOUT, IMAGE and ACIS solids (3DSOLID, REGION), named in a notice. |
 | Geotagged photos | `.jpg`, `.jpeg` | Add Data (several at once in the web app), drop them, upload, or `layer.addPhotos` with `"paths"` or a `"folder"` | JPEGs with a GPS position in their EXIF become points in the **Photos** layer (photos added one at a time join it): each with its `name`, `file`, `time` (when it was taken), `altitude`, `direction` (where the camera faced), `camera` and a `thumbnail` of at most 160 pixels, kept with the feature so the project needs no other file. Identify shows the thumbnail. Photos without a position are named in a notice and left out; a layer holds up to 2,000 photos. A JPEG is always read as a photo unless `layer.addData` or `layer.addDataBytes` is given `"as": "scan"` (a phone photo of a paper map, say: see [Scans with no coordinates](#rasters)). |
 | LiDAR point clouds | `.las`, `.laz` (COPC too) | Add Data, drop the file, upload, or From URL… | LAS 1.0–1.4 (point formats 0–10) and LAZ, on desktop and web: points with `z`, `intensity`, `classification`, `return` and colour (`red`, `green`, `blue`), coloured by ASPRS class or elevation. An evenly spread sample is read once, at most 2 million points (500,000 in the web app); views use that sample, not the COPC spatial index. LAZ decompression reads at most the first 400 million points (40 million on the web), with a notice when capped. Converted from the file's WKT or GeoTIFF-key record; without one, coordinates are kept with a notice. A local project keeps the path; uploads keep the file bytes. Remote files download whole. |
-| GeoPackage | `.gpkg` | Add Data, or upload in the web app | Local files and browser uploads add every feature table, up to 32 (with the rest counted in `skippedCount` and up to 100 named in `skipped`); `"layer"` picks one, and `info.fileLayers` lists them. Desktop byte uploads and downloads add the first table unless `"layer"` names another. Large local tables use their R-tree. A table is read in its coordinate system: by its EPSG code, or, for a system without one (or with a code RustGIS doesn't know), by the WKT definition the file gives it, on the desktop and in the web app alike (an azimuthal equidistant one opens on the desktop only, and the web app says so). Browser tables are scanned, testing each geometry header's envelope first; UTF-16 databases aren't read there. Raster tile tables aren't imported. |
+| GeoPackage | `.gpkg` | Add Data, or upload in the web app | Local files and browser uploads add every feature table, up to 32 (with the rest counted in `skippedCount` and up to 100 named in `skipped`); `"layer"` picks one, and `info.fileLayers` lists them. Desktop byte uploads and downloads add the first table unless `"layer"` names another. Large local tables use their R-tree. A table is read in its coordinate system: by its EPSG code, or, for a system without one (or with a code KHGIS doesn't know), by the WKT definition the file gives it, on the desktop and in the web app alike (an azimuthal equidistant one opens on the desktop only, and the web app says so). Browser tables are scanned, testing each geometry header's envelope first; UTF-16 databases aren't read there. Raster tile tables aren't imported. |
 | GeoParquet | `.parquet`, `.geoparquet` | Add Data, or upload in the web app | WKB geometry, with the CRS from the file's `geo` metadata. A binary geometry column is required; plain non-spatial Parquet tables and GeoArrow-native geometry encodings aren't read by this importer. Row groups are pruned by the bbox covering. Whole reads and exports retain rows with null geometry and their attributes; extent-filtered reads exclude them because they have no location. Snappy, gzip, LZ4 and zstd compression are read, in the browser too; Brotli isn't. Text, whole-number, floating-point and true/false columns become fields, as do decimals stored as 32- or 64-bit integers (up to 18 digits), read as floating-point numbers. Dates and times stored as 32- or 64-bit integers are read as those whole numbers (such as milliseconds since 1970). Other columns are left out: decimals stored as bytes (how many writers store every decimal), binary, lists, maps, structs, INT96 timestamps and further geometry columns. A notice gives how many were left out and names the first 12, each with its kind; another names the date and time columns with their unit. |
 | FlatGeobuf | `.fgb` | Add Data, or upload | Read in place by its packed R-tree. Binary columns are left out, with a notice counting them and naming the first 12. |
 | Esri File Geodatabase | `.gdb` folder (desktop) | In Add Data pick a `.gdbtable` file inside it; or double-click the `.gdb` in the Browser, or drop the folder | The native reader loads up to 512 feature classes and tables, up to 2 GiB per table. Feature classes become layers and non-spatial tables standalone tables; dates are text. Coordinates use the EPSG/Esri code, else WKT. `"layer"` picks one; `info.fileLayers` lists them. Multipatches become footprints with `z_min`, `z_max` and `height`; large or wall-only ones may use a convex hull. Curves become straight segments between their ends. Unreadable tables (compressed storage, raster fields or unsupported row indexes) are tried through GDAL when installed; otherwise they are named in a notice. |
@@ -248,7 +248,7 @@ so one of yours or of another service with the same name is left alone. The same
 under another key counts as the same layer, and so does a project reopened from disk, whose saved
 address carries no keys: the row shows **Remove** rather than an **Add** that would duplicate it.
 A layer saved by an older version, which kept the file name it was downloaded under rather than
-the service's address, shows **Add**; RustGIS won't guess by name. A service's downloaded layers
+the service's address, shows **Add**; KHGIS won't guess by name. A service's downloaded layers
 are grouped under the service's host in the Layers pane's **Data Source** view, and **Copy Path**
 gives that address without its keys or tokens.
 
@@ -268,7 +268,7 @@ supersedes earlier pending requests. Panning or navigating elsewhere cancels pen
 MBTiles metadata normally loads in the background. A read still pending after 30 seconds, or
 a worker pool saturated by stalled storage, reports an error; retry once the storage responds.
 
-An OGC API landing page works directly: RustGIS follows its advertised
+An OGC API landing page works directly: KHGIS follows its advertised
 JSON collections link, so you don't need to append `/collections`. If the landing page also
 offers map tiles, they remain listed alongside the collections. A failed collections request
 leaves any available map layers usable and shows the error.
@@ -277,12 +277,12 @@ When a service can't be reached or refuses the request, the dialog says what hap
 words and what to try next: a sign-in or token it needs (401), access refused (403), nothing at
 that address (404), too many requests (429), a problem on the server (5xx), or a server that
 couldn't be reached or took too long. When a firewall in front of the server (Cloudflare,
-Akamai, Imperva, Sucuri or AWS WAF) blocked or challenged RustGIS itself, told by its own block
+Akamai, Imperva, Sucuri or AWS WAF) blocked or challenged KHGIS itself, told by its own block
 page or a header it sends only then, it says so: only the service's administrator can let
-RustGIS through. A firewall that only passed on the service's own refusal (a private service
+KHGIS through. A firewall that only passed on the service's own refusal (a private service
 wanting a token) isn't blamed for it. **Details**, folded below, lists
 what the server said for an expert or the administrator: the address (without keys or tokens),
-the status, the server, the firewall and the request's id, the `User-Agent` RustGIS sent, and
+the status, the server, the firewall and the request's id, the `User-Agent` KHGIS sent, and
 the title or first words of the server's answer (as text). **Copy details** copies them to send.
 In the web app the browser hides most of a refused answer, so it tells the status only.
 
@@ -302,8 +302,8 @@ Scripts use `service.import {"url":"…","name":"My OGC Layer"}` and
 
 | Service | What it lists | How a layer is added |
 | --- | --- | --- |
-| WMS 1.1.1 / 1.3.0 | Named layers offered in Web Mercator or in a coordinate system RustGIS can transform (an EPSG code, CRS:84) | A layer of GetMap images (PNG when the service offers it, else JPEG): one picture of the view, or tiles; see [One picture of the view, or tiles](#one-picture-of-the-view-or-tiles) and [Services in other coordinate systems](#services-in-other-coordinate-systems) |
-| WMTS | Layers whose tile matrix set is Web Mercator's pyramid, or a tile matrix set in a coordinate system RustGIS can transform | A tile layer from the tile template (or KVP GetTile) |
+| WMS 1.1.1 / 1.3.0 | Named layers offered in Web Mercator or in a coordinate system KHGIS can transform (an EPSG code, CRS:84) | A layer of GetMap images (PNG when the service offers it, else JPEG): one picture of the view, or tiles; see [One picture of the view, or tiles](#one-picture-of-the-view-or-tiles) and [Services in other coordinate systems](#services-in-other-coordinate-systems) |
+| WMTS | Layers whose tile matrix set is Web Mercator's pyramid, or a tile matrix set in a coordinate system KHGIS can transform | A tile layer from the tile template (or KVP GetTile) |
 | WFS 1.1 / 2.0 | Feature types | Their features downloaded as GeoJSON, following next links. Without a next link, WFS 1.x reads only the first response (requested limit: 50,000); reaching that limit produces an incomplete-read notice. A server may cap this response below the requested limit. WFS 2.0 verifies the hits total and uses offset requests when needed, up to 100,000 features or more on a computer with more memory; unknown totals, repeated offset pages and interrupted reads produce a notice |
 | OGC API Features | Collections | Their items downloaded as GeoJSON, following the service's `next` pages up to 100,000 features, or more on a computer with more memory (see Environments in the analysis guide; a command such as `service.add` waits a minute at most) |
 | OGC API Tiles | Collections' map and vector tiles; a landing page's dataset map tiles | A tile layer in WebMercatorQuad, from the tile template the tileset advertises (its `item` link; `…/tiles/WebMercatorQuad/{z}/{y}/{x}`, the usual path, when that can't be read), keeping the tiles link's query (a token), map tiles in the server's image format, vector tiles drawn layer by layer in colours of their own |
@@ -424,7 +424,7 @@ before keeps its tiles until you switch it.
 
 National and regional services often draw their maps in a coordinate system of their own
 (Switzerland's LV95, EPSG:2056; Austria's EPSG:31287) and sometimes not in Web Mercator at all. A
-WMS layer offered in any system with an EPSG code that RustGIS can transform (or in CRS:84), and a
+WMS layer offered in any system with an EPSG code that KHGIS can transform (or in CRS:84), and a
 WMTS layer whose tile matrix set is in one, is listed and added like any other (#769):
 
 - **On a Web Mercator map**, a layer the service offers in Web Mercator is asked for in it, as
@@ -443,7 +443,7 @@ WMTS layer whose tile matrix set is in one, is listed and added like any other (
   layer is drawn so on a map in its tile matrix set's system. Change the map's projection and the
   layer follows: in Web Mercator again, it is asked for in Web Mercator (or warped), and in a
   projection the layer isn't offered in, it is drawn warped as before. A WMS layer is drawn so in
-  up to 64 of the systems it lists that RustGIS can transform (projected ones first, then
+  up to 64 of the systems it lists that KHGIS can transform (projected ones first, then
   CRS:84, then other longitude/latitude ones, each kind in the order listed), and warped in the
   rest. A tilted map draws every layer warped.
 - **Identify** asks a WMS layer drawn in a system of its own (GetFeatureInfo) in that system.
@@ -452,14 +452,14 @@ WMTS layer whose tile matrix set is in one, is listed and added like any other (
   longitude/latitude systems (not in CRS:84), north first in EPSG:3035 (LAEA Europe), the German
   Gauss-Krüger zones, SWEREF99 TM, Poland's CS92, Austria's Lambert and the ETRS89 "UTM (N-E)"
   codes (EPSG:3040 and its neighbours), east first in Web Mercator, the other UTM codes and LV95.
-  RustGIS carries that order for the systems it knows (from the EPSG dataset); for a system newer
+  KHGIS carries that order for the systems it knows (from the EPSG dataset); for a system newer
   than its table, the layer's own `BoundingBox` is read the way that holds the layer, and a WMTS
   corner the way its matrix covers the layer. A longitude/latitude WMTS corner, which services
   often write longitude first, is read longitude first when its first number can't be a
   latitude, or when its matrix read in EPSG's order misses the layer and read the other way
   doesn't; otherwise in EPSG's order.
 
-A layer offered in no system RustGIS can transform (an `AUTO:` system, a planet's) is still left
+A layer offered in no system KHGIS can transform (an `AUTO:` system, a planet's) is still left
 out, and the dialog says how many were.
 
 ```sh
@@ -473,10 +473,10 @@ A secured ArcGIS service answers error 499, "Token Required". There are two ways
 - **Sign in to ArcGIS** (in Add From Service, shown for ArcGIS addresses; `arcgis.signIn`) signs in
   to ArcGIS Online, an ArcGIS Online organization (`https://myorg.maps.arcgis.com`) or an ArcGIS
   Enterprise portal (`https://gis.example.org/portal`) on the portal's own page, with its single
-  sign-on and multi-factor checks: RustGIS never sees the password. It uses OAuth 2.0 with PKCE.
-  ArcGIS Online needs no setup: leave **Client ID** blank and RustGIS's own app is used. An
+  sign-on and multi-factor checks: KHGIS never sees the password. It uses OAuth 2.0 with PKCE.
+  ArcGIS Online needs no setup: leave **Client ID** blank and KHGIS's own app is used. An
   Enterprise portal needs the client ID of an app registered on it (**Content › New item ›
-  Developer credentials › OAuth 2.0 credentials**) whose redirect URLs list RustGIS's callback:
+  Developer credentials › OAuth 2.0 credentials**) whose redirect URLs list KHGIS's callback:
   `http://127.0.0.1:7290/arcgis/callback` for the desktop app and the command line (give
   `"port"` to `arcgis.signIn` for another port, and register that address instead), and
   `oauth-callback.html` next to the web app's page for the browser (for example
@@ -503,9 +503,9 @@ the sessions.
 The same dialog's **Catalogue search (CSW)** type searches a CSW 2.0.2 catalogue (GeoNetwork,
 pycsw, geocat.ch…) by words anywhere in its records and, if you like, the map's area
 (`catalog.search`). Its records are listed 20 at a time (**More** asks for the next), with their
-titles, abstracts (on hover) and bounds (**Zoom**), and a button per link RustGIS can follow: a WMS,
+titles, abstracts (on hover) and bounds (**Zoom**), and a button per link KHGIS can follow: a WMS,
 WMTS, WFS, WCS, OGC API or ArcGIS service connects in the dialog, a download is added as From URL…
-does. Links pointing where a document on the web may not send RustGIS (the local network) are left
+does. Links pointing where a document on the web may not send KHGIS (the local network) are left
 out.
 
 ## PostgreSQL and PostGIS
@@ -524,7 +524,7 @@ database live, talking to the server itself: see [MySQL and MariaDB](data.md#mys
 
 | Source | How to add it | Notes |
 | --- | --- | --- |
-| MySQL or MariaDB table or view | Home › Add › Add Data › Database… (`layer.addDatabase`) with a `mysql://user@host:3306/database` or `mariadb://…` address | Large tables read a view at a time by their spatial index, others loaded whole. Converted to longitude/latitude by RustGIS from the column's SRID; `"crs"` for an SRID of 0. A column of mixed types becomes a layer per type. `ssl-mode` sets the encryption. The password is kept for the session only. |
+| MySQL or MariaDB table or view | Home › Add › Add Data › Database… (`layer.addDatabase`) with a `mysql://user@host:3306/database` or `mariadb://…` address | Large tables read a view at a time by their spatial index, others loaded whole. Converted to longitude/latitude by KHGIS from the column's SRID; `"crs"` for an SRID of 0. A column of mixed types becomes a layer per type. `ssl-mode` sets the encryption. The password is kept for the session only. |
 
 ## SQL Server and Azure SQL
 
@@ -594,12 +594,12 @@ were rounded, and Export Raster, which writes the rounded values, says so again.
 
 GeoPackage, Shapefile and FlatGeobuf exports default to the layer's original coordinate system
 when it has an EPSG code. Shapefiles can also retain a custom WKT system; GeoPackage and FlatGeobuf
-need an EPSG code and otherwise default to WGS 84. A layer made in RustGIS defaults to WGS 84.
+need an EPSG code and otherwise default to WGS 84. A layer made in KHGIS defaults to WGS 84.
 `share.exportLayer` takes `"crs"` to choose
 another, such as `{"layer": "Parcels", "path": "parcels.gpkg", "crs": "EPSG:4647"}`. GeoJSON, KML,
 GPX, GeoParquet and CSV are always written in WGS 84.
 
-RustGIS keeps x and y only. When a source has Z or M values (heights or measures), adding it says
+KHGIS keeps x and y only. When a source has Z or M values (heights or measures), adding it says
 they were dropped, and exporting or converting the layer (or exporting a standalone table that
 holds geometry), or sharing it as a web map, web layer or OGC API Features, says what's written
 lacks them.
@@ -625,13 +625,13 @@ layer is placed on the Earth.
 
 - **Read, with a notice.** A layer whose coordinates are the body's longitude/latitude, counted
   east, is read as it is: a geographic `.prj` or WKT, a GeoTIFF's own keys, an IAU code ending in
-  `00` or `02`, or a projection RustGIS unprojects. Adding it says that the map, its scale bar and
+  `00` or `02`, or a projection KHGIS unprojects. Adding it says that the map, its scale bar and
   measurements take it for the Earth.
 - **Refused.** A layer whose coordinates would land in the wrong place as longitude/latitude is
   refused, and the error says why:
   - projected metres the reader can't convert: a FlatGeobuf, GeoParquet or GeoJSON whose system
     is another body's projection, a GeoPackage one known only by its IAU code, or a projection
-    RustGIS doesn't read;
+    KHGIS doesn't read;
   - geocentric X/Y/Z (a GeoParquet system);
   - longitude/latitude in another unit than degrees (a GeoParquet or GeoTIFF one);
   - longitudes counted west: planetographic systems, and projections of them, unless their axes
@@ -658,7 +658,7 @@ definitions without an EPSG code can be exported in their native coordinates as 
 
 This differs from changing the map's coordinate system, which only changes the display, or
 exporting to another CRS, which converts coordinate numbers while preserving locations.
-RustGIS stores geometry in longitude/latitude, so Define Projection first reconstructs native
+KHGIS stores geometry in longitude/latitude, so Define Projection first reconstructs native
 numbers through the previous CRS; small floating-point rounding differences are possible.
 Edits already made to the layer are reinterpreted too. If the wrong CRS already discarded or
 clamped coordinates, import the original file again to recover them accurately.
@@ -684,7 +684,7 @@ The same operations are available to scripts and the CLI:
 `layer.addDataBytes`, `layer.addUrl` and `layer.addDownload` also accept `crs` for zipped
 Shapefiles. The source files and their `.prj` sidecars are never rewritten by either operation.
 
-## RustGIS files
+## KHGIS files
 
 | File | Extension | Notes |
 | --- | --- | --- |

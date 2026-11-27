@@ -1,17 +1,17 @@
 # Plugins
 
-Plugins add commands, geoprocessing tools and assistant skills to RustGIS. A plugin has a
+Plugins add commands, geoprocessing tools and assistant skills to KHGIS. A plugin has a
 `plugin.json` manifest and is packaged as a `.rgplugin` file. WebAssembly plugins run sandboxed
 in the desktop app, on the command line and in the web app. [Process plugins](#process-plugins)
 run a local program instead and need the desktop app or command line.
 
 Browse the [plugin catalog](https://plugins.rustgis.app/catalog/).
-[opengeos/rustgis-plugins](https://github.com/opengeos/rustgis-plugins) holds the registry,
-blocklist and [`rustgis-plugin` SDK](https://github.com/opengeos/rustgis-plugins/tree/main/sdk),
+[opengeos/rustgis-plugins](https://github.com/khgeo/KHGIS-plugins) holds the registry,
+blocklist and [`rustgis-plugin` SDK](https://github.com/khgeo/KHGIS-plugins/tree/main/sdk),
 not plugin source. Plugin sources live in their own repositories; start one from the
-[Rust WebAssembly](https://github.com/opengeos/rustgis-plugin-template),
-[Rust process](https://github.com/opengeos/rustgis-rust-process-plugin-template) or
-[Python process](https://github.com/opengeos/rustgis-python-plugin-template) template.
+[Rust WebAssembly](https://github.com/khgeo/KHGIS-plugin-template),
+[Rust process](https://github.com/khgeo/KHGIS-rust-process-plugin-template) or
+[Python process](https://github.com/khgeo/KHGIS-python-plugin-template) template.
 
 ## Using plugins
 
@@ -25,7 +25,7 @@ Open **Plugins › Plugin Manager**. The **Plugins** tab also has **Install From
   plugin, the withdrawal reason in a single tooltip.
 - **Installed** lists your plugins: turn them on or off, update them, or uninstall them.
 - **Settings** has **Install From File…** for a `.rgplugin` file; you can also drop the file on
-  the window. It also sets the registry address (empty means the RustGIS registry). On the
+  the window. It also sets the registry address (empty means the KHGIS registry). On the
   desktop, **Add Plugin Folder…** loads an unpacked plugin while you develop it.
 
 A plugin's commands and tools appear on the **Plugins** tab, in a group named after the
@@ -62,8 +62,8 @@ Use `--no-plugins` to skip loading installed plugins. `plugins browse` and `plug
 ## Safety
 
 Plugins run in a sandbox: an interpreter (`wasmi`) with no access to files, the network, the
-clock or anything else outside the module. A plugin reaches RustGIS only through the requests
-described below, and RustGIS checks each one:
+clock or anything else outside the module. A plugin reaches KHGIS only through the requests
+described below, and KHGIS checks each one:
 
 - Every plugin can **read the map**: its layers, their features and the view.
 - With the **`edit`** permission, it can change the project. It can run commands that edit it and
@@ -98,17 +98,17 @@ that traps, panics or returns garbage produces an error message, never a crash.
 
 The registry is curated: plugins are reviewed before they are listed, and packages are
 hash-pinned. A `blocklist.json` beside a registry withdraws a plugin (every version, or one
-package). RustGIS checks it when you browse that registry. Desktop and command-line startup
+package). KHGIS checks it when you browse that registry. Desktop and command-line startup
 apply the cached blocklist; the web app fetches it when restoring plugins.
 
 ## Writing a plugin
 
-Start from the [Rust WebAssembly template](https://github.com/opengeos/rustgis-plugin-template),
-or the [Rust](https://github.com/opengeos/rustgis-rust-process-plugin-template) or
-[Python](https://github.com/opengeos/rustgis-python-plugin-template) template for a
+Start from the [Rust WebAssembly template](https://github.com/khgeo/KHGIS-plugin-template),
+or the [Rust](https://github.com/khgeo/KHGIS-rust-process-plugin-template) or
+[Python](https://github.com/khgeo/KHGIS-python-plugin-template) template for a
 [process plugin](#process-plugins), and read the
 [official plugins](https://official-plugins.rustgis.app) for examples, such as
-[Hello RustGIS](https://github.com/opengeos/rustgis-official-plugins/tree/main/plugins/hello).
+[Hello KHGIS](https://github.com/khgeo/KHGIS-official-plugins/tree/main/plugins/hello).
 A WebAssembly plugin uses the `rustgis-plugin` SDK crate:
 
 ```rust
@@ -145,7 +145,7 @@ cargo build --release --target wasm32-unknown-unknown
 ```json
 {
   "id": "hello-rustgis",
-  "name": "Hello RustGIS",
+  "name": "Hello KHGIS",
   "version": "0.1.0",
   "description": "What it does, in a sentence or two.",
   "author": "You",
@@ -178,13 +178,13 @@ cargo build --release --target wasm32-unknown-unknown
   defaults to `plugin.wasm` and must name a `.wasm` file relative to the manifest, using
   forward slashes with no `.` or `..` path segments. `abi` defaults to `1` and must equal `1`.
 - `version` and optional `minRustgisVersion` are numeric versions such as `1.2.3` or `1.2`.
-  RustGIS compares their numeric components, ignoring prerelease and build suffixes, and
-  refuses a plugin that needs a newer RustGIS.
+  KHGIS compares their numeric components, ignoring prerelease and build suffixes, and
+  refuses a plugin that needs a newer KHGIS.
 - `permissions`: `edit`, `files` and `network` (see [Safety](#safety)); empty by default.
   Ask only for what you use.
 - `commands[].params`: a string describing the command's parameters for scripts and agents,
   not a JSON object or a form definition; it defaults to `"{}"`.
-- `commands[].icon`: the name of one of RustGIS's own icons (`stats`, `zoom_full`, `bookmark`,
+- `commands[].icon`: the name of one of KHGIS's own icons (`stats`, `zoom_full`, `bookmark`,
   `buffer`…), or a puzzle piece when it isn't one.
 - Tool parameter `kind`s: `layer`, `vectorLayer`, `polygonLayer`, `pointLayer`, `field`,
   `numericField`, `number`, `text`, `choice` (with 1 to 64 `choices`), `bool` and `file` (see
@@ -216,13 +216,13 @@ The plugin needs the `files` permission:
 
 - The Tools pane shows a path box with a **Browse** button. `extensions` filters the picker:
   at most 16 extensions, each 1 to 16 letters or digits without the dot. Leave it out for any file.
-- On the desktop and the command line the value is a path, and RustGIS reads the file. In the
+- On the desktop and the command line the value is a path, and KHGIS reads the file. In the
   web app, which has no paths, the user picks the file and its contents go with the run. A
   script can do the same with `{"name": "run.nc", "data": base64}`.
 - The tool gets the file in the request's `files`, by parameter name, as
   `{"name": "run.nc", "data": base64}`. The parameter itself holds just the file name.
 - Files are at most 64 MB. The Geoprocessing history keeps the file's name, not its contents.
-- RustGIS versions before file parameters refuse a plugin that has one, so set
+- KHGIS versions before file parameters refuse a plugin that has one, so set
   `minRustgisVersion` to the first version with them.
 
 ### Translations
@@ -241,7 +241,7 @@ English strings and their translations, written exactly as they appear in `plugi
 - It covers the plugin's name and description, command labels and help, tool names, summaries
   and toolboxes, parameter labels and `choice` values, the tab, group and menu labels, and the
   panel's title, help and widget labels. A string with no translation shows in English.
-- Alongside English (`en`), RustGIS's interface languages are `de`, `es`, `fr`, `it`, `nl`,
+- Alongside English (`en`), KHGIS's interface languages are `de`, `es`, `fr`, `it`, `nl`,
   `pt`, `ru`, `tr`, `az`, `id`, `vi`, `fa`, `zh`, `ja`, `ko` and `ka`. A code with a region
   matches its language: `zh-CN` serves `zh`.
 - The registry copies the name and description translations into `registry.json`, so the
@@ -308,11 +308,11 @@ can hide it like any other. Declare it in `plugin.json`:
   as level 1. Across the entire tab there may be at most 16,384 items, counting every
   command/tool/panel entry and every menu at every level. Every entry must name one of the
   plugin's own commands or tools, or its panel.
-- The label is one line of 1 to 32 characters and can't be the name of one of RustGIS's tabs
+- The label is one line of 1 to 32 characters and can't be the name of one of KHGIS's tabs
   (Home, Data, Style, Analyze, Plugins…), including their older names. The `i18n` translations
   apply to the tab, group and menu labels too.
 
-[Map Explorer](https://github.com/opengeos/rustgis-official-plugins/tree/main/plugins/map-explorer) is
+[Map Explorer](https://github.com/khgeo/KHGIS-official-plugins/tree/main/plugins/map-explorer) is
 an example.
 
 ### A panel
@@ -339,7 +339,7 @@ buttons, trees, dropdowns, date pickers and range sliders bound to its commands.
 ```
 
 - `title` is the pane's tab and the label of the button that opens it: one line of 1 to 48
-  characters. RustGIS puts the button first in the plugin's group on the **Plugins** tab.
+  characters. KHGIS puts the button first in the plugin's group on the **Plugins** tab.
   On a tab of its own, put `panel` among a group's items. Command search lists the panel too.
   `icon` and `help` are for that button.
 - `items` lists the widgets, top to bottom (1 to 32). Buttons that follow each other share a
@@ -372,13 +372,13 @@ buttons, trees, dropdowns, date pickers and range sliders bound to its commands.
   stepped (never while it is dragged, while the pane shows the label of the value it would take),
   a tree or a dropdown when a node or an option is chosen, and a date when one is picked. Without a `command`, a widget's value just goes with the plugin's
   next request.
-- `state` (optional) is a command RustGIS runs each time the panel is opened, to answer its
+- `state` (optional) is a command KHGIS runs each time the panel is opened, to answer its
   state.
 - Every `command` reference, including `state`, must name one of the plugin's own commands.
   Widget ids are independent of command ids. A plugin with a panel can't have a command
   called `panel`.
 
-A plugin keeps nothing between calls, so RustGIS keeps the panel's state. Every request of a
+A plugin keeps nothing between calls, so KHGIS keeps the panel's state. Every request of a
 plugin with a panel carries the widgets' values, whatever ran the command (the panel, a ribbon
 button, a script or the command line):
 
@@ -421,33 +421,33 @@ Any command can answer the panel's new state, beside the rest of its answer:
   `count` (a whole number) shows at the right of the row. The nodes come before the values in an
   answer, so one can give a tree and choose a node of it; a chosen node no longer among them
   leaves nothing chosen.
-- RustGIS checks the answer like any other: unknown ids and fields and values of the wrong type
+- KHGIS checks the answer like any other: unknown ids and fields and values of the wrong type
   are ignored, a slider's or a range's value stays within its ends, a tree's among its nodes, a
   dropdown's among its options (a repeated or missing id is left out) and a date is a real date, texts are
   clipped to 4,000 characters, labels to 200, and a slider has at most 2,000 labels of 80
   characters. A tree holds at most 5,000 nodes, 8 levels deep; a node without an id, or with one
   longer than 200 characters or taken already, is left out with its children.
-- A plugin words what it sets in the request's `lang`; RustGIS translates only what the
+- A plugin words what it sets in the request's `lang`; KHGIS translates only what the
   manifest declares.
 - A command that fails leaves the values as they were. The panel's state command is no undo
   step when it changes nothing in the project (it only reads the map); other commands keep
   theirs.
-- RustGIS asks for the state only when the panel opens, and takes in what the plugin's own
+- KHGIS asks for the state only when the panel opens, and takes in what the plugin's own
   commands answer. It doesn't run the plugin when the map changes in other ways: undo, another
   plugin, a project opened. A state command that reads what it shows from the map (which
   release is on it) puts the panel right when it is opened again.
-- The values are kept while RustGIS runs, not saved with the project.
+- The values are kept while KHGIS runs, not saved with the project.
 - `plugin.panel {"id": "<plugin>"}` answers a panel's state (`values` and `items`), and sets
   `values` or, with `"refresh": true`, runs the state command first. On the command line, which
   has no panes, the commands still run with the values given.
-- RustGIS versions before panels ignore `panel` (and refuse a tab that names it): keep the
+- KHGIS versions before panels ignore `panel` (and refuse a tab that names it): keep the
   commands usable from the ribbon too, or set `minRustgisVersion`. Versions before dropdowns,
   dates and ranges refuse a panel that has one, so set `minRustgisVersion` to the first version
   with them.
 
 ### What a plugin can ask for
 
-Inside a request, `host::call(op, params)` sends one of these to RustGIS:
+Inside a request, `host::call(op, params)` sends one of these to KHGIS:
 
 | Request | Answer |
 |---|---|
@@ -463,7 +463,7 @@ Inside a request, `host::call(op, params)` sends one of these to RustGIS:
 
 In the apps a plugin's command (from the ribbon, command search or a panel's widget; not its
 panel's state command) doesn't wait for a download, so where `layer.addUrl` has to
-download a file whole it answers `{"pending": true, "url": …}`: RustGIS downloads the data off the
+download a file whole it answers `{"pending": true, "url": …}`: KHGIS downloads the data off the
 frame, saying so in the status bar, and adds the layer when it lands (its own undo step), as
 **Home › Add › Add Data › From URL** does. On the desktop that goes for reading a GeoTIFF's,
 FlatGeobuf's or GeoParquet's header too; in the web app a PMTiles archive, a cloud-optimised
@@ -472,7 +472,7 @@ downloads wait at a time: a request past 16 fails, and if the command then fails
 downloads start. Run by
 `rustgis-cli`, a script or a task, the command waits and answers what was added.
 
-The command then runs again, as for a [fetch](#fetching-a-document): RustGIS undoes what the call
+The command then runs again, as for a [fetch](#fetching-a-document): KHGIS undoes what the call
 did to the project and, once every download it left has been added (or failed), runs it again with
 the same parameters. In that run the same `layer.addUrl` call answers what adding the download
 answered (`{"layer", …}`, or its error) and adds nothing, so the command goes on with the layer:
@@ -533,10 +533,10 @@ document parsed when it is a JSON object or array.
   (in the web app, the browser decides what it may reach). Requests carry no credentials (an
   S3 connection's included) and no headers of the plugin's. On the desktop and the command line
   they never go through a proxy (`HTTPS_PROXY` and the like are ignored), since a proxy would
-  reach addresses RustGIS can't check.
+  reach addresses KHGIS can't check.
 - At most 2 MB, in UTF-8 (a byte-order mark is dropped). An answer that isn't a success (404,
   500…) is an error ending in `HTTP <status>`.
-- Answers are kept for 10 minutes (up to 256 documents and 16 MB in all) while RustGIS runs,
+- Answers are kept for 10 minutes (up to 256 documents and 16 MB in all) while KHGIS runs,
   so asking for the same address again costs nothing. Each plugin has answers of its own: one
   never reads what another fetched. Errors are kept for 30 seconds,
   so every command waiting for an address sees its error; after that it is fetched again.
@@ -544,7 +544,7 @@ document parsed when it is a JSON object or array.
   one, and 60 seconds for all the fetches of one plugin call. A call makes at most 64 fetches.
 - In the web app nothing may wait. A fetch that isn't kept yet answers
   `{"pending": true, "url"}` and starts in the background. The command should then return
-  straight away, before doing anything outside the project (writing a file): RustGIS undoes
+  straight away, before doing anything outside the project (writing a file): KHGIS undoes
   what the call did to the project (its error notices stay, and the next run doesn't repeat them;
   anything done outside the project stays too), and runs the command
   again with the same parameters once every pending answer has landed (up to 8 per call), when
@@ -557,7 +557,7 @@ Use `host::call("host.fetch", json!({"url": url}))` in the Rust SDK.
 Tools work differently. A tool receives its layer parameters' features as GeoJSON (only the
 selected features when a layer has a selection), and its `file` parameters' files. It returns
 new layers and standalone tables, or a selection, plus messages for the Geoprocessing history.
-RustGIS adds the results as it does for built-in tools, with undo; returning these results
+KHGIS adds the results as it does for built-in tools, with undo; returning these results
 does not require `edit`. Tools can log, but they make no host requests.
 
 In the desktop app a plugin tool runs in the background, so the map and the rest of the window
@@ -583,7 +583,7 @@ The module is `wasm32` with no imports except these three, in module `rustgis`:
 The module exports:
 
 - `memory`.
-- `rustgis_alloc(len: i32) -> i32`, which returns room for `len` bytes. RustGIS writes the
+- `rustgis_alloc(len: i32) -> i32`, which returns room for `len` bytes. KHGIS writes the
   request there.
 - `rustgis_call(ptr: i32, len: i32) -> i64`, which handles the request and returns
   `reply_ptr << 32 | reply_len`. The reply is `{"ok": value}` or `{"error": "text"}`.
@@ -604,7 +604,7 @@ A tool's `ok` value can contain:
   over `layers` and `tables`.
 - `messages`: an array of strings.
 
-RustGIS takes at most 64 layers, 64 tables and 200 messages, with at most 5,000,000 features
+KHGIS takes at most 64 layers, 64 tables and 200 messages, with at most 5,000,000 features
 in each output dataset.
 
 Each call gets a fresh instance, so a module keeps no state between calls and need not free
@@ -643,7 +643,7 @@ with no **Install** button.
   `default` when the platform has no entry). Omit `entry`; process plugins use `run` instead.
   Each argument list contains the program and at most 63 arguments.
 - Commands, tools, tabs, translations and permissions work as for WebAssembly plugins.
-  Permissions still decide which host requests RustGIS answers, but they don't limit what the
+  Permissions still decide which host requests KHGIS answers, but they don't limit what the
   program itself can do.
 - A `.rgplugin` holds the plugin's files (the manifest, scripts, executables). Installing it
   unpacks them to `unpacked/<id>/` in the plugins folder, keeping Unix execute bits and
@@ -653,7 +653,7 @@ with no **Install** button.
 
 ### The protocol
 
-The [Rust process template](https://github.com/opengeos/rustgis-rust-process-plugin-template)
+The [Rust process template](https://github.com/khgeo/KHGIS-rust-process-plugin-template)
 provides a command, a tool and a reusable JSON-line transport module, with packaging and release
 builds for Linux, Windows and universal macOS. Users run the packaged executable without Rust or
 Python installed. Native plugins are not sandboxed and do not run in the web app.
@@ -661,16 +661,16 @@ Python installed. Native plugins are not sandboxed and do not run in the web app
 Each command or tool call starts the program once. It speaks the [ABI](#the-abi-version-1)'s
 requests and replies over its standard input and output, one JSON object per line:
 
-1. RustGIS writes the [request](#the-abi-version-1) as one JSON line, including `panel` for a
+1. KHGIS writes the [request](#the-abi-version-1) as one JSON line, including `panel` for a
    command of a plugin with a panel, and `layers` and optional `files` for a tool.
 2. The program writes lines:
     - `{"call": {"op": "...", "params": {...}}}`: a [host request](#what-a-plugin-can-ask-for).
-      RustGIS answers with one line, `{"ok": value}` or `{"error": "text"}`.
+      KHGIS answers with one line, `{"ok": value}` or `{"error": "text"}`.
     - `{"log": "text"}`: a line for the log (and a tool's run messages).
     - `{"progress": "text"}`: what a tool is doing now, shown while it runs and not kept in its
       messages: a line per step of a long run, say.
     - Last, `{"ok": value}` or `{"error": "text"}`: the result.
-3. RustGIS then closes the program's input; a program still running a few seconds later is
+3. KHGIS then closes the program's input; a program still running a few seconds later is
    stopped.
 
 Output lines that aren't protocol messages are logged and skipped, since libraries print (even
@@ -686,7 +686,7 @@ import sys
 
 
 def call(op, params):
-    """Sends a request to RustGIS and returns its answer."""
+    """Sends a request to KHGIS and returns its answer."""
     print(json.dumps({"call": {"op": op, "params": params}}), flush=True)
     reply = json.loads(sys.stdin.readline())
     if "error" in reply:
@@ -714,8 +714,8 @@ print(json.dumps(result), flush=True)
 ### Session plugins
 
 A process plugin with `"session": true` keeps one program running between its commands, so it
-can ask RustGIS for things whenever it likes and hear when the map changes: a view of the map in
-a window of its own (a 3D globe linked with it) is one. The program talks to RustGIS only over
+can ask KHGIS for things whenever it likes and hear when the map changes: a view of the map in
+a window of its own (a 3D globe linked with it) is one. The program talks to KHGIS only over
 its standard input and output: no port, no token, nothing another program can join.
 
 ```json
@@ -724,24 +724,24 @@ its standard input and output: no port, no token, nothing another program can jo
 "run": ["bin/globe"]
 ```
 
-- RustGIS starts the program the first time one of the plugin's commands runs and writes a first
+- KHGIS starts the program the first time one of the plugin's commands runs and writes a first
   line `{"session": {"abi": 1, "plugin": "<id>", "rustgis": "<version>", "lang": "<code>"}}`.
 - Each command comes as `{"command": request, "id": n}`, where `request` is what a per-call
   program gets. The program answers `{"ok": value, "id": n}` or `{"error": "text", "id": n}`,
   within 2 minutes.
 - At any time, during a command or between commands, the program can send a host request
-  `{"call": {"op": "...", "params": {...}}, "id": "any"}`. RustGIS answers
+  `{"call": {"op": "...", "params": {...}}, "id": "any"}`. KHGIS answers
   `{"ok": value, "id": "any"}` or `{"error": "text", "id": "any"}`; the `id` is optional and comes
   back as given. Requests go through the same checks as a command's, within the plugin's
   permissions. Between commands, each request that can change the project is an undo step of its
   own, named after the plugin, and an entry in the session log; `host.fetch` is refused: it would make the app wait, and the
-  program can fetch for itself. Whether a request is part of a command depends on when RustGIS handles
+  program can fetch for itself. Whether a request is part of a command depends on when KHGIS handles
   it, not when the program sent it: one handled before the command starts (by a poll, or as the
   command is about to run) is answered as between commands; one handled while the command runs,
   until the program answers, is part of that command (its undo step), even if it was sent just
   before. Sending a request meant to stand alone after answering the command, and
   waiting for its reply, makes that likely but not certain: if another of its commands starts
-  before RustGIS handles the request, the request is part of that command. The desktop app answers requests as they come; `rustgis-cli` and
+  before KHGIS handles the request, the request is part of that command. The desktop app answers requests as they come; `rustgis-cli` and
   the Python package only while one of the plugin's commands runs (or as the next one starts);
   `rustgis-cli` ends the program after its last command, and what it asks after that isn't
   answered.
@@ -754,24 +754,24 @@ its standard input and output: no port, no token, nothing another program can jo
   for an answer: match answers by their `id`. While the program is behind in reading its input,
   events wait, and only the latest of each kind is sent.
 - `log` and `progress` lines work as for a per-call program.
-- The program RustGIS started is the session: keep it running, rather than starting another
-  program and exiting. RustGIS stops it, with what it started, when the plugin is turned off,
+- The program KHGIS started is the session: keep it running, rather than starting another
+  program and exiting. KHGIS stops it, with what it started, when the plugin is turned off,
   removed or updated and when the desktop app closes. Its input closing means it is being
-  stopped (RustGIS closing or gone, however it ended; the plugin turned off, removed or updated;
+  stopped (KHGIS closing or gone, however it ended; the plugin turned off, removed or updated;
   the program failed or stopped answering): the program should then exit, and stop what it
   started. A program may also
   exit by itself (its window closed); the plugin's next command starts it again. One that fails
   or stops answering a command is stopped, and the error says so.
-- On Linux and macOS, while RustGIS runs, what a program left running when it exited is stopped
+- On Linux and macOS, while KHGIS runs, what a program left running when it exited is stopped
   with it. Windows can't find what an exited program started, so there the program must stop it
-  itself, as every program must once RustGIS has gone.
+  itself, as every program must once KHGIS has gone.
 - The plugin's tools still start the program once per run, with the request as its first line.
-- RustGIS versions before sessions run the program once per command instead, so set
+- KHGIS versions before sessions run the program once per command instead, so set
   `minRustgisVersion` to the first version with them.
 
 ### Python environments
 
-A Python plugin can have RustGIS make its environment, so its users don't install Python or
+A Python plugin can have KHGIS make its environment, so its users don't install Python or
 any package themselves:
 
 ```json
@@ -783,11 +783,11 @@ any package themselves:
 - `python`, `python3` or `python.exe` as the program in `run` becomes that environment's
   interpreter, on every platform. The Python version defaults to `3.12`; omit `requirements`
   for an environment with no extra packages.
-- RustGIS prepares the environment when the plugin is installed: in the background in the desktop
+- KHGIS prepares the environment when the plugin is installed: in the background in the desktop
   app (the Plugin Manager shows how it's going, with a **Prepare** button if it is not ready), and
   before the command returns in `rustgis-cli plugins install` and `get`.
   `rustgis-cli plugins prepare <id>` and the `plugin.prepare` command make it on demand.
-- It uses [uv](https://github.com/astral-sh/uv), which RustGIS downloads once (a pinned version,
+- It uses [uv](https://github.com/astral-sh/uv), which KHGIS downloads once (a pinned version,
   checked against its pinned SHA-256; `RUSTGIS_UV` names one to use instead, which is then
   trusted as it is, unchecked). uv installs a standalone Python of the version asked for and
   the packages in the requirements file, from PyPI. Pythons and uv's cache are shared in
@@ -832,14 +832,14 @@ installs from a file in the desktop app, on the command line and in the web app:
 ## Publishing a plugin
 
 1. Write the plugin in your own repository, starting from the
-   [Rust WebAssembly](https://github.com/opengeos/rustgis-plugin-template),
-   [Rust process](https://github.com/opengeos/rustgis-rust-process-plugin-template) or
-   [Python process](https://github.com/opengeos/rustgis-python-plugin-template) template. See
+   [Rust WebAssembly](https://github.com/khgeo/KHGIS-plugin-template),
+   [Rust process](https://github.com/khgeo/KHGIS-rust-process-plugin-template) or
+   [Python process](https://github.com/khgeo/KHGIS-python-plugin-template) template. See
    [Write a plugin](https://plugins.rustgis.app/develop/).
 2. Release it: the templates' **Release** workflow attaches the `.rgplugin` and its registry
    entry to a GitHub release.
 3. Open a pull request on
-   [opengeos/rustgis-plugins](https://github.com/opengeos/rustgis-plugins) adding that entry as
+   [opengeos/rustgis-plugins](https://github.com/khgeo/KHGIS-plugins) adding that entry as
    `registry/<id>.json`:
 
    ```json
@@ -848,19 +848,19 @@ installs from a file in the desktop app, on the command line and in the web app:
 
    Every plugin is listed by `source`; the registry build refuses `path` entries.
 4. CI downloads the package, checks its hash, validates its manifest and module (or a process
-   plugin's files), and runs it in RustGIS. A maintainer reviews it before merging.
+   plugin's files), and runs it in KHGIS. A maintainer reviews it before merging.
 5. Once merged, the registry lists the plugin and serves its package at
    `https://packages.rustgis.app/<id>/<id>-<version>.rgplugin`. Published packages never change,
    and every version stays available. To update, release a new version and submit a pull
    request updating the entry's `source.url` and `source.sha256`.
 
-Pull requests get a preview with an **Open in RustGIS** link; process plugins must be tried
+Pull requests get a preview with an **Open in KHGIS** link; process plugins must be tried
 in the desktop app instead. The nightly workflow runs every published plugin in the latest
-RustGIS. See the registry's [publishing instructions](https://plugins.rustgis.app/registry/)
+KHGIS. See the registry's [publishing instructions](https://plugins.rustgis.app/registry/)
 for details.
 
 The file you submit is only a pointer to the release. The registry build turns it into the
-published `registry.json` that RustGIS reads, whose entries carry `package` (the package's address) and
+published `registry.json` that KHGIS reads, whose entries carry `package` (the package's address) and
 `sha256` in place of `source`. A registry entry contains `id`, `name`, `version`, `description`, `author`, `homepage`,
 `license`, `permissions`, `minRustgisVersion`, `i18n` (the name and description translated),
 `categories`, `package`, lower-case hexadecimal `sha256`, and `size` in bytes.

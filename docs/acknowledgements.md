@@ -1,23 +1,23 @@
 # Acknowledgements
 
-RustGIS stands on the work of many projects and their authors. Thank you to all of them. If your
-work is missing here, please [open an issue](https://github.com/opengeos/RustGIS/issues).
+KHGIS stands on the work of many projects and their authors. Thank you to all of them. If your
+work is missing here, please [open an issue](https://github.com/khgeo/KHGIS/issues).
 
 !!! note "Disclaimer"
 
-    RustGIS is primarily built with [Claude Opus 5.5](https://www.anthropic.com/claude), an AI
+    KHGIS is primarily built with [Claude Opus 5.5](https://www.anthropic.com/claude), an AI
     model by Anthropic, working under human direction and review. Its results are tested, but check
-    them for your own use, and please [report](https://github.com/opengeos/RustGIS/issues) anything
+    them for your own use, and please [report](https://github.com/khgeo/KHGIS/issues) anything
     that looks wrong.
 
 ## The GIS that came before
 
 [QGIS](https://qgis.org) and [ArcGIS Pro](https://www.esri.com/en-us/arcgis/products/arcgis-pro/overview)
-set the expectations of a desktop GIS that RustGIS is measured against, and [GDAL](https://gdal.org)
+set the expectations of a desktop GIS that KHGIS is measured against, and [GDAL](https://gdal.org)
 those of reading geospatial formats. [MapLibre](https://maplibre.org) defines the style
-specification RustGIS implements a subset of for vector tiles, and [PROJ](https://proj.org)
+specification KHGIS implements a subset of for vector tiles, and [PROJ](https://proj.org)
 the coordinate operations it follows. [Zarr](https://zarr.dev) defines the chunked-array format
-read by RustGIS's raster provider.
+read by KHGIS's raster provider.
 
 ## Geoprocessing
 
@@ -26,7 +26,7 @@ built on [whitebox-wasm](https://github.com/opengeos/whitebox-wasm)) brings more
 vector, LiDAR and hydrology tools, after John Lindsay's
 [WhiteboxTools](https://www.whiteboxgeo.com).
 
-The suite runs separately from RustGIS: through an optional downloaded `geolibre` program on
+The suite runs separately from KHGIS: through an optional downloaded `geolibre` program on
 the desktop and command line, or a WebAssembly runner loaded on demand in the browser.
 
 ## Data
@@ -36,7 +36,7 @@ the desktop and command line, or a WebAssembly runner loaded on demand in the br
   [projection-engine-db-doc](https://github.com/Esri/projection-engine-db-doc) for coordinate
   systems.
 - [OpenFreeMap](https://openfreemap.org), whose free vector tiles and styles (such as Liberty)
-  draw RustGIS's vector basemaps.
+  draw KHGIS's vector basemaps.
 - [OpenStreetMap](https://www.openstreetmap.org) and its contributors,
   [Overture Maps](https://overturemaps.org) and [Protomaps](https://protomaps.com) for basemaps
   and open map data.
@@ -44,12 +44,12 @@ the desktop and command line, or a WebAssembly runner loaded on demand in the br
   Crameri's [Scientific colour maps](https://www.fabiocrameri.ch/colourmaps/) and
   [cmocean](https://matplotlib.org/cmocean/).
 
-[ATTRIBUTION.md](https://github.com/opengeos/RustGIS/blob/main/ATTRIBUTION.md) lists every asset
+[ATTRIBUTION.md](https://github.com/khgeo/KHGIS/blob/main/ATTRIBUTION.md) lists every asset
 with its source and licence.
 
 ## Rust crates
 
-RustGIS is written in Rust, built on these crates, among others:
+KHGIS is written in Rust, built on these crates, among others:
 
 | Crate | For |
 |---|---|
@@ -65,9 +65,9 @@ RustGIS is written in Rust, built on these crates, among others:
 | [ureq](https://crates.io/crates/ureq), [serde](https://serde.rs) | HTTP and JSON |
 | [PyO3](https://pyo3.rs), [wasm-bindgen](https://github.com/rustwasm/wasm-bindgen), [rfd](https://crates.io/crates/rfd) | The Python package, the web app and file dialogs |
 
-The full dependency list is in [Cargo.toml](https://github.com/opengeos/RustGIS/blob/main/Cargo.toml),
+The full dependency list is in [Cargo.toml](https://github.com/khgeo/KHGIS/blob/main/Cargo.toml),
 the crate and application manifests, and
-[Cargo.lock](https://github.com/opengeos/RustGIS/blob/main/Cargo.lock). Dependency licences and
+[Cargo.lock](https://github.com/khgeo/KHGIS/blob/main/Cargo.lock). Dependency licences and
 copyright notices are collected in
-[THIRD-PARTY-LICENSES.txt](https://github.com/opengeos/RustGIS/blob/main/THIRD-PARTY-LICENSES.txt),
-with a [separate list for Python](https://github.com/opengeos/RustGIS/blob/main/apps/rustgis-python/THIRD-PARTY-LICENSES.txt).
+[THIRD-PARTY-LICENSES.txt](https://github.com/khgeo/KHGIS/blob/main/THIRD-PARTY-LICENSES.txt),
+with a [separate list for Python](https://github.com/khgeo/KHGIS/blob/main/apps/rustgis-python/THIRD-PARTY-LICENSES.txt).

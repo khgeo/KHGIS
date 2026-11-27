@@ -70,7 +70,7 @@ rustgis-cli run --cmd 'stac.search={"collections":"sentinel-2-c1-l2a","bbox":[7.
 Assets can use HTTP(S) or `s3://` addresses. S3 assets use the saved connection serving their
 bucket, or anonymous AWS access when none matches; see [S3 buckets](data.md#s3-buckets).
 An item on the web can't point into the local network. A Planetary
-Computer asset (in Azure Blob Storage) is signed first: RustGIS asks the Planetary Computer's
+Computer asset (in Azure Blob Storage) is signed first: KHGIS asks the Planetary Computer's
 token service for its storage container's token and reuses it for half an hour. The token is part
 of the layer's address, so a project saved with one reads it again only while the token lasts
 (about an hour): add the asset again after that. A `?stac=` link opens the web app on an item or a
@@ -173,7 +173,7 @@ The entries, all public and read in place:
 | [Digital Earth Australia](https://www.dea.ga.gov.au/) and [Digital Earth Africa](https://www.digitalearthafrica.org/) | the yearly frequency of water seen by Landsat (30 m, from 1986 and 1984) |
 | [ARCO-ERA5](https://cloud.google.com/storage/docs/public-datasets/era5) (Google Cloud, ECMWF) | hourly air temperature at 2 m, total precipitation and top-layer soil moisture (0.25°, from 1940), as a Zarr store the desktop reads |
 
-Only cubes RustGIS reads today are listed. Collections whose files sit behind signed addresses
+Only cubes KHGIS reads today are listed. Collections whose files sit behind signed addresses
 (Planetary Computer), need a sign-in (Copernicus Data Space, NASA Earthdata) or charge the reader
 (Landsat Collection 2 on Earth Search) are left out. Digital Earth Australia's catalog sits behind
 a firewall that may ask a program making many requests in a row for a browser check for a while;
@@ -411,7 +411,7 @@ only over HTTPS to NASA's Earthdata data servers (`*.earthdatacloud.nasa.gov` an
 presigned address the file is served from) goes without it. A file the token doesn't open says
 so (an expired token, or a dataset whose EULA you haven't accepted on Earthdata Login).
 
-The token is kept until RustGIS closes, unless you tick **Remember on this computer** (off by
+The token is kept until KHGIS closes, unless you tick **Remember on this computer** (off by
 default; `earthdata.login` with `"remember": true`). The desktop app then keeps it in the system's
 credential store (macOS Keychain, Windows Credential Manager, or the Secret Service on Linux) and
 reads it back the next time it is needed: when the pane opens or a file is read from a data
@@ -437,7 +437,7 @@ rustgis-cli run --sample --use-saved-secrets --cmd 'layer.addUrl={"url":"https:/
 ## Open-data portals
 
 **Home › Add › Web Data › Search Open Data…** (`portal.search`) finds datasets by text in an open-data
-portal and lists, for each, the resources RustGIS can add, the best format first:
+portal and lists, for each, the resources KHGIS can add, the best format first:
 
 - **data.gov and CKAN catalogues**: [catalog.data.gov](https://catalog.data.gov) by default,
   using data.gov's own DCAT search, or a CKAN site by its address
@@ -495,7 +495,7 @@ The search by place (OpenAerialMap, LiDAR HD, 3DEP) is always where the map is, 
 given, keep to the images or tiles that have them: OpenAerialMap's to 200 images where the map is
 at a time (**Load more** looks at older ones), LiDAR HD's to the first 50 tiles. A Hugging Face
 dataset lists its first 1,000 files, and the Ocean Data Platform's catalogue is read whole (a few
-hundred datasets) and searched in RustGIS. In the web app, the Ocean Data Platform's features are
+hundred datasets) and searched in KHGIS. In the web app, the Ocean Data Platform's features are
 read through GeoLibre's relay (`tiles.geolibre.app`), the platform answering only its own site, so
 those requests pass through it.
 
@@ -505,9 +505,9 @@ rustgis-cli run --cmd 'portal.files={"dataset":"giswqs/geospatial"}'
 rustgis-cli run --sample --cmd 'portal.add={"url":"https://data.geopf.fr/telechargement/download/LiDARHD-NUALID/NUALHD_1-0__LAZ_LAMB93_KE_2025-06-06/LHD_FXX_0652_6864_PTS_LAMB93_IGN69.copc.laz","name":"LiDAR HD 0652-6864"}'
 ```
 
-When forwarding query options to addresses supplied by a service, RustGIS copies only
+When forwarding query options to addresses supplied by a service, KHGIS copies only
 `collections`, `datetime`, `subset`, `subset-crs`, `crs`, `bgcolor` and `transparent`.
-Other settings, including keys, are inherited only by sub-addresses RustGIS constructs within
+Other settings, including keys, are inherited only by sub-addresses KHGIS constructs within
 the original source path. Some discovery paths report withheld settings in a counted notice.
 An advertised WMS GetMap address can replace the discovery address without inheriting its query;
 this does not produce that notice.
@@ -627,12 +627,12 @@ alike. Pick a dataset (its provider, model, resolution, years, coverage, licence
 shown), a year, and **Search where the map is**; the results are cards with **Zoom** and **Add**,
 their footprints drawn as a layer.
 
-| Dataset | What RustGIS does with it |
+| Dataset | What KHGIS does with it |
 |---|---|
 | **AlphaEarth Foundations** (Google's Satellite Embedding; 64 values a 10 m pixel, 2017–2025) | Finds the year's UTM tiles where the map is in the dataset's GeoParquet index on [Source Cooperative](https://source.coop/tge-labs/aef), read in place (its bounding boxes, then the rows that meet the map). **Add** shows a tile as a cloud-optimised GeoTIFF read in place: three bands (**Bands**, from 1; A01, A16 and A09 by default) as red, green and blue, dequantised (`sign(v)·(v/127.5)²`) and stretched over ±**Stretch** (0.3). Only the three bands shown are read, a band at a time. **Apply to layers** shows other bands or another stretch on the tiles already added. |
 | **Earth Index** (Earth Genome; 384 values every ~320 m, 2024) | Names the Sentinel-2 (MGRS) tiles where the map is and keeps those with a file. **Add points** reads the file's points in the view in place (every point's position, then the vectors of those in view: zoom to a few kilometres) and colours them by their vectors' first three principal components (64 colours); **Keep value** keeps one of each vector's values as the points' `value` field. |
 | **Tessera** (Cambridge; 128 values a 10 m pixel, 2017–2025) | **Add view** reads three bands (1, 2 and 3 by default) of the view from Tessera's [Zarr store](https://data.source.coop/tessera/tessera/zarr/v1.1-dclimate) in place (the shard's index, then the chunks the view needs: at most about 6 km a side, its centre when the view is larger), as a 32-bit raster in UTM. |
-| **Clay**, **Major TOM**, **Copernicus-Embed** | Listed with links to their data and papers; RustGIS doesn't read them. |
+| **Clay**, **Major TOM**, **Copernicus-Embed** | Listed with links to their data and papers; KHGIS doesn't read them. |
 
 AlphaEarth's tiles are tile layers that keep their look in their address
 (`#bands=2,17,10&range=-0.3,0.3&dequantize=aef`), which `map.setTiles` changes (`"bands"`,

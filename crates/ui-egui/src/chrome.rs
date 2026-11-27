@@ -222,6 +222,26 @@ pub fn header(app: &mut RustGisApp, ui: &mut Ui) {
         });
 }
 
+/// The pointer's position on the map: kept after the pointer leaves the map (dimmed then, to tell
+/// it from a live one); a click changes how it is written.
+fn pointer_readout(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
+    let format = app.map.coord_format;
+    let earth = app.session.map().body().is_earth();
+    let kept = app.map.kept_pointer_lonlat(app.session.map().instance_id(), app.session.opened);
+    let live = app.map.pointer_lonlat.is_some();
+    let resp = ui.add(
+        egui::Label::new(egui::RichText::new(format.readout(kept, earth)).monospace().size(11.5).color(if live {
+            t.text_dim
+        } else {
+            t.text_disabled
+        }))
+        .sense(Sense::click()),
+    );
+    if resp.on_hover_text(format.hover()).clicked() {
+        let _ = app.run("ui.coordinateFormat", Value::Null);
+    }
+}
+
 pub fn status_bar(app: &mut RustGisApp, ui: &mut Ui) {
     let t = Tokens::get(ui.ctx());
     egui::Panel::bottom("status")
@@ -233,6 +253,14 @@ pub fn status_bar(app: &mut RustGisApp, ui: &mut Ui) {
             ui.painter().line_segment([pos2(r.min.x - 10.0, r.min.y), pos2(r.max.x + 10.0, r.min.y)], Stroke::new(1.0, t.border));
             ui.horizontal_centered(|ui| {
                 ui.spacing_mut().item_spacing = vec2(10.0, 0.0);
+                // The QGIS layout reads as QGIS's status bar: Coordinate, Scale, Rotation, then the
+                // coordinate system's code.
+                let qgis = app.ui.qgis_layout;
+                if qgis {
+                    ui.label(egui::RichText::new(tl!("Coordinate")).size(11.5).color(t.text_dim));
+                    pointer_readout(app, ui, &t);
+                    ui.label(egui::RichText::new(tl!("Scale")).size(11.5).color(t.text_dim));
+                }
                 // Scale: typed (1:12,345, 12345, 25k, …) and set with Enter, or picked from the
                 // list. Esc, or clicking away, leaves the map's scale as it was.
                 let scale = app.session.scale();
@@ -277,6 +305,16 @@ pub fn status_bar(app: &mut RustGisApp, ui: &mut Ui) {
                         }
                     }
                 });
+                if qgis {
+                    // Rotation, as QGIS's box: degrees clockwise, typed or dragged.
+                    ui.label(egui::RichText::new(tl!("Rotation")).size(11.5).color(t.text_dim));
+                    let mut b = app.session.map().camera.bearing;
+                    let r = ui.add(egui::DragValue::new(&mut b).range(-180.0..=180.0).speed(1.0).fixed_decimals(1).suffix(" °"));
+                    if r.changed() {
+                        let _ = app.run("map.setBearing", json!({"bearing": b}));
+                    }
+                    r.on_hover_text(tl!("Map rotation: the direction the top of the map faces, clockwise from north"));
+                }
                 // The map's zoom level, bearing and pitch; clicking them on a turned or tilted map
                 // faces north and looks straight down again.
                 let cam = app.session.map().camera;
@@ -291,6 +329,7 @@ pub fn status_bar(app: &mut RustGisApp, ui: &mut Ui) {
                     ],
                 );
                 let level = cam.bearing.round() == 0.0 && cam.pitch.round() == 0.0;
+                if !qgis {
                 let resp = ui.add(
                     egui::Label::new(egui::RichText::new(text).monospace().size(11.5).color(if level { t.text_dim } else { t.accent_text }))
                         .sense(Sense::click()),
@@ -302,27 +341,17 @@ pub fn status_bar(app: &mut RustGisApp, ui: &mut Ui) {
                     let _ = app.run("map.resetNorth", json!({}));
                 }
                 sep(ui, &t);
-                // Pointer coordinates.
-                let format = app.map.coord_format;
-                let earth = app.session.map().body().is_earth();
-                // Kept after the pointer leaves the map, so a click here still shows the position;
-                // dimmed then, to tell it from a live one.
-                let kept = app.map.kept_pointer_lonlat(app.session.map().instance_id(), app.session.opened);
-                let live = app.map.pointer_lonlat.is_some();
-                let resp = ui.add(
-                    egui::Label::new(
-                        egui::RichText::new(format.readout(kept, earth)).monospace().size(11.5).color(if live { t.text_dim } else { t.text_disabled }),
-                    )
-                    .sense(Sense::click()),
-                );
-                if resp.on_hover_text(format.hover()).clicked() {
-                    let _ = app.run("ui.coordinateFormat", Value::Null);
+                pointer_readout(app, ui, &t);
                 }
                 let projection = match &app.session.map().projection {
+                    rustgis_engine::map::Projection::WebMercator if qgis => "EPSG:3857".to_string(),
                     rustgis_engine::map::Projection::Globe => tl!("WGS 84 / Globe").to_string(),
                     rustgis_engine::map::Projection::WebMercator => tl!("WGS 84 / Web Mercator").to_string(),
                     p => tl!(p.label().as_str()).to_string(),
                 };
+                if qgis {
+                    sep(ui, &t);
+                }
                 let resp = ui.add(egui::Label::new(egui::RichText::new(projection).size(11.0).color(t.text_dim)).sense(Sense::click()));
                 if resp.on_hover_text(tl!("Change the map's coordinate system")).clicked() {
                     let _ = app.run("ui.dialog", json!({"name": "coordinateSystem"}));

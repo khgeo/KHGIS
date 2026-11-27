@@ -1,29 +1,29 @@
-# RustGIS vs. other GIS platforms
+# KHGIS vs. other GIS platforms
 
-How RustGIS compares to its sibling project **[GeoLibre](https://geolibre.app)** and to the GIS
+How KHGIS compares to its sibling project **[GeoLibre](https://geolibre.app)** and to the GIS
 platforms people most often ask about: **QGIS**, **ArcGIS Pro** and **ArcGIS Online**.
 
-RustGIS is not trying to replace any of these. It fills a narrower spot: a **free and
+KHGIS is not trying to replace any of these. It fills a narrower spot: a **free and
 open-source desktop GIS compiled to a single native program**, with a ribbon interface familiar
 from desktop GIS, almost every action available as a scriptable command, and the same app running
 in a browser tab through WebAssembly.
 
 !!! note "How to read this"
-    Comparisons like this age quickly and are written by an interested party. The RustGIS
-    column reflects what ships in the [current source](https://github.com/opengeos/RustGIS)
+    Comparisons like this age quickly and are written by an interested party. The KHGIS
+    column reflects what ships in the [current source](https://github.com/khgeo/KHGIS)
     as of **October 2026**; the other columns describe each product's mainstream,
     out-of-the-box behaviour, not what is reachable with every add-on or plugin. The GeoLibre,
     QGIS and ArcGIS columns draw on [GeoLibre's own comparison](https://geolibre.app/comparison/),
     where those products are described in more depth. Found something wrong or out of date?
-    Please [open an issue](https://github.com/opengeos/RustGIS/issues).
+    Please [open an issue](https://github.com/khgeo/KHGIS/issues).
 
-Coming from QGIS? [RustGIS and QGIS](qgis.md) goes deeper: the pros and cons of each, how QGIS
-concepts map onto RustGIS, and how to use the two together. Deciding between RustGIS and its
-sibling? [RustGIS and GeoLibre](geolibre.md) compares the two in detail.
+Coming from QGIS? [KHGIS and QGIS](qgis.md) goes deeper: the pros and cons of each, how QGIS
+concepts map onto KHGIS, and how to use the two together. Deciding between KHGIS and its
+sibling? [KHGIS and GeoLibre](geolibre.md) compares the two in detail.
 
-## RustGIS and GeoLibre
+## KHGIS and GeoLibre
 
-RustGIS and GeoLibre are both [opengeos](https://github.com/opengeos) projects, and they share
+KHGIS and GeoLibre are both [opengeos](https://github.com/opengeos) projects, and they share
 more than a maintainer: both can run the suite of over 1,000 GeoLibre and Whitebox
 geoprocessing tools, through an optional desktop runner or WebAssembly in the browser.
 
@@ -33,21 +33,21 @@ They differ in how they are built and who they suit:
   It reaches further: cloud-native formats (GeoParquet, PMTiles, Zarr, STAC), databases, OGC
   and Esri services, native Android and iOS apps, a Jupyter widget, a Python package and
   real-time collaboration.
-- **RustGIS** is written entirely in Rust and draws its own interface on the GPU (egui). It is
+- **KHGIS** is written entirely in Rust and draws its own interface on the GPU (egui). It is
   one native program with no browser engine or JavaScript runtime inside, a ribbon laid
   out in the order of the work, and an engine whose commands run the
   same way from the ribbon, `rustgis-cli`, Python, notebooks, models and the AI Assistant.
 
-They complement each other rather than compete: GeoLibre is web and mobile first, RustGIS
+They complement each other rather than compete: GeoLibre is web and mobile first, KHGIS
 desktop first and built for automation and AI agents. If you want the widest data access and the
 most platforms, choose GeoLibre. If you want a compact native desktop GIS with a classic ribbon
-workflow and a scriptable command engine, choose RustGIS. Both work on local files on your
+workflow and a scriptable command engine, choose KHGIS. Both work on local files on your
 machine; remote features, such as web data and AI providers, send requests over the network. See
-[RustGIS and GeoLibre](geolibre.md) for a closer look.
+[KHGIS and GeoLibre](geolibre.md) for a closer look.
 
 ## At a glance
 
-| | **RustGIS** | **GeoLibre** | **QGIS** | **ArcGIS Pro** | **ArcGIS Online** |
+| | **KHGIS** | **GeoLibre** | **QGIS** | **ArcGIS Pro** | **ArcGIS Online** |
 |---|---|---|---|---|---|
 | **License** | Apache-2.0, open source | MIT, open source | GPL-2.0+, open source | Proprietary | Proprietary |
 | **Cost** | Free | Free | Free | Paid subscription | Paid subscription (credit-metered analysis) |
@@ -62,7 +62,7 @@ machine; remote features, such as web data and AI providers, send requests over 
 
 ## Data and formats
 
-| | **RustGIS** | **GeoLibre** | **QGIS** | **ArcGIS Pro** | **ArcGIS Online** |
+| | **KHGIS** | **GeoLibre** | **QGIS** | **ArcGIS Pro** | **ArcGIS Online** |
 |---|---|---|---|---|---|
 | **Format breadth** | GeoJSON, CSV, Shapefile, GeoPackage (desktop export), GeoParquet, FlatGeobuf, KML/KMZ and GPX in and out; GML, MapInfo MIF, OSM PBF, TopoJSON, CityJSON, DXF, GeoRSS, LandXML, LiDAR and spreadsheets in; File Geodatabase feature classes and tables read natively, with limits; GeoTIFF/COG, ASCII grids and georeferenced PNG/JPEG; WKT out; optional GDAL and DuckDB programs extend access on desktop | Wide: DuckDB-WASM Spatial plus in-house readers | **Widest**: everything GDAL/OGR reads | Very wide, plus native Esri formats | Common upload formats |
 | **Cloud-native data** | GeoParquet, FlatGeobuf, PMTiles and cloud-optimised GeoTIFF read in place, large files and web addresses alike (by address, over HTTP byte ranges: a COG reads only the tiles the view needs, a FlatGeobuf only its index and the features in view, a GeoParquet its footer and the row groups in view, desktop and web), Zarr 2 and 3 stores (the chunks of the step picked, desktop and web), from `s3://` buckets too (private ones signed with a connection's keys, S3-compatible services by endpoint) | GeoParquet, FlatGeobuf, PMTiles, COG, Zarr, streamed over HTTP | GeoParquet, FlatGeobuf, PMTiles, COG, Zarr | GeoParquet, COG, Zarr | Hosted layers |
@@ -75,7 +75,7 @@ machine; remote features, such as web data and AI providers, send requests over 
 
 ## Analysis and processing
 
-| | **RustGIS** | **GeoLibre** | **QGIS** | **ArcGIS Pro** | **ArcGIS Online** |
+| | **KHGIS** | **GeoLibre** | **QGIS** | **ArcGIS Pro** | **ArcGIS Online** |
 |---|---|---|---|---|---|
 | **Geoprocessing tools** | Built-in tools plus the optional **1,000+** GeoLibre/Whitebox suite (the available list comes from the runner) | **1,000+** (GeoLibre and Whitebox) | **1,000+** (native, GDAL, GRASS, SAGA) | **Most mature and complete**, plus paid extensions | A useful subset, credit-metered |
 | **Where analysis runs** | Your machine; in the browser on WebAssembly | Your browser (WASM); optional Python sidecar on desktop | Your machine | Your machine, or a server | Vendor cloud |
@@ -88,7 +88,7 @@ machine; remote features, such as web data and AI providers, send requests over 
 
 ## Cartography, layout and output
 
-| | **RustGIS** | **GeoLibre** | **QGIS** | **ArcGIS Pro** | **ArcGIS Online** |
+| | **KHGIS** | **GeoLibre** | **QGIS** | **ArcGIS Pro** | **ArcGIS Online** |
 |---|---|---|---|---|---|
 | **Renderers** | Single, unique values, graduated, proportional; stacked line strokes and symbol levels; hexagon/square aggregation; blend modes and layer groups; raster stretch, RGB, classify, colormap, shaded relief | Single, categorized, graduated, rule-based, heatmap, cluster, proportional | **Richest** | Very rich | Smart-mapping styles |
 | **Labeling** | Collision avoidance, SQL-filtered label classes, per-class placement and scale/distance ranges, annotation | Data-defined engine | Best-in-class placement | Maplex | Basic |
@@ -99,7 +99,7 @@ machine; remote features, such as web data and AI providers, send requests over 
 
 ## Automation and extensibility
 
-| | **RustGIS** | **GeoLibre** | **QGIS** | **ArcGIS Pro** | **ArcGIS Online** |
+| | **KHGIS** | **GeoLibre** | **QGIS** | **ArcGIS Pro** | **ArcGIS Online** |
 |---|---|---|---|---|---|
 | **Scripting** | Engine commands run headlessly through `rustgis-cli` and the `rustgis` Python package; Script pane; UI-only pane/dialog commands stay in the app | Python console, `geolibre` Python package | PyQGIS, `qgis_process` | `arcpy` | ArcGIS API for Python / JavaScript |
 | **Notebooks** | Built-in notebooks of text and command cells; Jupyter `.ipynb` in and out | The whole app as a Jupyter widget | Bindings, not the UI | Notebooks drive `arcpy` | Hosted notebooks |
@@ -110,7 +110,7 @@ machine; remote features, such as web data and AI providers, send requests over 
 
 ## Where each one is the right choice
 
-**Choose RustGIS when** you want a compact, native desktop GIS that installs as one program, a
+**Choose KHGIS when** you want a compact, native desktop GIS that installs as one program, a
 ribbon interface without a licence, engine commands scriptable from
 the command line with the same ids the interface uses, sandboxed WebAssembly plugins, or an AI
 assistant whose project edits use the same undo system as the interface.
@@ -128,10 +128,10 @@ versioned editing, the deepest 3D and imagery workflows, or organizational suppo
 **Choose ArcGIS Online when** the priority is hosted layers, organizational sharing and the
 surrounding Esri app family.
 
-They also compose: RustGIS reads and writes GeoJSON, CSV, GeoPackage, GeoParquet, Shapefile and GeoTIFF, which every tool above
+They also compose: KHGIS reads and writes GeoJSON, CSV, GeoPackage, GeoParquet, Shapefile and GeoTIFF, which every tool above
 opens, and writes MapLibre styles and OGC API Features collections for the web.
 
-## Where RustGIS is not the strongest option
+## Where KHGIS is not the strongest option
 
 Stated plainly, so the tables above are worth trusting:
 
@@ -151,14 +151,14 @@ Stated plainly, so the tables above are worth trusting:
   network datasets and advanced spatial statistics depend on the external suite or another GIS.
 - **Python.** The [`rustgis` package](../python.md) runs commands headlessly, but there is no
   Python console inside the app. Python process plugins are supported on desktop and CLI, without a sandbox.
-- **Maturity.** RustGIS is young. Many features are first versions; see the
-  [roadmap](https://github.com/opengeos/RustGIS/blob/main/ROADMAP.md).
+- **Maturity.** KHGIS is young. Many features are first versions; see the
+  [roadmap](https://github.com/khgeo/KHGIS/blob/main/ROADMAP.md).
 
 ## See also
 
-- [User Guide](../user-guide/index.md): what RustGIS does, page by page
-- [RustGIS and GeoLibre](geolibre.md): a closer look at the sibling project
-- [RustGIS and QGIS](qgis.md): a closer look, for QGIS users
-- [Command Line](../cli.md): scripting RustGIS
+- [User Guide](../user-guide/index.md): what KHGIS does, page by page
+- [KHGIS and GeoLibre](geolibre.md): a closer look at the sibling project
+- [KHGIS and QGIS](qgis.md): a closer look, for QGIS users
+- [Command Line](../cli.md): scripting KHGIS
 - [GeoLibre's comparison](https://geolibre.app/comparison/): GeoLibre against QGIS, ArcGIS,
   CARTO, Felt, kepler.gl and Google Earth

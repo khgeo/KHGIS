@@ -1,6 +1,6 @@
 # Contributing
 
-Contributions are welcome. See [AGENTS.md](https://github.com/opengeos/RustGIS/blob/main/AGENTS.md)
+Contributions are welcome. See [AGENTS.md](https://github.com/khgeo/KHGIS/blob/main/AGENTS.md)
 for the conventions.
 
 1. Fork the repository and create a branch.
@@ -193,9 +193,9 @@ is space. Agree on that purpose before reorganising a tab.
 | Analyze | Turning existing data into new results, from single tools to repeatable workflows, scripts and automation. |
 | View | How the map and workspace are displayed: map appearance and view configuration, and which panes and windows are open. Basic navigation stays on Home. |
 | Publish | Getting work out to others: printing, exporting or sharing products such as maps, layouts, reports and packages, including on the web. |
-| Plugins | Finding, installing and using plugins that extend RustGIS. |
+| Plugins | Finding, installing and using plugins that extend KHGIS. |
 | Settings | Preferences that apply to every project, such as language, appearance and start-up. |
-| Help | Learning RustGIS, finding commands and shortcuts, and getting information about the app. |
+| Help | Learning KHGIS, finding commands and shortcuts, and getting information about the app. |
 
 Keep Data, Style and Labeling fixed, rather than making the tab strip change with the selected
 layer. Their target should be explicit: a layer chooser at the left of each layer-dependent tab
@@ -298,7 +298,7 @@ pip install -r requirements_docs.txt
 zensical serve        # http://localhost:8000
 ```
 
-Images live in [rustgis-assets](https://github.com/opengeos/rustgis-assets) and are linked by
+Images live in [rustgis-assets](https://github.com/khgeo/KHGIS-assets) and are linked by
 URL; don't commit images to this repository.
 
 For PR screenshots, GitHub web attachments are fine. The optional

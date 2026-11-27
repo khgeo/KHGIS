@@ -3,9 +3,9 @@
 ## Reporting a vulnerability
 
 Report security problems privately through
-[GitHub's private vulnerability reporting](https://github.com/opengeos/RustGIS/security/advisories/new),
+[GitHub's private vulnerability reporting](https://github.com/khgeo/KHGIS/security/advisories/new),
 not in a public issue, pull request or discussion. Include what you did, what happened, the
-RustGIS version and platform (desktop, browser, command line or Python), and a file, plugin or
+KHGIS version and platform (desktop, browser, command line or Python), and a file, plugin or
 script that shows it if you have one. Leave out real passwords, keys and private data; a
 made-up example is enough.
 
@@ -15,9 +15,9 @@ give us a chance to release a fix before you disclose the problem publicly.
 
 ## Supported versions
 
-RustGIS is released often and fixes go into the next release; older releases don't get
+KHGIS is released often and fixes go into the next release; older releases don't get
 patches. Check that the problem still happens with the
-[latest release](https://github.com/opengeos/RustGIS/releases/latest) or `main`.
+[latest release](https://github.com/khgeo/KHGIS/releases/latest) or `main`.
 
 ## Sharing projects and generated items
 
@@ -38,7 +38,7 @@ saved widget state and save again; printed cell output and user data require you
 While a service login is active, generated output masks its known secrets throughout the
 process. A very short password can therefore also mask ordinary words, names or addresses,
 including output from another session. This changes displayed output, not the stored data,
-requests or permission checks. RustGIS does not retain revoked secrets just to recognize them
+requests or permission checks. KHGIS does not retain revoked secrets just to recognize them
 in later output; review that output before sharing it.
 
 ## Embedding-page command boundary
@@ -50,7 +50,7 @@ UI messages.
 
 ## What counts as a security problem
 
-RustGIS makes promises about what untrusted plugins, files, agents and web pages can do. A way
+KHGIS makes promises about what untrusted plugins, files, agents and web pages can do. A way
 around one of them is a security problem:
 
 - **Plugins**: a WebAssembly plugin reaching files, the network or the project beyond the
@@ -69,7 +69,7 @@ around one of them is a security problem:
 
 ## What doesn't
 
-Report these as ordinary [issues](https://github.com/opengeos/RustGIS/issues):
+Report these as ordinary [issues](https://github.com/khgeo/KHGIS/issues):
 
 - A crash, hang or memory blow-up from a malformed file or parameters, unless it leads to more
   than that. These are bugs we fix, and the regression tests keep them fixed.
