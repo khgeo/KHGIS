@@ -30,6 +30,8 @@ mod request;
 mod shppick;
 #[cfg(target_arch = "wasm32")]
 mod web;
+#[cfg(target_arch = "wasm32")]
+mod webfolders;
 
 #[cfg(target_arch = "wasm32")]
 fn main() {

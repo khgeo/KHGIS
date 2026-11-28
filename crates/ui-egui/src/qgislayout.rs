@@ -3,7 +3,7 @@
 //! View, Add Item, Atlas) headed by the layout's name and a way back to the map, and toolbars to
 //! add items, arrange them and export. Item properties are in the Format pane on the right.
 
-use egui::{CornerRadius, Rect, Sense, Stroke, Ui, pos2, vec2};
+use egui::{CornerRadius, Sense, Stroke, Ui, pos2, vec2};
 use serde_json::{Value, json};
 
 use crate::RustGisApp;
@@ -48,16 +48,17 @@ fn on_selected(app: &mut RustGisApp, id: &str, extra: Value) {
 
 /// The items one can add: (icon, label, what to add).
 const ITEMS: &[(&str, &str, &str)] = &[
+    ("label_item", "Add Label", "text"),
+    ("dynamic_text", "Add Dynamic Text (page, date, scale…)", "dynamicText"),
     ("legend", "Add Legend", "legend"),
     ("scale_bar", "Add Scale Bar", "scaleBar"),
     ("north_arrow", "Add North Arrow", "northArrow"),
-    ("g_text", "Add Label", "text"),
-    ("table", "Add Attribute Table", "table"),
-    ("chart", "Add Chart", "chart"),
-    ("colorbar", "Add Colorbar", "colorbar"),
     ("g_rect", "Add Rectangle", "rectangle"),
     ("g_ellipse", "Add Ellipse", "ellipse"),
     ("g_arrow", "Add Arrow", "arrow"),
+    ("attribute_table", "Add Attribute Table", "table"),
+    ("chart", "Add Chart", "chart"),
+    ("colorbar", "Add Color Bar", "colorbar"),
 ];
 
 /// The menu bar while a layout is open.
@@ -102,7 +103,7 @@ pub fn menu_bar(app: &mut RustGisApp, ui: &mut Ui) {
 fn layout_menu(app: &mut RustGisApp, ui: &mut Ui) {
     ui.set_min_width(250.0);
     menu_item(ui, app, "new_layout", "New Layout", "layout.new", json!({"template": "blank"}));
-    submenu_row(ui, "new_layout", tl!("Page Size"), |ui| {
+    submenu_row(ui, "page_setup", tl!("Page Size"), |ui| {
         let Some(li) = app.session.active_layout else { return };
         let landscape = app.session.project.layouts.get(li).is_some_and(|l| l.width > l.height);
         for (id, label, _, _) in rustgis_engine::map::layout::PAGES {
@@ -123,7 +124,7 @@ fn layout_menu(app: &mut RustGisApp, ui: &mut Ui) {
     ui.separator();
     menu_item(ui, app, "export", "Export as Image or PDF…", "ui.exportLayout", Value::Null);
     menu_item(ui, app, "print", "Print…", "ui.printLayout", Value::Null);
-    menu_item(ui, app, "save_as", "Save Layout File…", "ui.saveLayout", Value::Null);
+    menu_item(ui, app, "save_layout", "Save Layout File…", "ui.saveLayout", Value::Null);
     ui.separator();
     menu_item(ui, app, "close", "Close Layout (Back to Map)", "layout.close", Value::Null);
 }
@@ -210,7 +211,7 @@ fn add_menu(app: &mut RustGisApp, ui: &mut Ui) {
 fn atlas_menu(app: &mut RustGisApp, ui: &mut Ui) {
     ui.set_min_width(250.0);
     let Some(li) = app.session.active_layout else { return };
-    submenu_row(ui, "map", tl!("Generate an Atlas From Layer"), |ui| {
+    submenu_row(ui, "atlas", tl!("Generate an Atlas From Layer"), |ui| {
         let layers: Vec<String> = app.session.map().layers.iter().filter(|l| !l.is_raster()).map(|l| l.name.clone()).collect();
         if layers.is_empty() {
             ui.label(egui::RichText::new(tl!("No vector layers")).weak());
@@ -228,7 +229,7 @@ fn atlas_menu(app: &mut RustGisApp, ui: &mut Ui) {
     });
     menu_item(ui, app, "prev_extent", "Previous Feature", "layout.seriesPage", json!({"layout": li, "page": "previous"}));
     menu_item(ui, app, "next_extent", "Next Feature", "layout.seriesPage", json!({"layout": li, "page": "next"}));
-    menu_item(ui, app, "delete", "Turn Atlas Off", "layout.series", json!({"layout": li, "off": true}));
+    menu_item(ui, app, "close", "Turn Atlas Off", "layout.series", json!({"layout": li, "off": true}));
 }
 
 /// A toolbar button that does `act` (enabled when `on`).
@@ -252,7 +253,17 @@ fn sep(ui: &mut Ui, t: &Tokens) {
     ui.painter().line_segment([pos2(r.center().x, r.min.y + 3.0), pos2(r.center().x, r.max.y - 3.0)], Stroke::new(1.0, t.border_strong));
 }
 
-/// The toolbars while a layout is open: the layout's output, adding items, and the selected item.
+/// The selected item's lock: (layout, element, locked).
+fn selected_lock(app: &RustGisApp) -> Option<(usize, u32, bool)> {
+    let (li, el) = (app.session.active_layout?, app.layout.selected?);
+    let l = app.session.project.layouts.get(li)?;
+    l.elements.iter().find(|e| e.id == el).map(|e| (li, el, e.locked))
+}
+
+/// The toolbars while a layout is open, as QGIS's Layout window has them: the Layout toolbar
+/// (save, export, print, undo), the Navigation toolbar (the page's zoom) and the Actions
+/// toolbar (the selected item's order, lock, copy and deletion) along the top, and the Toolbox
+/// (select, move content and every item to add) down the left.
 pub fn toolbars(app: &mut RustGisApp, ui: &mut Ui) {
     let t = Tokens::get(ui.ctx());
     egui::Panel::top("qgis_layout_toolbars")
@@ -263,12 +274,12 @@ pub fn toolbars(app: &mut RustGisApp, ui: &mut Ui) {
             ui.painter().line_segment([pos2(r.min.x - 6.0, r.max.y + 2.0), pos2(r.max.x + 6.0, r.max.y + 2.0)], Stroke::new(1.0, t.border));
             ui.horizontal_wrapped(|ui| {
                 ui.spacing_mut().item_spacing = vec2(1.0, 2.0);
-                // Layout: save, export, print.
+                // The Layout toolbar.
                 for (icon, tip, id) in [
                     ("save", "Save Project", "ui.save"),
-                    ("save_as", "Save Layout File", "ui.saveLayout"),
-                    ("export", "Export as Image or PDF", "ui.exportLayout"),
-                    ("print", "Print", "ui.printLayout"),
+                    ("save_layout", "Save as Template (layout file)", "ui.saveLayout"),
+                    ("print", "Print Layout", "ui.printLayout"),
+                    ("export_image", "Export as Image or PDF…", "ui.exportLayout"),
                     ("undo", "Undo", "edit.undo"),
                     ("redo", "Redo", "edit.redo"),
                 ] {
@@ -277,44 +288,50 @@ pub fn toolbars(app: &mut RustGisApp, ui: &mut Ui) {
                     }
                 }
                 sep(ui, &t);
-                // Navigation inside the frames.
-                let nav = app.layout.navigate;
-                if tbtn(ui, "select", "Select and Move Items", true, !nav) {
-                    app.layout.navigate = false;
+                // The Navigation toolbar: the page's zoom.
+                if tbtn(ui, "zoom_full", "Zoom Full", true, false) {
+                    app.layout.zoom_full();
                 }
-                if tbtn(ui, "explore", "Pan and Zoom the Map in Frames", true, nav) {
-                    app.layout.navigate = true;
+                if tbtn(ui, "zoom_in", "Zoom In", true, false) {
+                    app.layout.zoom_by(1.25);
                 }
-                sep(ui, &t);
-                // Adding items.
-                if tbtn(ui, "map", "Add Map", true, false) {
-                    add_frame(app, "rectangle");
+                if tbtn(ui, "zoom_out", "Zoom Out", true, false) {
+                    app.layout.zoom_by(0.8);
                 }
-                for (icon, tip, kind) in ITEMS {
-                    if tbtn(ui, icon, tip, true, false) {
-                        add(app, json!({"kind": kind}));
-                    }
-                }
-                if tbtn(ui, "picture", "Add Picture…", true, false) {
-                    let _ = app.run_by_user("ui.layoutPicture", Value::Null);
+                if tbtn(ui, "zoom_actual", "Zoom to 100%", true, false) {
+                    app.layout.zoom_actual();
                 }
                 sep(ui, &t);
-                // The selected item.
+                // The Actions toolbar: the selected item.
                 let sel = app.layout.selected.is_some();
                 for (icon, tip, id, extra) in [
-                    ("up", "Raise to Top", "layout.arrange", json!({"to": "front"})),
-                    ("down", "Lower to Bottom", "layout.arrange", json!({"to": "back"})),
-                    ("delete", "Delete Item", "layout.removeElement", json!({})),
+                    ("raise", "Raise Selected Items", "layout.arrange", json!({"to": "forward"})),
+                    ("lower", "Lower Selected Items", "layout.arrange", json!({"to": "backward"})),
+                    ("bring_front", "Bring Selected Items to Front", "layout.arrange", json!({"to": "front"})),
+                    ("send_back", "Send Selected Items to Back", "layout.arrange", json!({"to": "back"})),
+                    ("duplicate", "Duplicate Item", "layout.duplicateElement", json!({})),
                 ] {
                     if tbtn(ui, icon, tip, sel, false) {
                         on_selected(app, id, extra);
                     }
                 }
+                let lock = selected_lock(app);
+                let locked = lock.is_some_and(|l| l.2);
+                if tbtn(ui, if locked { "lock" } else { "unlock" }, if locked { "Unlock Item" } else { "Lock Item" }, lock.is_some(), locked)
+                    && let Some((li, el, locked)) = lock
+                {
+                    let _ = app.run_by_user("layout.update", json!({"layout": li, "element": el, "locked": !locked}));
+                }
+                if tbtn(ui, "delete", "Delete Item", sel && !locked, false) {
+                    on_selected(app, "layout.removeElement", json!({}));
+                }
+                sep(ui, &t);
                 let props = app.ui.right == Some(crate::RightPane::Format);
-                if tbtn(ui, "pane_right", "Item Properties", true, props) {
+                if tbtn(ui, "pane_right", "Items and Item Properties", true, props) {
                     let _ = app.run_by_user("ui.pane.format", Value::Null);
                 }
                 // A hint of what the mouse does, at the end of the row.
+                let nav = app.layout.navigate;
                 let hint = if nav {
                     tl!("Drag in a map frame to pan its map, wheel to zoom it")
                 } else {
@@ -324,5 +341,42 @@ pub fn toolbars(app: &mut RustGisApp, ui: &mut Ui) {
                 ui.label(egui::RichText::new(hint).font(regular(11.5)).color(t.text_dim));
             });
         });
-    let _ = Rect::NOTHING;
+    // The Toolbox down the left, as QGIS's.
+    egui::Panel::left("qgis_layout_toolbox")
+        .exact_size(36.0)
+        .resizable(false)
+        .show_separator_line(false)
+        .frame(egui::Frame::NONE.fill(t.ribbon).inner_margin(egui::Margin { left: 4, right: 4, top: 6, bottom: 6 }))
+        .show(ui, |ui| {
+            let r = ui.max_rect();
+            ui.painter().line_segment([pos2(r.max.x + 4.0, r.min.y - 6.0), pos2(r.max.x + 4.0, r.max.y + 6.0)], Stroke::new(1.0, t.border));
+            egui::ScrollArea::vertical().id_salt("qgis_layout_toolbox_scroll").show(ui, |ui| {
+                ui.spacing_mut().item_spacing = vec2(0.0, 2.0);
+                let nav = app.layout.navigate;
+                if tbtn(ui, "select_item", "Select/Move Item", true, !nav) {
+                    app.layout.navigate = false;
+                }
+                if tbtn(ui, "move_content", "Move Item Content (pan and zoom the map in a frame)", true, nav) {
+                    app.layout.navigate = true;
+                }
+                vsep(ui, &t);
+                if tbtn(ui, "map", "Add Map", true, false) {
+                    add_frame(app, "rectangle");
+                }
+                if tbtn(ui, "picture", "Add Picture…", true, false) {
+                    let _ = app.run_by_user("ui.layoutPicture", Value::Null);
+                }
+                for (icon, tip, kind) in ITEMS {
+                    if tbtn(ui, icon, tip, true, false) {
+                        add(app, json!({"kind": kind}));
+                    }
+                }
+            });
+        });
+}
+
+/// A separator across the Toolbox.
+fn vsep(ui: &mut Ui, t: &Tokens) {
+    let (r, _) = ui.allocate_exact_size(vec2(26.0, 9.0), Sense::hover());
+    ui.painter().line_segment([pos2(r.min.x + 3.0, r.center().y), pos2(r.max.x - 3.0, r.center().y)], Stroke::new(1.0, t.border_strong));
 }

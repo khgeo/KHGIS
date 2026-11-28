@@ -19,7 +19,7 @@ installed QGIS plugin that adds Processing algorithms — on KHGIS's layers.
 | Locator bar | **Command Search** (Ctrl+K), top right |
 | Layer Styling panel | **Layer › Layer Styling**: the layer at the top, Symbology / Labels / Diagrams / Information down the left (a raster: Symbology / Information), the renderer (Single Symbol, Categorized, Graduated, Proportional Symbols) or a raster's render type in a list |
 | Feature Attributes form after digitizing | the same: finishing a point, line or polygon (double-click, right-click or Enter) opens a form with a box for each field; **OK** adds the feature with its values (one step to undo), **Cancel** leaves it out. A text field's **▾** lists the values it already has (the classes of a training layer). **Remember the last values** fills the form with the last ones; **Settings › Suppress Attribute Form After Feature Creation** turns the form off |
-| Print Layout window | opening a layout swaps in the layout's own menus (Layout, Edit, View, Add Item, Atlas) and toolbar, and shows only Item Properties; **← Back to Map** returns |
+| Print Layout window | opening a layout swaps in the layout's own menus (Layout, Edit, View, Add Item, Atlas), QGIS's Layout, Navigation and Actions toolbars along the top, the **Toolbox** down the left (Select/Move Item, Move Item Content, then each item to add) and **Items** over **Item Properties** on the right; **← Back to Map** returns |
 
 Every menu entry and toolbar button runs a KHGIS command, so nothing is lost from the ribbon.
 **View › Toolbars › Ribbon** shows the ribbon below the toolbars at any time.
@@ -29,6 +29,32 @@ The **ខ្មែរ | EN** switch at the top right changes the interface langu
 **Settings › Interface** switches between the QGIS layout and the ribbon; KHGIS remembers the
 choice. **Settings › Options…** has the rest of the settings (theme, interface scale, language,
 start-up project, autosave…).
+
+## Browser panel
+
+As QGIS's Browser: a toolbar (**Add Folder…**, **Refresh**, **Collapse All** and a filter) over
+a tree of **Favorites**, **Spatial Bookmarks**, **Project Home**, **Home**, the computer's drives,
+**XYZ Tiles** and the **Project**'s maps and layouts. Folders open in place; a double-click adds
+a file to the map (a Shapefile is listed by its `.shp` and opens with its `.dbf`, `.shx` and
+`.prj`), opens a project, or adds an XYZ basemap.
+
+In the web app, **Add Folder…** asks for a folder on the computer (Chrome and Edge; Firefox and
+Safari can't open local folders): it is listed under Favorites, kept for the next visit, and the
+browser asks once per visit to read it again. Right-click a folder to remove it from Favorites.
+
+## Print layout
+
+As QGIS's Layout window: the **Layout** toolbar (Save, Save as Template, Print, Export, Undo,
+Redo), **Navigation** (Zoom Full, Zoom In, Zoom Out, Zoom to 100%) and **Actions** (Raise,
+Lower, Bring to Front, Send to Back, Duplicate, Lock/Unlock, Delete) along the top; the
+**Toolbox** down the left: **Select/Move Item**, **Move Item Content** (pan and zoom the map in a
+map frame), then Add Map, Picture, Label, Dynamic Text, Legend, Scale Bar, North Arrow, Rectangle,
+Ellipse, Arrow, Attribute Table, Chart and Color Bar. On the right, **Items** lists every item,
+the top one first, with a box to show it and a lock; a click selects it, and its settings are in
+**Item Properties** below.
+
+Every toolbar tool has an icon of its own, and a test keeps it so: a new tool without one, or
+two tools sharing one, fails it.
 
 ## Layer Styling
 

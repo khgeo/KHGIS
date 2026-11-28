@@ -70,6 +70,7 @@ mod pluginsui;
 mod portalsui;
 mod qgisdock;
 mod qgislayout;
+mod qgisbrowser;
 mod qgisstyle;
 mod qgisui;
 mod radial;
@@ -334,6 +335,9 @@ pub struct Services {
     /// (the bridge's status, or an error) in the slot.
     #[allow(clippy::type_complexity)]
     pub qgis_connect: Option<Box<dyn Fn(String, std::sync::Arc<std::sync::Mutex<Option<Result<Value, String>>>>)>>,
+    /// Local folders the browser can read (Chrome, Edge), for the Browser panel; `None` on the
+    /// desktop (which reads folders itself) and in browsers without folder access.
+    pub local_folders: Option<LocalFolders>,
     /// Opens a file picker for `"data"`, `"project"`, or `"shapefile"`; results land in `inbox`.
     /// Shapefile picks carry [`SHAPEFILE_PICK`] after sidecars are gathered into ZIPs.
     pub open_async: Option<Box<dyn Fn(&str)>>,
@@ -375,6 +379,22 @@ pub struct Services {
     /// Online and KHGIS's own app) in a pop-up window, putting who signed in, or why not, in the
     /// slot (the browser; the desktop runs `arcgis.signIn`).
     pub arcgis_sign_in: Option<Box<dyn Fn(String, String, Slot<Result<String, String>>)>>,
+}
+
+/// The browser's local folders (`Services::local_folders`): a folder picked once is kept for
+/// later visits; its contents are listed by path (`""` the folder itself, `"a/b"` inside it).
+#[allow(clippy::type_complexity)]
+pub struct LocalFolders {
+    /// The folders connected before: (id, name) each.
+    pub known: Box<dyn Fn(Slot<Result<Vec<(u32, String)>, String>>)>,
+    /// Asks for a folder (the browser's folder picker); the slot gets every connected folder.
+    pub connect: Box<dyn Fn(Slot<Result<Vec<(u32, String)>, String>>)>,
+    /// A folder's entries at a path: (name, whether it is a folder).
+    pub list: Box<dyn Fn(u32, String, Slot<Result<Vec<(String, bool)>, String>>)>,
+    /// Reads a file at a path (and a Shapefile's parts beside it) into `inbox`, as a pick does.
+    pub open: Box<dyn Fn(u32, String, String)>,
+    /// Forgets a connected folder.
+    pub forget: Box<dyn Fn(u32)>,
 }
 
 /// A new private folder for one print job: unique, created fresh (never an existing path) and,

@@ -473,7 +473,7 @@ impl eframe::App for WebShell {
 
 /// Reads files picked or dropped together into the inbox, all at once, each Shapefile's loose
 /// parts zipped into one (`gather_shapefiles`) so it opens as a layer; `mark` starts each name.
-async fn read_together(files: Vec<web_sys::File>, mark: &str, inbox: &Inbox, notes: Notes) {
+pub(crate) async fn read_together(files: Vec<web_sys::File>, mark: &str, inbox: &Inbox, notes: Notes) {
     let mut read = Vec::new();
     for file in files {
         let name = file.name();
@@ -1166,6 +1166,19 @@ fn services(inbox: Inbox, font_inbox: Inbox, notes: Notes, ctx: egui::Context, e
             });
         })),
         font_inbox: Some(font_inbox),
+        local_folders: crate::webfolders::supported().then(|| {
+            let (c1, c2, c3, c4) = (ctx.clone(), ctx.clone(), ctx.clone(), ctx.clone());
+            let (inbox, notes) = (inbox.clone(), notes.clone());
+            rustgis_ui_egui::LocalFolders {
+                known: Box::new(move |slot| crate::webfolders::known(slot, c1.clone())),
+                connect: Box::new(move |slot| crate::webfolders::connect(slot, c2.clone())),
+                list: Box::new(move |id, path, slot| crate::webfolders::list(id, path, slot, c3.clone())),
+                open: Box::new(move |id, path, name| {
+                    crate::webfolders::open(id, path, name, inbox.clone(), notes.clone(), c4.clone())
+                }),
+                forget: Box::new(crate::webfolders::forget),
+            }
+        }),
         open_async: Some(Box::new(move |purpose: &str| {
             let inbox = open_inbox.clone();
             let notes = notes.clone();

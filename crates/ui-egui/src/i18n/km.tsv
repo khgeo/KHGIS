@@ -1902,3 +1902,35 @@ Add a class	បន្ថែមថ្នាក់
 Remove the selected class	ដកថ្នាក់ដែលបានជ្រើសចេញ
 Graduated classes come from their bounds: Classify makes them again	ថ្នាក់តាមកម្រិតកើតពីព្រំដែនរបស់វា៖ ចុច ចាត់ថ្នាក់ ដើម្បីបង្កើតឡើងវិញ
 Values without a class:	តម្លៃដែលគ្មានថ្នាក់៖
+Favorites	ចំណូលចិត្ត
+Project Home	ថតគម្រោង
+XYZ Tiles	ផ្ទាំង XYZ
+Add Folder… (to Favorites)	បន្ថែមថត… (ទៅចំណូលចិត្ត)
+Add Folder to Favorites	បន្ថែមថតទៅចំណូលចិត្ត
+Remove Folder from Favorites	ដកថតចេញពីចំណូលចិត្ត
+Filter files	ត្រងឯកសារ
+Double-click to add it to the map	ចុចពីរដងដើម្បីបន្ថែមទៅផែនទី
+Double-click to open the layout	ចុចពីរដងដើម្បីបើកប្លង់
+Add Layer to Project	បន្ថែមស្រទាប់ទៅគម្រោង
+Reading…	កំពុងអាន…
+Try again	សាកម្ដងទៀត
+{n} more not listed	{n} ទៀតមិនបានបង្ហាញ
+Pick a folder on this computer to browse it here	ជ្រើសថតមួយនៅលើកុំព្យូទ័រនេះ ដើម្បីរុករកវានៅទីនេះ
+This browser can't open local folders: use Chrome or Edge	កម្មវិធីរុករកនេះមិនអាចបើកថតក្នុងម៉ាស៊ីនបានទេ៖ សូមប្រើ Chrome ឬ Edge
+None yet: View › New Spatial Bookmark	មិនទាន់មាន៖ ទិដ្ឋភាព › ចំណាំទីតាំងថ្មី
+Save as Template (layout file)	រក្សាទុកជាគំរូ (ឯកសារប្លង់)
+Zoom to 100%	ពង្រីកទៅ ១០០%
+Raise Selected Items	លើកធាតុដែលបានជ្រើស
+Lower Selected Items	បន្ទាបធាតុដែលបានជ្រើស
+Bring Selected Items to Front	នាំធាតុដែលបានជ្រើសទៅខាងមុខ
+Send Selected Items to Back	បញ្ជូនធាតុដែលបានជ្រើសទៅខាងក្រោយ
+Lock Item	ចាក់សោធាតុ
+Unlock Item	ដោះសោធាតុ
+Items and Item Properties	ធាតុ និងលក្ខណៈធាតុ
+Select/Move Item	ជ្រើស/ផ្លាស់ទីធាតុ
+Move Item Content (pan and zoom the map in a frame)	ផ្លាស់ទីខ្លឹមសារធាតុ (រំកិល និងពង្រីកផែនទីក្នុងស៊ុម)
+Add Dynamic Text (page, date, scale…)	បន្ថែមអត្ថបទថាមវន្ត (ទំព័រ កាលបរិច្ឆេទ មាត្រដ្ឋាន…)
+Add Color Bar	បន្ថែមរបារពណ៌
+Items	ធាតុ
+Show this item	បង្ហាញធាតុនេះ
+No items yet: add them from the Toolbox on the left	មិនទាន់មានធាតុ៖ បន្ថែមពីប្រអប់ឧបករណ៍នៅខាងឆ្វេង

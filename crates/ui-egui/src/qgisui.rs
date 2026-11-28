@@ -72,6 +72,8 @@ pub struct State {
     pub dragging: Option<String>,
     /// The Feature Attributes form (see `featureform`).
     pub form: crate::featureform::State,
+    /// The Browser panel's folders and listings (see `qgisbrowser`).
+    pub browse: crate::qgisbrowser::State,
 }
 
 impl Default for State {
@@ -92,6 +94,7 @@ impl Default for State {
             toolbar_widths: Default::default(),
             dragging: None,
             form: Default::default(),
+            browse: Default::default(),
         }
     }
 }
@@ -351,7 +354,7 @@ fn project_menu(app: &mut RustGisApp, ui: &mut Ui) {
     ui.separator();
     submenu_row(ui, "export", tl!("Import/Export"), |ui| {
         menu_item(ui, app, "export_map", "Export Map to Image…", "ui.exportMap", Value::Null);
-        menu_item(ui, app, "print", "Export Map to PDF…", "ui.printMap", Value::Null);
+        menu_item(ui, app, "export_pdf", "Export Map to PDF…", "ui.printMap", Value::Null);
         menu_item(ui, app, "export_layer", "Export Layer…", "ui.exportLayer", Value::Null);
         menu_item(ui, app, "bookmark_import", "Import Bookmarks…", "ui.openItem", json!({"kind": "bookmarks"}));
         menu_item(ui, app, "bookmark_export", "Export Bookmarks…", "ui.saveItem", json!({"kind": "bookmarks"}));
@@ -361,8 +364,8 @@ fn project_menu(app: &mut RustGisApp, ui: &mut Ui) {
     menu_item(ui, app, "new_layout", "New Print Layout", "layout.new", json!({"template": "blank"}));
     menu_item(ui, app, "new_layout", "Cambodia A4 Map Layout", "khgis.autoLayout", json!({"lang": lang()}));
     ui.separator();
-    menu_item(ui, app, "settings", "Properties… (Coordinate System)", "ui.dialog", json!({"name": "coordinateSystem"}));
-    menu_item(ui, app, "goto_xy", "Snapping Options", "edit.snapping", Value::Null);
+    menu_item(ui, app, "crs", "Properties… (Coordinate System)", "ui.dialog", json!({"name": "coordinateSystem"}));
+    menu_item(ui, app, "snapping", "Snapping Options", "edit.snapping", Value::Null);
     #[cfg(not(target_arch = "wasm32"))]
     {
         ui.separator();
@@ -390,10 +393,10 @@ fn edit_menu(app: &mut RustGisApp, ui: &mut Ui) {
         tool_item(ui, app, "select", "Select Features by Freehand", Tool::SelectLasso);
         tool_item(ui, app, "select", "Select Features by Radius", Tool::SelectRadius);
         ui.separator();
-        menu_item(ui, app, "select", "Select All Features", "select.all", Value::Null);
-        menu_item(ui, app, "select", "Invert Feature Selection", "select.switch", Value::Null);
+        menu_item(ui, app, "select_all", "Select All Features", "select.all", Value::Null);
+        menu_item(ui, app, "select_invert", "Invert Feature Selection", "select.switch", Value::Null);
         menu_item(ui, app, "clear_sel", "Deselect Features from All Layers", "select.clear", Value::Null);
-        menu_item(ui, app, "new", "New Layer From Selection", "select.layerFromSelection", Value::Null);
+        menu_item(ui, app, "layer_from_selection", "New Layer From Selection", "select.layerFromSelection", Value::Null);
     });
     ui.separator();
     let editing = app.session.map().editing.settings.enabled;
@@ -418,7 +421,7 @@ fn view_menu(app: &mut RustGisApp, ui: &mut Ui) {
     ui.separator();
     menu_item(ui, app, "zoom_full", "Zoom Full", "map.zoomFull", Value::Null);
     menu_item(ui, app, "zoom_sel", "Zoom to Selection", "select.zoomTo", Value::Null);
-    menu_item(ui, app, "zoom_full", "Zoom to Layer", "layer.zoomTo", Value::Null);
+    menu_item(ui, app, "zoom_layer", "Zoom to Layer", "layer.zoomTo", Value::Null);
     menu_item(ui, app, "prev_extent", "Zoom Last", "map.prevExtent", Value::Null);
     menu_item(ui, app, "next_extent", "Zoom Next", "map.nextExtent", Value::Null);
     menu_item(ui, app, "goto_xy", "Go to Coordinates…", "ui.dialog", json!({"name": "goToXY"}));
@@ -437,7 +440,7 @@ fn view_menu(app: &mut RustGisApp, ui: &mut Ui) {
     });
     menu_item(ui, app, "globe_view", "3D Map View (Globe)", "map.projection", json!({"projection": "globe"}));
     menu_item(ui, app, "map", "2D Map View", "map.projection", json!({"projection": "mercator"}));
-    menu_item(ui, app, "relief", "Open in Cambodia 3D (Landscape, Trees, Houses)", "ui.cambodia3d", json!({}));
+    menu_item(ui, app, "landscape_3d", "Open in Cambodia 3D (Landscape, Trees, Houses)", "ui.cambodia3d", json!({}));
     menu_item(ui, app, "time_slider", "Temporal Controller", "ui.timeSlider", Value::Null);
     ui.separator();
     submenu_row(ui, "pane", tl!("Panels"), |ui| panels(app, ui));
@@ -451,7 +454,7 @@ fn view_menu(app: &mut RustGisApp, ui: &mut Ui) {
         check_item(ui, app, on, "Ribbon (every KHGIS tool)", "ui.qgisToolbar", json!({"id": "ribbon"}));
     });
     ui.separator();
-    menu_item(ui, app, "zoom_full", "Refresh", "map.reloadWebLayers", json!({}));
+    menu_item(ui, app, "update", "Refresh", "map.reloadWebLayers", json!({}));
     #[cfg(not(target_arch = "wasm32"))]
     {
         let full = ui.ctx().input(|i| i.viewport().fullscreen).unwrap_or(false);
@@ -494,15 +497,15 @@ fn panels(app: &mut RustGisApp, ui: &mut Ui) {
 
 fn layer_menu(app: &mut RustGisApp, ui: &mut Ui) {
     ui.set_min_width(260.0);
-    menu_item(ui, app, "add_data", "Data Source Manager", "ui.pane.sources", Value::Null);
+    menu_item(ui, app, "data_source", "Data Source Manager", "ui.pane.sources", Value::Null);
     submenu_row(ui, "add_data", tl!("Add Layer"), |ui| {
         menu_item(ui, app, "add_data", "Add Vector or Raster Layer…", "ui.addData", Value::Null);
-        menu_item(ui, app, "table", "Add Delimited Text Layer…", "ui.addDelimited", Value::Null);
+        menu_item(ui, app, "add_delimited", "Add Delimited Text Layer…", "ui.addDelimited", Value::Null);
         menu_item(ui, app, "web_data", "Add Layer From URL…", "ui.addUrl", Value::Null);
         menu_item(ui, app, "web_map", "Add WMS/WMTS, WFS or ArcGIS Layer…", "ui.addService", Value::Null);
         menu_item(ui, app, "basemap", "Add XYZ Tile Layer…", "ui.dialog", json!({"name": "addTiles"}));
-        menu_item(ui, app, "package", "Add GeoPackage Layer…", "ui.dialog", json!({"name": "gpkgAddLayer"}));
-        menu_item(ui, app, "table", "Add Database Layer…", "ui.dialog", json!({"name": "addDatabase"}));
+        menu_item(ui, app, "add_gpkg", "Add GeoPackage Layer…", "ui.dialog", json!({"name": "gpkgAddLayer"}));
+        menu_item(ui, app, "add_database", "Add Database Layer…", "ui.dialog", json!({"name": "addDatabase"}));
         menu_item(ui, app, "raster_layer", "Add Zarr Variable…", "ui.addZarr", Value::Null);
         menu_item(ui, app, "add_folder", "Add Folder…", "ui.addFolder", Value::Null);
     });
@@ -518,8 +521,8 @@ fn layer_menu(app: &mut RustGisApp, ui: &mut Ui) {
     menu_item(ui, app, "field", "Add Field…", "ui.dialog", json!({"name": "addField"}));
     menu_item(ui, app, "symbology", "Layer Styling (Symbology)", "ui.pane.symbology", Value::Null);
     menu_item(ui, app, "label", "Labeling", "ui.pane.labeling", Value::Null);
-    menu_item(ui, app, "about", "Layer Properties (Details)", "ui.pane.details", Value::Null);
-    menu_item(ui, app, "zoom_full", "Zoom to Layer", "layer.zoomTo", Value::Null);
+    menu_item(ui, app, "layer_properties", "Layer Properties (Details)", "ui.pane.details", Value::Null);
+    menu_item(ui, app, "zoom_layer", "Zoom to Layer", "layer.zoomTo", Value::Null);
 }
 
 fn settings_menu(app: &mut RustGisApp, ui: &mut Ui) {
@@ -564,7 +567,7 @@ fn plugins_menu(app: &mut RustGisApp, ui: &mut Ui) {
     menu_item(ui, app, "plugin", "Manage and Install Plugins…", "ui.plugins", json!({"open": true}));
     menu_item(ui, app, "plugin_add", "Install Plugin From File…", "ui.installPlugin", Value::Null);
     ui.separator();
-    menu_item(ui, app, "toolbox", "QGIS Plugins & Tools…", "ui.qgisBridge", Value::Null);
+    menu_item(ui, app, "geoprocessing", "QGIS Plugins & Tools…", "ui.qgisBridge", Value::Null);
     menu_item(ui, app, "python", "Python Console (Scripts)", "ui.pane.script", Value::Null);
     // Each enabled plugin: its panel, commands and tools.
     let lang = app.lang().code();
@@ -623,7 +626,7 @@ fn tools_menu(app: &mut RustGisApp, ui: &mut Ui, raster: bool) {
         ui.label(egui::RichText::new(tl!("No tools")).weak());
     }
     if raster {
-        menu_item(ui, app, "rgb", "LEE RS Lab…", "ui.pane.rslab", Value::Null);
+        menu_item(ui, app, "satellite", "LEE RS Lab…", "ui.pane.rslab", Value::Null);
         ui.separator();
     }
     tree(app, ui, &own);
@@ -632,7 +635,7 @@ fn tools_menu(app: &mut RustGisApp, ui: &mut Ui, raster: bool) {
         submenu_row(ui, "toolbox", tl!("QGIS Processing"), |ui| tree(app, ui, &qgis));
     } else if !raster {
         ui.separator();
-        menu_item(ui, app, "toolbox", "Connect QGIS for its Algorithms…", "ui.qgisBridge", Value::Null);
+        menu_item(ui, app, "geoprocessing", "Connect QGIS for its Algorithms…", "ui.qgisBridge", Value::Null);
     }
     ui.separator();
     menu_item(ui, app, "toolbox", "Processing Toolbox", "ui.pane.geoprocessing", Value::Null);
@@ -676,8 +679,8 @@ fn web_menu(app: &mut RustGisApp, ui: &mut Ui) {
         menu_item(ui, app, "planet", "Portolan…", "ui.stac.portolan", Value::Null);
         menu_item(ui, app, "planet", "Vantor…", "ui.stac.vantor", Value::Null);
     });
-    menu_item(ui, app, "web_data", "OpenStreetMap…", "ui.dialog", json!({"name": "osm"}));
-    menu_item(ui, app, "web_data", "Administrative Boundaries…", "ui.dialog", json!({"name": "boundaries"}));
+    menu_item(ui, app, "osm", "OpenStreetMap…", "ui.dialog", json!({"name": "osm"}));
+    menu_item(ui, app, "boundaries", "Administrative Boundaries…", "ui.dialog", json!({"name": "boundaries"}));
     menu_item(ui, app, "directions", "Directions", "ui.pane.directions", Value::Null);
     menu_item(ui, app, "share", "Share…", "ui.share", Value::Null);
 }
@@ -690,15 +693,15 @@ fn processing_menu(app: &mut RustGisApp, ui: &mut Ui) {
     menu_item(ui, app, "python", "Scripts", "ui.pane.script", Value::Null);
     menu_item(ui, app, "run", "Tasks", "ui.pane.tasks", Value::Null);
     ui.separator();
-    menu_item(ui, app, "toolbox", "QGIS Plugins & Tools…", "ui.qgisBridge", Value::Null);
+    menu_item(ui, app, "geoprocessing", "QGIS Plugins & Tools…", "ui.qgisBridge", Value::Null);
 }
 
 fn cambodia_menu(app: &mut RustGisApp, ui: &mut Ui) {
     ui.set_min_width(260.0);
     menu_item(ui, app, "cambodia", "Load a Province or District…", "ui.dialog", json!({"name": "cambodia"}));
     menu_item(ui, app, "new_layout", "A4 Map Layout (Khmer or English)", "khgis.autoLayout", json!({"lang": lang()}));
-    menu_item(ui, app, "rgb", "LEE RS Lab (Satellite Imagery)", "ui.pane.rslab", Value::Null);
-    menu_item(ui, app, "relief", "Open in Cambodia 3D", "ui.cambodia3d", json!({}));
+    menu_item(ui, app, "satellite", "LEE RS Lab (Satellite Imagery)", "ui.pane.rslab", Value::Null);
+    menu_item(ui, app, "landscape_3d", "Open in Cambodia 3D", "ui.cambodia3d", json!({}));
     ui.separator();
     for (id, label) in [
         ("floodExposure", "Villages Exposed to Floods"),
@@ -716,7 +719,7 @@ fn help_menu(app: &mut RustGisApp, ui: &mut Ui) {
     menu_item(ui, app, "command", "Keyboard Shortcuts", "ui.shortcuts", Value::Null);
     menu_item(ui, app, "message_log", "Log Messages", "ui.pane.diagnosticLog", Value::Null);
     #[cfg(not(target_arch = "wasm32"))]
-    menu_item(ui, app, "export", "Check for Updates…", "ui.checkUpdate", Value::Null);
+    menu_item(ui, app, "check_updates", "Check for Updates…", "ui.checkUpdate", Value::Null);
     ui.separator();
     menu_item(ui, app, "about", "About KHGIS", "ui.about", Value::Null);
 }
@@ -786,7 +789,7 @@ fn contents(ui: &mut Ui, app: &mut RustGisApp, id: &str) {
         button(ui, app, "save", "Save Project", "ui.save", Value::Null, false);
         button(ui, app, "save_as", "Save Project As…", "ui.saveAs", Value::Null, false);
         button(ui, app, "new_layout", "New Print Layout", "layout.new", json!({"template": "blank"}), false);
-        button(ui, app, "print", "Export Map to PDF", "ui.printMap", Value::Null, false);
+        button(ui, app, "export_pdf", "Export Map to PDF", "ui.printMap", Value::Null, false);
         }
         "navigation" => {
         tool_button(ui, app, "explore", "Pan Map (click a feature to identify it)", Tool::Explore);
@@ -795,7 +798,7 @@ fn contents(ui: &mut Ui, app: &mut RustGisApp, id: &str) {
         button(ui, app, "zoom_out", "Zoom Out", "map.zoomOut", Value::Null, false);
         button(ui, app, "zoom_full", "Zoom Full", "map.zoomFull", Value::Null, false);
         button(ui, app, "zoom_sel", "Zoom to Selection", "select.zoomTo", Value::Null, false);
-        button(ui, app, "zoom_world", "Zoom to Layer", "layer.zoomTo", Value::Null, false);
+        button(ui, app, "zoom_layer", "Zoom to Layer", "layer.zoomTo", Value::Null, false);
         button(ui, app, "prev_extent", "Zoom Last", "map.prevExtent", Value::Null, false);
         button(ui, app, "next_extent", "Zoom Next", "map.nextExtent", Value::Null, false);
         button(ui, app, "bookmark_new", "New Spatial Bookmark…", "ui.dialog", json!({"name": "bookmark"}), false);
@@ -831,15 +834,15 @@ fn contents(ui: &mut Ui, app: &mut RustGisApp, id: &str) {
         }
         "data" => {
         let s = app.ui.left == Some(crate::LeftPane::Sources);
-        button(ui, app, "add_data", "Open Data Source Manager", "ui.pane.sources", Value::Null, s);
-        button(ui, app, "point_layer", "Add Vector or Raster Layer", "ui.addData", Value::Null, false);
-        button(ui, app, "table", "Add Delimited Text Layer", "ui.addDelimited", Value::Null, false);
+        button(ui, app, "data_source", "Open Data Source Manager", "ui.pane.sources", Value::Null, s);
+        button(ui, app, "add_data", "Add Vector or Raster Layer", "ui.addData", Value::Null, false);
+        button(ui, app, "add_delimited", "Add Delimited Text Layer", "ui.addDelimited", Value::Null, false);
         button(ui, app, "web_map", "Add WMS/WMTS, WFS or ArcGIS Layer", "ui.addService", Value::Null, false);
         button(ui, app, "basemap", "Add XYZ Tile Layer", "ui.dialog", json!({"name": "addTiles"}), false);
         button(ui, app, "cambodia", "Add Cambodia Data", "ui.dialog", json!({"name": "cambodia"}), false);
         let lab = app.ui.right == Some(RightPane::RsLab);
-        button(ui, app, "rgb", "LEE RS Lab", "ui.pane.rslab", Value::Null, lab);
-        button(ui, app, "relief", "Open in Cambodia 3D", "ui.cambodia3d", json!({}), false);
+        button(ui, app, "satellite", "LEE RS Lab", "ui.pane.rslab", Value::Null, lab);
+        button(ui, app, "landscape_3d", "Open in Cambodia 3D", "ui.cambodia3d", json!({}), false);
         }
         "plugins" => {
         let tb = app.ui.right == Some(RightPane::Geoprocessing);
@@ -851,7 +854,7 @@ fn contents(ui: &mut Ui, app: &mut RustGisApp, id: &str) {
         let q = app.ui.qgis.bridge.open;
         button(ui, app, "geoprocessing", "QGIS Plugins & Tools", "ui.qgisBridge", Value::Null, q);
         let ai = app.ui.right == Some(RightPane::Assistant);
-        button(ui, app, "command", "AI Assistant", "ui.pane.assistant", Value::Null, ai);
+        button(ui, app, "assistant", "AI Assistant", "ui.pane.assistant", Value::Null, ai);
         }
         _ => {}
     }
@@ -1633,5 +1636,122 @@ mod toolbar_tests {
         // Saved and read back; unknown and repeated ids dropped, missing ones added.
         assert_eq!(rows_pref(&rows_from_pref(&rows_pref(&rows))), rows_pref(&rows));
         assert_eq!(rows_pref(&rows_from_pref("data,bogus;data,project")), "data;project,navigation,attributes,digitizing,plugins");
+    }
+}
+
+/// Every tool of the QGIS layout's toolbars, Toolbox and menus: drawn with an icon of its own
+/// (one KHGIS draws, not the plain square an unknown name gets), no two tools of the toolbars
+/// sharing one, and running a command that exists.
+#[cfg(test)]
+#[allow(clippy::unwrap_used)]
+mod tool_audit {
+    /// The quoted strings after each `prefix` in `src`: up to `n` of them, in order, the first
+    /// right after the prefix.
+    fn calls(src: &str, prefix: &str, n: usize) -> Vec<Vec<String>> {
+        // This test's own text isn't a tool.
+        let src = src.split("mod tool_audit").next().unwrap_or(src);
+        let mut out = Vec::new();
+        let mut rest = src;
+        while let Some(i) = rest.find(prefix) {
+            rest = &rest[i + prefix.len()..];
+            // The call, as far as its closing parenthesis (or a line's end, for a tuple).
+            let end = rest.find(')').unwrap_or(rest.len()).min(400);
+            let call = &rest[..end];
+            // The first string: the prefix ends with its opening quote.
+            let Some(first) = call.find('"') else { continue };
+            let mut items = vec![call[..first].to_string()];
+            let mut s = &call[first + 1..];
+            while items.len() < n {
+                let Some(a) = s.find('"') else { break };
+                let Some(b) = s[a + 1..].find('"') else { break };
+                items.push(s[a + 1..a + 1 + b].to_string());
+                s = &s[a + 2 + b..];
+            }
+            out.push(items);
+        }
+        out
+    }
+
+    const SOURCES: [&str; 3] = [include_str!("qgisui.rs"), include_str!("qgislayout.rs"), include_str!("qgisbrowser.rs")];
+
+    #[test]
+    fn every_tool_has_its_own_icon_and_a_command() {
+        let known = |icon: &str| drawn(icon) != drawn("__no_such_icon__");
+        let mut toolbar: Vec<(String, String, String)> = Vec::new();
+        for src in SOURCES {
+            // Toolbar buttons (icon, label, command), tool buttons (icon, label) and the layout's
+            // buttons (icon, label).
+            for c in calls(src, "\n        button(ui, app, \"", 3) {
+                toolbar.push((c[0].clone(), c.get(1).cloned().unwrap_or_default(), c.get(2).cloned().unwrap_or_default()));
+            }
+            for c in calls(src, "tool_button(ui, app, \"", 2) {
+                toolbar.push((c[0].clone(), c.get(1).cloned().unwrap_or_default(), String::new()));
+            }
+            for c in calls(src, "tbtn(ui, \"", 2) {
+                toolbar.push((c[0].clone(), c.get(1).cloned().unwrap_or_default(), String::new()));
+            }
+            for c in calls(src, "menu_item(ui, app, \"", 3) {
+                assert!(c[0].is_empty() || known(&c[0]), "menu item {:?} draws no icon of its own: {}", c.get(1), c[0]);
+                if let Some(cmd) = c.get(2) {
+                    assert_command(cmd);
+                }
+            }
+        }
+        // The layout's tables of tools: ("icon", "Label", …).
+        for c in calls(include_str!("qgislayout.rs"), "    (\"", 2) {
+            if c.len() == 2 && c[1].starts_with(char::is_uppercase) {
+                toolbar.push((c[0].clone(), c[1].clone(), String::new()));
+            }
+        }
+        assert!(toolbar.len() > 50, "the audit found the tools: {}", toolbar.len());
+        let mut by_icon: std::collections::HashMap<&str, Vec<&str>> = Default::default();
+        for (icon, label, cmd) in &toolbar {
+            assert!(known(icon), "{label}: its icon {icon} isn't drawn (an unknown name is a plain square)");
+            if !cmd.is_empty() {
+                assert_command(cmd);
+            }
+            let label = label.trim_end_matches('…');
+            let list = by_icon.entry(icon).or_default();
+            if !list.contains(&label) {
+                list.push(label);
+            }
+        }
+        // The same action under two names is fine; anything else shares an icon by mistake.
+        let same = [["Save", "Save Project"], ["Delete Selected", "Delete Item"], ["Print", "Print Layout"]];
+        let shared: Vec<String> = by_icon
+            .iter()
+            .filter(|(_, l)| l.len() > 1 && !same.iter().any(|s| l.iter().all(|x| s.contains(x))))
+            .map(|(i, l)| format!("{i}: {l:?}"))
+            .collect();
+        assert!(shared.is_empty(), "tools sharing an icon:\n{}", shared.join("\n"));
+    }
+
+    /// What an icon draws, as text: the fallback's for a name KHGIS doesn't draw.
+    fn drawn(icon: &str) -> String {
+        let ctx = egui::Context::default();
+        let mut out = ctx.run_ui(Default::default(), |ui| {
+            let r = egui::Rect::from_min_size(egui::pos2(0.0, 0.0), egui::vec2(24.0, 24.0));
+            crate::icons::paint(ui.painter(), r, icon, egui::Color32::BLACK, egui::Color32::BLUE);
+        });
+        out.textures_delta.clear();
+        format!("{:?}", out.shapes.iter().map(|s| &s.shape).collect::<Vec<_>>())
+    }
+
+    /// A command a tool runs: the engine's, or one the app runs itself (`ui.*`).
+    fn assert_command(cmd: &str) {
+        if !cmd.contains('.') {
+            return;
+        }
+        let s = rustgis_engine::Session::new(rustgis_engine::Project::default());
+        if s.registry.get(cmd).is_some() {
+            return;
+        }
+        // The app's own commands, as Command Search lists them, or ones it handles by name.
+        let listed = crate::chrome::UI_COMMANDS.iter().any(|(id, ..)| *id == cmd);
+        let quoted = format!("\"{cmd}\" =>");
+        let lib = include_str!("lib.rs");
+        let arm = lib.contains(&quoted) || lib.contains(&format!("| \"{cmd}\"")) || lib.contains(&format!("\"{cmd}\" |"));
+        let handled = cmd.starts_with("ui.") && (listed || arm);
+        assert!(handled, "the tool runs {cmd}, which no command is");
     }
 }

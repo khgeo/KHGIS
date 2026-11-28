@@ -350,10 +350,19 @@ pub fn paint(painter: &Painter, r: Rect, name: &str, ink: Color32, accent: Color
             p.globe(10.0, 10.0, 7.5);
             p.plus_badge(18.0, 17.5);
         }
-        "add_folder" | "open" => {
+        // Open: an amber folder, its front lifted open.
+        "open" => {
+            p.fill(&[(2.0, 5.0), (9.0, 5.0), (11.0, 7.5), (20.0, 7.5), (20.0, 19.0), (2.0, 19.0)], amber.gamma_multiply(0.75));
+            p.closed(&[(2.0, 5.0), (9.0, 5.0), (11.0, 7.5), (20.0, 7.5), (20.0, 10.0)], 1.3, ink);
+            p.fill(&[(5.0, 10.0), (23.0, 10.0), (20.0, 19.0), (2.0, 19.0)], amber);
+            p.closed(&[(5.0, 10.0), (23.0, 10.0), (20.0, 19.0), (2.0, 19.0)], 1.3, ink);
+        }
+        // Add Folder: the folder with a plus.
+        "add_folder" => {
             p.fill(&[(2.0, 6.0), (9.0, 6.0), (11.0, 8.0), (22.0, 8.0), (22.0, 19.0), (2.0, 19.0)], amber);
             p.closed(&[(2.0, 5.0), (9.0, 5.0), (11.0, 7.5), (22.0, 7.5), (22.0, 19.0), (2.0, 19.0)], 1.3, ink);
             p.line(&[(2.0, 10.0), (22.0, 10.0)], 1.0, ink);
+            p.plus_badge(18.5, 17.5);
         }
         "select" => {
             p.dashed_rect(3.0, 3.0, 14.0, 12.0, accent);
@@ -410,10 +419,17 @@ pub fn paint(painter: &Painter, r: Rect, name: &str, ink: Color32, accent: Color
                 p.line(&[(x, 16.0), (x, 16.0 + l)], 1.0, ink);
             }
         }
-        "identify" | "about" => {
+        "about" => {
             p.circle(12.0, 12.0, 9.0, Some(accent), None);
             p.circle(12.0, 7.5, 1.4, Some(Color32::WHITE), None);
             p.line(&[(12.0, 10.5), (12.0, 17.0)], 2.2, Color32::WHITE);
+        }
+        // Identify Features: the pointer over the information mark.
+        "identify" => {
+            p.circle(14.5, 9.5, 7.0, Some(accent), None);
+            p.circle(14.5, 6.0, 1.2, Some(Color32::WHITE), None);
+            p.line(&[(14.5, 8.5), (14.5, 13.5)], 1.9, Color32::WHITE);
+            p.cursor(3.0, 10.0, 1.0);
         }
         "message_log" => {
             // A message bubble containing a log's severity dots and text lines.
@@ -459,7 +475,18 @@ pub fn paint(painter: &Painter, r: Rect, name: &str, ink: Color32, accent: Color
             p.rect(2.0, 12.0, 20.0, 2.0, Some(Color32::from_rgb(0x9C, 0x2A, 0x2A)), None, 0.0);
             p.rect(10.5, 11.0, 3.0, 4.0, Some(Color32::from_gray(230)), Some((1.0, ink)), 0.5);
         }
-        "tools" | "geoprocessing" => {
+        // QGIS's algorithms and plugins through the bridge: two meshed gears.
+        "geoprocessing" => {
+            for (cx, cy, r, c) in [(8.5, 9.5, 5.5, accent), (16.0, 16.0, 4.5, green)] {
+                for i in 0..8 {
+                    let a = (i as f32 * 45.0).to_radians();
+                    p.line(&[(cx + (r - 0.5) * a.cos(), cy + (r - 0.5) * a.sin()), (cx + (r + 1.6) * a.cos(), cy + (r + 1.6) * a.sin())], 2.0, ink);
+                }
+                p.circle(cx, cy, r, Some(c), Some((1.2, ink)));
+                p.circle(cx, cy, r * 0.35, Some(Color32::WHITE), None);
+            }
+        }
+        "tools" => {
             p.line(&[(4.0, 20.0), (13.0, 11.0)], 3.0, ink);
             p.circle(15.5, 8.5, 5.0, Some(accent), Some((1.3, ink)));
             p.circle(15.5, 8.5, 1.8, Some(Color32::WHITE), None);
@@ -686,7 +713,14 @@ pub fn paint(painter: &Painter, r: Rect, name: &str, ink: Color32, accent: Color
             p.line(&[(14.0, 20.0), (21.5, 12.5)], 1.8, green);
             p.line(&[(17.0, 12.5), (21.5, 12.5), (21.5, 17.0)], 1.8, green);
         }
-        "web_map" | "share" => {
+        // Share: three linked nodes.
+        "share" => {
+            p.line(&[(17.0, 5.5), (7.0, 12.0), (17.0, 18.5)], 1.6, ink);
+            for (x, y) in [(17.0, 5.5), (7.0, 12.0), (17.0, 18.5)] {
+                p.circle(x, y, 3.3, Some(accent), Some((1.2, ink)));
+            }
+        }
+        "web_map" => {
             p.circle(8.0, 13.0, 5.0, Some(p.tint(120)), None);
             p.circle(14.0, 9.5, 6.5, Some(p.tint(120)), None);
             p.circle(18.0, 14.0, 4.5, Some(p.tint(120)), None);
@@ -887,6 +921,265 @@ pub fn paint(painter: &Painter, r: Rect, name: &str, ink: Color32, accent: Color
             p.line(&[(15.6, 5.2), (18.4, 6.9), (18.0, 3.7)], 1.7, ink);
             p.line(&[(12.0, 8.0), (12.0, 15.0)], 1.8, p.acc);
             p.line(&[(9.2, 12.4), (12.0, 15.2), (14.8, 12.4)], 1.8, p.acc);
+        }
+        // A folder: its tab, tinted inside.
+        "folder" => {
+            p.fill(&[(2.5, 7.0), (21.5, 7.0), (21.5, 19.0), (2.5, 19.0)], p.tint(70));
+            p.closed(&[(2.5, 5.0), (9.0, 5.0), (11.0, 7.0), (21.5, 7.0), (21.5, 19.0), (2.5, 19.0)], 1.4, ink);
+            p.line(&[(2.5, 9.5), (21.5, 9.5)], 1.1, ink);
+        }
+        // Favorites: a star.
+        "favorites" => {
+            let pts: Vec<(f32, f32)> = (0..10)
+                .map(|i| {
+                    let a = (-90.0 + 36.0 * i as f32).to_radians();
+                    let r = if i % 2 == 0 { 9.5 } else { 4.0 };
+                    (12.0 + r * a.cos(), 12.5 + r * a.sin())
+                })
+                .collect();
+            for i in 0..10 {
+                let (a, b) = (pts[i], pts[(i + 1) % 10]);
+                p.fill(&[(12.0, 12.5), a, b], Color32::from_rgb(242, 184, 36));
+            }
+            p.closed(&pts, 1.2, ink);
+        }
+        // Home: a house.
+        "home" => {
+            p.fill(&[(5.5, 11.0), (18.5, 11.0), (18.5, 20.0), (5.5, 20.0)], p.tint(60));
+            p.closed(&[(5.5, 11.0), (5.5, 20.0), (18.5, 20.0), (18.5, 11.0)], 1.4, ink);
+            p.line(&[(3.0, 12.5), (12.0, 4.0), (21.0, 12.5)], 1.6, ink);
+            p.rect(10.0, 14.0, 4.0, 6.0, Some(ink), None, 0.5);
+        }
+        // The project's folder: a folder with the KHGIS dot.
+        "project_home" => {
+            p.fill(&[(2.5, 7.0), (21.5, 7.0), (21.5, 19.0), (2.5, 19.0)], p.tint(70));
+            p.closed(&[(2.5, 5.0), (9.0, 5.0), (11.0, 7.0), (21.5, 7.0), (21.5, 19.0), (2.5, 19.0)], 1.4, ink);
+            p.circle(12.0, 13.5, 3.2, Some(accent), Some((1.0, ink)));
+        }
+        // A disk drive.
+        "drive" => {
+            p.rect(2.5, 8.0, 19.0, 9.0, Some(p.tint(50)), Some((1.4, ink)), 2.0);
+            p.circle(17.5, 12.5, 1.3, Some(accent), None);
+            p.line(&[(5.5, 12.5), (12.0, 12.5)], 1.4, ink);
+        }
+        // XYZ tiles: a 2×2 grid of map tiles.
+        "xyz" => {
+            p.rect(3.0, 3.0, 8.5, 8.5, Some(p.tint(90)), Some((1.2, ink)), 0.5);
+            p.rect(12.5, 3.0, 8.5, 8.5, Some(p.tint(40)), Some((1.2, ink)), 0.5);
+            p.rect(3.0, 12.5, 8.5, 8.5, Some(p.tint(40)), Some((1.2, ink)), 0.5);
+            p.rect(12.5, 12.5, 8.5, 8.5, Some(p.tint(90)), Some((1.2, ink)), 0.5);
+            p.text(12.0, 12.0, "XYZ", 6.0, ink);
+        }
+        // A database: a cylinder.
+        "database" => {
+            // Flat ellipses (a cylinder seen from a little above): `a0`..`a1` degrees of one.
+            let ell = |cy: f32, a0: f32, a1: f32| -> Vec<(f32, f32)> {
+                (0..=20).map(|i| (a0 + (a1 - a0) * i as f32 / 20.0).to_radians()).map(|a| (12.0 + 7.5 * a.cos(), cy + 2.6 * a.sin())).collect()
+            };
+            p.rect(4.5, 5.5, 15.0, 13.0, Some(p.tint(70)), None, 0.0);
+            p.fill(&ell(18.5, 0.0, 180.0), p.tint(70));
+            p.fill(&ell(5.5, 0.0, 360.0), p.tint(140));
+            p.closed(&ell(5.5, 0.0, 360.0), 1.3, ink);
+            p.line(&[(4.5, 5.5), (4.5, 18.5)], 1.3, ink);
+            p.line(&[(19.5, 5.5), (19.5, 18.5)], 1.3, ink);
+            p.line(&ell(18.5, 0.0, 180.0), 1.3, ink);
+            p.line(&ell(12.0, 0.0, 180.0), 1.0, ink);
+        }
+        // Delimited text: a sheet with comma-separated columns.
+        "delimited" => {
+            p.page(4.0, 2.5, 16.0, 19.0);
+            for y in [8.0, 12.0, 16.0] {
+                p.line(&[(6.5, y), (10.0, y)], 1.3, ink);
+                p.text(11.5, y + 0.6, ",", 6.0, accent);
+                p.line(&[(13.0, y), (17.5, y)], 1.3, ink);
+            }
+        }
+        // The layout's tools and items.
+        "zoom_actual" => {
+            p.magnifier(10.0, 10.0, 6.5);
+            p.text(10.0, 10.3, "1:1", 5.0, ink);
+        }
+        "zoom_layer" => {
+            p.layers(2.0, 4.0, 0.8);
+            p.magnifier(15.0, 14.5, 4.5);
+        }
+        "move_content" => {
+            p.rect(2.5, 2.5, 19.0, 19.0, Some(p.tint(40)), Some((1.2, ink)), 1.0);
+            for (a, b, c) in [((12.0, 5.0), (10.0, 7.5), (14.0, 7.5)), ((12.0, 19.0), (10.0, 16.5), (14.0, 16.5)), ((5.0, 12.0), (7.5, 10.0), (7.5, 14.0)), ((19.0, 12.0), (16.5, 10.0), (16.5, 14.0))] {
+                p.fill(&[a, b, c], ink);
+            }
+            p.line(&[(12.0, 6.5), (12.0, 17.5)], 1.4, ink);
+            p.line(&[(6.5, 12.0), (17.5, 12.0)], 1.4, ink);
+        }
+        "label_item" => {
+            p.dashed_rect(2.5, 5.0, 19.0, 14.0, ink);
+            p.text(12.0, 12.3, "Aa", 10.0, accent);
+        }
+        "attribute_table" => p.table(2.5, 4.0, 19.0, 16.0),
+        "save_layout" => {
+            p.page(3.0, 2.0, 14.0, 18.0);
+            p.rect(5.0, 5.0, 8.0, 6.0, Some(p.tint(110)), Some((0.9, ink)), 0.0);
+            p.rect(12.5, 13.0, 9.5, 9.0, Some(accent), Some((1.1, ink)), 1.0);
+            p.rect(14.5, 13.0, 5.5, 3.0, Some(Color32::WHITE), None, 0.0);
+        }
+        "export_image" => {
+            p.rect(2.5, 4.0, 15.0, 13.0, Some(p.paper()), Some((1.3, ink)), 1.0);
+            p.circle(7.0, 8.5, 1.8, Some(amber), None);
+            p.fill(&[(4.0, 15.5), (9.0, 10.5), (12.0, 13.5), (14.0, 11.5), (16.5, 15.5)], green);
+            p.line(&[(14.0, 21.0), (21.5, 13.5)], 1.8, green);
+            p.line(&[(17.0, 13.5), (21.5, 13.5), (21.5, 18.0)], 1.8, green);
+        }
+        "export_pdf" => {
+            p.page(4.0, 2.0, 15.0, 20.0);
+            p.rect(2.0, 11.0, 14.0, 7.0, Some(red), None, 1.0);
+            p.text(9.0, 14.6, "PDF", 5.2, Color32::WHITE);
+        }
+        "raise" | "lower" => {
+            p.rect(3.0, 3.0, 11.0, 11.0, Some(p.tint(if name == "raise" { 60 } else { 150 })), Some((1.2, ink)), 1.0);
+            p.rect(10.0, 10.0, 11.0, 11.0, Some(p.tint(if name == "raise" { 150 } else { 60 })), Some((1.2, ink)), 1.0);
+            let (y0, y1) = if name == "raise" { (21.0, 15.0) } else { (15.0, 21.0) };
+            p.line(&[(4.5, y0), (4.5, y1)], 1.6, green);
+            p.line(&[(2.5, (y1 + 2.0 * (y0 - y1).signum())), (4.5, y1), (6.5, (y1 + 2.0 * (y0 - y1).signum()))], 1.6, green);
+        }
+        "bring_front" | "send_back" => {
+            let front = name == "bring_front";
+            p.rect(2.5, 2.5, 9.0, 9.0, Some(p.tint(50)), Some((1.1, ink)), 1.0);
+            p.rect(12.5, 12.5, 9.0, 9.0, Some(p.tint(50)), Some((1.1, ink)), 1.0);
+            p.rect(7.0, 7.0, 10.0, 10.0, Some(if front { accent } else { p.tint(25) }), Some((1.3, ink)), 1.0);
+        }
+        "duplicate" => {
+            p.rect(2.5, 2.5, 12.0, 12.0, Some(p.tint(50)), Some((1.2, ink)), 1.0);
+            p.rect(8.5, 8.5, 12.0, 12.0, Some(p.paper()), Some((1.3, ink)), 1.0);
+            p.plus_badge(14.5, 14.5);
+        }
+        "unlock" => {
+            p.rect(5.0, 11.0, 14.0, 10.0, Some(p.tint(30)), Some((1.4, ink)), 1.5);
+            p.arc(16.5, 8.0, 4.5, 180.0, 360.0, 1.8, ink);
+            p.line(&[(12.0, 8.0), (12.0, 11.0)], 1.8, ink);
+        }
+        "page_setup" => {
+            p.page(4.0, 2.0, 13.0, 17.0);
+            p.line(&[(4.0, 21.5), (17.0, 21.5)], 1.1, accent);
+            p.line(&[(20.0, 2.0), (20.0, 19.0)], 1.1, accent);
+            p.line(&[(4.0, 20.5), (4.0, 22.5)], 1.1, accent);
+            p.line(&[(17.0, 20.5), (17.0, 22.5)], 1.1, accent);
+        }
+        "atlas" => {
+            for (o, a) in [(4.0, 50u8), (2.0, 90), (0.0, 150)] {
+                p.rect(3.0 + o, 2.0 + o, 14.0, 16.0, Some(p.tint(a)), Some((1.1, ink)), 0.5);
+            }
+            p.text(10.0, 10.5, "1", 6.0, ink);
+        }
+        // Map projection: a graticule on a globe.
+        "crs" => {
+            p.globe(11.0, 11.0, 8.5);
+            p.text(18.0, 19.5, "CRS", 5.0, ink);
+        }
+        // Snapping: a magnet.
+        "snapping" => {
+            p.arc(12.0, 11.0, 6.5, 0.0, 180.0, 4.0, red);
+            p.line(&[(5.5, 11.0), (5.5, 4.0)], 4.0, red);
+            p.line(&[(18.5, 11.0), (18.5, 4.0)], 4.0, red);
+            p.line(&[(5.5, 4.0), (5.5, 6.5)], 4.0, Color32::from_gray(200));
+            p.line(&[(18.5, 4.0), (18.5, 6.5)], 4.0, Color32::from_gray(200));
+            p.circle(12.0, 21.0, 1.5, Some(accent), None);
+        }
+        "select_all" => {
+            p.rect(3.0, 3.0, 18.0, 18.0, Some(p.tint(90)), None, 0.0);
+            p.dashed_rect(3.0, 3.0, 18.0, 18.0, accent);
+            p.fill(&[(7.0, 8.0), (12.0, 6.0), (15.0, 10.0), (10.0, 13.0)], amber);
+            p.circle(16.0, 16.0, 2.0, Some(amber), None);
+        }
+        "select_invert" => {
+            p.rect(3.0, 3.0, 18.0, 18.0, Some(p.tint(90)), None, 0.0);
+            p.dashed_rect(3.0, 3.0, 18.0, 18.0, accent);
+            p.circle(12.0, 12.0, 5.0, Some(p.paper()), Some((1.2, ink)));
+            p.arc(12.0, 12.0, 7.5, 200.0, 340.0, 1.4, ink);
+            p.fill(&[(17.5, 8.5), (19.5, 11.0), (16.0, 11.5)], ink);
+        }
+        // The Data Source Manager: stacked layers under a plug.
+        "data_source" => {
+            p.layers(1.5, 8.0, 0.8);
+            p.rect(13.0, 3.0, 7.0, 6.0, Some(accent), Some((1.1, ink)), 1.0);
+            p.line(&[(15.0, 1.0), (15.0, 3.0)], 1.3, ink);
+            p.line(&[(18.0, 1.0), (18.0, 3.0)], 1.3, ink);
+            p.line(&[(16.5, 9.0), (16.5, 12.0), (12.0, 14.0)], 1.3, ink);
+        }
+        // OpenStreetMap data: a map pin over a street grid.
+        "osm" => {
+            p.rect(2.5, 6.0, 19.0, 15.0, Some(p.tint(40)), Some((1.2, ink)), 1.0);
+            p.line(&[(2.5, 13.0), (21.5, 11.0)], 1.6, amber);
+            p.line(&[(9.0, 6.0), (11.0, 21.0)], 1.6, amber);
+            p.circle(16.0, 7.0, 4.0, Some(green), Some((1.2, ink)));
+            p.fill(&[(13.0, 8.5), (19.0, 8.5), (16.0, 14.0)], green);
+            p.circle(16.0, 7.0, 1.4, Some(Color32::WHITE), None);
+        }
+        // Administrative boundaries: countries' outlines, one picked.
+        "boundaries" => {
+            p.polygon_shape(&[(3.0, 5.0), (11.0, 3.0), (12.0, 11.0), (4.0, 13.0)], 50);
+            p.polygon_shape(&[(12.0, 11.0), (11.0, 3.0), (20.0, 5.0), (21.0, 12.0)], 140);
+            p.polygon_shape(&[(4.0, 13.0), (12.0, 11.0), (21.0, 12.0), (18.0, 21.0), (6.0, 20.0)], 70);
+        }
+        // Check for Updates: a download arrow into a tray.
+        "check_updates" => {
+            p.line(&[(12.0, 3.0), (12.0, 15.0)], 2.0, green);
+            p.line(&[(7.5, 10.5), (12.0, 15.0), (16.5, 10.5)], 2.0, green);
+            p.line(&[(3.5, 15.0), (3.5, 20.5), (20.5, 20.5), (20.5, 15.0)], 1.5, ink);
+        }
+        // A new layer from the selected features.
+        "layer_from_selection" => {
+            p.layers(2.0, 3.0, 0.8);
+            p.dashed_rect(11.0, 11.0, 10.0, 10.0, accent);
+            p.plus_badge(16.0, 16.0);
+        }
+        // LEE RS Lab: a satellite.
+        "satellite" => {
+            p.rect(9.0, 9.0, 6.0, 6.0, Some(accent), Some((1.2, ink)), 1.0);
+            p.rect(1.5, 10.0, 6.0, 4.0, Some(Color32::from_rgb(0x2B, 0x5C, 0xA8)), Some((1.0, ink)), 0.3);
+            p.rect(16.5, 10.0, 6.0, 4.0, Some(Color32::from_rgb(0x2B, 0x5C, 0xA8)), Some((1.0, ink)), 0.3);
+            p.line(&[(7.5, 12.0), (9.0, 12.0)], 1.2, ink);
+            p.line(&[(15.0, 12.0), (16.5, 12.0)], 1.2, ink);
+            p.arc(12.0, 19.0, 3.0, 200.0, 340.0, 1.2, ink);
+            p.arc(12.0, 19.0, 5.5, 210.0, 330.0, 1.2, ink);
+        }
+        // Cambodia 3D: a landscape block.
+        "landscape_3d" => {
+            p.fill(&[(2.0, 9.0), (12.0, 4.0), (22.0, 9.0), (12.0, 14.0)], green);
+            p.fill(&[(2.0, 9.0), (12.0, 14.0), (12.0, 21.0), (2.0, 16.0)], Color32::from_rgb(0x8B, 0x6A, 0x45));
+            p.fill(&[(12.0, 14.0), (22.0, 9.0), (22.0, 16.0), (12.0, 21.0)], Color32::from_rgb(0x6E, 0x52, 0x34));
+            p.closed(&[(2.0, 9.0), (12.0, 4.0), (22.0, 9.0), (22.0, 16.0), (12.0, 21.0), (2.0, 16.0)], 1.2, ink);
+            p.line(&[(2.0, 9.0), (12.0, 14.0), (22.0, 9.0)], 1.0, ink);
+            p.line(&[(12.0, 14.0), (12.0, 21.0)], 1.0, ink);
+            p.fill(&[(9.0, 9.0), (12.0, 5.5), (15.0, 9.0)], Color32::WHITE);
+        }
+        // Select/Move Item (the layout): the pointer over a dashed item.
+        "select_item" => {
+            p.dashed_rect(9.0, 9.0, 12.5, 10.0, ink);
+            p.cursor(4.0, 3.0, 1.15);
+        }
+        // Layer Properties: stacked layers and a gear.
+        "layer_properties" => {
+            p.layers(1.0, 3.0, 0.8);
+            let (cx, cy) = (17.0, 16.5);
+            for i in 0..8 {
+                let a = (i as f32 * 45.0).to_radians();
+                p.line(&[(cx + 3.2 * a.cos(), cy + 3.2 * a.sin()), (cx + 5.6 * a.cos(), cy + 5.6 * a.sin())], 2.0, ink);
+            }
+            p.circle(cx, cy, 4.0, Some(accent), Some((1.1, ink)));
+            p.circle(cx, cy, 1.5, Some(Color32::WHITE), None);
+        }
+        // A database layer: a cylinder with a plus.
+        "add_database" => {
+            paint(painter, Rect::from_min_size(r.min, r.size() * 0.85), "database", ink, accent);
+            p.plus_badge(18.5, 18.0);
+        }
+        "add_delimited" => {
+            paint(painter, Rect::from_min_size(r.min, r.size() * 0.85), "delimited", ink, accent);
+            p.plus_badge(18.5, 18.0);
+        }
+        "add_gpkg" => {
+            paint(painter, Rect::from_min_size(r.min, r.size() * 0.85), "package", ink, accent);
+            p.plus_badge(18.5, 18.0);
         }
         "plus" => {
             p.line(&[(12.0, 5.0), (12.0, 19.0)], 2.2, accent);
@@ -1246,6 +1539,48 @@ pub fn paint(painter: &Painter, r: Rect, name: &str, ink: Color32, accent: Color
 
 /// Every icon name, for the gallery test.
 pub const ALL: &[&str] = &[
+    "select_item",
+    "layer_properties",
+    "folder",
+    "favorites",
+    "home",
+    "project_home",
+    "drive",
+    "xyz",
+    "database",
+    "delimited",
+    "plus",
+    "minus",
+    "zoom_actual",
+    "zoom_layer",
+    "move_content",
+    "label_item",
+    "attribute_table",
+    "save_layout",
+    "export_image",
+    "export_pdf",
+    "raise",
+    "lower",
+    "bring_front",
+    "send_back",
+    "duplicate",
+    "unlock",
+    "page_setup",
+    "atlas",
+    "crs",
+    "snapping",
+    "select_all",
+    "select_invert",
+    "data_source",
+    "osm",
+    "boundaries",
+    "check_updates",
+    "layer_from_selection",
+    "satellite",
+    "landscape_3d",
+    "add_database",
+    "add_delimited",
+    "add_gpkg",
     "directions",
     "maneuver_straight",
     "maneuver_slight_right",

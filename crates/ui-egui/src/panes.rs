@@ -690,10 +690,6 @@ pub(crate) fn contents_in(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
     contents(app, ui, t);
 }
 
-/// The Browser (catalog) pane's contents, for the QGIS layout's Browser dock.
-pub(crate) fn catalog_in(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
-    catalog(app, ui, t);
-}
 
 fn contents(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
     // The name filter (#300), above the list so it stays in view.

@@ -495,7 +495,7 @@ fn group(app: &mut RustGisApp, ui: &mut Ui, side: usize, g: usize, rect: Rect, t
     );
     child.set_clip_rect(body.intersect(ui.clip_rect()));
     match active {
-        Panel::Browser => crate::panes::catalog_in(app, &mut child, t),
+        Panel::Browser => crate::qgisbrowser::show(app, &mut child, t),
         Panel::Layers => crate::panes::contents_in(app, &mut child, t),
         Panel::Sources => crate::sourcespane::show(app, &mut child, t),
         Panel::Right(r) => crate::panes::right_body(app, &mut child, r, t),

@@ -12,7 +12,7 @@ use rustgis_engine::map::layout::{
 };
 use serde_json::{Value, json};
 
-use crate::RustGisApp;
+use crate::{RustGisApp, icons};
 use crate::theme::{Tokens, regular, semibold};
 use crate::widgets::Dragged;
 
@@ -145,6 +145,9 @@ pub struct LayoutView {
     /// layout, element and time (seconds), for [`LayoutView::nudge_key`].
     nudges: u64,
     nudged: Option<(usize, u32, f64)>,
+    /// Zoom 100% asked for: the page at its printed size, set as the page is next drawn (which
+    /// knows the size it fits).
+    actual_size: bool,
 }
 
 /// How far (mm) an arrow key nudges the selected layout element, and with Shift.
@@ -152,6 +155,25 @@ pub const NUDGE_MM: f64 = 1.0;
 pub const NUDGE_FAST_MM: f64 = 10.0;
 
 impl LayoutView {
+    /// Zoom Full: the whole page in view.
+    pub fn zoom_full(&mut self) {
+        self.zoom = 0.0;
+        self.pan = egui::Vec2::ZERO;
+    }
+
+    /// Zoom In or Out by `k`, about the middle of the view.
+    pub fn zoom_by(&mut self, k: f32) {
+        let old = if self.zoom > 0.0 { self.zoom } else { 1.0 };
+        let new = (old * k).clamp(0.2, 12.0);
+        self.pan *= new / old;
+        self.zoom = new;
+    }
+
+    /// Zoom 100%: the page at its printed size (96 points to the inch).
+    pub fn zoom_actual(&mut self) {
+        self.actual_size = true;
+    }
+
     /// The undo key for an arrow key nudging element `id` of layout `li` at `now` (seconds): the
     /// last nudge's while the same element keeps being nudged, at most a second apart, so a held
     /// key (or quick taps) is one step to undo.
@@ -632,6 +654,12 @@ pub fn show(app: &mut RustGisApp, ui: &mut Ui) {
     let resp = ui.interact(area, ui.scope_id().with("layout_page"), Sense::click_and_drag());
     let painter = ui.painter_at(area);
     painter.rect_filled(area, 0.0, if t.dark { Color32::from_gray(38) } else { Color32::from_rgb(0xD9, 0xDD, 0xE3) });
+    if std::mem::take(&mut app.layout.actual_size) {
+        // 96 points to the inch: 3.78 points to the millimetre, as the page fits it now.
+        let fit = ((area.width() - 48.0) / layout.width as f32).min((area.height() - 48.0) / layout.height as f32).max(0.05);
+        app.layout.zoom = (96.0 / 25.4 / fit).clamp(0.2, 12.0);
+        app.layout.pan = egui::Vec2::ZERO;
+    }
     let (page, s) = page_rect(&app.layout, area, &layout);
     interact(app, ui, &resp, &layout, li, page, s);
     // The properties or a drag may have just changed the layout: draw the page as it is now,
@@ -1496,6 +1524,15 @@ pub fn format(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
     let on_screen = app.session.active_layout.filter(|_| !app.mb.shown());
     let layout = on_screen.and_then(|li| Some((li, shown_layout(app, li)?)));
     let selected = layout.as_ref().and_then(|(li, l)| Some((*li, app.layout.selected.filter(|id| l.element(*id).is_some())?)));
+    // The QGIS layout: the Items list above the properties, as QGIS docks its Items panel.
+    if app.ui.qgis_layout
+        && let Some((li, l)) = layout.as_ref()
+    {
+        items_list(app, ui, l, *li, t);
+        ui.add_space(6.0);
+        ui.label(egui::RichText::new(tl!("Item Properties")).font(semibold(13.0)));
+        ui.separator();
+    }
     match (layout, selected) {
         (Some((li, layout)), Some(drawn)) => {
             app.layout.drawn = Some(drawn);
@@ -1520,6 +1557,69 @@ pub fn format(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
             ui.label(egui::RichText::new(tl!("Select an element to format it.")).color(t.text_dim));
         }
     }
+}
+
+/// The icon of an element's kind, in the Items list.
+fn kind_icon(k: &rustgis_engine::map::layout::ElementKind) -> &'static str {
+    match k.label() {
+        "Map Frame" => "map",
+        "North Arrow" => "north_arrow",
+        "Scale Bar" => "scale_bar",
+        "Legend" => "legend",
+        "Colorbar" => "colorbar",
+        "Text" => "label_item",
+        "Picture" => "picture",
+        "Table Frame" => "attribute_table",
+        "Chart Frame" => "chart",
+        "Rectangle" => "g_rect",
+        "Ellipse" => "g_ellipse",
+        _ => "g_line",
+    }
+}
+
+/// QGIS's Items panel: every item of the layout, the top one first, with a switch to show it, a
+/// lock, its kind's icon and its name; a click selects it.
+fn items_list(app: &mut RustGisApp, ui: &mut Ui, layout: &Layout, li: usize, t: &Tokens) {
+    ui.label(egui::RichText::new(tl!("Items")).font(semibold(13.0)));
+    egui::Frame::NONE.fill(t.input).stroke(Stroke::new(1.0, t.border)).corner_radius(4).inner_margin(egui::Margin::same(3)).show(ui, |ui| {
+        ui.set_width(ui.available_width());
+        egui::ScrollArea::vertical().id_salt(("layout_items", li)).max_height(180.0).auto_shrink([false, true]).show(ui, |ui| {
+            if layout.elements.is_empty() {
+                ui.label(egui::RichText::new(tl!("No items yet: add them from the Toolbox on the left")).small().color(t.text_dim));
+            }
+            for e in layout.elements.iter().rev() {
+                let on = app.layout.selected == Some(e.id);
+                ui.horizontal(|ui| {
+                    ui.spacing_mut().item_spacing.x = 4.0;
+                    let mut visible = e.visible;
+                    if ui.checkbox(&mut visible, "").on_hover_text(tl!("Show this item")).changed() {
+                        let _ = app.run("layout.update", json!({"layout": li, "element": e.id, "visible": visible}));
+                    }
+                    let (lr, lresp) = ui.allocate_exact_size(vec2(18.0, 18.0), Sense::click());
+                    icons::paint(ui.painter(), lr.shrink(1.0), if e.locked { "lock" } else { "unlock" }, if e.locked { t.icon } else { t.text_disabled }, t.accent);
+                    let tip = if e.locked { tl!("Unlock Item") } else { tl!("Lock Item") };
+                    lresp.widget_info(|| egui::WidgetInfo::selected(egui::Role::CheckBox, true, e.locked, tip));
+                    if lresp.on_hover_text(tip).clicked() {
+                        let _ = app.run("layout.update", json!({"layout": li, "element": e.id, "locked": !e.locked}));
+                    }
+                    let (r, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 20.0), Sense::click());
+                    if on {
+                        ui.painter().rect_filled(r, 3.0, t.checked);
+                    } else if resp.hovered() {
+                        ui.painter().rect_filled(r, 3.0, t.hover);
+                    }
+                    let ir = Rect::from_min_size(pos2(r.min.x + 2.0, r.min.y + 2.0), vec2(16.0, 16.0));
+                    icons::paint(ui.painter(), ir, kind_icon(&e.kind), t.icon, t.accent);
+                    let name = if e.name.trim().is_empty() { tl!(e.kind.label()).to_string() } else { e.name.clone() };
+                    ui.painter().text(pos2(ir.max.x + 6.0, r.center().y), egui::Align2::LEFT_CENTER, &name, regular(12.5), if e.visible { t.text } else { t.text_dim });
+                    resp.widget_info(|| egui::WidgetInfo::selected(egui::Role::ListItem, true, on, &name));
+                    if resp.clicked() {
+                        app.layout.selected = Some(e.id);
+                    }
+                });
+            }
+        });
+    });
 }
 
 /// The selected element's properties.
