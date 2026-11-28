@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KHGIS</title>
+<meta name="description" content="A desktop GIS for Cambodia, in Khmer and English. Cambodian boundaries, OpenStreetMap data and one-click workflows.">
+<style>
+  /* Self-hosted so Khmer renders even where Google Fonts is blocked. */
+  @font-face{
+    font-family:"Noto Sans Khmer Local";
+    src:url("NotoSansKhmer-Regular.ttf") format("truetype");
+    font-weight:400 700; font-display:swap;
+  }
+  :root{
+    --bg:#ffffff; --surface:#f6f8f9; --line:#e2e8ea; --ink:#0f1c20; --muted:#55666c;
+    --accent:#0891B2; --accent-ink:#065f74; --code-bg:#0f1c20; --code-ink:#e6eef0;
+  }
+  :root:not([data-theme="light"]) { }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0b1417; --surface:#111e23; --line:#1f3138; --ink:#eaf2f4; --muted:#9db0b7;
+      --accent:#22b8d8; --accent-ink:#7fd8ea; --code-bg:#07100f; --code-ink:#dbe9ec;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0b1417; --surface:#111e23; --line:#1f3138; --ink:#eaf2f4; --muted:#9db0b7;
+    --accent:#22b8d8; --accent-ink:#7fd8ea; --code-bg:#07100f; --code-ink:#dbe9ec;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI","Noto Sans Khmer Local",Roboto,Helvetica,Arial,-apple-system,Segoe UI,sans-serif;
+    line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  .km{font-family:"Noto Sans Khmer Local","Noto Sans Khmer",sans-serif; line-height:1.9}
+  .wrap{max-width:960px; margin:0 auto; padding:0 16px}
+  header{padding:72px 0 48px; text-align:center; border-bottom:1px solid var(--line)}
+  .mark{
+    display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:18px;
+  }
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+  h1{font-size:clamp(44px,9vw,76px); margin:0; letter-spacing:-.03em; font-weight:700}
+  .kh-title{font-size:clamp(17px,3.4vw,24px); color:var(--accent-ink); margin:14px 0 0; font-weight:600}
+  .tag{font-size:clamp(17px,2.4vw,21px); color:var(--muted); max-width:620px; margin:20px auto 0}
+  .cta{display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:34px}
+  .btn{
+    display:inline-block; padding:12px 22px; border-radius:9px; text-decoration:none;
+    font-weight:600; font-size:15px; border:1px solid var(--line); color:var(--ink); background:var(--surface);
+  }
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff}
+  section{padding:56px 0; border-bottom:1px solid var(--line)}
+  h2{font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:0 0 28px; font-weight:600}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(248px,1fr)); gap:20px}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:22px}
+  .card h3{margin:0 0 8px; font-size:17px}
+  .card p{margin:0; color:var(--muted); font-size:15px}
+  table{width:100%; border-collapse:collapse; font-size:15px}
+  td,th{text-align:left; padding:11px 10px; border-bottom:1px solid var(--line); vertical-align:top}
+  th{color:var(--muted); font-weight:600; font-size:13px; letter-spacing:.05em; text-transform:uppercase}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.92em; color:var(--accent-ink)}
+  pre{
+    background:var(--code-bg); color:var(--code-ink); padding:18px; border-radius:11px;
+    overflow-x:auto; font-size:14px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; line-height:1.65;
+  }
+  pre code{color:inherit}
+  footer{padding:40px 0 64px; color:var(--muted); font-size:14px; text-align:center}
+  footer a{color:var(--accent-ink)}
+  a{color:var(--accent-ink)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="mark"><span class="dot"></span> Cambodia · កម្ពុជា</div>
+    <h1>KHGIS</h1>
+    <p class="kh-title km">ប្រព័ន្ធព័ត៌មានភូមិសាស្ត្រសម្រាប់កម្ពុជា</p>
+    <p class="tag">A desktop GIS for Cambodia, in Khmer and English. Cambodian boundaries, OpenStreetMap data and one-click workflows, built in.</p>
+    <div class="cta">
+      <a class="btn primary" href="../">Open KHGIS in your browser</a>
+      <a class="btn" href="https://github.com/khgeo/KHGIS">View on GitHub</a>
+      <a class="btn" href="https://github.com/khgeo/KHGIS#get-khgis">Build from source</a>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>What KHGIS adds</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Khmer interface</h3>
+        <p>1,255 translated strings. Switch the whole app between English and <span class="km">ភាសាខ្មែរ</span>; anything untranslated falls back to English.</p>
+      </div>
+      <div class="card">
+        <h3>Khmer that renders right</h3>
+        <p>Noto Sans Khmer is bundled and the renderer shapes Khmer properly, so labels, legends and exported maps stay readable.</p>
+      </div>
+      <div class="card">
+        <h3>Cambodia built in</h3>
+        <p>Province (ADM1) and district (ADM2) boundaries ship with the app. No download, no projection fiddling before you start.</p>
+      </div>
+      <div class="card">
+        <h3>One-click area loading</h3>
+        <p>Name a province and get its boundary plus roads, rivers, schools, health facilities and villages from OpenStreetMap, clipped to the area.</p>
+      </div>
+      <div class="card">
+        <h3>A4 maps in one step</h3>
+        <p>Title, legend, scale bar, north arrow, regional inset, sources and date — print-ready, in Khmer or English.</p>
+      </div>
+      <div class="card">
+        <h3>Cambodia-aware assistant</h3>
+        <p>Understands province names in Khmer, English and loose romanisations, and replies in Khmer when you write in Khmer.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Workflows</h2>
+    <table>
+      <thead><tr><th>Command</th><th>What it answers</th></tr></thead>
+      <tbody>
+        <tr><td><code>floodExposure</code></td><td>Villages within a distance of rivers and water</td></tr>
+        <tr><td><code>schoolAccess</code></td><td>Villages farther than a distance from any school</td></tr>
+        <tr><td><code>healthAccess</code></td><td>Villages farther than a distance from any health facility</td></tr>
+        <tr><td><code>districtSchools</code></td><td>Schools counted per district, as a choropleth</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Every action is a command</h2>
+<pre><code>rustgis-cli run \
+  --cmd 'project.cambodia={"khmer":true}' \
+  --cmd 'khgis.loadArea={"province":"Kandal","themes":["water","places"],"lang":"km"}' \
+  --cmd 'khgis.recipe={"id":"floodExposure","distance":3,"lang":"km"}' \
+  --cmd 'khgis.autoLayout={"lang":"km"}' \
+  --save kandal.rgis</code></pre>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>KHGIS is built on <a href="https://github.com/opengeos/RustGIS">RustGIS</a> by Qiusheng Wu and its contributors, and is licensed under Apache-2.0.</p>
+    <p>Khmer text set in Noto Sans Khmer (SIL Open Font License 1.1).</p>
+  </div>
+</footer>
+
+</body>
+</html>
