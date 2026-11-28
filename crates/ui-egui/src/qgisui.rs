@@ -1181,10 +1181,21 @@ pub fn layer_styling(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
     let strip = Rect::from_min_size(rest.min, vec2(36.0, rest.height()));
     ui.painter().rect_filled(strip, 0.0, t.pane_header);
     ui.painter().line_segment([strip.right_top(), strip.right_bottom()], Stroke::new(1.0, t.border));
-    for (i, (icon, tip)) in [("symbology", "Symbology"), ("label", "Labels"), ("about", "Information")].into_iter().enumerate() {
-        let r = Rect::from_min_size(pos2(strip.min.x + 3.0, strip.min.y + 4.0 + 34.0 * i as f32), vec2(30.0, 30.0));
+    // The pages, as QGIS orders them (a raster has no labels or diagrams); `styling_page` keeps
+    // the page's number: 0 Symbology, 1 Labels, 2 Information, 3 Diagrams.
+    let raster = active.as_ref().is_some_and(|l| l.2 == "raster_layer");
+    let pages: &[(u8, &str, &str)] = if raster {
+        &[(0, "symbology", "Symbology"), (2, "about", "Information")]
+    } else {
+        &[(0, "symbology", "Symbology"), (1, "label", "Labels"), (3, "chart", "Diagrams"), (2, "about", "Information")]
+    };
+    if !pages.iter().any(|p| p.0 == app.ui.qgis.styling_page) {
+        app.ui.qgis.styling_page = 0;
+    }
+    for (row, &(i, icon, tip)) in pages.iter().enumerate() {
+        let r = Rect::from_min_size(pos2(strip.min.x + 3.0, strip.min.y + 4.0 + 34.0 * row as f32), vec2(30.0, 30.0));
         let resp = ui.interact(r, egui::Id::unique(("qgis_styling_page", i)), Sense::click());
-        let on = app.ui.qgis.styling_page as usize == i;
+        let on = app.ui.qgis.styling_page == i;
         resp.widget_info(|| egui::WidgetInfo::selected(egui::Role::Tab, true, on, tl!(tip)));
         if on {
             ui.painter().rect_filled(r, CornerRadius::same(4), t.checked);
@@ -1194,7 +1205,7 @@ pub fn layer_styling(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
         }
         icons::paint(ui.painter(), r.shrink(5.0), icon, t.icon, t.accent);
         if resp.on_hover_text(tl!(tip)).clicked() {
-            app.ui.qgis.styling_page = i as u8;
+            app.ui.qgis.styling_page = i;
         }
     }
     // The page.
@@ -1207,6 +1218,7 @@ pub fn layer_styling(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
             egui::Frame::NONE.inner_margin(egui::Margin::symmetric(10, 8)).show(ui, |ui| match app.ui.qgis.styling_page {
                 1 => crate::labelpane::show(app, ui, t),
                 2 => crate::panes::details_in(app, ui, t),
+                3 => crate::panes::diagrams_in(app, ui, t),
                 _ => crate::panes::symbology_in(app, ui, t),
             });
         },
@@ -1214,7 +1226,8 @@ pub fn layer_styling(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
     ui.advance_cursor_after_rect(all);
 }
 
-/// Layer Styling's foot: the Live update switch, and Apply while it's off.
+/// Layer Styling's foot, as QGIS's: undo and redo, the Live update switch, and Apply (pressed
+/// while Live update is off).
 fn styling_foot(app: &mut RustGisApp, ui: &mut Ui, foot: Rect, layer: Option<(u32, bool)>, t: &Tokens) {
     ui.painter().rect_filled(foot, 0.0, t.pane_header);
     ui.painter().line_segment([foot.left_top(), foot.right_top()], Stroke::new(1.0, t.border));
@@ -1222,6 +1235,17 @@ fn styling_foot(app: &mut RustGisApp, ui: &mut Ui, foot: Rect, layer: Option<(u3
         .new_child(egui::UiBuilder::new().max_rect(foot.shrink2(vec2(10.0, 4.0))).layout(egui::Layout::left_to_right(egui::Align::Center)));
     // Rasters always update live: holding their style back would copy their pixels.
     let raster = layer.is_some_and(|l| l.1);
+    for (icon, cmd, tip, can) in [
+        ("undo", "edit.undo", tl!("Undo"), app.session.undo_label().is_some()),
+        ("redo", "edit.redo", tl!("Redo"), app.session.redo_label().is_some()),
+    ] {
+        let resp = bar.add_enabled_ui(can, |ui| crate::widgets::icon_button(ui, icon, tip)).inner;
+        if resp.clicked() {
+            let _ = app.run_by_user(cmd, Value::Null);
+            app.map.invalidate();
+        }
+    }
+    bar.add_space(6.0);
     let mut live = app.ui.qgis.live || raster;
     let resp = bar
         .add_enabled(!raster, egui::Checkbox::new(&mut live, tl!("Live update")))
@@ -1251,7 +1275,8 @@ fn styling_foot(app: &mut RustGisApp, ui: &mut Ui, foot: Rect, layer: Option<(u3
         app.ui.qgis.staged = None;
     }
     bar.with_layout(egui::Layout::right_to_left(egui::Align::Center), |bar| {
-        if !app.ui.qgis.live && !raster && crate::widgets::primary_button(bar, tl!("Apply"), true, vec2(80.0, 26.0)).clicked() {
+        let held = !app.ui.qgis.live && !raster;
+        if crate::widgets::primary_button(bar, tl!("Apply"), held, vec2(80.0, 26.0)).on_disabled_hover_text(tl!("Live update shows each change at once")).clicked() && held {
             app.ui.qgis.staged = None;
             app.map.invalidate();
         }

@@ -838,16 +838,15 @@ fn raster_renderers_read_as_rustgis_raster_styles() {
         "{r:?}"
     );
 
-    // Hillshade as shaded relief; hue and saturation and contours are noted.
+    // Hillshade as shaded relief; saturation and inverted colours are read, greyscale noted.
     let (s, report) = read(
         r#"<rasterrenderer type="hillshade" band="1" azimuth="300" angle="35" zfactor="2" multidirection="0"/>"#,
-        r#"<huesaturation saturation="-30" grayscaleMode="0" colorizeOn="0" invertColors="0"/>"#,
+        r#"<huesaturation saturation="-30" grayscaleMode="1" colorizeOn="0" invertColors="1"/>"#,
     );
-    assert_eq!(
-        s.raster.unwrap().renderer,
-        RasterRenderer::ShadedRelief { band: 0, ramp: None, azimuth: 300.0, altitude: 35.0, z_factor: 2.0 }
-    );
-    assert!(report.notes.iter().any(|n| n.text.contains("saturation")));
+    let r = s.raster.unwrap();
+    assert_eq!(r.renderer, RasterRenderer::ShadedRelief { band: 0, ramp: None, azimuth: 300.0, altitude: 35.0, z_factor: 2.0 });
+    assert!(r.saturation == -30.0 && r.invert, "{r:?}");
+    assert!(report.notes.iter().any(|n| n.text.contains("greyscale")));
     let (s, report) = read(r#"<rasterrenderer type="contour" band="1"/>"#, "");
     assert!(s.raster.is_none() && report.notes.iter().any(|n| n.text.contains("contour")));
     // Nonsense bands and values: nothing, without a crash, and noted.

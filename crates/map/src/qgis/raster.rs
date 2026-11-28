@@ -115,6 +115,8 @@ fn renderer_style(node: Node, pipe: Node, r: Node, kind: &str, layer: &str, repo
         brightness: 0.0,
         contrast: 0.0,
         gamma: 1.0,
+        saturation: 0.0,
+        invert: false,
         rotation: 0.0,
         mask,
     };
@@ -127,8 +129,12 @@ fn renderer_style(node: Node, pipe: Node, r: Node, kind: &str, layer: &str, repo
     }
     if let Some(hs) = child(pipe, "huesaturation") {
         let set = |k: &str, off: &str| hs.attribute(k).is_some_and(|v| v.trim() != off);
-        if set("saturation", "0") || set("grayscaleMode", "0") || set("colorizeOn", "0") || set("invertColors", "0") {
-            report.approximated(layer, "raster hue and saturation settings (saturation, greyscale, colourise, invert), left out");
+        // Saturation (-100 to 100 in both) and inverted colours are read; greyscale and colourise aren't.
+        style.saturation =
+            hs.attribute("saturation").and_then(|v| v.trim().parse::<f64>().ok()).filter(|v| v.is_finite()).map_or(0.0, |v| v.clamp(-100.0, 100.0));
+        style.invert = set("invertColors", "0");
+        if set("grayscaleMode", "0") || set("colorizeOn", "0") {
+            report.approximated(layer, "raster greyscale and colourise settings, left out");
         }
     }
     style.dra =

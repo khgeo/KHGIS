@@ -17,7 +17,7 @@ installed QGIS plugin that adds Processing algorithms — on KHGIS's layers.
 | Dock panels: drag a panel's title to tab it with another, stack it, or move it to the other side | the same: drag a panel's tab onto another panel's tabs or middle to tab them, onto its top or bottom edge to stack, or to the window's left or right edge; right-click a tab to move it without dragging. KHGIS remembers the arrangement |
 | Processing Toolbox | the Tools pane on the right (**Processing › Toolbox**) |
 | Locator bar | **Command Search** (Ctrl+K), top right |
-| Layer Styling panel | **Layer › Layer Styling**: the layer at the top, Symbology / Labels / Information down the left, the renderer (Single Symbol, Categorized, Graduated, Proportional Symbols) in a list |
+| Layer Styling panel | **Layer › Layer Styling**: the layer at the top, Symbology / Labels / Diagrams / Information down the left (a raster: Symbology / Information), the renderer (Single Symbol, Categorized, Graduated, Proportional Symbols) or a raster's render type in a list |
 | Feature Attributes form after digitizing | the same: finishing a point, line or polygon (double-click, right-click or Enter) opens a form with a box for each field; **OK** adds the feature with its values (one step to undo), **Cancel** leaves it out. A text field's **▾** lists the values it already has (the classes of a training layer). **Remember the last values** fills the form with the last ones; **Settings › Suppress Attribute Form After Feature Creation** turns the form off |
 | Print Layout window | opening a layout swaps in the layout's own menus (Layout, Edit, View, Add Item, Atlas) and toolbar, and shows only Item Properties; **← Back to Map** returns |
 
@@ -30,11 +30,36 @@ The **ខ្មែរ | EN** switch at the top right changes the interface langu
 choice. **Settings › Options…** has the rest of the settings (theme, interface scale, language,
 start-up project, autosave…).
 
-## Layer Styling: Live update
+## Layer Styling
 
-At the foot of **Layer Styling**, **Live update** (on by default) shows every change on the map
-at once. Turn it off to change the style first and see it on the map when you press **Apply**,
-as in QGIS. A raster's style always shows at once.
+**Single Symbol** is laid out as in QGIS: the symbol's preview beside its tree of symbol layers
+(**Fill › Simple Fill**, **Line › Simple Line** or **Marker › Simple Marker**), and the
+properties of the one picked below it. The top node has the symbol's **Color** and **Opacity**;
+the simple layer has its colours, outline width and (points) size and shape. For a polygon, **+**
+stacks a fill on it (a line pattern to start with; change it to a colour, a point pattern, a
+gradient or a shapeburst), **−** removes the one picked, and the arrows move it up or down.
+
+Below is the symbol gallery: KHGIS's symbols (hatched, outlined, gradient, water, forest… for
+polygons; roads, rivers and dashed lines; coloured markers), searched by name, and **My
+Symbols**: **Save Symbol…** keeps the layer's symbol there for any layer of its kind
+(right-click one to remove it). A click on a symbol styles the layer with it, one step to undo.
+**Advanced** has **No Fill**, data-defined size and colours, and **Import QGIS Style…**. A line's
+stacked strokes and a point's marks are in **Strokes** and **Marks** below.
+
+A raster's **Render type** uses QGIS's names: Multiband color, Paletted/Unique values,
+Singleband pseudocolor (stretched, or in classes), the file's own palette, and Hillshade.
+**Paletted/Unique values** lists its values in a table with their colour and label: click a
+colour to change it, type a label (whole-number classes), and use **Classify** (a colour for
+each value in the band), **+**, **−** (the value picked) and **Delete All** below.
+
+**Layer Rendering** (at the bottom) has the blending mode and opacity, and for a raster its
+brightness, saturation, contrast, gamma and **Invert colors** (QGIS styles bring their
+saturation and inverted colours with them). Diagrams (pie and bar charts of numeric fields) are
+on their own page, as in QGIS.
+
+At the foot of **Layer Styling** are undo and redo, and **Live update** (on by default), which
+shows every change on the map at once. Turn it off to change the style first and see it on the
+map when you press **Apply**, as in QGIS. A raster's style always shows at once.
 
 ## Continue in QGIS: Save As GeoPackage for QGIS
 

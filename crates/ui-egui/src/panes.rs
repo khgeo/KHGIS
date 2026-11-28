@@ -4304,6 +4304,21 @@ pub(crate) fn symbology_in(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
     symbology(app, ui, t);
 }
 
+/// The Layer Styling panel's Diagrams page: a pie or bar chart of several numeric fields on each
+/// feature.
+pub(crate) fn diagrams_in(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
+    let Some(l) = app.session.active_layer.and_then(|id| app.session.map().layer(id)).cloned() else {
+        ui.label(egui::RichText::new(tl!("Select a layer in the Layers pane.")).color(t.text_dim));
+        return;
+    };
+    if l.is_raster() || l.graphics {
+        ui.label(egui::RichText::new(tl!("Diagrams are drawn on a vector layer's features.")).color(t.text_dim));
+        return;
+    }
+    let numeric: Vec<String> = l.dataset.fields.iter().filter(|f| f.ty.is_numeric()).map(|f| f.name.clone()).collect();
+    diagram_section(app, ui, &l, &numeric, t);
+}
+
 /// The Details page's contents, for the Layer Styling panel's Information page.
 pub(crate) fn details_in(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
     details(app, ui, t);
@@ -4318,7 +4333,11 @@ fn symbology(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
         return;
     };
     if l.is_raster() {
-        raster_symbology(app, ui, &l, t);
+        if app.ui.qgis_layout {
+            crate::qgisstyle::raster(app, ui, &l, t);
+        } else {
+            raster_symbology(app, ui, &l, t);
+        }
         return;
     }
     let g = l.geometry_type();
@@ -4472,7 +4491,8 @@ fn symbology(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
         });
         ui.add_space(6.0);
     }
-    if l.has_geometry(GeometryType::Polygon) && !l.graphics {
+    // (The QGIS layout has No Fill in the symbol's Advanced menu.)
+    if l.has_geometry(GeometryType::Polygon) && !l.graphics && !app.ui.qgis_layout {
         if ui.button(tl!("No Fill")).on_hover_text(tl!("Draw only polygon outlines, keeping their colors and widths.")).clicked() {
             let _ = app.run("layer.noFill", Value::Null);
         }
@@ -4506,6 +4526,7 @@ fn symbology(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
         ui.add_space(6.0);
     }
     match &l.renderer {
+        Renderer::Single(s) if app.ui.qgis_layout && !l.graphics => crate::qgisstyle::single_symbol(app, ui, &l, *s, t),
         Renderer::Single(s) => symbol_editor(app, ui, *s, g, t),
         Renderer::Unique { field, classes, ramp, expression, .. } => {
             field_combo(app, ui, "Field", if expression.is_some() { tl!("(expression)") } else { field.as_str() }, &all, "unique");
@@ -4566,13 +4587,31 @@ fn symbology(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
         ui.add_space(8.0);
         marker_rotation_row(app, ui, &l);
     }
+    let qgis = app.ui.qgis_layout;
+    let single = matches!(l.renderer, Renderer::Single(_));
     if matches!(g, GeometryType::Polyline | GeometryType::Point) && !l.graphics {
         ui.add_space(8.0);
-        line_strokes_editor(app, ui, &l, t);
+        if qgis {
+            // Stacked strokes and marks, folded away as QGIS's extra symbol layers are.
+            let title = if g == GeometryType::Point { tl!("Marks") } else { tl!("Strokes") };
+            egui::CollapsingHeader::new(egui::RichText::new(title).font(semibold(12.5)))
+                .id_salt(("qgis_strokes", l.id))
+                .default_open(!l.line_strokes.is_empty())
+                .show(ui, |ui| line_strokes_editor(app, ui, &l, t));
+        } else {
+            line_strokes_editor(app, ui, &l, t);
+        }
     }
-    if l.has_geometry(GeometryType::Polygon) && !l.graphics {
+    // The QGIS layout's single symbol has its fills in its tree.
+    if l.has_geometry(GeometryType::Polygon) && !l.graphics && !(qgis && single) {
         ui.add_space(8.0);
         crate::fill_editor::fills_editor(app, ui, &l, t);
+    }
+    if qgis {
+        // Diagrams have a page of their own; the layer's opacity and blending are Layer Rendering.
+        ui.add_space(10.0);
+        crate::qgisstyle::layer_rendering(app, ui, &l);
+        return;
     }
     if !l.graphics {
         ui.add_space(10.0);
@@ -4605,7 +4644,7 @@ fn symbology(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
 /// drawn on each feature over its symbol, as ArcGIS Pro's Chart symbology and QGIS's Diagrams
 /// draw. Every change re-runs `layer.diagram` with the whole setting — one undo step, and the
 /// scaled size range is recomputed from the data; `layer.clearDiagram` removes the diagram.
-fn diagram_section(app: &mut RustGisApp, ui: &mut Ui, l: &Layer, numeric: &[String], t: &Tokens) {
+pub(crate) fn diagram_section(app: &mut RustGisApp, ui: &mut Ui, l: &Layer, numeric: &[String], t: &Tokens) {
     use rustgis_engine::map::diagram::{CATEGORY_COLORS, MAX_CATEGORIES};
     use rustgis_engine::map::{DiagramKind, DiagramLabel, DiagramSize};
 
@@ -4896,7 +4935,7 @@ const REFERENCE_SCALE_CHOICES: [f64; 8] = [5_000.0, 10_000.0, 25_000.0, 50_000.0
 
 /// The Symbology pane's Reference scale: the scale a layer's symbol and label sizes are set
 /// for, so they grow and shrink with the map (`layer.referenceScale`).
-fn reference_scale_row(app: &mut RustGisApp, ui: &mut Ui, l: &Layer) {
+pub(crate) fn reference_scale_row(app: &mut RustGisApp, ui: &mut Ui, l: &Layer) {
     let current = app.session.map().scale().round();
     ui.horizontal(|ui| {
         ui.label(tl!("Reference scale")).on_hover_text(tl!(
@@ -4925,7 +4964,7 @@ fn reference_scale_row(app: &mut RustGisApp, ui: &mut Ui, l: &Layer) {
 
 /// The Symbology pane's Transparency slider: the map follows it while it's dragged, and letting
 /// go runs `layer.transparency` once, so the drag is one undo step.
-fn transparency_drag(app: &mut RustGisApp, ui: &Ui, r: &egui::Response, l: &Layer, tr: f32) {
+pub(crate) fn transparency_drag(app: &mut RustGisApp, ui: &Ui, r: &egui::Response, l: &Layer, tr: f32) {
     let id = l.id;
     crate::ribbon::live_drag(
         app,
@@ -4969,7 +5008,7 @@ fn field_combo(app: &mut RustGisApp, ui: &mut Ui, label: &str, cur: &str, fields
     });
 }
 
-fn ramp_picker(app: &mut RustGisApp, ui: &mut Ui, cur: &Ramp, t: &Tokens) {
+pub(crate) fn ramp_picker(app: &mut RustGisApp, ui: &mut Ui, cur: &Ramp, t: &Tokens) {
     ramp_picker_with(app, ui, cur, t, false);
 }
 
@@ -5370,6 +5409,14 @@ fn symbol_editor(app: &mut RustGisApp, ui: &mut Ui, s: Symbol, g: GeometryType, 
             patch(ui.painter(), r.shrink(6.0), &s, g);
             ui.label(egui::RichText::new(tl!("Symbol")).font(semibold(12.5)));
         });
+        symbol_rows(app, ui, s, g);
+    });
+}
+
+/// The symbol's own rows: its colours, outline width and, for points, size and shape (the
+/// Symbol box, and Layer Styling's Simple Fill, Simple Line or Simple Marker).
+pub(crate) fn symbol_rows(app: &mut RustGisApp, ui: &mut Ui, s: Symbol, g: GeometryType) {
+    {
         egui::Grid::new("symbol_grid").num_columns(2).spacing(vec2(10.0, 6.0)).show(ui, |ui| {
             if g != GeometryType::Polyline {
                 ui.label(tl!("Color"));
@@ -5435,7 +5482,7 @@ fn symbol_editor(app: &mut RustGisApp, ui: &mut Ui, s: Symbol, g: GeometryType, 
                 }
             }
         });
-    });
+    }
 }
 
 /// The dash patterns the stroke editor offers, in stroke widths (dash, gap, …).
@@ -5787,7 +5834,7 @@ fn marks_preview(ui: &Ui, r: Rect, strokes: &[LineStroke], base: &Symbol) {
 
 /// The field a point layer's markers turn by (`layer.markerRotation`): none, or one of its number
 /// fields, its angles clockwise or counterclockwise.
-fn marker_rotation_row(app: &mut RustGisApp, ui: &mut Ui, l: &rustgis_engine::map::Layer) {
+pub(crate) fn marker_rotation_row(app: &mut RustGisApp, ui: &mut Ui, l: &rustgis_engine::map::Layer) {
     let cur = l.marker_rotation.as_ref();
     ui.horizontal(|ui| {
         let input_label = ui.label(tl!("Rotation"));
@@ -5826,7 +5873,7 @@ fn marker_rotation_row(app: &mut RustGisApp, ui: &mut Ui, l: &rustgis_engine::ma
 /// feature, each from an expression (`layer.symbolBy`). An expression applies when its box loses
 /// focus; one that doesn't read shows why as it is typed, and stays in its box unapplied until
 /// it is fixed or Escape drops it.
-fn symbol_by_editor(app: &mut RustGisApp, ui: &mut Ui, l: &rustgis_engine::map::Layer, t: &Tokens) {
+pub(crate) fn symbol_by_editor(app: &mut RustGisApp, ui: &mut Ui, l: &rustgis_engine::map::Layer, t: &Tokens) {
     let g = l.geometry_type();
     let by = &l.symbol_by;
     let mut rows: Vec<(&str, &str, &Option<String>)> = Vec::new();
@@ -5947,7 +5994,7 @@ pub(crate) fn expression_box(
 /// its own colour, width, sideways offset, cap and join. Listed top first, as they are seen. A
 /// layer with classes can stack strokes for one class of its own, picked at the top. A point
 /// layer's are its Marks: markers stacked at the point, each shifted and turned.
-fn line_strokes_editor(app: &mut RustGisApp, ui: &mut Ui, l: &rustgis_engine::map::Layer, t: &Tokens) {
+pub(crate) fn line_strokes_editor(app: &mut RustGisApp, ui: &mut Ui, l: &rustgis_engine::map::Layer, t: &Tokens) {
     let points = l.geometry_type() == GeometryType::Point;
     let classes = stroke_classes(&l.renderer);
     let picked_id = egui::Id::unique(("stroke_class", l.id));
@@ -6692,8 +6739,12 @@ fn rgb_stretch_bounds(app: &mut RustGisApp, ui: &mut Ui, layer: impl std::hash::
     }
 }
 
-fn raster_symbology(app: &mut RustGisApp, ui: &mut Ui, l: &Layer, t: &Tokens) {
-    ui.label(egui::RichText::new(&l.name).font(semibold(14.0)));
+pub(crate) fn raster_symbology(app: &mut RustGisApp, ui: &mut Ui, l: &Layer, t: &Tokens) {
+    // The QGIS layout names the layer above and picks the render type from a list.
+    let qgis = app.ui.qgis_layout;
+    if !qgis {
+        ui.label(egui::RichText::new(&l.name).font(semibold(14.0)));
+    }
     let Some(rl) = l.raster.clone() else { return };
     let Some(d) = rl.data.clone() else {
         // Read in place, its overview is on its way until it lands, or fails (as Details says).
@@ -6705,10 +6756,11 @@ fn raster_symbology(app: &mut RustGisApp, ui: &mut Ui, l: &Layer, t: &Tokens) {
         return;
     };
     let style = rl.style.clone();
-    ui.add_space(6.0);
-    ui.label(egui::RichText::new(tl!("Primary symbology")).size(11.5).color(t.text_dim));
     let has_categories = d.bands.first().is_some_and(|b| b.stats.categories.is_some());
     let palette = matches!(d.color, rustgis_engine::data::raster::ColorHint::Palette(_));
+    if !qgis {
+    ui.add_space(6.0);
+    ui.label(egui::RichText::new(tl!("Primary symbology")).size(11.5).color(t.text_dim));
     ui.horizontal_wrapped(|ui| {
         for (code, label) in RasterRenderer::KINDS {
             let ok = match code {
@@ -6758,6 +6810,7 @@ fn raster_symbology(app: &mut RustGisApp, ui: &mut Ui, l: &Layer, t: &Tokens) {
         }
     });
     ui.add_space(8.0);
+    }
     let bands: Vec<String> = d.bands.iter().map(|b| b.name.clone()).collect();
     let band_combo = |app: &mut RustGisApp, ui: &mut Ui, label: &str, cur: usize, run: &dyn Fn(usize) -> (String, Value)| {
         ui.horizontal(|ui| {
@@ -6830,10 +6883,23 @@ fn raster_symbology(app: &mut RustGisApp, ui: &mut Ui, l: &Layer, t: &Tokens) {
         }
         RasterRenderer::UniqueValues { band, ramp, values } => {
             band_combo(app, ui, "Band", *band, &|i| ("raster.symbology".into(), json!({"type": "unique", "band": i + 1})));
-            ramp_picker(app, ui, ramp, t);
-            ui.label(
-                egui::RichText::new(crate::i18n::fmt("{n} classes", &[("n", &values.len().to_string())])).size(11.5).color(t.text_dim),
-            );
+            if qgis {
+                // One row, as QGIS's Color ramp, opened to pick another.
+                egui::CollapsingHeader::new(crate::i18n::fmt("Color ramp: {name}", &[("name", tl!(ramp.name()))]))
+                    .id_salt(("qgis_unique_ramp", l.id))
+                    .default_open(false)
+                    .show(ui, |ui| ramp_picker(app, ui, ramp, t));
+            } else {
+                ramp_picker(app, ui, ramp, t);
+            }
+            if qgis {
+                ui.add_space(4.0);
+                crate::qgisstyle::unique_table(app, ui, l, *band, ramp, values, t);
+            } else {
+                ui.label(
+                    egui::RichText::new(crate::i18n::fmt("{n} classes", &[("n", &values.len().to_string())])).size(11.5).color(t.text_dim),
+                );
+            }
         }
         RasterRenderer::Colormap => {
             ui.label(egui::RichText::new(tl!("Colors from the raster's own color table.")).size(11.5).color(t.text_dim));
@@ -7012,6 +7078,14 @@ fn raster_symbology(app: &mut RustGisApp, ui: &mut Ui, l: &Layer, t: &Tokens) {
         raster_default_buttons(app, ui, &style);
     }
     raster_masking(app, ui, l, &d, &style, t);
+    // The table is the legend in the QGIS layout, and the layer's opacity is in Layer Rendering.
+    if qgis {
+        if !matches!(style.renderer, RasterRenderer::UniqueValues { .. }) {
+            ui.add_space(6.0);
+            raster_legend_rows(ui, &rl.legend(), 2.0, t);
+        }
+        return;
+    }
     ui.add_space(6.0);
     egui::Frame::NONE.stroke(Stroke::new(1.0, t.border)).corner_radius(CornerRadius::same(6)).inner_margin(egui::Margin::same(6)).show(
         ui,

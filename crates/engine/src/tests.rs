@@ -2920,11 +2920,25 @@ fn raster_layers_open_style_identify_and_round_trip() {
     s.run("raster.stretch", &json!({"type": "standardDeviation", "n": 2.5})).unwrap();
     s.run("raster.dra", &json!({"on": true})).unwrap();
     s.run("raster.resampling", &json!({"type": "bilinear"})).unwrap();
-    s.run("raster.enhance", &json!({"brightness": 20, "contrast": -10, "gamma": 1.4})).unwrap();
+    s.run("raster.enhance", &json!({"brightness": 20, "contrast": -10, "gamma": 1.4, "saturation": -40, "invert": true})).unwrap();
     s.run("layer.ramp", &json!({"ramp": "Aurora"})).unwrap();
     let st = s.map().layers.first().unwrap().raster.as_ref().unwrap().style.clone();
     assert_eq!(st.renderer, rustgis_map::RasterRenderer::Rgb { red: 2, green: 1, blue: 0 });
-    assert!(st.dra && st.gamma == 1.4);
+    assert!(st.dra && st.gamma == 1.4 && st.saturation == -40.0 && st.invert);
+    // Unique Values classes set as Layer Styling's table edits them, sorted; one undo step each.
+    s.run("raster.uniqueValues", &json!({"values": [[30, "#ffff00"], [10, "#006400"]]})).unwrap();
+    let st = s.map().layers.first().unwrap().raster.as_ref().unwrap().style.clone();
+    let rustgis_map::RasterRenderer::UniqueValues { values, band, .. } = &st.renderer else { panic!("{st:?}") };
+    // From RGB, the red band (band 3 here) is the one classed.
+    assert_eq!((values.len(), values[0].0, *band), (2, 10.0, 2));
+    assert_eq!(values[0].1.hex(), "#006400");
+    s.run("raster.uniqueValues", &json!({"values": []})).unwrap();
+    assert!(s.run("raster.uniqueValues", &json!({"values": [[1, "#000000"], [1, "#ffffff"]]})).is_err());
+    assert!(s.run("raster.uniqueValues", &json!({"values": [[1, "teal"]]})).is_err());
+    s.run("edit.undo", &Value::Null).unwrap();
+    let st = s.map().layers.first().unwrap().raster.as_ref().unwrap().style.clone();
+    assert!(matches!(&st.renderer, rustgis_map::RasterRenderer::UniqueValues { values, .. } if values.len() == 2));
+    s.run("raster.symbology", &json!({"type": "rgb"})).unwrap();
     // Feature-only commands are off for rasters, and layer conditions follow a named layer.
     assert!(s.run("table.open", &Value::Null).is_err());
     assert!(s.run("labels.enable", &json!({"layer": "scene"})).is_err());

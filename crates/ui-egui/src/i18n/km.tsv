@@ -1852,3 +1852,46 @@ leafless in the dry season: deciduous forest?	ជ្រុះស្លឹកន�
 medium greenness: shrubland?	ភាពបៃតងមធ្យម៖ ព្រៃគុម្ពោត?
 dense vegetation: forest?	រុក្ខជាតិក្រាស់៖ ព្រៃឈើ?
 rice?	ស្រូវ?
+Marker	សញ្ញាសម្គាល់
+Simple Fill	ការបំពេញធម្មតា
+Simple Line	បន្ទាត់ធម្មតា
+Simple Marker	សញ្ញាសម្គាល់ធម្មតា
+Solid Fill	ការបំពេញពណ៌ពេញ
+Line Pattern Fill	ការបំពេញលំនាំបន្ទាត់
+Point Pattern Fill	ការបំពេញលំនាំចំណុច
+Gradient Fill	ការបំពេញពណ៌ជម្រាល
+Shapeburst Fill	ការបំពេញពីគែមចូល
+Add symbol layer	បន្ថែមស្រទាប់និមិត្តសញ្ញា
+Remove symbol layer	ដកស្រទាប់និមិត្តសញ្ញាចេញ
+Unit	ឯកតា
+Sizes and widths are in points (1/72 inch)	ទំហំ និងទទឹងគិតជាពិន្ទុ (1/72 អ៊ីញ)
+Favorites — search symbols	ចំណូលចិត្ត — ស្វែងរកនិមិត្តសញ្ញា
+My Symbols	និមិត្តសញ្ញារបស់ខ្ញុំ
+Remove from my symbols	ដកចេញពីនិមិត្តសញ្ញារបស់ខ្ញុំ
+Advanced ▾	កម្រិតខ្ពស់ ▾
+Save Symbol…	រក្សាទុកនិមិត្តសញ្ញា…
+Keep this symbol in My Symbols, for any layer	រក្សាទុកនិមិត្តសញ្ញានេះក្នុង និមិត្តសញ្ញារបស់ខ្ញុំ សម្រាប់ស្រទាប់ណាមួយ
+Data-defined	កំណត់ដោយទិន្នន័យ
+Data-defined size and colors	ទំហំ និងពណ៌កំណត់ដោយទិន្នន័យ
+Layer Rendering	ការបង្ហាញស្រទាប់
+Blending mode	របៀបលាយ
+Invert colors	បញ្ច្រាសពណ៌
+Multiband color	ពណ៌ពហុប៊ែន
+Paletted/Unique values	ក្ដារពណ៌/តម្លៃតែមួយ
+Singleband pseudocolor (classes)	ពណ៌ក្លែងប៊ែនតែមួយ (ថ្នាក់)
+Paletted (the file's colors)	ក្ដារពណ៌ (ពណ៌របស់ឯកសារ)
+Hillshade	ស្រមោលភ្នំ
+Singleband pseudocolor	ពណ៌ក្លែងប៊ែនតែមួយ
+Needs three bands or more	ត្រូវការបីប៊ែន ឬច្រើនជាងនេះ
+Needs a band of a few whole-number values (classes)	ត្រូវការប៊ែនដែលមានតម្លៃចំនួនគត់តិចតួច (ថ្នាក់)
+Needs a color table in the file	ត្រូវការតារាងពណ៌ក្នុងឯកសារ
+Render type	ប្រភេទការបង្ហាញ
+No values: press Classify, or + to add one.	គ្មានតម្លៃ៖ ចុច ចាត់ថ្នាក់ ឬ + ដើម្បីបន្ថែម។
+A color for each value in the band	ពណ៌មួយសម្រាប់តម្លៃនីមួយៗក្នុងប៊ែន
+Add a value	បន្ថែមតម្លៃ
+Remove the selected value	ដកតម្លៃដែលបានជ្រើសចេញ
+Delete All	លុបទាំងអស់
+Color ramp: {name}	ជម្រាលពណ៌៖ {name}
+Diagrams	ដ្យាក្រាម
+Diagrams are drawn on a vector layer's features.	ដ្យាក្រាមគូរលើធាតុនៃស្រទាប់វ៉ិចទ័រ។
+Live update shows each change at once	ការធ្វើបច្ចុប្បន្នភាពភ្លាមៗ បង្ហាញការផ្លាស់ប្ដូរនីមួយៗភ្លាម

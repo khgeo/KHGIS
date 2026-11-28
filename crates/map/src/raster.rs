@@ -1009,6 +1009,10 @@ impl RasterDefaults {
 /// Most values given their own colour by Unique Values.
 pub const MAX_UNIQUE_VALUES: usize = 256;
 
+fn no_saturation(x: &f64) -> bool {
+    *x == 0.0
+}
+
 /// A raster layer's symbology.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct RasterStyle {
@@ -1029,6 +1033,12 @@ pub struct RasterStyle {
     /// 0.1 to 10; 1 leaves values unchanged.
     #[serde(default = "one")]
     pub gamma: f64,
+    /// −100 (grey) to 100 (twice as vivid); 0 leaves colours unchanged.
+    #[serde(default, skip_serializing_if = "no_saturation")]
+    pub saturation: f64,
+    /// Colours drawn inverted (white for black).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub invert: bool,
     /// Display rotation in degrees clockwise, about the raster's centre.
     #[serde(default)]
     pub rotation: f64,
@@ -1197,6 +1207,8 @@ impl RasterStyle {
             brightness: 0.0,
             contrast: 0.0,
             gamma: 1.0,
+            saturation: 0.0,
+            invert: false,
             rotation: 0.0,
             mask: RasterMask::default(),
         }
@@ -1235,6 +1247,8 @@ impl RasterStyle {
             brightness: 0.0,
             contrast: 0.0,
             gamma: 1.0,
+            saturation: 0.0,
+            invert: false,
             rotation: 0.0,
             mask: RasterMask::default(),
         }
@@ -1429,7 +1443,11 @@ impl<'a> Colorizer<'a> {
             ColorHint::Palette(p) => p,
             _ => &[],
         };
-        let plain = style.brightness == 0.0 && style.contrast == 0.0 && (style.gamma - 1.0).abs() < 1e-9;
+        let plain = style.brightness == 0.0
+            && style.contrast == 0.0
+            && (style.gamma - 1.0).abs() < 1e-9
+            && style.saturation == 0.0
+            && !style.invert;
         let bytes = norms.iter().map(|n| std::array::from_fn(|i| Self::normalize(n, i as f32))).collect();
         Colorizer { style, norms, bytes, lut: enhancement_lut(style.brightness, style.contrast, style.gamma), plain, ramp_lut, palette }
     }
@@ -1453,7 +1471,18 @@ impl<'a> Colorizer<'a> {
             return c;
         }
         let l = |x: u8| self.lut[x as usize];
-        [l(c[0]), l(c[1]), l(c[2]), c[3]]
+        let [mut r, mut g, mut b] = [l(c[0]), l(c[1]), l(c[2])];
+        // Saturation: away from (or towards) the pixel's grey, as QGIS's Hue and Saturation does.
+        if self.style.saturation != 0.0 {
+            let k = 1.0 + self.style.saturation.clamp(-100.0, 100.0) / 100.0;
+            let grey = 0.299 * r as f64 + 0.587 * g as f64 + 0.114 * b as f64;
+            let s = |x: u8| (grey + (x as f64 - grey) * k).round().clamp(0.0, 255.0) as u8;
+            [r, g, b] = [s(r), s(g), s(b)];
+        }
+        if self.style.invert {
+            [r, g, b] = [255 - r, 255 - g, 255 - b];
+        }
+        [r, g, b, c[3]]
     }
 
     /// The colour of a pixel from its renderer band values (`NaN` = no data), or `None` for
@@ -1866,6 +1895,22 @@ mod tests {
         let bright = enhancement_lut(50.0, 0.0, 1.0);
         assert!(bright[100] > flat[100]);
         let _ = enhancement_lut(f64::NAN, f64::INFINITY, f64::NAN);
+        // Saturation away from the pixel's grey, and inverted colours.
+        let r = rgb();
+        let mut style = RasterStyle::default_for(&r);
+        style.renderer = RasterRenderer::Rgb { red: 0, green: 1, blue: 2 };
+        style.stretch = Stretch::None;
+        let c = |style: &RasterStyle| Colorizer::new(style, &r, None).color(&[200.0, 100.0, 50.0], None).unwrap();
+        let plain = c(&style);
+        style.saturation = -100.0;
+        let grey = c(&style);
+        assert!(grey[0] == grey[1] && grey[1] == grey[2], "{grey:?}");
+        style.saturation = 50.0;
+        let vivid = c(&style);
+        assert!(vivid[0] >= plain[0] && vivid[2] <= plain[2], "{plain:?} {vivid:?}");
+        style.saturation = 0.0;
+        style.invert = true;
+        assert_eq!(c(&style), [255 - plain[0], 255 - plain[1], 255 - plain[2], plain[3]]);
     }
 
     fn rgb() -> Raster {

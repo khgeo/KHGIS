@@ -70,6 +70,7 @@ mod pluginsui;
 mod portalsui;
 mod qgisdock;
 mod qgislayout;
+mod qgisstyle;
 mod qgisui;
 mod radial;
 #[cfg(not(target_arch = "wasm32"))]

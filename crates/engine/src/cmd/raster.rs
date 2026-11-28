@@ -67,8 +67,15 @@ pub fn commands() -> Vec<C> {
             .when(need_raster)
             .params(r#"{"layer"?, "red"?: 1.., "green"?: 1.., "blue"?: 1.., "preset"?: "natural"|"colorInfrared"}"#),
         C::new("raster.enhance", "Enhancement", "Style › Enhancement", |s, p| {
-            let (br, co, ga) = (f(p, "brightness"), f(p, "contrast"), f(p, "gamma"));
+            let (br, co, ga, sa) = (f(p, "brightness"), f(p, "contrast"), f(p, "gamma"), f(p, "saturation"));
+            let inv = p.get("invert").and_then(Value::as_bool);
             with(s, p, |rl, _| {
+                if let Some(v) = sa {
+                    rl.style.saturation = v.clamp(-100.0, 100.0);
+                }
+                if let Some(v) = inv {
+                    rl.style.invert = v;
+                }
                 if let Some(v) = br {
                     rl.style.brightness = v.clamp(-100.0, 100.0);
                 }
@@ -82,7 +89,12 @@ pub fn commands() -> Vec<C> {
             })
         }).roles(&[]).effects(crate::policy::Effects::NONE)
         .when(need_raster)
-        .params(r#"{"layer"?, "brightness"?: -100..100, "contrast"?: -100..100, "gamma"?: 0.1..10}"#),
+        .params(r#"{"layer"?, "brightness"?: -100..100, "contrast"?: -100..100, "gamma"?: 0.1..10, "saturation"?: -100..100 (-100 grey), "invert"?: bool (inverted colours)}"#),
+        C::new("raster.uniqueValues", "Unique Values Classes", "Style › Rendering", set_unique_values)
+            .when(need_raster)
+            .roles(&[])
+            .effects(crate::policy::Effects::NONE)
+            .params(r##"{"layer"?, "values": [[value, "#rrggbb"], …] (each value drawn in its colour; values not listed aren't drawn; [] draws none)}"##),
         C::new("raster.setDefaultStyle", "Save as Default Raster Style", "Style › Rendering", set_default_style).roles(&[]).effects(crate::policy::Effects::NONE).view().params(
             r#"{"fromLayer"?: bool (the active or named layer's colour ramp stretch; the settings apply to every raster added later that would be a grey stretch, opened files and analysis results alike), "layer"?, "ramp"?, "invert"?: bool, "stretch"?: "none"|"minMax"|"percentClip"|"standardDeviation"|"histogramEqualize", "low"?, "high"?: %, "n"?: deviations, "resampling"?: "nearest"|"bilinear", "reset"?: bool (back to the black-to-white grey stretch)}"#,
         ),
@@ -264,6 +276,35 @@ fn stretch(s: &mut Session, p: &Value) -> CmdResult {
 }
 
 /// Applies `f` to the raster layer named by `p`.
+/// `raster.uniqueValues`: the Unique Values classes set as given (Layer Styling's table: a class
+/// added, one removed, all deleted, a colour changed), keeping the band and ramp it had.
+fn set_unique_values(s: &mut Session, p: &Value) -> CmdResult {
+    let list = p.get("values").and_then(Value::as_array).ok_or("values is [[value, \"#rrggbb\"], …]")?;
+    if list.len() > rustgis_map::raster::MAX_UNIQUE_VALUES {
+        return Err(format!("at most {} values have a colour of their own", rustgis_map::raster::MAX_UNIQUE_VALUES));
+    }
+    let mut values = Vec::with_capacity(list.len());
+    for item in list {
+        let pair = item.as_array().filter(|a| a.len() == 2).ok_or("each value is [value, \"#rrggbb\"]")?;
+        let v = pair[0].as_f64().filter(|v| v.is_finite()).ok_or_else(|| format!("{} isn't a number", pair[0]))?;
+        let c = pair[1].as_str().and_then(rustgis_map::Rgba::from_hex).ok_or_else(|| format!("{} isn't a colour (#rrggbb)", pair[1]))?;
+        values.push((v, c));
+    }
+    values.sort_by(|a, b| a.0.total_cmp(&b.0));
+    if values.windows(2).any(|w| w[0].0 == w[1].0) {
+        return Err("a value is listed twice".into());
+    }
+    with(s, p, |rl, _| {
+        let (band, ramp) = match &rl.style.renderer {
+            RasterRenderer::UniqueValues { band, ramp, .. } => (*band, ramp.clone()),
+            other => (other.bands().first().copied().unwrap_or(0), Ramp::Harbour),
+        };
+        rl.style.renderer = RasterRenderer::UniqueValues { band, ramp, values };
+        rl.style.stretch = Stretch::None;
+        Ok(())
+    })
+}
+
 fn with(s: &mut Session, p: &Value, f: impl FnOnce(&mut RasterLayer, &Raster) -> Result<(), String>) -> CmdResult {
     let (id, data) = get(s, p)?;
     let rl = s.map_mut().layer_mut(id).and_then(|l| l.raster.as_mut()).ok_or("no such layer")?;

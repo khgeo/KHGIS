@@ -17,7 +17,7 @@ use crate::RustGisApp;
 use crate::theme::{Tokens, c32, rgba, semibold};
 
 /// The fill's settings as `layer.fillLayers` takes them.
-fn fill_json(f: &FillLayer) -> Value {
+pub(crate) fn fill_json(f: &FillLayer) -> Value {
     let color = f.color.map(|c| c.hex());
     match f.pattern {
         FillPattern::Solid => json!({"color": color, "pattern": "solid"}),
@@ -78,7 +78,7 @@ fn spread_name(s: Spread) -> &'static str {
 }
 
 /// Runs `layer.fillLayers` with `fills` for the class picked (`None`: the layer's).
-fn set_fills(app: &mut RustGisApp, class: Option<&ClassRef>, fills: &[FillLayer]) {
+pub(crate) fn set_fills(app: &mut RustGisApp, class: Option<&ClassRef>, fills: &[FillLayer]) {
     let mut p = json!({"fills": fills.iter().map(fill_json).collect::<Vec<_>>()});
     match class {
         Some(ClassRef::Value(v)) => p["value"] = json!(v),
@@ -90,7 +90,7 @@ fn set_fills(app: &mut RustGisApp, class: Option<&ClassRef>, fills: &[FillLayer]
 }
 
 /// A fill's kind, as the Draw list names it.
-fn kind(f: &FillLayer) -> &'static str {
+pub(crate) fn kind(f: &FillLayer) -> &'static str {
     match f.pattern {
         FillPattern::Solid => "Solid",
         FillPattern::Hatch { .. } => "Hatch lines",
@@ -177,7 +177,9 @@ pub(crate) fn fills_editor(app: &mut RustGisApp, ui: &mut Ui, l: &Layer, t: &Tok
         }
         let n = fills.len();
         for i in (0..n).rev() {
-            let Some(f) = fills.get(i).copied() else { continue };
+            if fills.get(i).is_none() {
+                continue;
+            }
             ui.add_space(4.0);
             ui.separator();
             ui.horizontal(|ui| {
@@ -201,248 +203,257 @@ pub(crate) fn fills_editor(app: &mut RustGisApp, ui: &mut Ui, l: &Layer, t: &Tok
                     }
                 });
             });
-            let set = |app: &mut RustGisApp, new: FillLayer| {
-                let mut next = fills.clone();
-                if let Some(slot) = next.get_mut(i) {
-                    *slot = new;
+            fill_rows(app, ui, i, &fills, class, &base, t);
+        }
+    });
+}
+
+/// One fill's rows (`fills[i]`, of the class picked or the layer's): what it draws, its colour
+/// and its pattern's settings. Layer Styling's symbol tree shows them for the fill picked.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn fill_rows(app: &mut RustGisApp, ui: &mut Ui, i: usize, fills: &[FillLayer], class: Option<&ClassRef>, base: &Symbol, t: &Tokens) {
+    let Some(f) = fills.get(i).copied() else { return };
+    let fills = fills.to_vec();
+    let set = |app: &mut RustGisApp, new: FillLayer| {
+        let mut next = fills.clone();
+        if let Some(slot) = next.get_mut(i) {
+            *slot = new;
+        }
+        set_fills(app, class, &next);
+    };
+    egui::Grid::new(("fill_grid", i)).num_columns(2).spacing(vec2(10.0, 6.0)).show(ui, |ui| {
+        let input_label = ui.label(tl!("Draw"));
+        egui::ComboBox::from_id_salt(("fill_draw", i))
+            .selected_text(tl!(kind(&f)))
+            .show_ui(ui, |ui| {
+                let options = [
+                    FillLayer { pattern: FillPattern::Solid, ..f },
+                    FillLayer::hatch(45.0, 6.0, 1.0),
+                    FillLayer {
+                        pattern: FillPattern::Dots {
+                            marker: Marker::Circle,
+                            size: 3.0,
+                            outline: None,
+                            outline_width: 0.0,
+                            spacing: [8.0, 8.0],
+                            displacement: [4.0, 0.0],
+                            offset: [0.0, 0.0],
+                        },
+                        ..f
+                    },
+                    FillLayer {
+                        pattern: FillPattern::Gradient {
+                            shape: GradientShape::Linear,
+                            color2: rustgis_engine::map::Rgba::rgb(255, 255, 255),
+                            stops: Stops::default(),
+                            discrete: false,
+                            from: GradientPoint::At([0.5, 0.0]),
+                            to: GradientPoint::At([0.5, 1.0]),
+                            spread: Spread::Pad,
+                            angle: 0.0,
+                            in_view: false,
+                        },
+                        ..f
+                    },
+                    FillLayer {
+                        pattern: FillPattern::Shapeburst {
+                            color2: rustgis_engine::map::Rgba::rgb(255, 255, 255),
+                            stops: Stops::default(),
+                            discrete: false,
+                            // QGIS's: over the whole shape.
+                            distance: None,
+                            blur: 0,
+                            ignore_rings: false,
+                        },
+                        ..f
+                    },
+                ];
+                for option in options {
+                    let option = FillLayer { color: f.color, ..option };
+                    if ui.selectable_label(kind(&option) == kind(&f), tl!(kind(&option))).clicked() && kind(&option) != kind(&f) {
+                        set(app, option);
+                    }
                 }
-                set_fills(app, class, &next);
+            })
+            .response
+            .on_hover_text(tl!(
+                "A colour, hatch lines, markers on a grid, a gradient, or a shapeburst (shaded from the edge inwards)"
+            ))
+            .labelled_by(input_label.id);
+        ui.end_row();
+        ui.label(tl!("Color"));
+        ui.horizontal(|ui| {
+            let c = f.color.unwrap_or(base.fill);
+            let mut cc = c32(c);
+            let resp = crate::widgets::color_button(ui, &mut cc);
+            if resp.changed() {
+                crate::widgets::one_step_per_press(app, &resp);
+                set(app, FillLayer { color: Some(rgba(cc)), ..f });
+            }
+            let mut from_symbol = f.color.is_none();
+            if ui.checkbox(&mut from_symbol, tl!("From symbol")).on_hover_text(tl!("Use each feature's fill color")).changed() {
+                set(app, FillLayer { color: if from_symbol { None } else { Some(c) }, ..f });
+            }
+        });
+        ui.end_row();
+        // A number changed, its command run straight after (one step to undo a drag).
+        let number =
+            |app: &mut RustGisApp, ui: &mut Ui, label: &str, v: f32, range: std::ops::RangeInclusive<f32>, suffix: &str| {
+                let input_label = ui.label(tl!(label));
+                let mut x = v;
+                let resp = ui
+                    .add(egui::DragValue::new(&mut x).update_while_editing(false).range(range).speed(0.1).suffix(suffix))
+                    .labelled_by(input_label.id);
+                ui.end_row();
+                let changed = crate::widgets::changed(&resp) && x != v;
+                if changed {
+                    crate::widgets::one_step_per_press(app, &resp);
+                }
+                changed.then_some(x)
             };
-            egui::Grid::new(("fill_grid", i)).num_columns(2).spacing(vec2(10.0, 6.0)).show(ui, |ui| {
-                let input_label = ui.label(tl!("Draw"));
-                egui::ComboBox::from_id_salt(("fill_draw", i))
-                    .selected_text(tl!(kind(&f)))
+        // A gradient's or shapeburst's second colour, and its stops between (set by command).
+        if let FillPattern::Gradient { color2, stops, .. } | FillPattern::Shapeburst { color2, stops, .. } = f.pattern {
+            let input_label = ui.label(tl!("Second color"));
+            ui.horizontal(|ui| {
+                let mut cc = c32(color2);
+                let resp = crate::widgets::color_button(ui, &mut cc).labelled_by(input_label.id);
+                if resp.changed() {
+                    crate::widgets::one_step_per_press(app, &resp);
+                    let mut pattern = f.pattern;
+                    if let FillPattern::Gradient { color2, .. } | FillPattern::Shapeburst { color2, .. } = &mut pattern {
+                        *color2 = rgba(cc);
+                    }
+                    set(app, FillLayer { pattern, ..f });
+                }
+                if !stops.is_empty() {
+                    let n = stops.as_slice().len().to_string();
+                    ui.label(
+                        egui::RichText::new(crate::i18n::fmt("{n} colors between", &[("n", &n)])).size(11.5).color(t.text_dim),
+                    );
+                }
+            });
+            ui.end_row();
+        }
+        match f.pattern {
+            FillPattern::Solid => {}
+            FillPattern::Gradient { shape, spread, angle, .. } => {
+                let with = |shape: GradientShape, spread: Spread, a: f32| {
+                    let mut pattern = f.pattern;
+                    if let FillPattern::Gradient { shape: s, spread: p, angle, .. } = &mut pattern {
+                        (*s, *p, *angle) = (shape, spread, a);
+                    }
+                    FillLayer { pattern, ..f }
+                };
+                let input_label = ui.label(tl!("Type"));
+                egui::ComboBox::from_id_salt(("fill_gradient", i))
+                    .selected_text(tl!(shape_name(shape)))
                     .show_ui(ui, |ui| {
-                        let options = [
-                            FillLayer { pattern: FillPattern::Solid, ..f },
-                            FillLayer::hatch(45.0, 6.0, 1.0),
-                            FillLayer {
-                                pattern: FillPattern::Dots {
-                                    marker: Marker::Circle,
-                                    size: 3.0,
-                                    outline: None,
-                                    outline_width: 0.0,
-                                    spacing: [8.0, 8.0],
-                                    displacement: [4.0, 0.0],
-                                    offset: [0.0, 0.0],
-                                },
-                                ..f
-                            },
-                            FillLayer {
-                                pattern: FillPattern::Gradient {
-                                    shape: GradientShape::Linear,
-                                    color2: rustgis_engine::map::Rgba::rgb(255, 255, 255),
-                                    stops: Stops::default(),
-                                    discrete: false,
-                                    from: GradientPoint::At([0.5, 0.0]),
-                                    to: GradientPoint::At([0.5, 1.0]),
-                                    spread: Spread::Pad,
-                                    angle: 0.0,
-                                    in_view: false,
-                                },
-                                ..f
-                            },
-                            FillLayer {
-                                pattern: FillPattern::Shapeburst {
-                                    color2: rustgis_engine::map::Rgba::rgb(255, 255, 255),
-                                    stops: Stops::default(),
-                                    discrete: false,
-                                    // QGIS's: over the whole shape.
-                                    distance: None,
-                                    blur: 0,
-                                    ignore_rings: false,
-                                },
-                                ..f
-                            },
-                        ];
-                        for option in options {
-                            let option = FillLayer { color: f.color, ..option };
-                            if ui.selectable_label(kind(&option) == kind(&f), tl!(kind(&option))).clicked() && kind(&option) != kind(&f) {
-                                set(app, option);
+                        for s in [GradientShape::Linear, GradientShape::Radial, GradientShape::Conical] {
+                            if ui.selectable_label(s == shape, tl!(shape_name(s))).clicked() && s != shape {
+                                set(app, with(s, spread, angle));
                             }
                         }
                     })
                     .response
-                    .on_hover_text(tl!(
-                        "A colour, hatch lines, markers on a grid, a gradient, or a shapeburst (shaded from the edge inwards)"
-                    ))
+                    .on_hover_text(tl!("Straight across, in rings from its first point, or round its first point"))
                     .labelled_by(input_label.id);
                 ui.end_row();
-                ui.label(tl!("Color"));
-                ui.horizontal(|ui| {
-                    let c = f.color.unwrap_or(base.fill);
-                    let mut cc = c32(c);
-                    let resp = crate::widgets::color_button(ui, &mut cc);
-                    if resp.changed() {
-                        crate::widgets::one_step_per_press(app, &resp);
-                        set(app, FillLayer { color: Some(rgba(cc)), ..f });
-                    }
-                    let mut from_symbol = f.color.is_none();
-                    if ui.checkbox(&mut from_symbol, tl!("From symbol")).on_hover_text(tl!("Use each feature's fill color")).changed() {
-                        set(app, FillLayer { color: if from_symbol { None } else { Some(c) }, ..f });
-                    }
-                });
+                if let Some(a) = number(app, ui, "Angle", angle, 0.0..=360.0, "°") {
+                    set(app, with(shape, spread, a));
+                }
+                let input_label = ui.label(tl!("Spread"));
+                egui::ComboBox::from_id_salt(("fill_spread", i))
+                    .selected_text(tl!(spread_name(spread)))
+                    .show_ui(ui, |ui| {
+                        for s in [Spread::Pad, Spread::Reflect, Spread::Repeat] {
+                            if ui.selectable_label(s == spread, tl!(spread_name(s))).clicked() && s != spread {
+                                set(app, with(shape, s, angle));
+                            }
+                        }
+                    })
+                    .response
+                    .on_hover_text(tl!("Past its points: its end colors, back and forth, or over again"))
+                    .labelled_by(input_label.id);
                 ui.end_row();
-                // A number changed, its command run straight after (one step to undo a drag).
-                let number =
-                    |app: &mut RustGisApp, ui: &mut Ui, label: &str, v: f32, range: std::ops::RangeInclusive<f32>, suffix: &str| {
-                        let input_label = ui.label(tl!(label));
-                        let mut x = v;
-                        let resp = ui
-                            .add(egui::DragValue::new(&mut x).update_while_editing(false).range(range).speed(0.1).suffix(suffix))
-                            .labelled_by(input_label.id);
-                        ui.end_row();
-                        let changed = crate::widgets::changed(&resp) && x != v;
-                        if changed {
-                            crate::widgets::one_step_per_press(app, &resp);
-                        }
-                        changed.then_some(x)
-                    };
-                // A gradient's or shapeburst's second colour, and its stops between (set by command).
-                if let FillPattern::Gradient { color2, stops, .. } | FillPattern::Shapeburst { color2, stops, .. } = f.pattern {
-                    let input_label = ui.label(tl!("Second color"));
-                    ui.horizontal(|ui| {
-                        let mut cc = c32(color2);
-                        let resp = crate::widgets::color_button(ui, &mut cc).labelled_by(input_label.id);
-                        if resp.changed() {
-                            crate::widgets::one_step_per_press(app, &resp);
-                            let mut pattern = f.pattern;
-                            if let FillPattern::Gradient { color2, .. } | FillPattern::Shapeburst { color2, .. } = &mut pattern {
-                                *color2 = rgba(cc);
-                            }
-                            set(app, FillLayer { pattern, ..f });
-                        }
-                        if !stops.is_empty() {
-                            let n = stops.as_slice().len().to_string();
-                            ui.label(
-                                egui::RichText::new(crate::i18n::fmt("{n} colors between", &[("n", &n)])).size(11.5).color(t.text_dim),
-                            );
-                        }
-                    });
-                    ui.end_row();
+            }
+            FillPattern::Shapeburst { distance, blur, ignore_rings, .. } => {
+                let with = |d: Option<f32>, b: u8, ig: bool| {
+                    let mut pattern = f.pattern;
+                    if let FillPattern::Shapeburst { distance, blur, ignore_rings, .. } = &mut pattern {
+                        (*distance, *blur, *ignore_rings) = (d, b, ig);
+                    }
+                    FillLayer { pattern, ..f }
+                };
+                ui.label("");
+                let mut whole = distance.is_none();
+                if ui.checkbox(&mut whole, tl!("Whole shape")).on_hover_text(tl!("Shade to the point deepest inside")).changed() {
+                    set(app, with(if whole { None } else { Some(14.0) }, blur, ignore_rings));
                 }
-                match f.pattern {
-                    FillPattern::Solid => {}
-                    FillPattern::Gradient { shape, spread, angle, .. } => {
-                        let with = |shape: GradientShape, spread: Spread, a: f32| {
-                            let mut pattern = f.pattern;
-                            if let FillPattern::Gradient { shape: s, spread: p, angle, .. } = &mut pattern {
-                                (*s, *p, *angle) = (shape, spread, a);
-                            }
-                            FillLayer { pattern, ..f }
-                        };
-                        let input_label = ui.label(tl!("Type"));
-                        egui::ComboBox::from_id_salt(("fill_gradient", i))
-                            .selected_text(tl!(shape_name(shape)))
-                            .show_ui(ui, |ui| {
-                                for s in [GradientShape::Linear, GradientShape::Radial, GradientShape::Conical] {
-                                    if ui.selectable_label(s == shape, tl!(shape_name(s))).clicked() && s != shape {
-                                        set(app, with(s, spread, angle));
-                                    }
-                                }
-                            })
-                            .response
-                            .on_hover_text(tl!("Straight across, in rings from its first point, or round its first point"))
-                            .labelled_by(input_label.id);
-                        ui.end_row();
-                        if let Some(a) = number(app, ui, "Angle", angle, 0.0..=360.0, "°") {
-                            set(app, with(shape, spread, a));
-                        }
-                        let input_label = ui.label(tl!("Spread"));
-                        egui::ComboBox::from_id_salt(("fill_spread", i))
-                            .selected_text(tl!(spread_name(spread)))
-                            .show_ui(ui, |ui| {
-                                for s in [Spread::Pad, Spread::Reflect, Spread::Repeat] {
-                                    if ui.selectable_label(s == spread, tl!(spread_name(s))).clicked() && s != spread {
-                                        set(app, with(shape, s, angle));
-                                    }
-                                }
-                            })
-                            .response
-                            .on_hover_text(tl!("Past its points: its end colors, back and forth, or over again"))
-                            .labelled_by(input_label.id);
-                        ui.end_row();
-                    }
-                    FillPattern::Shapeburst { distance, blur, ignore_rings, .. } => {
-                        let with = |d: Option<f32>, b: u8, ig: bool| {
-                            let mut pattern = f.pattern;
-                            if let FillPattern::Shapeburst { distance, blur, ignore_rings, .. } = &mut pattern {
-                                (*distance, *blur, *ignore_rings) = (d, b, ig);
-                            }
-                            FillLayer { pattern, ..f }
-                        };
-                        ui.label("");
-                        let mut whole = distance.is_none();
-                        if ui.checkbox(&mut whole, tl!("Whole shape")).on_hover_text(tl!("Shade to the point deepest inside")).changed() {
-                            set(app, with(if whole { None } else { Some(14.0) }, blur, ignore_rings));
-                        }
-                        ui.end_row();
-                        if let Some(d) = distance
-                            && let Some(d) = number(app, ui, "Distance", d, 0.0..=MAX_BURST_DISTANCE, " pt")
-                        {
-                            set(app, with(Some(d), blur, ignore_rings));
-                        }
-                        if let Some(b) = number(app, ui, "Blur", f32::from(blur), 0.0..=f32::from(MAX_BURST_BLUR), " px") {
-                            set(app, with(distance, b.round() as u8, ignore_rings));
-                        }
-                        ui.label("");
-                        let mut ig = ignore_rings;
-                        if ui.checkbox(&mut ig, tl!("Ignore holes")).on_hover_text(tl!("Shade from the outer edge alone")).changed() {
-                            set(app, with(distance, blur, ig));
-                        }
-                        ui.end_row();
-                    }
-                    FillPattern::Hatch { angle, spacing, width, offset } => {
-                        let hatch = |angle, spacing, width, offset| FillLayer {
-                            pattern: FillPattern::Hatch { angle, spacing, width, offset },
-                            ..f
-                        };
-                        if let Some(a) = number(app, ui, "Angle", angle, 0.0..=360.0, "°") {
-                            set(app, hatch(a, spacing, width, offset));
-                        }
-                        if let Some(s) = number(app, ui, "Spacing", spacing, PATTERN_SPACING, " pt") {
-                            set(app, hatch(angle, s, width, offset));
-                        }
-                        if let Some(w) = number(app, ui, "Line width", width, 0.0..=MAX_HATCH_WIDTH, " pt") {
-                            set(app, hatch(angle, spacing, w, offset));
-                        }
-                        if let Some(o) = number(app, ui, "Offset", offset, -MAX_PATTERN_OFFSET..=MAX_PATTERN_OFFSET, " pt") {
-                            set(app, hatch(angle, spacing, width, o));
-                        }
-                    }
-                    FillPattern::Dots { marker, size, outline, outline_width, spacing, displacement, offset } => {
-                        let dots = |marker, size, spacing: [f32; 2], displacement: [f32; 2]| FillLayer {
-                            pattern: FillPattern::Dots { marker, size, outline, outline_width, spacing, displacement, offset },
-                            ..f
-                        };
-                        let input_label = ui.label(tl!("Marker"));
-                        egui::ComboBox::from_id_salt(("fill_marker", i))
-                            .selected_text(tl!(marker.label()))
-                            .show_ui(ui, |ui| {
-                                for m in Marker::ALL {
-                                    if ui.selectable_label(m == marker, tl!(m.label())).clicked() && m != marker {
-                                        set(app, dots(m, size, spacing, displacement));
-                                    }
-                                }
-                            })
-                            .response
-                            .labelled_by(input_label.id);
-                        ui.end_row();
-                        if let Some(s) = number(app, ui, "Size", size, 0.0..=MAX_DOT_SIZE, " pt") {
-                            set(app, dots(marker, s, spacing, displacement));
-                        }
-                        if let Some(s) = number(app, ui, "Spacing across", spacing[0], PATTERN_SPACING, " pt") {
-                            set(app, dots(marker, size, [s, spacing[1]], displacement));
-                        }
-                        if let Some(s) = number(app, ui, "Spacing down", spacing[1], PATTERN_SPACING, " pt") {
-                            set(app, dots(marker, size, [spacing[0], s], displacement));
-                        }
-                        if let Some(d) = number(app, ui, "Rows shifted", displacement[0], 0.0..=(spacing[0] - 0.01).max(0.0), " pt") {
-                            set(app, dots(marker, size, spacing, [d, displacement[1]]));
-                        }
-                    }
+                ui.end_row();
+                if let Some(d) = distance
+                    && let Some(d) = number(app, ui, "Distance", d, 0.0..=MAX_BURST_DISTANCE, " pt")
+                {
+                    set(app, with(Some(d), blur, ignore_rings));
                 }
-            });
+                if let Some(b) = number(app, ui, "Blur", f32::from(blur), 0.0..=f32::from(MAX_BURST_BLUR), " px") {
+                    set(app, with(distance, b.round() as u8, ignore_rings));
+                }
+                ui.label("");
+                let mut ig = ignore_rings;
+                if ui.checkbox(&mut ig, tl!("Ignore holes")).on_hover_text(tl!("Shade from the outer edge alone")).changed() {
+                    set(app, with(distance, blur, ig));
+                }
+                ui.end_row();
+            }
+            FillPattern::Hatch { angle, spacing, width, offset } => {
+                let hatch = |angle, spacing, width, offset| FillLayer {
+                    pattern: FillPattern::Hatch { angle, spacing, width, offset },
+                    ..f
+                };
+                if let Some(a) = number(app, ui, "Angle", angle, 0.0..=360.0, "°") {
+                    set(app, hatch(a, spacing, width, offset));
+                }
+                if let Some(s) = number(app, ui, "Spacing", spacing, PATTERN_SPACING, " pt") {
+                    set(app, hatch(angle, s, width, offset));
+                }
+                if let Some(w) = number(app, ui, "Line width", width, 0.0..=MAX_HATCH_WIDTH, " pt") {
+                    set(app, hatch(angle, spacing, w, offset));
+                }
+                if let Some(o) = number(app, ui, "Offset", offset, -MAX_PATTERN_OFFSET..=MAX_PATTERN_OFFSET, " pt") {
+                    set(app, hatch(angle, spacing, width, o));
+                }
+            }
+            FillPattern::Dots { marker, size, outline, outline_width, spacing, displacement, offset } => {
+                let dots = |marker, size, spacing: [f32; 2], displacement: [f32; 2]| FillLayer {
+                    pattern: FillPattern::Dots { marker, size, outline, outline_width, spacing, displacement, offset },
+                    ..f
+                };
+                let input_label = ui.label(tl!("Marker"));
+                egui::ComboBox::from_id_salt(("fill_marker", i))
+                    .selected_text(tl!(marker.label()))
+                    .show_ui(ui, |ui| {
+                        for m in Marker::ALL {
+                            if ui.selectable_label(m == marker, tl!(m.label())).clicked() && m != marker {
+                                set(app, dots(m, size, spacing, displacement));
+                            }
+                        }
+                    })
+                    .response
+                    .labelled_by(input_label.id);
+                ui.end_row();
+                if let Some(s) = number(app, ui, "Size", size, 0.0..=MAX_DOT_SIZE, " pt") {
+                    set(app, dots(marker, s, spacing, displacement));
+                }
+                if let Some(s) = number(app, ui, "Spacing across", spacing[0], PATTERN_SPACING, " pt") {
+                    set(app, dots(marker, size, [s, spacing[1]], displacement));
+                }
+                if let Some(s) = number(app, ui, "Spacing down", spacing[1], PATTERN_SPACING, " pt") {
+                    set(app, dots(marker, size, [spacing[0], s], displacement));
+                }
+                if let Some(d) = number(app, ui, "Rows shifted", displacement[0], 0.0..=(spacing[0] - 0.01).max(0.0), " pt") {
+                    set(app, dots(marker, size, spacing, [d, displacement[1]]));
+                }
+            }
         }
     });
 }
@@ -450,7 +461,7 @@ pub(crate) fn fills_editor(app: &mut RustGisApp, ui: &mut Ui, l: &Layer, t: &Tok
 /// The stacked `fills` on `r`, bottom first: a colour fills it, hatch lines cross it at their
 /// angle and spacing, markers sit on their grid (as circles), a gradient or shapeburst shades it
 /// (in cells), each in its colour or `base`'s.
-fn preview(ui: &Ui, r: Rect, fills: &[FillLayer], base: &Symbol) {
+pub(crate) fn preview(ui: &Ui, r: Rect, fills: &[FillLayer], base: &Symbol) {
     let p = ui.painter().with_clip_rect(r);
     let one = [FillLayer::default()];
     let shown = if fills.is_empty() { &one[..] } else { fills };
