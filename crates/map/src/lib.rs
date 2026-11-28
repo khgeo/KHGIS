@@ -165,6 +165,10 @@ pub struct Layer {
     /// Scale-dependent feature filters.
     #[serde(default)]
     pub display_filters: Vec<effects::DisplayFilter>,
+    /// Classes of its renderer switched off (Layer Styling's checkboxes, QGIS's category
+    /// "render" switch): their features aren't drawn, labelled or picked on the map.
+    #[serde(default, skip_serializing_if = "symbology::HiddenClasses::is_empty")]
+    pub hidden_classes: symbology::HiddenClasses,
     /// Points drawn as counted bins.
     #[serde(default)]
     pub aggregation: Option<effects::Aggregation>,
@@ -420,6 +424,7 @@ impl Layer {
             blend: effects::Blend::Normal,
             mask: None,
             display_filters: Vec::new(),
+            hidden_classes: symbology::HiddenClasses::default(),
             aggregation: None,
             extrusion: None,
             line_strokes: Vec::new(),
@@ -1041,6 +1046,14 @@ impl Layer {
                 }
             }
         }
+        if !self.hidden_classes.is_empty() {
+            let c = self.renderer.classer(&self.dataset, Some(scale));
+            for (r, keep) in rows.iter_mut().enumerate() {
+                if *keep && self.renderer.hides_row(&self.dataset, r, &c, &self.hidden_classes) {
+                    *keep = false;
+                }
+            }
+        }
         rows
     }
 
@@ -1054,7 +1067,7 @@ impl Layer {
         // Nothing to filter: every feature is drawn, and no row list needs building.
         let query = self.definition_query.as_deref().is_some_and(|q| !q.trim().is_empty());
         let timed = self.time.as_ref().is_some_and(|t| t.window.is_some());
-        if !query && !timed && self.display_filters.is_empty() {
+        if !query && !timed && self.display_filters.is_empty() && self.hidden_classes.is_empty() {
             return (!self.dataset.features.is_empty()).then(|| self.renderer.legend_at(&self.dataset, &[], Some(scale)));
         }
         let rows = self.drawn_rows(scale);
@@ -2858,6 +2871,7 @@ impl Layer {
             blend: _,
             mask: _,
             display_filters: _,
+            hidden_classes: _,
             aggregation: _,
             extrusion: _,
             line_strokes: _,

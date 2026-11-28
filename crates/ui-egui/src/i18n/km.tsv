@@ -1895,3 +1895,10 @@ Color ramp: {name}	ជម្រាលពណ៌៖ {name}
 Diagrams	ដ្យាក្រាម
 Diagrams are drawn on a vector layer's features.	ដ្យាក្រាមគូរលើធាតុនៃស្រទាប់វ៉ិចទ័រ។
 Live update shows each change at once	ការធ្វើបច្ចុប្បន្នភាពភ្លាមៗ បង្ហាញការផ្លាស់ប្ដូរនីមួយៗភ្លាម
+Show or hide every class	បង្ហាញ ឬលាក់ថ្នាក់ទាំងអស់
+Draw this class	គូរថ្នាក់នេះ
+Classes again from the data	បង្កើតថ្នាក់ម្ដងទៀតពីទិន្នន័យ
+Add a class	បន្ថែមថ្នាក់
+Remove the selected class	ដកថ្នាក់ដែលបានជ្រើសចេញ
+Graduated classes come from their bounds: Classify makes them again	ថ្នាក់តាមកម្រិតកើតពីព្រំដែនរបស់វា៖ ចុច ចាត់ថ្នាក់ ដើម្បីបង្កើតឡើងវិញ
+Values without a class:	តម្លៃដែលគ្មានថ្នាក់៖

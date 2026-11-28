@@ -294,6 +294,59 @@ fn standalone_tables_keep_their_ids_in_the_project_file() {
     assert_eq!(s.table_standalone, None);
 }
 
+/// Classes switched off aren't drawn (or exported to QGIS as drawn); a Unique Values class is
+/// added, removed, or all taken out; another field brings every class back.
+#[test]
+fn classes_switched_off_added_and_removed() {
+    let mut s = world();
+    s.run("layer.symbology", &json!({"layer": "Countries", "type": "unique", "field": "continent"})).unwrap();
+    let drawn = |s: &Session| {
+        let l = s.map().layer_by_name("Countries").unwrap();
+        l.drawn_rows(1e7).iter().filter(|r| **r).count()
+    };
+    let all = drawn(&s);
+    let africa = s.run("select.byAttributes", &json!({"layer": "Countries", "where": "continent = 'Africa'"})).unwrap()["selected"]
+        .as_u64()
+        .unwrap() as usize;
+    s.run("layer.classVisible", &json!({"layer": "Countries", "value": "Africa", "visible": false})).unwrap();
+    assert_eq!(drawn(&s), all - africa);
+    // The legend of what's drawn leaves it out; QGIS gets it switched off.
+    let legend = s.map().layer_by_name("Countries").unwrap().shown_legend(1e7).unwrap();
+    assert!(!legend.iter().any(|e| e.label == "Africa"));
+    assert!(s.run("layer.classVisible", &json!({"layer": "Countries", "value": "Atlantis", "visible": false})).is_err());
+    s.run("edit.undo", &Value::Null).unwrap();
+    assert_eq!(drawn(&s), all, "one step to undo");
+    s.run("layer.classVisible", &json!({"layer": "Countries", "all": true, "visible": false})).unwrap();
+    assert_eq!(drawn(&s), 0);
+    s.run("layer.classVisible", &json!({"layer": "Countries", "all": true, "visible": true})).unwrap();
+    assert_eq!(drawn(&s), all);
+    // Added, refused twice, removed (its features join <all other values>), all removed.
+    let classes = |s: &Session| match &s.map().layer_by_name("Countries").unwrap().renderer {
+        rustgis_map::Renderer::Unique { classes, .. } => classes.iter().map(|c| c.0.clone()).collect::<Vec<_>>(),
+        _ => Vec::new(),
+    };
+    let n = classes(&s).len();
+    s.run("layer.addClass", &json!({"layer": "Countries", "value": "Atlantis", "color": "#123456"})).unwrap();
+    assert_eq!(classes(&s).len(), n + 1);
+    assert!(s.run("layer.addClass", &json!({"layer": "Countries", "value": "Atlantis"})).is_err());
+    s.run("layer.classVisible", &json!({"layer": "Countries", "value": "Europe", "visible": false})).unwrap();
+    s.run("layer.removeClass", &json!({"layer": "Countries", "value": "Europe"})).unwrap();
+    assert!(!classes(&s).contains(&"Europe".to_string()));
+    assert!(s.map().layer_by_name("Countries").unwrap().hidden_classes.is_empty(), "its switch goes with it");
+    s.run("layer.removeClass", &json!({"layer": "Countries", "all": true})).unwrap();
+    assert!(classes(&s).is_empty());
+    assert_eq!(drawn(&s), all, "everything is <all other values>");
+    // Graduated classes by index; another renderer clears the switches.
+    s.run("layer.symbology", &json!({"layer": "Countries", "type": "graduated", "field": "pop_est", "classes": 4})).unwrap();
+    s.run("layer.classVisible", &json!({"layer": "Countries", "index": 3, "visible": false})).unwrap();
+    assert!(drawn(&s) < all);
+    assert!(s.run("layer.addClass", &json!({"layer": "Countries", "value": "x"})).is_err());
+    s.run("layer.symbology", &json!({"layer": "Countries", "type": "graduated", "field": "pop_est", "classes": 4, "ramp": "Viridis"})).unwrap();
+    assert!(drawn(&s) < all, "the same field and kind keep them");
+    s.run("layer.symbology", &json!({"layer": "Countries", "type": "single"})).unwrap();
+    assert_eq!(drawn(&s), all);
+}
+
 #[test]
 fn select_symbolize_undo_redo() {
     let mut s = world();

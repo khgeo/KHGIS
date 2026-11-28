@@ -1303,6 +1303,7 @@ pub fn swap_staged(app: &mut RustGisApp) {
     std::mem::swap(&mut l.blend, &mut k.blend);
     std::mem::swap(&mut l.mask, &mut k.mask);
     std::mem::swap(&mut l.display_filters, &mut k.display_filters);
+    std::mem::swap(&mut l.hidden_classes, &mut k.hidden_classes);
     std::mem::swap(&mut l.aggregation, &mut k.aggregation);
     std::mem::swap(&mut l.extrusion, &mut k.extrusion);
     std::mem::swap(&mut l.line_strokes, &mut k.line_strokes);

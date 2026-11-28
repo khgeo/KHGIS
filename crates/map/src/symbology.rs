@@ -184,7 +184,7 @@ impl Symbol {
     }
 
     /// Ramp colours change hue, not a polygon's existing fill opacity (even below 150).
-    fn with_ramp_fill(self, c: Rgba, g: GeometryType) -> Symbol {
+    pub fn with_ramp_fill(self, c: Rgba, g: GeometryType) -> Symbol {
         let mut out = self.with_fill(c, g);
         if g == GeometryType::Polygon {
             out.fill = c.with_alpha(self.fill.a());
@@ -829,6 +829,52 @@ pub const OTHER_FILL: Rgba = Rgba::rgb(0xB0, 0xB0, 0xB0);
 /// The longest legend label set by hand, in characters.
 pub const MAX_LABEL: usize = 200;
 
+/// The classes of a layer's renderer switched off (`Layer::hidden_classes`): Unique Values classes
+/// by value, `<all other values>`, Graduated Colors classes by index.
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct HiddenClasses {
+    #[serde(default, skip_serializing_if = "std::collections::BTreeSet::is_empty")]
+    pub values: std::collections::BTreeSet<String>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub other: bool,
+    #[serde(default, skip_serializing_if = "std::collections::BTreeSet::is_empty")]
+    pub indexes: std::collections::BTreeSet<usize>,
+}
+
+impl HiddenClasses {
+    pub fn is_empty(&self) -> bool {
+        self.values.is_empty() && !self.other && self.indexes.is_empty()
+    }
+
+    /// Whether `class` is switched off.
+    pub fn hides(&self, class: &ClassRef) -> bool {
+        match class {
+            ClassRef::Value(v) => self.values.contains(v),
+            ClassRef::Other => self.other,
+            ClassRef::Index(i) => self.indexes.contains(i),
+        }
+    }
+
+    /// Switches `class` on or off.
+    pub fn set(&mut self, class: &ClassRef, hidden: bool) {
+        match class {
+            ClassRef::Value(v) if hidden => {
+                self.values.insert(v.clone());
+            }
+            ClassRef::Value(v) => {
+                self.values.remove(v);
+            }
+            ClassRef::Other => self.other = hidden,
+            ClassRef::Index(i) if hidden => {
+                self.indexes.insert(*i);
+            }
+            ClassRef::Index(i) => {
+                self.indexes.remove(i);
+            }
+        }
+    }
+}
+
 /// One class of a Unique Values or Graduated Colors renderer, as a command names it.
 #[derive(Clone, Debug, PartialEq)]
 pub enum ClassRef {
@@ -1262,6 +1308,17 @@ impl Renderer {
     pub fn style_fills_for(&self, ds: &Dataset, row: usize) -> (Symbol, Option<&[LineStroke]>, Option<&[FillLayer]>) {
         let slot = self.class_of(ds, row);
         (self.symbol_in(ds, row, slot), self.strokes_in(slot), self.fills_in(slot))
+    }
+
+    /// Whether a feature row's class is switched off (`h`, the layer's `hidden_classes`; `c` from
+    /// [`Renderer::classer`]). A Graduated Colors row without a number is in no class: shown.
+    pub fn hides_row(&self, ds: &Dataset, row: usize, c: &Classer, h: &HiddenClasses) -> bool {
+        match (self, self.class_in(ds, row, c)) {
+            (Renderer::Unique { classes, .. }, Some(Slot::Class(i))) => classes.get(i).is_some_and(|(k, _)| h.values.contains(k)),
+            (Renderer::Unique { .. }, Some(Slot::Other)) => h.other,
+            (Renderer::Graduated { .. }, Some(Slot::Class(i))) => h.indexes.contains(&i),
+            _ => false,
+        }
     }
 
     /// The place in `classes` of the Unique Values class a feature row falls in (`c` from

@@ -622,6 +622,162 @@ fn advanced_menu(app: &mut RustGisApp, ui: &mut Ui, l: &Layer) {
     }
 }
 
+/// Below Categorized and Graduated's table: Classify (classes again from the data), + (a value's
+/// class; Graduated: the widest class split), − (the class picked; Graduated: joined to the next)
+/// and Delete All (Categorized).
+pub(crate) fn class_buttons(app: &mut RustGisApp, ui: &mut Ui, l: &Layer) {
+    use rustgis_engine::map::Renderer;
+    let sel_id = egui::Id::unique(("qgis_class_sel", l.id));
+    let selected: Option<Value> = ui.data(|d| d.get_temp::<String>(sel_id)).and_then(|t| serde_json::from_str(&t).ok());
+    let adding_id = egui::Id::unique(("qgis_class_adding", l.id));
+    let mut adding: Option<String> = ui.data(|d| d.get_temp(adding_id));
+    let report = |app: &mut RustGisApp, r: Result<Value, String>| {
+        if let Err(e) = r {
+            app.session.notify(e, true);
+        }
+    };
+    // Graduated Colors' bounds set by hand (the classes' method becomes Manual, as in QGIS).
+    let set_breaks = |app: &mut RustGisApp, field: &str, b: Vec<f64>, ramp: &str| {
+        app.run(
+            "layer.symbology",
+            json!({"layer": l.id, "type": "graduated", "field": field, "method": "manual", "breaks": b, "ramp": ramp}),
+        )
+    };
+    ui.add_space(4.0);
+    ui.horizontal(|ui| {
+        let w = ui.available_width();
+        let half = ((w - 120.0) / 2.0).max(60.0);
+        let classify = ui.add(egui::Button::new(tl!("Classify")).min_size(vec2(half, 26.0))).on_hover_text(tl!("Classes again from the data"));
+        let add = crate::widgets::icon_button(ui, "plus", tl!("Add a class"));
+        add.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, tl!("Add a class")));
+        let rm_on = match &l.renderer {
+            Renderer::Unique { .. } => selected.as_ref().is_some_and(|v| v.get("value").is_some()),
+            Renderer::Graduated { breaks, .. } => selected.is_some() && breaks.len() > 1,
+            _ => false,
+        };
+        let rm = ui.add_enabled_ui(rm_on, |ui| crate::widgets::icon_button(ui, "minus", tl!("Remove the selected class"))).inner;
+        rm.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, rm_on, tl!("Remove the selected class")));
+        let unique = matches!(l.renderer, Renderer::Unique { .. });
+        let del = ui
+            .add_enabled(unique, egui::Button::new(tl!("Delete All")).min_size(vec2(half, 26.0)))
+            .on_disabled_hover_text(tl!("Graduated classes come from their bounds: Classify makes them again"));
+        match &l.renderer {
+            Renderer::Unique { field, expression, ramp, .. } => {
+                if classify.clicked() {
+                    let mut p = json!({"layer": l.id, "type": "unique", "ramp": ramp.name()});
+                    match expression {
+                        Some(e) => p["expression"] = json!(e),
+                        None => p["field"] = json!(field),
+                    }
+                    let r = app.run("layer.symbology", p);
+                    report(app, r);
+                }
+                if add.clicked() {
+                    adding = Some(String::new());
+                }
+                if rm.clicked()
+                    && let Some(v) = selected.as_ref().and_then(|s| s.get("value")).cloned()
+                {
+                    let r = app.run("layer.removeClass", json!({"layer": l.id, "value": v}));
+                    report(app, r);
+                    ui.data_mut(|d| d.remove::<String>(sel_id));
+                }
+                if del.clicked() {
+                    let r = app.run("layer.removeClass", json!({"layer": l.id, "all": true}));
+                    report(app, r);
+                }
+            }
+            Renderer::Graduated { field, breaks, min, ramp, method, .. } => {
+                let asked = l.renderer.classes_asked();
+                if classify.clicked() {
+                    let m = if *method == rustgis_engine::map::ClassMethod::Manual { rustgis_engine::map::ClassMethod::EqualInterval } else { *method };
+                    let r = app.run(
+                        "layer.symbology",
+                        json!({"layer": l.id, "type": "graduated", "field": field, "method": format!("{m:?}"), "classes": asked.max(2), "ramp": ramp.name()}),
+                    );
+                    report(app, r);
+                }
+                let lower = |i: usize| if i == 0 { *min } else { breaks.get(i - 1).copied().unwrap_or(*min) };
+                if add.clicked() && breaks.len() < 32 {
+                    // The widest class split in two.
+                    let mut b = breaks.clone();
+                    if let Some(i) = (0..b.len()).max_by(|&x, &y| (b[x] - lower(x)).total_cmp(&(b[y] - lower(y)))) {
+                        b.insert(i, (lower(i) + b[i]) / 2.0);
+                        let r = set_breaks(app, field, b, ramp.name());
+                        report(app, r);
+                    }
+                }
+                if rm.clicked()
+                    && let Some(i) = selected.as_ref().and_then(|s| s.get("index")).and_then(Value::as_u64).map(|i| i as usize)
+                    && i < breaks.len()
+                {
+                    // Joined to the class above it (the top one to the one below).
+                    let mut b = breaks.clone();
+                    if i + 1 < b.len() {
+                        b.remove(i);
+                    } else {
+                        b.remove(i.saturating_sub(1));
+                    }
+                    let r = set_breaks(app, field, b, ramp.name());
+                    report(app, r);
+                    ui.data_mut(|d| d.remove::<String>(sel_id));
+                }
+            }
+            _ => {}
+        }
+    });
+    // + for Categorized: a value of the field not classed yet, or one typed.
+    if let Some(mut typed) = adding.take() {
+        let mut keep = true;
+        egui::Frame::NONE
+            .stroke(Stroke::new(1.0, Tokens::get(ui.ctx()).border))
+            .corner_radius(CornerRadius::same(4))
+            .inner_margin(egui::Margin::same(6))
+            .show(ui, |ui| {
+                ui.horizontal(|ui| {
+                    let input_label = ui.label(tl!("Value"));
+                    let r = ui.add(egui::TextEdit::singleline(&mut typed).desired_width(140.0)).labelled_by(input_label.id);
+                    let enter = r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
+                    if (ui.button(tl!("Add")).clicked() || enter) && !typed.trim().is_empty() {
+                        let r = app.run("layer.addClass", json!({"layer": l.id, "value": typed.trim()}));
+                        report(app, r);
+                        keep = false;
+                    }
+                    if ui.button(tl!("Cancel")).clicked() {
+                        keep = false;
+                    }
+                });
+                if let rustgis_engine::map::Renderer::Unique { field, classes, expression: None, .. } = &l.renderer
+                    && let Some(fi) = l.dataset.field_index(field)
+                {
+                    let (values, _) = l.dataset.unique_values_counted(fi, &[], 200);
+                    let missing: Vec<&String> = values.iter().filter(|v| !classes.iter().any(|(k, _)| k == *v)).take(40).collect();
+                    if !missing.is_empty() {
+                        ui.label(egui::RichText::new(tl!("Values without a class:")).size(11.5));
+                        ui.horizontal_wrapped(|ui| {
+                            for v in missing {
+                                if ui.small_button(v.as_str()).clicked() {
+                                    let r = app.run("layer.addClass", json!({"layer": l.id, "value": v}));
+                                    report(app, r);
+                                    keep = false;
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        if keep {
+            adding = Some(typed);
+        }
+    }
+    ui.data_mut(|d| match adding {
+        Some(a) => {
+            d.insert_temp(adding_id, a);
+        }
+        None => d.remove::<String>(adding_id),
+    });
+}
+
 /// Layer Rendering: blending, opacity and (rasters) the colour adjustments.
 pub(crate) fn layer_rendering(app: &mut RustGisApp, ui: &mut Ui, l: &Layer) {
     let raster = l.raster.as_ref().map(|r| r.style.clone());
@@ -994,6 +1150,53 @@ mod tests {
         h.get_by_label("Classify").click();
         h.run_steps(3);
         assert_eq!(values(&h), [10.0, 20.0, 30.0]);
+    }
+
+    /// Categorized and Graduated's table: a row picked and removed, a value added from the
+    /// field's, Delete All and Classify; Graduated's + and − split and join classes.
+    #[test]
+    fn class_table_buttons() {
+        let mut app = qgis_app();
+        app.run("layer.select", json!({"layer": "Countries"})).unwrap();
+        app.run("layer.symbology", json!({"type": "unique", "field": "continent"})).unwrap();
+        let mut h = harness(app);
+        let classes =
+            |h: &egui_kittest::Harness<'_, RustGisApp>| match &h.state().session.map().layer_by_name("Countries").unwrap().renderer {
+                rustgis_engine::map::Renderer::Unique { classes, .. } => classes.iter().map(|c| c.0.clone()).collect::<Vec<_>>(),
+                rustgis_engine::map::Renderer::Graduated { breaks, .. } => breaks.iter().map(|b| b.to_string()).collect(),
+                _ => Vec::new(),
+            };
+        let n = classes(&h).len();
+        h.get_by_role_and_label(egui::accesskit::Role::Button, "Africa").click();
+        h.run_steps(2);
+        h.get_by_label("Remove the selected class").click();
+        h.run_steps(3);
+        assert_eq!(classes(&h).len(), n - 1);
+        assert!(!classes(&h).contains(&"Africa".to_string()));
+        h.get_by_label("Add a class").click();
+        h.run_steps(3);
+        h.get_by_role_and_label(egui::accesskit::Role::Button, "Africa").click();
+        h.run_steps(3);
+        assert!(classes(&h).contains(&"Africa".to_string()), "added from the values without a class");
+        h.get_by_label("Delete All").click();
+        h.run_steps(3);
+        assert!(classes(&h).is_empty());
+        h.get_by_label("Classify").click();
+        h.run_steps(3);
+        assert_eq!(classes(&h).len(), n);
+        // Graduated: + splits the widest class, − joins the one picked to the next.
+        h.state_mut().run("layer.symbology", json!({"type": "graduated", "field": "pop_est", "classes": 4})).unwrap();
+        h.run_steps(3);
+        assert_eq!(classes(&h).len(), 4);
+        h.get_by_label("Add a class").click();
+        h.run_steps(3);
+        assert_eq!(classes(&h).len(), 5);
+        let range = h.get_all_by_role(egui::accesskit::Role::Button).find(|b| format!("{b:?}").contains(" – "));
+        range.expect("a range in the Value column").click();
+        h.run_steps(2);
+        h.get_by_label("Remove the selected class").click();
+        h.run_steps(3);
+        assert_eq!(classes(&h).len(), 4);
     }
 
     fn base64_of(b: &[u8]) -> String {

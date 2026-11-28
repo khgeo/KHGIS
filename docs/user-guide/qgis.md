@@ -46,6 +46,16 @@ Symbols**: **Save Symbol…** keeps the layer's symbol there for any layer of it
 **Advanced** has **No Fill**, data-defined size and colours, and **Import QGIS Style…**. A line's
 stacked strokes and a point's marks are in **Strokes** and **Marks** below.
 
+**Categorized** and **Graduated** list their classes as QGIS does: a checkbox to draw a class
+or not (the one in the header switches every class), its symbol (click to change its colour), its
+value (a Graduated class's range) and its legend label (type to change it). Below are
+**Classify** (the classes again from the data), **+** (Categorized: a value of the field without
+a class, or one typed; Graduated: the widest class split in two), **−** (the class picked by its
+value; a Graduated class is joined to the next) and **Delete All** (Categorized; its features are
+then drawn as all other values). A switched-off class isn't drawn, labelled or picked on the map,
+nor listed in a layout's legend, and goes to QGIS switched off in **Save As GeoPackage for
+QGIS**.
+
 A raster's **Render type** uses QGIS's names: Multiband color, Paletted/Unique values,
 Singleband pseudocolor (stretched, or in classes), the file's own palette, and Hillshade.
 **Paletted/Unique values** lists its values in a table with their colour and label: click a

@@ -4536,12 +4536,23 @@ fn symbology(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
                 let e = if text.is_empty() { Value::Null } else { json!(text) };
                 let _ = app.run("layer.symbology", json!({"type": "unique", "expression": e, "ramp": ramp.name()}));
             }
-            ramp_picker_with(app, ui, ramp, t, !l.graphics);
+            if app.ui.qgis_layout {
+                // One row, as QGIS's Color ramp, opened to pick another.
+                egui::CollapsingHeader::new(crate::i18n::fmt("Color ramp: {name}", &[("name", tl!(ramp.name()))]))
+                    .id_salt(("qgis_class_ramp", l.id))
+                    .default_open(false)
+                    .show(ui, |ui| ramp_picker_with(app, ui, ramp, t, !l.graphics));
+            } else {
+                ramp_picker_with(app, ui, ramp, t, !l.graphics);
+            }
             ui.add_space(6.0);
             ui.label(
                 egui::RichText::new(crate::i18n::fmt("{n} classes", &[("n", &classes.len().to_string())])).size(11.5).color(t.text_dim),
             );
             legend_list(app, ui, &l, t);
+            if app.ui.qgis_layout {
+                crate::qgisstyle::class_buttons(app, ui, &l);
+            }
         }
         Renderer::Graduated { field, breaks, ramp, method, min, .. } => {
             // Re-classing keeps the classes asked for, not the fewer some methods found.
@@ -4573,9 +4584,20 @@ fn symbology(app: &mut RustGisApp, ui: &mut Ui, t: &Tokens) {
                     }
                 });
             }
-            ramp_picker_with(app, ui, ramp, t, !l.graphics);
+            if app.ui.qgis_layout {
+                // One row, as QGIS's Color ramp, opened to pick another.
+                egui::CollapsingHeader::new(crate::i18n::fmt("Color ramp: {name}", &[("name", tl!(ramp.name()))]))
+                    .id_salt(("qgis_class_ramp", l.id))
+                    .default_open(false)
+                    .show(ui, |ui| ramp_picker_with(app, ui, ramp, t, !l.graphics));
+            } else {
+                ramp_picker_with(app, ui, ramp, t, !l.graphics);
+            }
             ui.add_space(6.0);
             legend_list(app, ui, &l, t);
+            if app.ui.qgis_layout {
+                crate::qgisstyle::class_buttons(app, ui, &l);
+            }
         }
         Renderer::Proportional { field, base, .. } => {
             field_combo(app, ui, "Field", field, &numeric, "proportional");
@@ -5196,10 +5218,45 @@ fn legend_list(app: &mut RustGisApp, ui: &mut Ui, l: &Layer, t: &Tokens) {
         Renderer::Graduated { symbols, .. } => (0..symbols.len()).map(|i| (json!({"index": i}), ClassRef::Index(i))).collect(),
         _ => Vec::new(),
     };
+    // The QGIS layout's table: a switch, the symbol, the value and the legend label per class.
+    let qgis = app.ui.qgis_layout && matches!(l.renderer, Renderer::Unique { .. } | Renderer::Graduated { .. });
+    let value_w = 96.0;
+    let sel_id = egui::Id::unique(("qgis_class_sel", l.id));
+    let selected: Option<String> = if qgis { ui.data(|d| d.get_temp(sel_id)) } else { None };
+    // A class's value as QGIS's Value column shows it: Unique Values' value (none for
+    // <all other values>), a Graduated Colors class's range.
+    let value_text = |class_ref: &ClassRef| -> String {
+        match (&l.renderer, class_ref) {
+            (_, ClassRef::Value(v)) => v.clone(),
+            (_, ClassRef::Other) => String::new(),
+            (Renderer::Graduated { breaks, min, .. }, ClassRef::Index(i)) => {
+                let lo = if *i == 0 { *min } else { breaks.get(i - 1).copied().unwrap_or(*min) };
+                let hi = breaks.get(*i).copied().unwrap_or(lo);
+                format!("{} – {}", fmt_class_num(lo), fmt_class_num(hi))
+            }
+            _ => String::new(),
+        }
+    };
     egui::Frame::NONE.stroke(Stroke::new(1.0, t.border)).corner_radius(CornerRadius::same(6)).inner_margin(egui::Margin::same(6)).show(
         ui,
         |ui| {
             ui.set_width(ui.available_width());
+            if qgis {
+                // The header: a switch for every class, then the columns.
+                ui.horizontal(|ui| {
+                    let hidden = &l.hidden_classes;
+                    let mut all_on = hidden.is_empty();
+                    if ui.checkbox(&mut all_on, "").on_hover_text(tl!("Show or hide every class")).changed() {
+                        let _ = app.run("layer.classVisible", json!({"layer": l.id, "all": true, "visible": all_on}));
+                    }
+                    let (r, _) = ui.allocate_exact_size(vec2(SYMBOL_W, 18.0), Sense::hover());
+                    ui.painter().text(r.left_center(), Align2::LEFT_CENTER, tl!("Symbol"), semibold(12.0), t.text);
+                    let (r, _) = ui.allocate_exact_size(vec2(value_w, 18.0), Sense::hover());
+                    ui.painter().text(r.left_center(), Align2::LEFT_CENTER, tl!("Value"), semibold(12.0), t.text);
+                    ui.label(egui::RichText::new(tl!("Legend")).font(semibold(12.0)));
+                });
+                ui.separator();
+            }
             let legend = l.renderer.legend();
             // Unique Values legends sort their classes (by value or by label): row i shows class `order[i]`,
             // and the rows past them (`<all other values>`) keep their place.
@@ -5245,6 +5302,12 @@ fn legend_list(app: &mut RustGisApp, ui: &mut Ui, l: &Layer, t: &Tokens) {
                     p
                 };
                 ui.horizontal(|ui| {
+                    if qgis {
+                        let mut on = !l.hidden_classes.hides(class_ref);
+                        if ui.checkbox(&mut on, "").on_hover_text(tl!("Draw this class")).changed() {
+                            let _ = app.run("layer.classVisible", with("visible", json!(on)));
+                        }
+                    }
                     // Construct hue independently of alpha: Color32 discards hidden RGB at zero.
                     let fill = e.symbol.fill;
                     let mut hsva = egui::ecolor::Hsva::from_srgb([fill.r(), fill.g(), fill.b()]);
@@ -5265,12 +5328,35 @@ fn legend_list(app: &mut RustGisApp, ui: &mut Ui, l: &Layer, t: &Tokens) {
                             ui.ctx().set_style_of(theme, style);
                         }
                     }
+                    let response_w = response.rect.width();
                     let picked = response.on_hover_text(tl!("Class color")).changed().then(|| {
                         let edited = rustgis_engine::map::Rgba(hsva.to_srgba_unmultiplied());
                         // The numeric alpha editor also rounds RGB through Color32; an
                         // opacity-only edit must keep the class's original channels exactly.
                         if hsva.a != alpha { fill.with_alpha(edited.a()) } else { edited }
                     });
+                    if qgis {
+                        // The symbol column's width, whatever the colour button's.
+                        ui.add_space((SYMBOL_W - response_w).max(0.0));
+                        // The value, a click picks the row (for −).
+                        let key = class.to_string();
+                        let on = selected.as_deref() == Some(key.as_str());
+                        let (r, resp) = ui.allocate_exact_size(vec2(value_w, 22.0), Sense::click());
+                        if on {
+                            ui.painter().rect_filled(r, CornerRadius::same(3), t.checked);
+                        } else if resp.hovered() {
+                            ui.painter().rect_filled(r, CornerRadius::same(3), t.hover);
+                        }
+                        let text = value_text(class_ref);
+                        let shown = if text.chars().count() > 14 { format!("{}…", text.chars().take(13).collect::<String>()) } else { text.clone() };
+                        ui.painter().text(pos2(r.min.x + 4.0, r.center().y), Align2::LEFT_CENTER, shown, regular(12.0), t.text);
+                        // <all other values> has no value: named by its legend label.
+                        let name = if text.is_empty() { e.label.clone() } else { text.clone() };
+                        resp.widget_info(|| egui::WidgetInfo::selected(egui::Role::Button, true, on, &name));
+                        if resp.on_hover_text(&name).clicked() {
+                            ui.data_mut(|d| d.insert_temp(sel_id, key));
+                        }
+                    }
                     if let Some(color) = picked {
                         // Keep FF too: six-digit polygon colours deliberately preserve translucency.
                         let params = with("color", json!(color.hex8()));
@@ -5348,6 +5434,28 @@ fn legend_list(app: &mut RustGisApp, ui: &mut Ui, l: &Layer, t: &Tokens) {
             }
         },
     );
+}
+
+/// The symbol column of the QGIS layout's class table.
+const SYMBOL_W: f32 = 58.0;
+
+/// A class bound as the Value column shows it: millions and billions shortened (23.6M), whole
+/// numbers without decimals, others to 4 places.
+fn fmt_class_num(v: f64) -> String {
+    let short = |x: f64, unit: &str| {
+        let t = format!("{x:.1}");
+        format!("{}{unit}", t.trim_end_matches(".0"))
+    };
+    if v.abs() >= 1e9 {
+        short(v / 1e9, "B")
+    } else if v.abs() >= 1e6 {
+        short(v / 1e6, "M")
+    } else if v.fract() == 0.0 {
+        format!("{}", v as i64)
+    } else {
+        let t = format!("{v:.4}");
+        t.trim_end_matches('0').trim_end_matches('.').to_string()
+    }
 }
 
 /// Graduated Colors' bounds typed by hand: each class's upper bound as a number, a button to take

@@ -136,6 +136,15 @@ pub fn commands() -> Vec<C> {
         }).roles(&[]).effects(crate::policy::Effects::NONE).params(r#"{"layer"?: name|id | [name|id] (default: the layer selection; zooms to all of them)}"#)
         .view()
         .when(need_layer),
+        C::new("layer.classVisible", "Show Class", "Style › Drawing", class_visible).roles(&[]).effects(crate::policy::Effects::NONE)
+            .when(need_feature_layer)
+            .params(r#"{"layer"?, "value"?: text|number (a Unique Values class), "index"?: number (a Graduated Colors class, 0 = the lowest), "other"?: true (<all other values>), "all"?: true (every class), "visible": bool (false: the class's features aren't drawn)}"#),
+        C::new("layer.addClass", "Add Class", "Style › Drawing", add_class).roles(&[]).effects(crate::policy::Effects::NONE)
+            .when(need_feature_layer)
+            .params(r##"{"layer"?, "value": text|number (a Unique Values class for features of this value), "color"?: "#RRGGBB" (default: the next colour of the ramp)}"##),
+        C::new("layer.removeClass", "Remove Class", "Style › Drawing", remove_class).roles(&[]).effects(crate::policy::Effects::NONE)
+            .when(need_feature_layer)
+            .params(r#"{"layer"?, "value"?: text|number (a Unique Values class; its features join <all other values>), "all"?: true (every class)}"#),
         C::new("layer.symbology", "Symbology", "Style › Drawing", symbology).roles(&[]).effects(crate::policy::Effects::NONE)
             .when(need_feature_layer)
             .params(r#"{"layer"?, "type": "single"|"unique"|"graduated"|"proportional", "field"?, "expression"?: text|null (unique: class by this expression's values instead of a field; blank or null: by a field; with neither key, Unique Values keep the layer's expression), "classes"?: 1..12, "method"?: "naturalBreaks"|"equalInterval"|"quantile"|"geometricInterval"|"standardDeviation"|"arithmeticProgression"|"headTailBreaks"|"manual", "breaks"?: [numbers] (manual: the classes' upper bounds, closed by the field's largest value), "ramp"?: string}"#),
@@ -4856,7 +4865,31 @@ fn move_one(s: &mut Session, id: u32, to: u64) -> CmdResult {
     Ok(Value::Null)
 }
 
+/// `layer.symbology`; a renderer of another kind or field takes the classes switched off away
+/// with the classes they named.
 fn symbology(s: &mut Session, p: &Value) -> CmdResult {
+    let id = s.layer_id(p)?;
+    // Graduated classes are switched off by number: other bounds, other classes.
+    let key = |s: &Session| {
+        s.map().layer(id).map(|l| {
+            let bounds = match &l.renderer {
+                Renderer::Graduated { breaks, .. } => format!("{breaks:?}"),
+                _ => String::new(),
+            };
+            (l.renderer.kind_label(), l.renderer.field().map(str::to_string), l.renderer.expression().map(str::to_string), bounds)
+        })
+    };
+    let before = key(s);
+    let out = symbology_set(s, p)?;
+    if key(s) != before
+        && let Some(l) = s.map_mut().layer_mut(id)
+    {
+        l.hidden_classes = Default::default();
+    }
+    Ok(out)
+}
+
+fn symbology_set(s: &mut Session, p: &Value) -> CmdResult {
     let id = s.layer_id(p)?;
     let kind = ps(p, "type").unwrap_or("single").to_ascii_lowercase();
     // The layer's own ramp: kept when no other is named and the type stays, and found by name even
@@ -5063,6 +5096,108 @@ fn class_ref(p: &Value) -> Result<Option<ClassRef>, String> {
         (None, None, true) => ClassRef::Other,
         _ => return Err("name one class: value (Unique Values), index (Graduated Colors) or other: true".into()),
     }))
+}
+
+/// `layer.classVisible`: a class's features drawn or not (Layer Styling's checkboxes).
+fn class_visible(s: &mut Session, p: &Value) -> CmdResult {
+    let visible = b(p, "visible").ok_or("visible is true or false")?;
+    let all = b(p, "all").unwrap_or(false);
+    let class = class_ref(p)?;
+    let id = s.layer_id(p)?;
+    let l = s.map_mut().layer_mut(id).ok_or("no such layer")?;
+    if all {
+        l.hidden_classes = Default::default();
+        if !visible {
+            match &l.renderer {
+                Renderer::Unique { classes, .. } => {
+                    l.hidden_classes.values = classes.iter().map(|(k, _)| k.clone()).collect();
+                    l.hidden_classes.other = true;
+                }
+                Renderer::Graduated { symbols, .. } => l.hidden_classes.indexes = (0..symbols.len()).collect(),
+                _ => return Err("only Unique Values and Graduated Colors have classes to switch off".into()),
+            }
+        }
+        return Ok(Value::Null);
+    }
+    let class = class.ok_or("name one class: value (Unique Values), index (Graduated Colors) or other: true; or all: true")?;
+    let known = match (&l.renderer, &class) {
+        (Renderer::Unique { classes, .. }, ClassRef::Value(v)) => classes.iter().any(|(k, _)| k == v),
+        (Renderer::Unique { .. }, ClassRef::Other) => true,
+        (Renderer::Graduated { symbols, .. }, ClassRef::Index(i)) => *i < symbols.len(),
+        _ => false,
+    };
+    if !known {
+        return Err("the layer's renderer has no such class".into());
+    }
+    l.hidden_classes.set(&class, !visible);
+    Ok(Value::Null)
+}
+
+/// `layer.addClass`: a Unique Values class for a value (Layer Styling's +), in the ramp's next
+/// colour unless one is given.
+fn add_class(s: &mut Session, p: &Value) -> CmdResult {
+    let Some(ClassRef::Value(v)) = class_value(p)? else { return Err("value is the class's value (a text or a number)".into()) };
+    if v.trim().is_empty() {
+        return Err("a class needs a value".into());
+    }
+    let color = s.get_color(p, "color")?;
+    let id = s.layer_id(p)?;
+    let l = s.map_mut().layer_mut(id).ok_or("no such layer")?;
+    let g = l.geometry_type();
+    let Renderer::Unique { classes, other, ramp, .. } = &mut l.renderer else {
+        return Err("classes are added to Unique Values (Categorized); Graduated Colors classes come from its bounds".into());
+    };
+    if classes.iter().any(|(k, _)| *k == v) {
+        return Err(format!("'{v}' already has a class"));
+    }
+    if classes.len() >= rustgis_map::symbology::MAX_UNIQUE {
+        return Err(format!("at most {} classes", rustgis_map::symbology::MAX_UNIQUE));
+    }
+    let n = classes.len();
+    let c = color.unwrap_or_else(|| ramp.pick(n, n + 1));
+    classes.push((v.clone(), other.with_ramp_fill(c, g)));
+    Ok(json!({"value": v}))
+}
+
+/// `layer.removeClass`: a Unique Values class taken out (its features join `<all other values>`),
+/// or every class.
+fn remove_class(s: &mut Session, p: &Value) -> CmdResult {
+    let all = b(p, "all").unwrap_or(false);
+    let class = class_value(p)?;
+    let id = s.layer_id(p)?;
+    let l = s.map_mut().layer_mut(id).ok_or("no such layer")?;
+    let Renderer::Unique { classes, class_labels, class_strokes, class_fills, .. } = &mut l.renderer else {
+        return Err("classes are removed from Unique Values (Categorized); Graduated Colors classes come from its bounds".into());
+    };
+    if all {
+        let n = classes.len();
+        classes.clear();
+        class_labels.clear();
+        class_strokes.clear();
+        class_fills.clear();
+        l.hidden_classes.values.clear();
+        return Ok(json!({"removed": n}));
+    }
+    let Some(ClassRef::Value(v)) = class else { return Err("name the class by its value, or all: true".into()) };
+    let before = classes.len();
+    classes.retain(|(k, _)| *k != v);
+    if classes.len() == before {
+        return Err(format!("no class '{v}'"));
+    }
+    class_labels.remove(&v);
+    class_strokes.remove(&v);
+    class_fills.remove(&v);
+    l.hidden_classes.values.remove(&v);
+    Ok(json!({"removed": before - classes.len()}))
+}
+
+/// The Unique Values class `value` names (as `class_ref` reads it), for the commands that take
+/// nothing else.
+fn class_value(p: &Value) -> Result<Option<ClassRef>, String> {
+    match p.get("value") {
+        Some(v) => class_ref(&json!({ "value": v })),
+        None => Ok(None),
+    }
 }
 
 /// `layer.classStyle`: one class's colour, outline colour and legend label (#314).

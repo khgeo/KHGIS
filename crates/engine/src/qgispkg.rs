@@ -179,13 +179,19 @@ fn renderer_xml(l: &Layer, g: GeometryType, opacity: f32, notes: &mut Vec<String
             );
             for (i, (value, _)) in classes.iter().enumerate() {
                 let label = class_labels.get(value).cloned().unwrap_or_else(|| value.clone());
-                let _ =
-                    writeln!(out, r#"<category render="true" symbol="{i}" value="{}" label="{}" type="string"/>"#, esc(value), esc(&label));
+                let render = !l.hidden_classes.values.contains(value);
+                let _ = writeln!(
+                    out,
+                    r#"<category render="{render}" symbol="{i}" value="{}" label="{}" type="string"/>"#,
+                    esc(value),
+                    esc(&label)
+                );
             }
             let other_label = other_label.clone().unwrap_or_default();
             let _ = writeln!(
                 out,
-                r#"<category render="true" symbol="{}" value="" label="{}" type="string"/>"#,
+                r#"<category render="{}" symbol="{}" value="" label="{}" type="string"/>"#,
+                !l.hidden_classes.other,
                 classes.len(),
                 esc(&other_label)
             );
@@ -211,7 +217,8 @@ fn renderer_xml(l: &Layer, g: GeometryType, opacity: f32, notes: &mut Vec<String
             let mut lower = *min;
             for (i, upper) in breaks.iter().enumerate() {
                 let label = class_labels.get(&i).cloned().unwrap_or_else(|| format!("{lower} – {upper}"));
-                let _ = writeln!(out, r#"<range render="true" symbol="{i}" lower="{lower}" upper="{upper}" label="{}"/>"#, esc(&label));
+                let render = !l.hidden_classes.indexes.contains(&i);
+                let _ = writeln!(out, r#"<range render="{render}" symbol="{i}" lower="{lower}" upper="{upper}" label="{}"/>"#, esc(&label));
                 lower = *upper;
             }
             out.push_str("</ranges><symbols>");
